@@ -1,0 +1,55 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+
+PROJECT(Fistbump C CXX)
+
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Assimp REQUIRED)
+find_package(GLFW REQUIRED)
+find_package(Fmod REQUIRED)
+find_package(SOIL REQUIRED)
+find_package(Threads REQUIRED)
+
+#FILE(GLOB_RECURSE HEADERS src/**/include/*.h)
+SET(HEADERS "source" "source/include" "source/scripts/include")
+
+SET(LIBS ${CMAKE_THREAD_LIBS_INIT} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${FMOD_LIBRARIES}
+    ${GLEW_LIBRARIES} ${Assimp_LIBRARY} ${SOIL_LIBRARY})
+
+SET(ENGINE_VERSION_SHORT "1")
+SET(ENGINE_VERSION "0.${ENGINE_VERSION_SHORT}.0")
+add_definitions(-DENGINE_VERSION="${ENGINE_VERSION}")
+add_definitions(-DENGINE_VERSION_SHORT="${ENGINE_VERSION_SHORT}")
+
+INCLUDE_DIRECTORIES(${HEADERS} ${GLFW_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIR}/GL ${ASSIMP_INCLUDE_DIR} ${FMOD_INCLUDE_DIR}
+    ${SOIL_INCLUDE_DIR} Dependencies/glm/glm Dependencies/gli/gli)
+
+SET(GCC_FLAGS "-Wall -Wextra -pedantic")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    SET(CMAKE_CXX_FLAGS "${GCC_FLAGS} -std=c++14")
+    SET(CMAKE_CXX_LINK_FLAGS "-lstdc++ -L/usr/local/lib")
+    SET(CMAKE_C_FLAGS "${GCC_FLAGS} -std=c11")
+    SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+    SET(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
+    SET(CMAKE_CXX_LINK_FLAGS_DEBUG "-ggdb")
+    SET(CMAKE_C_FLAGS_DEBUG "-ggdb")
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    SET(CMAKE_CXX_FLAGS "${GCC_FLAGS} -std=c++14")
+    SET(CMAKE_C_FLAGS "${GCC_FLAGS} -std=c11")
+    SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+    SET(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native")
+    SET(CMAKE_C_FLAGS_DEBUG "-ggdb")
+endif()
+
+FILE(GLOB_RECURSE src_files source/*.c*)
+
+ADD_EXECUTABLE(Fistbump ${src_files})
+
+LINK_DIRECTORIES("/usr/local/lib")
+TARGET_LINK_LIBRARIES(Fistbump ${LIBS})
+
+INSTALL(TARGETS Fistbump
+    DESTINATION bin
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)

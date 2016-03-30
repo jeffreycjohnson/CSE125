@@ -1,0 +1,44 @@
+# Locate SOIL
+#
+#   SOIL_FOUND       - True if SOIL found.
+#   SOIL_INCLUDE_DIR - Where to find includes
+#   SOIL_LIBRARIES   - List of libraries when using SOIL.
+#
+
+SET( SOIL_SEARCH_PATHS
+	~/Library/Frameworks
+	/Library/Frameworks
+	/usr/local
+	/usr
+	/sw # Fink
+	/opt/local # DarwinPorts
+	/opt/csw # Blastwave
+	/opt
+)
+
+FIND_PATH( SOIL_INCLUDE_DIR
+	NAMES SOIL2.h
+	PATH_SUFFIXES include include/SOIL
+	PATHS ${SOIL_SEARCH_PATHS}
+)
+
+FIND_LIBRARY( SOIL_LIBRARY
+	NAMES soil2-debug
+	PATH_SUFFIXES lib lib64 lib/x86_64-linux-gnu lib64/x86_64-linux-gnu
+	PATHS ${SOIL_SEARCH_PATHS}
+)
+
+IF( SOIL_LIBRARY )
+    SET( SOIL_LIBRARIES "${SOIL_LIBRARY}")
+ENDIF()
+
+IF(SOIL_INCLUDE_DIR AND SOIL_LIBRARIES)
+	SET(SOIL_FOUND TRUE)
+ELSE(SOIL_INCLUDE_DIR AND SOIL_LIBRARIES)
+	message (STATUS "Could not find SOIL.")
+	SET(SOIL_FOUND FALSE)
+ENDIF(SOIL_INCLUDE_DIR AND SOIL_LIBRARIES)
+
+INCLUDE( FindPackageHandleStandardArgs )
+FIND_PACKAGE_HANDLE_STANDARD_ARGS( SOIL DEFAULT_MSG SOIL_LIBRARIES SOIL_INCLUDE_DIR )
+MARK_AS_ADVANCED( SOIL_INCLUDE_DIR SOIL_LIBRARY )

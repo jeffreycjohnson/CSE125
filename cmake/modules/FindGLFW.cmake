@@ -1,0 +1,45 @@
+
+# Locate GLFW
+#
+#   GLFW_FOUND       - True if GLFW found.
+#   GLFW_INCLUDE_DIR - Where to find includes
+#   GLFW_LIBRARIES   - List of libraries when using GLFW.
+#
+
+SET( GLFW_SEARCH_PATHS
+	~/Library/Frameworks
+	/Library/Frameworks
+	/usr/local
+	/usr
+	/sw # Fink
+	/opt/local # DarwinPorts
+	/opt/csw # Blastwave
+	/opt
+)
+
+FIND_PATH( GLFW_INCLUDE_DIR
+	NAMES glfw3.h
+	PATH_SUFFIXES include include/GLFW
+	PATHS ${GLFW_SEARCH_PATHS}
+)
+
+FIND_LIBRARY( GLFW_LIBRARY
+	NAMES glfw
+	PATH_SUFFIXES lib lib64 lib/x86_64-linux-gnu lib64/x86_64-linux-gnu
+	PATHS ${GLFW_SEARCH_PATHS}
+)
+
+IF( GLFW_LIBRARY )
+    SET( GLFW_LIBRARIES "${GLFW_LIBRARY}")
+ENDIF()
+
+IF(GLFW_INCLUDE_DIR AND GLFW_LIBRARIES)
+	SET(GLFW_FOUND TRUE)
+ELSE(GLFW_INCLUDE_DIR AND GLFW_LIBRARIES)
+	message (STATUS "Could not find GLFW.")
+	SET(GLFW_FOUND FALSE)
+ENDIF(GLFW_INCLUDE_DIR AND GLFW_LIBRARIES)
+
+INCLUDE( FindPackageHandleStandardArgs )
+FIND_PACKAGE_HANDLE_STANDARD_ARGS( GLFW DEFAULT_MSG GLFW_LIBRARIES GLFW_INCLUDE_DIR )
+MARK_AS_ADVANCED( GLFW_INCLUDE_DIR GLFW_LIBRARY )
