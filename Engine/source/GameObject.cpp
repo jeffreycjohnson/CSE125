@@ -4,7 +4,6 @@
 #include "Light.h"
 #include "ParticleTrail.h"
 #include "Timer.h"
-#include "GameScene.h"
 #include "Renderer.h"
 #include "Material.h"
 
@@ -28,8 +27,6 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
     return ret;
 }
 
-
-extern Scene * scene;
 void GameObject::UpdateScene()
 {
     while(Timer::nextFixedStep())
@@ -37,7 +34,6 @@ void GameObject::UpdateScene()
         SceneRoot.fixedUpdate();
     }
     SceneRoot.update(Timer::deltaTime());
-    scene->loop(); /* This is just temporary - all it does it do translation without having to create temporary components */
 }
 
 GameObject::GameObject() {

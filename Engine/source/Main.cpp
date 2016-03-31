@@ -11,8 +11,10 @@
 
 GLFWwindow * mainWindow;
 
-static void initialize()
+void InitializeEngine()
 {
+    workerPool = new ThreadPool();
+
     Timer::init(2.5f);
     if (!glfwInit())
     {
@@ -25,11 +27,11 @@ static void initialize()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    int width = 1280;
-    int height = 1024;
+    int width = 1024;
+    int height = 768;
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 167 Final Project", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 125", nullptr, nullptr);
 
     //set callbacks
     //glfwSetWindowFocusCallback(window, window_focus_callback);
@@ -57,15 +59,12 @@ static void initialize()
 
     // Loads mesh data for primatives, but we don't need it in a GameObject
     delete loadScene("assets/Primatives.obj");
-
-    auto update = workerPool->createJob(GameObject::UpdateScene)->queue();
-    workerPool->wait(update);
 }
 
-int main()
+void RunEngine()
 {
-    workerPool = new ThreadPool();
-    initialize();
+    auto update = workerPool->createJob(GameObject::UpdateScene)->queue();
+    workerPool->wait(update);
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{

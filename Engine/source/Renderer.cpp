@@ -5,7 +5,7 @@
 #include "Skybox.h"
 #include "Timer.h"
 #include "Light.h"
-#include "GameScene.h"
+#include "GameObject.h"
 #include "ThreadPool.h"
 #include "RenderPass.h"
 
@@ -40,8 +40,6 @@ GPUData Renderer::gpuData;
 
 Renderer::RenderBuffer Renderer::renderBuffer;
 
-Scene* scene;
-
 Skybox* skybox;
 
 void Renderer::init(int window_width, int window_height) {
@@ -60,75 +58,75 @@ void Renderer::init(int window_width, int window_height) {
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	shaderList[FORWARD_PBR_SHADER_ANIM] = new Shader(
-		"source/shaders/forward_pbr_skeletal.vert", "source/shaders/forward_pbr.frag"
+		"shaders/forward_pbr_skeletal.vert", "shaders/forward_pbr.frag"
 		);
 
 
 	shaderList[FORWARD_PBR_SHADER] = new Shader(
-		"source/shaders/forward_pbr.vert", "source/shaders/forward_pbr.frag"
+		"shaders/forward_pbr.vert", "shaders/forward_pbr.frag"
 		);
 
     shaderList[DEFERRED_PBR_SHADER_ANIM] = new Shader(
-        "source/shaders/forward_pbr_skeletal.vert", "source/shaders/deferred_gbuffer.frag"
+        "shaders/forward_pbr_skeletal.vert", "shaders/deferred_gbuffer.frag"
         );
 
 
     shaderList[DEFERRED_PBR_SHADER] = new Shader(
-        "source/shaders/forward_pbr.vert", "source/shaders/deferred_gbuffer.frag"
+        "shaders/forward_pbr.vert", "shaders/deferred_gbuffer.frag"
         );
 
     shaderList[DEFERRED_SHADER_LIGHTING] = new Shader(
-        "source/shaders/deferred_lighting.vert", "source/shaders/deferred_lighting.frag"
+        "shaders/deferred_lighting.vert", "shaders/deferred_lighting.frag"
         );
 
 	shaderList[SKYBOX_SHADER] = new Shader(
-		"source/shaders/skybox.vert", "source/shaders/skybox.frag"
+		"shaders/skybox.vert", "shaders/skybox.frag"
 		);
 
 	shaderList[FBO_HDR] = new Shader(
-		"source/shaders/fbo.vert", "source/shaders/fbo_hdr.frag"
+		"shaders/fbo.vert", "shaders/fbo_hdr.frag"
 		);
 
 	shaderList[EMITTER_SHADER] = new Shader(
-		"source/shaders/gpu_particle.vert", "source/shaders/gpu_particle.frag"
+		"shaders/gpu_particle.vert", "shaders/gpu_particle.frag"
 		);
 
 	shaderList[EMITTER_BURST_SHADER] = new Shader(
-		"source/shaders/gpu_particle_burst.vert", "source/shaders/gpu_particle.frag"
+		"shaders/gpu_particle_burst.vert", "shaders/gpu_particle.frag"
 		);
 
 	shaderList[PARTICLE_TRAIL_SHADER] = new Shader(
-		"source/shaders/particle_trail.vert", "source/shaders/particle_trail.frag"
+		"shaders/particle_trail.vert", "shaders/particle_trail.frag"
 		);
 
     shaderList[SHADOW_SHADER] = new Shader(
-        "source/shaders/forward_pbr.vert", "source/shaders/shadow.frag"
+        "shaders/forward_pbr.vert", "shaders/shadow.frag"
         );
 
     shaderList[SHADOW_SHADER_ANIM] = new Shader(
-        "source/shaders/forward_pbr_skeletal.vert", "source/shaders/shadow.frag"
+        "shaders/forward_pbr_skeletal.vert", "shaders/shadow.frag"
         );
 
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
 
 	shaderList[DEBUG_SHADER] = new Shader(
-		"source/shaders/simple.vert", "source/shaders/simple.frag"
+		"shaders/simple.vert", "shaders/simple.frag"
 		);
 
     shaderList[FORWARD_UNLIT] = new Shader(
-        "source/shaders/forward_pbr.vert", "source/shaders/forward_unlit.frag"
+        "shaders/forward_pbr.vert", "shaders/forward_unlit.frag"
         );
     shaderList[FORWARD_EMISSIVE] = new Shader(
-        "source/shaders/forward_pbr.vert", "source/shaders/emissive.frag"
+        "shaders/forward_pbr.vert", "shaders/emissive.frag"
         );
 
 	shaderList[FBO_BLUR] = new Shader(
-		"source/shaders/fbo.vert", "source/shaders/fbo_blur.frag"
+		"shaders/fbo.vert", "shaders/fbo_blur.frag"
 		);
 
 	shaderList[FBO_PASS] = new Shader(
-		"source/shaders/fbo.vert", "source/shaders/fbo_pass.frag"
+		"shaders/fbo.vert", "shaders/fbo_pass.frag"
 		);
 
 	currentShader = shaderList[FORWARD_PBR_SHADER];
@@ -155,8 +153,6 @@ void Renderer::init(int window_width, int window_height) {
     mainCamera->passes.push_back(std::make_unique<BloomPass>());
 
     resize(windowWidth, windowHeight);
-
-	scene = new GameScene();
 }
 
 void Renderer::loop() {

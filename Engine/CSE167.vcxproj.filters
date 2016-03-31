@@ -16,15 +16,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{b86542ff-74a8-43be-8801-208f8725c59b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scripts">
-      <UniqueIdentifier>{728ac89f-1ee0-4035-b370-f042843b46ab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scripts\Header Files">
-      <UniqueIdentifier>{12226428-cc53-4e84-912b-88d066e2e5ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scripts\Source Files">
-      <UniqueIdentifier>{62d0683a-a729-4fe8-ae5e-22243073f48d}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Shader.cpp">
@@ -105,9 +96,6 @@
     <ClCompile Include="source\FileWatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\scripts\GameScene.cpp">
-      <Filter>Scripts\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\ThreadPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -185,81 +173,78 @@
     <ClInclude Include="source\include\FileWatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\scripts\include\GameScene.h">
-      <Filter>Scripts\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\include\ThreadPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="source\shaders\forward_pbr.frag">
+    <None Include="..\shaders\deferred_gbuffer.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\forward_pbr.vert">
+    <None Include="..\shaders\deferred_lighting.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\skybox.frag">
+    <None Include="..\shaders\deferred_lighting.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\skybox.vert">
+    <None Include="..\shaders\emissive.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\fbo.vert">
+    <None Include="..\shaders\fbo.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\fbo_hdr.frag">
+    <None Include="..\shaders\fbo_blur.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\forward_pbr_skeletal.vert">
+    <None Include="..\shaders\fbo_hdr.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\deferred_gbuffer.frag">
+    <None Include="..\shaders\fbo_pass.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\deferred_lighting.frag">
+    <None Include="..\shaders\forward_pbr.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\gpu_particle.frag">
+    <None Include="..\shaders\forward_pbr.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\gpu_particle.vert">
+    <None Include="..\shaders\forward_pbr_skeletal.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\gpu_particle_burst.vert">
+    <None Include="..\shaders\forward_unlit.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\particle_trail.vert">
+    <None Include="..\shaders\gpu_particle.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\particle_trail.frag">
+    <None Include="..\shaders\gpu_particle.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\shadow.frag">
+    <None Include="..\shaders\gpu_particle_burst.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\forward_unlit.frag">
+    <None Include="..\shaders\lighting.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\simple.frag">
+    <None Include="..\shaders\particle_trail.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\simple.vert">
+    <None Include="..\shaders\particle_trail.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\emissive.frag">
+    <None Include="..\shaders\shadow.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\fbo_blur.frag">
+    <None Include="..\shaders\simple.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\fbo_pass.frag">
+    <None Include="..\shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\deferred_lighting.vert">
+    <None Include="..\shaders\skybox.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="source\shaders\lighting.glsl">
+    <None Include="..\shaders\skybox.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

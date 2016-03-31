@@ -1,7 +1,7 @@
 #version 430
 precision mediump float;
 
-#include source/shaders/lighting.glsl
+#include shaders/lighting.glsl
 
 in vec4 vPosition;
 out vec4 frag_color;
