@@ -33,7 +33,7 @@ void GameObject::UpdateScene()
     {
         SceneRoot.fixedUpdate();
     }
-    SceneRoot.update(Timer::deltaTime());
+    SceneRoot.update((float)Timer::deltaTime());
 }
 
 GameObject::GameObject() {

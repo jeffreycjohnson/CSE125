@@ -9,7 +9,7 @@ public:
 	GLuint getTexture();
 	void applyIrradiance();
 	void applyTexture(int slot);
-	Skybox(std::string imageFiles[6]);
+	explicit Skybox(std::string imageFiles[6]);
 private:
 	GLuint skyboxTex;
 	glm::mat4 irradianceMatrix[3];

@@ -14,10 +14,10 @@ void ForwardPass::render(Camera* camera) {
 		l->forwardPass(lightIndex++);
 	}
 	for (auto mesh : Renderer::renderBuffer.forward) {
-        if(mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_FALSE);
+        if(mesh->material->shader == &Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == &Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_FALSE);
         mesh->material->bind();
 		mesh->draw();
-        if (mesh->material->shader == Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_TRUE);
+        if (mesh->material->shader == &Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == &Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_TRUE);
 	}
 }
 
@@ -37,6 +37,9 @@ void ShadowPass::render(Camera* camera)
     if (!l || !l->shadowCaster) return;
     l->bindShadowMap();
 
+    Renderer::getShader(SHADOW_SHADER)["uP_Matrix"] = DirectionalLight::shadowMatrix;
+    Renderer::getShader(SHADOW_SHADER_ANIM)["uP_Matrix"] = DirectionalLight::shadowMatrix;
+
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
@@ -48,8 +51,8 @@ void ShadowPass::render(Camera* camera)
     for (auto mesh : Renderer::renderBuffer.deferred) {
         Material* mat = mesh->material;
         Shader* s = nullptr;
-        if (mat->shader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) s = Renderer::getShader(SHADOW_SHADER_ANIM);
-        else s = Renderer::getShader(SHADOW_SHADER);
+        if (mat->shader == &Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) s = &Renderer::getShader(SHADOW_SHADER_ANIM);
+        else s = &Renderer::getShader(SHADOW_SHADER);
         s->use();
         mesh->draw();
     }

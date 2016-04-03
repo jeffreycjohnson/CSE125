@@ -90,9 +90,6 @@
     <ClCompile Include="source\Sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\SkyboxPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\FileWatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

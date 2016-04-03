@@ -129,24 +129,10 @@ void Renderer::init(int window_width, int window_height) {
 		"shaders/fbo.vert", "shaders/fbo_pass.frag"
 		);
 
-	currentShader = shaderList[FORWARD_PBR_SHADER];
-	currentShader->use();
-
-	std::string cubeFilenames[6] = {
-		"assets/skybox/right.hdr",
-		"assets/skybox/left.hdr",
-		"assets/skybox/top.hdr",
-		"assets/skybox/bottom.hdr",
-		"assets/skybox/front.hdr",
-		"assets/skybox/back.hdr"};
-	skybox = new Skybox(cubeFilenames);
-	skybox->applyIrradiance();
-	skybox->applyTexture(5);
-
     mainCamera = new Camera(windowWidth, windowHeight, false);
     mainCamera->passes.push_back(std::make_unique<GBufferPass>());
     mainCamera->passes.push_back(std::make_unique<LightingPass>());
-    mainCamera->passes.push_back(std::make_unique<SkyboxPass>(skybox));
+    mainCamera->passes.push_back(std::make_unique<SkyboxPass>(nullptr));
     mainCamera->passes.push_back(std::make_unique<ForwardPass>());
     mainCamera->passes.push_back(std::make_unique<ParticlePass>());
     mainCamera->passes.push_back(std::make_unique<DebugPass>());
@@ -160,7 +146,7 @@ void Renderer::loop() {
 
     for(auto camera : cameras)
     {
-        camera->update(Timer::deltaTime());
+        camera->update((float)Timer::deltaTime());
         if (camera == mainCamera) continue;
         currentCamera = camera;
         applyPerFrameData(camera);
@@ -182,8 +168,6 @@ void Renderer::loop() {
         else pass->render(mainCamera);
     }
 
-    (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
-    (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -198,32 +182,32 @@ void Renderer::extractObjects() {
 void Renderer::applyPerFrameData(Camera* camera) {
     view = camera->getCameraMatrix();
 	for (int shaderId : shaderViewList) {
-		(*Renderer::getShader(shaderId))[VIEW_MATRIX] = view;
+		getShader(shaderId)[VIEW_MATRIX] = view;
 	}
 	for (int shaderId : shaderCameraPosList) {
-		(*Renderer::getShader(shaderId))["cameraPos"] = camera->gameObject->transform.getWorldPosition();
+		getShader(shaderId)["cameraPos"] = camera->gameObject->transform.getWorldPosition();
 	}
 }
 
 void Renderer::updatePerspective(const glm::mat4& perspectiveMatrix) {
     perspective = perspectiveMatrix;
 	for (int shaderId : shaderPerspectiveList) {
-		(*Renderer::getShader(shaderId))["uP_Matrix"] = perspective;
+		getShader(shaderId)["uP_Matrix"] = perspective;
 	}
 }
 
 void Renderer::setEnvironment(int slot, float mipmapLevels) {
 	for (int shaderId : shaderEnvironmentList) {
-		((*Renderer::getShader(shaderId)))["environment"] = slot;
-		((*Renderer::getShader(shaderId)))["environment_mipmap"] = mipmapLevels;
+		getShader(shaderId)["environment"] = slot;
+		getShader(shaderId)["environment_mipmap"] = mipmapLevels;
 	}
 }
 
 void Renderer::setIrradiance(glm::mat4 (&irradianceMatrix)[3]) {
     for (int shaderId : shaderEnvironmentList) {
-        ((*Renderer::getShader(shaderId)))["irradiance[0]"] = irradianceMatrix[0];
-        ((*Renderer::getShader(shaderId)))["irradiance[1]"] = irradianceMatrix[1];
-        ((*Renderer::getShader(shaderId)))["irradiance[2]"] = irradianceMatrix[2];
+        getShader(shaderId)["irradiance[0]"] = irradianceMatrix[0];
+        getShader(shaderId)["irradiance[1]"] = irradianceMatrix[1];
+        getShader(shaderId)["irradiance[2]"] = irradianceMatrix[2];
     }
 }
 
@@ -232,8 +216,8 @@ Shader& Renderer::getCurrentShader() {
 	return *currentShader;
 }
 
-Shader* Renderer::getShader(int shaderId) {
-	return shaderList[shaderId];
+Shader& Renderer::getShader(int shaderId) {
+	return *shaderList[shaderId];
 }
 
 void Renderer::setCurrentShader(Shader* shader) {

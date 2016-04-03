@@ -1,7 +1,7 @@
 #include "Input.h"
 #include "Timer.h"
 #include <gtx/compatibility.hpp>
-#include <SOIL/SOIL.h>
+#include <SOIL2.h>
 
 using namespace std;
 

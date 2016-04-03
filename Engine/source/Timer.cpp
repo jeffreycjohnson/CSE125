@@ -16,7 +16,7 @@ void Timer::init(float count)
 	mDeltaTime = mTime = mUnscaledDeltaTime = mUnscaledTime = cycleTime = 0.167;
 	mTimeScale = 1;
 	frames = 0;
-    fixedTimestep = 0.02;
+    fixedTimestep = 0.02f;
     fixedTimeChange = 0;
 	Timer::count = count;
 }

@@ -95,7 +95,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL2;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -117,7 +117,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL2;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <AdditionalUsingDirectories>
@@ -147,7 +147,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL2;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,7 +174,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL2;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
@@ -216,7 +216,6 @@
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
-    <ClCompile Include="source\SkyboxPass.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />

@@ -11,7 +11,7 @@ public:
 	GLuint id;
 	bool accessibleDepth;
 	GLuint *colorTex;
-	int numColorTex;
+	size_t numColorTex;
 	GLuint depthTex;
 
 	bool hdrEnabled=false;

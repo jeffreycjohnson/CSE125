@@ -97,7 +97,7 @@ Framebuffer::~Framebuffer() {
 
 void Framebuffer::deleteTextures()
 {
-	glDeleteTextures(numColorTex, colorTex);
+	glDeleteTextures((GLsizei)numColorTex, colorTex);
 	if (accessibleDepth) {
 		glDeleteTextures(1, &depthTex);
 	} else {

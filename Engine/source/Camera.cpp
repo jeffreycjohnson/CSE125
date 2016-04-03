@@ -23,7 +23,6 @@ Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLint>& color
     {
         passes.push_back(std::make_unique<GBufferPass>());
         passes.push_back(std::make_unique<LightingPass>());
-        // TODO : get actual skybox
         passes.push_back(std::make_unique<SkyboxPass>(nullptr));
         passes.push_back(std::make_unique<ForwardPass>());
         passes.push_back(std::make_unique<ParticlePass>());
@@ -53,7 +52,7 @@ void Camera::update(float deltaTime)
 {
 	if (fov != prevFOV)
 	{
-		fovStartTime = Timer::time();
+		fovStartTime = (float)Timer::time();
 		prevFOV = fov;
 	}
 

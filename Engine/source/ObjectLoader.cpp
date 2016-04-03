@@ -78,16 +78,16 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
         auto foundEmit = name.find("Emit") != std::string::npos;
         Material * mat;
         if (foundForward) {
-            mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? FORWARD_PBR_SHADER_ANIM : FORWARD_UNLIT));
+            mat = new Material(&Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? FORWARD_PBR_SHADER_ANIM : FORWARD_UNLIT));
             mat->transparent = true;
         }
         else if(foundEmit)
         {
-            mat = new Material(Renderer::getShader(FORWARD_EMISSIVE));
+            mat = new Material(&Renderer::getShader(FORWARD_EMISSIVE));
             mat->transparent = true;
         }
         else {
-            mat = new Material(Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? DEFERRED_PBR_SHADER_ANIM : DEFERRED_PBR_SHADER));
+            mat = new Material(&Renderer::getShader(scene->mMeshes[*currentNode->mMeshes]->HasBones() ? DEFERRED_PBR_SHADER_ANIM : DEFERRED_PBR_SHADER));
             mat->transparent = false;
         }
         if (aMat->GetTextureCount(aiTextureType_DIFFUSE) > 0)

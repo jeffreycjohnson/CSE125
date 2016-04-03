@@ -36,15 +36,16 @@ void GBufferPass::render(Camera* camera)
 
 LightingPass::LightingPass()
 {
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
+    Renderer::getShader(DEFERRED_SHADER_LIGHTING)["colorTex"] = 0;
+    Renderer::getShader(DEFERRED_SHADER_LIGHTING)["normalTex"] = 1;
+    Renderer::getShader(DEFERRED_SHADER_LIGHTING)["posTex"] = 2;
 }
 
 void LightingPass::render(Camera* camera)
 {
-    Renderer::getShader(DEFERRED_SHADER_LIGHTING)->use();
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uScreenSize"] = glm::vec2(camera->width, camera->height);
+    auto& shader = Renderer::getShader(DEFERRED_SHADER_LIGHTING);
+    shader.use();
+    shader["uScreenSize"] = glm::vec2(camera->width, camera->height);
     glDepthMask(GL_FALSE);
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
@@ -54,11 +55,11 @@ void LightingPass::render(Camera* camera)
     camera->fbo->bindTexture(0, 0);
     camera->fbo->bindTexture(1, 1);
     camera->fbo->bindTexture(2, 2);
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["colorTex"] = 0;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["normalTex"] = 1;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["posTex"] = 2;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["shadowTex"] = 3;
-    (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uIV_Matrix"] = Renderer::currentCamera->gameObject->transform.getTransformMatrix();
+    shader["colorTex"] = 0;
+    shader["normalTex"] = 1;
+    shader["posTex"] = 2;
+    shader["shadowTex"] = 3;
+    shader["uIV_Matrix"] = Renderer::currentCamera->gameObject->transform.getTransformMatrix();
     CHECK_ERROR();
 
     for(auto light : Renderer::renderBuffer.light) {
@@ -73,7 +74,7 @@ void LightingPass::render(Camera* camera)
             if(d->shadowCaster && d->shadowMap->fbo)
             {
                 d->shadowMap->fbo->bindDepthTexture(3);
-                (*Renderer::getShader(DEFERRED_SHADER_LIGHTING))["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(d->gameObject->transform.getTransformMatrix());
+                shader["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(d->gameObject->transform.getTransformMatrix());
             }
         }
 
@@ -99,14 +100,14 @@ void LightingPass::render(Camera* camera)
         Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
     }
 
-    (*Renderer::currentShader)["uLightType"] = 3;
-    (*Renderer::currentShader)["uScale"] = 1.f;
-    (*Renderer::currentShader)["uLightPosition"] = glm::vec3(0);
-    (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
-    (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
+    shader["uLightType"] = 3;
+    shader["uScale"] = 1.f;
+    shader["uLightPosition"] = glm::vec3(0);
+    shader["uV_Matrix"] = glm::mat4();
+    shader["uP_Matrix"] = glm::mat4();
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
-    (*Renderer::currentShader)["uV_Matrix"] = Renderer::view;
-    (*Renderer::currentShader)["uP_Matrix"] = Renderer::perspective;
+    shader["uV_Matrix"] = Renderer::view;
+    shader["uP_Matrix"] = Renderer::perspective;
     CHECK_ERROR();
 
     // TODO : Render Ambient

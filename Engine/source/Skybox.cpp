@@ -1,38 +1,36 @@
 #include "Skybox.h"
 #include "Renderer.h"
-#include <SOIL.h>
+#include <SOIL2.h>
 #include "stb_image.h" //note - can get this file from SOIL2 - just put in an include folder in Dependencies for now
 #include "Renderer.h"
 #include "Camera.h"
 #include "Material.h"
+#include "RenderPass.h"
 
 #define FLOAT_SIZE 4
 #define POSITION_COUNT 3
-
 #define VERTEX_ATTRIB_LOCATION 0
-
 #define VERTEX_COUNT 12
+#define INDEX_COUNT 6
+#define CUBE_FACES 6
+#define SH_COUNT 9
+#define sample_count 1
+
 float vertices[VERTEX_COUNT] = { -1, -1, 0,
 1, -1, 0,
 1,  1, 0,
 -1,  1, 0 };
-
-#define INDEX_COUNT 6
 GLuint indices[INDEX_COUNT] = { 0, 1, 2, 0, 2, 3 };
-
-
-
-
-#define CUBE_FACES 6
-#define SH_COUNT 9
-
-#define sample_count 1
-
 
 bool Skybox::loaded = false;
 MeshData Skybox::meshData;
 
+SkyboxPass::SkyboxPass(Skybox* skybox) : skybox(skybox) {}
 
+void SkyboxPass::render(Camera*)
+{
+    if (skybox) skybox->draw();
+}
 
 void Skybox::load() {
 	GLuint vao;
@@ -67,7 +65,7 @@ void Skybox::draw() {
 	material->bind();
 	glActiveTexture(GL_TEXTURE0 + 5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, getTexture());
-	(*Renderer::getShader(SKYBOX_SHADER))["environment"] = 5;
+	Renderer::getShader(SKYBOX_SHADER)["environment"] = 5;
 
 
 	if (Renderer::gpuData.vaoHandle != meshData.vaoHandle) {
@@ -92,7 +90,10 @@ Skybox::Skybox(std::string imageFiles[6]) {
 		free(data.imageArray[f]);
 	}
 
-	material = new Material(Renderer::getShader(SKYBOX_SHADER));
+	material = new Material(&Renderer::getShader(SKYBOX_SHADER));
+
+    applyIrradiance();
+    applyTexture(5);
 }
 
 void Skybox::applyIrradiance() {

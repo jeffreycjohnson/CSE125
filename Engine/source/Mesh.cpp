@@ -48,9 +48,9 @@ void Mesh::draw() {
 	if(gameObject) Renderer::setModelMatrix(gameObject->transform.getTransformMatrix());
     else Renderer::setModelMatrix(glm::mat4());
 
-	if ((Renderer::currentShader == Renderer::getShader(FORWARD_PBR_SHADER_ANIM) ||
-        Renderer::currentShader == Renderer::getShader(DEFERRED_PBR_SHADER_ANIM) ||
-        Renderer::currentShader == Renderer::getShader(SHADOW_SHADER_ANIM))&& animationRoot) {
+	if ((Renderer::currentShader == &Renderer::getShader(FORWARD_PBR_SHADER_ANIM) ||
+        Renderer::currentShader == &Renderer::getShader(DEFERRED_PBR_SHADER_ANIM) ||
+        Renderer::currentShader == &Renderer::getShader(SHADOW_SHADER_ANIM))&& animationRoot) {
 		BoneData & meshBoneData = boneIdMap.at(name);
 
 		for (AnimNodeData node : animationRoot->getAnimationData()) {
@@ -110,14 +110,14 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 		boneResults = new std::pair<glm::ivec4, glm::vec4>[mesh->mNumVertices];
 		std::vector<std::pair<int, float>> *boneData = new std::vector<std::pair<int, float>>[mesh->mNumVertices];
 
-		for (int b = 0; b < mesh->mNumBones; ++b) {
+		for (unsigned int b = 0; b < mesh->mNumBones; ++b) {
 			Mesh::boneIdMap[name].boneMap[mesh->mBones[b]->mName.C_Str()] = b;
 			for (int matIndex = 0; matIndex < 16; ++matIndex) {
 				//Assimp matrices are row major, glm & opengl are column major, so we need to convert here
 				Mesh::boneIdMap[name].boneBindArray[b][matIndex % 4][matIndex / 4] = mesh->mBones[b]->mOffsetMatrix[matIndex / 4][matIndex % 4];
 			}
 
-			for (int w = 0; w < mesh->mBones[b]->mNumWeights; ++w) {
+			for (unsigned int w = 0; w < mesh->mBones[b]->mNumWeights; ++w) {
 				boneData[mesh->mBones[b]->mWeights[w].mVertexId].push_back(std::make_pair(b, mesh->mBones[b]->mWeights[w].mWeight));
 			}
 		}
@@ -175,7 +175,7 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 
 	for (unsigned int f = 0; f < mesh->mNumFaces; ++f) {
         unsigned indexCount = mesh->mPrimitiveTypes == aiPrimitiveType_LINE ? 2 : 3;
-		for (int p = 0; p < indexCount; ++p) {
+		for (unsigned int p = 0; p < indexCount; ++p) {
 			indexArray.push_back(mesh->mFaces[f].mIndices[p]);
 		}
 	}

@@ -93,7 +93,7 @@ void ThreadPool::wait(Job* job)
 
 void ThreadPool::runThread(ThreadPool* pool, size_t id)
 {
-    currentThread = id;
+    currentThread = (int)id;
     while(!pool->shutdown)
     {
         std::unique_lock<std::mutex> lock(pool->jobLock);

@@ -32,9 +32,9 @@ void Light::deferredHelper(const std::string& meshName)
 void PointLight::forwardPass(int index)
 {
 	for (int shaderId : Renderer::shaderForwardLightList) {
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(3*index) + "]"] = glm::vec4(gameObject->transform.getWorldPosition(), 1.0);
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(3*index+1) + "]"] = glm::vec4(color, 1);
-        (*Renderer::getShader(shaderId))["uLightData[" + std::to_string(3*index+2) + "]"] = glm::vec4(constantFalloff, linearFalloff, exponentialFalloff, 1);
+		Renderer::getShader(shaderId)["uLightData[" + std::to_string(3*index) + "]"] = glm::vec4(gameObject->transform.getWorldPosition(), 1.0);
+		Renderer::getShader(shaderId)["uLightData[" + std::to_string(3*index+1) + "]"] = glm::vec4(color, 1);
+        Renderer::getShader(shaderId)["uLightData[" + std::to_string(3*index+2) + "]"] = glm::vec4(constantFalloff, linearFalloff, exponentialFalloff, 1);
 	}
 }
 
@@ -70,8 +70,8 @@ DirectionalLight::DirectionalLight(bool shadow)
 void DirectionalLight::forwardPass(int index)
 {
 	for (int shaderId : Renderer::shaderForwardLightList) {
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2 * index) + "]"] = glm::vec4(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
-		(*Renderer::getShader(shaderId))["uLightData[" + std::to_string(2 * index + 1) + "]"] = glm::vec4(color, 0);
+		Renderer::getShader(shaderId)["uLightData[" + std::to_string(2 * index) + "]"] = glm::vec4(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, 1, 0));
+		Renderer::getShader(shaderId)["uLightData[" + std::to_string(2 * index + 1) + "]"] = glm::vec4(color, 0);
 	}
 }
 
@@ -96,8 +96,8 @@ void DirectionalLight::bindShadowMap()
     {
         shadowMap->fbo->bind(0, nullptr);
         auto mat = glm::affineInverse(gameObject->transform.getTransformMatrix());
-        (*Renderer::getShader(SHADOW_SHADER_ANIM))["uV_Matrix"] = mat;
-        (*Renderer::getShader(SHADOW_SHADER))["uV_Matrix"] = mat;
+        Renderer::getShader(SHADOW_SHADER_ANIM)["uV_Matrix"] = mat;
+        Renderer::getShader(SHADOW_SHADER)["uV_Matrix"] = mat;
     }
 }
 

@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include <SOIL/SOIL.h>
+#include <SOIL2.h>
 #include <unordered_map>
 
 std::unordered_map<std::string, GLuint> textures;
@@ -10,39 +10,19 @@ Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
         textureHandle = textures[filename];
         return;
     }
-    glGenTextures(1, &textureHandle);
 
-    glBindTexture(GL_TEXTURE_2D, textureHandle);
-	int width = -1;
-	int height = -1;
-    unsigned char * image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-    if (width == -1) {
+    auto flags = srgb ? SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_SRGB_COLOR_SPACE : 0;
+    textureHandle = SOIL_load_OGL_texture(filename.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | flags);
+    if (textureHandle == 0) {
         LOG(filename + ": Error during loading -> " + SOIL_last_result());
         throw;
     }
 
-    unsigned char * buffer = static_cast<unsigned char *>(malloc(width * height * 4));
-    for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                buffer[(x + (height - y - 1) * width) * 4 + i] = image[(x + y * width) * 4 + i];
-            }
-        }
-    }
-    glTexImage2D(GL_TEXTURE_2D, 0, srgb ? GL_SRGB_ALPHA : GL_RGBA, width, height, 0, GL_RGBA,
-        GL_UNSIGNED_BYTE, buffer);
-    free(buffer);
-    SOIL_free_image_data(image);
-
+    glBindTexture(GL_TEXTURE_2D, textureHandle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    glGenerateMipmap(GL_TEXTURE_2D);
 
     GLfloat anisoAmt = 0.0f;
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoAmt);

@@ -31,6 +31,7 @@
 *.opensdf
 *.suo
 *.opendb
+*.db
 
 # Dependencies
 Dependencies/*

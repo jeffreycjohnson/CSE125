@@ -15,7 +15,7 @@ public:
 
 private:
     unsigned int delay;
-    int ticks = 0;
+    unsigned int ticks = 0;
     typedef std::experimental::filesystem::file_time_type file_time_type;
     typedef std::experimental::filesystem::path path;
     file_time_type time;

@@ -68,7 +68,7 @@ class Renderer
 
 		static void setCurrentShader(Shader*);
 		static Shader& getCurrentShader();
-		static Shader* getShader(int shaderId);
+		static Shader& getShader(int shaderId);
 		static void switchShader(int shaderId);
 
 		static void setModelMatrix(const glm::mat4& transform);
