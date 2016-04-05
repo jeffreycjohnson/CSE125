@@ -5,6 +5,8 @@
 #include "Transform.h"
 #include "Renderer.h"
 
+const std::vector<GLenum> defaultFormats{ GL_RGBA8, GL_RGBA16, GL_RGBA16F, GL_RGBA16F };
+
 class Camera : public Component
 {
 	private:
@@ -23,7 +25,7 @@ class Camera : public Component
         Texture* renderResult;
 
 		explicit Camera(int w = Renderer::getWindowWidth(), int h = Renderer::getWindowHeight(), bool defaultPasses = true,
-            const std::vector<GLint>& colorFormats = { GL_RGBA8, GL_RGBA16, GL_RGBA16F, GL_RGBA16F });
+			const std::vector<GLenum>& colorFormats = defaultFormats);
         ~Camera();
 		glm::mat4 getCameraMatrix();
 		void update(float deltaTime) override;

@@ -2,7 +2,9 @@
 #define INCLUDE_FILEWATCHER_H
 
 #include "ForwardDecs.h"
+#ifndef OLD_VS
 #include <experimental/filesystem>
+#endif
 
 class FileWatcher
 {
@@ -16,9 +18,11 @@ public:
 private:
     unsigned int delay;
     unsigned int ticks = 0;
+#ifndef OLD_VS
     typedef std::experimental::filesystem::file_time_type file_time_type;
     typedef std::experimental::filesystem::path path;
     file_time_type time;
+#endif
 };
 
 #endif

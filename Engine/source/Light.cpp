@@ -61,7 +61,7 @@ DirectionalLight::DirectionalLight(bool shadow)
     if(shadow)
     {
         shadowCaster = shadow;
-        shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLint>({}));
+		shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLenum>({}));
         shadowMap->passes.push_back(std::make_unique<ShadowPass>());
         shadowMap->setGameObject(gameObject);
     }

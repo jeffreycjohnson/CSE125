@@ -26,7 +26,7 @@ Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDept
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Framebuffer::Framebuffer(int w, int h, const std::vector<GLint>& colorFormats, bool accessibleDepth)
+Framebuffer::Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, bool accessibleDepth)
         : accessibleDepth(accessibleDepth), numColorTex(colorFormats.size()), colorFormats(colorFormats), width(w), height(h) {
     glGenFramebuffers(1, &id);
     glBindFramebuffer(GL_FRAMEBUFFER, id);

@@ -15,7 +15,7 @@ public:
 	GLuint depthTex;
 
 	bool hdrEnabled=false;
-    std::vector<GLint> colorFormats;
+	std::vector<GLenum> colorFormats;
 
 	int width, height;
 
@@ -24,7 +24,7 @@ public:
 
 
 	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth, bool hdrEnabled);
-    Framebuffer(int w, int h, const std::vector<GLint>& colorFormats, bool accessibleDepth);
+	Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, bool accessibleDepth);
 	~Framebuffer();
 
 	void deleteTextures();
