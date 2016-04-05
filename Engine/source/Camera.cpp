@@ -11,7 +11,7 @@
 #include "Framebuffer.h"
 #include "RenderPass.h"
 
-Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLint>& colorFormats) : width(w), height(h)
+Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats) : width(w), height(h)
 {
 	currentFOV = fov = atan(1.f) * 4.0f / 3.0f;
 	fovDuration = 1;

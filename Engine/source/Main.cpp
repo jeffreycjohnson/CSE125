@@ -7,6 +7,7 @@
 #include <glfw3.h>
 #include "ObjectLoader.h"
 #include "ThreadPool.h"
+#include "Camera.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
@@ -49,16 +50,16 @@ void InitializeEngine()
     glewExperimental = GL_TRUE;
     glewInit();
     glfwSwapInterval(0);
-    Sound::init();
-    Renderer::init(width, height);
+	Sound::init();
+	Renderer::init(width, height);
     Input::init(window);
-    Input::setCursor("assets/cursor/cursor.png", 32, 32);
+	Input::setCursor("assets/cursor/cursor.png", 32, 32);
     //mouse events
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetScrollCallback(window, Input::scroll_callback);
 
     // Loads mesh data for primatives, but we don't need it in a GameObject
-    delete loadScene("assets/Primatives.obj");
+	delete loadScene("assets/Primatives.obj");
 }
 
 void RunEngine()
@@ -75,6 +76,9 @@ void RunEngine()
         Renderer::loop();
 	}
 
+	for (auto camera : Renderer::cameras) {
+		delete camera;
+	}
     delete workerPool;
 	glfwDestroyWindow(mainWindow);
 	glfwTerminate();

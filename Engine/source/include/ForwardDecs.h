@@ -34,6 +34,10 @@ class Transform;
 #ifndef __func__
 #define __func__ __FUNCSIG__
 #endif
+#if MSC_VER < 1900
+#define OLD_VS
+#define thread_local __declspec( thread )
+#endif
 #endif
 
 void _log(const char * file, int line, const char * func, const std::string& s);
@@ -62,11 +66,12 @@ void _logHelper<glm::mat4>(const char * file, int line, const char * func, glm::
 #ifndef CHECK_ERROR
 #define CHECK_ERROR() \
 do { \
-    GLenum error; \
-    while ((error = glGetError()) != GL_NO_ERROR) \
-    { \
-        _log(__FILE__, __LINE__, __func__, \
-                std::string("OpenGL Error: ") + (char *)gluErrorString(error)); \
+	GLenum error; \
+	while ((error = glGetError()) != GL_NO_ERROR) \
+	{ \
+		char * str = (char*)gluErrorString(error); \
+		_log(__FILE__, __LINE__, __func__, \
+                std::string("OpenGL Error: ") + (str?str:"")); \
     } \
 } while((void)0,0)
 #endif

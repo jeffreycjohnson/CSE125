@@ -42,13 +42,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -199,7 +199,7 @@
     <ClCompile Include="source\BoxCollider.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\Component.cpp" />
-    <ClCompile Include="source\DeferrerdPass.cpp" />
+    <ClCompile Include="source\DeferredPass.cpp" />
     <ClCompile Include="source\FileWatcher.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
