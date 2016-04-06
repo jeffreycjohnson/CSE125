@@ -13,7 +13,7 @@
 #define MODEL_MATRIX "uM_Matrix"
 #define VIEW_MATRIX "uV_Matrix"
 
-
+bool Renderer::shutdown = false;
 int Renderer::windowWidth = 0;
 int Renderer::windowHeight = 0;
 bool Renderer::drawDebug = false;

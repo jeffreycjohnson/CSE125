@@ -76,9 +76,7 @@ void RunEngine()
         Renderer::loop();
 	}
 
-	for (auto camera : Renderer::cameras) {
-		delete camera;
-	}
+	Renderer::shutdown = true;
     delete workerPool;
 	glfwDestroyWindow(mainWindow);
 	glfwTerminate();

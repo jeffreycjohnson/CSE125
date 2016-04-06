@@ -46,6 +46,8 @@ class Renderer
         };
         static struct RenderBuffer renderBuffer;
 
+		static bool shutdown;
+
 		static Shader* currentShader;
         static Camera* mainCamera;
 		static Camera* currentCamera;

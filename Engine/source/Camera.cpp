@@ -33,7 +33,7 @@ Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colo
 
 Camera::~Camera()
 {
-    Renderer::cameras.remove(this);
+    if(!Renderer::shutdown) Renderer::cameras.remove(this);
 }
 
 glm::mat4 Camera::getCameraMatrix()
