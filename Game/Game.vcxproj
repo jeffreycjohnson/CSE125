@@ -20,11 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Main.cpp" />
+    <ClCompile Include="source\PlayerMovement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\CSE167.vcxproj">
       <Project>{1ae1de3f-01ed-4b82-99c7-5d586a83010f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\PlayerMovement.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1A66FBD-7F91-412A-B6ED-FB645555F316}</ProjectGuid>
