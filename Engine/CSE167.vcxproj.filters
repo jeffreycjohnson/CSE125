@@ -176,7 +176,7 @@
     <ClInclude Include="source\include\ThreadPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
+    <ClInclude Include="source\include\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

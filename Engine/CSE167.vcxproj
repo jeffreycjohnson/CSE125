@@ -194,7 +194,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\BloomPass.cpp" />
     <ClCompile Include="source\BoxCollider.cpp" />
@@ -224,7 +224,7 @@
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Config.h" />
+    <ClInclude Include="source\include\Config.h" />
     <ClInclude Include="source\include\Animation.h" />
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />

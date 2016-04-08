@@ -48,7 +48,8 @@ public:
     Shader * shader;
     bool transparent;
 
-    Material(Shader *, bool transparent = true);
+    explicit Material(Shader *, bool transparent = true);
+    explicit Material(const std::string& file, bool hasAnimations=false);
     ~Material();
     UniformSetter operator[](const std::string& name);
     void bind();

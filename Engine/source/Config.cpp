@@ -3,32 +3,64 @@
 #include <fstream>
 #include <sstream>
 
-ConfigFile::ConfigFile(std::string& configFilePath)
+ConfigFile::ConfigFile(const std::string& configFilePath)
 {
 	this->configFilePath = configFilePath;
 	load();
 }
 
-
-ConfigFile::~ConfigFile()
+int ConfigFile::getInt(const std::string & section, const std::string & key) const
 {
+    try
+    {
+        return std::stoi(sections.at(section).get(key));
+    }
+    catch(...)
+    {
+        return 0;
+    }
 }
 
-int ConfigFile::getInt(const std::string & section, const std::string & key)
+float ConfigFile::getFloat(const std::string & section, const std::string & key) const
 {
-	return std::stoi(sections[section].get(key));
+    try
+    {
+        return std::stof(sections.at(section).get(key));
+    }
+    catch (...)
+    {
+        return 0.0f;
+    }
 }
 
-float ConfigFile::getFloat(const std::string & section, const std::string & key)
+std::string ConfigFile::getString(const std::string & section, const std::string & key) const
 {
-	return std::stof(sections[section].get(key));
+    try
+    {
+        return sections.at(section).get(key);
+    }
+    catch (...)
+    {
+        return "";
+    }
 }
 
-std::string & ConfigFile::getString(const std::string & section, const std::string & key)
+glm::vec3 ConfigFile::getColor(const std::string& section, const std::string& key) const
 {
-	return sections[section].get(key);
+    try
+    {
+        auto str = sections.at(section).get(key);
+        if (str.length() != 7 || str[0] != '#') return glm::vec3();
+        float r = stoi(str.substr(1, 2), nullptr, 16);
+        float g = stoi(str.substr(3, 2), nullptr, 16);
+        float b = stoi(str.substr(4, 2), nullptr, 16);
+        return glm::vec3(r / 256.f, g / 256.f, b / 256.f);
+    }
+    catch (...)
+    {
+        return glm::vec3();
+    }
 }
-
 
 void ConfigFile::load() {
 	// Open the config file
@@ -80,7 +112,7 @@ void ConfigFile::load() {
 
 }
 
-bool ConfigFile::hasSection(std::string& section) {
+bool ConfigFile::hasSection(const std::string& section) const {
 	// If the section name doesn't exist in our map, return false
 	auto iter = sections.find(section);
 	return ( iter != sections.end() );
@@ -137,17 +169,17 @@ std::vector<std::string> ConfigFile::tokenize(const std::string& line, ConfigFil
 
 }
 
-std::string & ConfigFile::ConfigSection::get(const std::string & key)
+std::string ConfigFile::ConfigSection::get(const std::string & key) const
 {
 	if (hasKey(key)) {
-		return keyValuePairs[key];
+		return keyValuePairs.at(key);
 	}
 	else {
 		return std::string("");
 	}
 }
 
-bool ConfigFile::ConfigSection::hasKey(const std::string & key)
+bool ConfigFile::ConfigSection::hasKey(const std::string & key) const
 {
 	auto iter = keyValuePairs.find(key);
 	return (iter != keyValuePairs.end());
