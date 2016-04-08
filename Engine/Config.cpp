@@ -3,21 +3,36 @@
 #include <fstream>
 #include <sstream>
 
-Config::Config(std::string& configFilePath)
+ConfigFile::ConfigFile(std::string& configFilePath)
 {
 	this->configFilePath = configFilePath;
 	load();
 }
 
 
-Config::~Config()
+ConfigFile::~ConfigFile()
 {
 }
 
+int ConfigFile::getInt(const std::string & section, const std::string & key)
+{
+	return std::stoi(sections[section].get(key));
+}
 
-void Config::load() {
+float ConfigFile::getFloat(const std::string & section, const std::string & key)
+{
+	return std::stof(sections[section].get(key));
+}
+
+std::string & ConfigFile::getString(const std::string & section, const std::string & key)
+{
+	return sections[section].get(key);
+}
+
+
+void ConfigFile::load() {
 	// Open the config file
-	std::ifstream file(configFilePath);
+	std::ifstream file(this->configFilePath);
 	std::string line;
 	std::string currentSection;
 	long lineNumber = 0;
@@ -46,8 +61,8 @@ void Config::load() {
 			}
 			break;
 			case TokenizedStringType::KEY_VALUE_PAIR: {
-				// tokens list is '{{key}}', '=', '{{value}}'
-				sections[currentSection].set(tokens[0], tokens[2]);
+				// tokens list is '{{key}}', '{{value}}'
+				sections[currentSection].set(tokens[0], tokens[1]);
 			}
 			break;
 			case TokenizedStringType::UNKNOWN: {
@@ -57,12 +72,15 @@ void Config::load() {
 			break;
 		}
 	}
+	if (file.bad() && !file.eof()) {
+		std::cerr << "Error while reading {" << configFilePath << "}. File may be corrupted, or something like that." << std::endl;
+	}
 
 	file.close();
 
 }
 
-bool Config::hasSection(std::string& section) {
+bool ConfigFile::hasSection(std::string& section) {
 	// If the section name doesn't exist in our map, return false
 	auto iter = sections.find(section);
 	return ( iter != sections.end() );
@@ -78,7 +96,7 @@ bool Config::hasSection(std::string& section) {
  *
  * NOTE:  If we were unable to determine
  */
-std::vector<std::string> Config::tokenize(const std::string& line, ConfigFile::TokenizedStringType type) {
+std::vector<std::string> ConfigFile::tokenize(const std::string& line, ConfigFile::TokenizedStringType type) {
 
 	std::vector<std::string> tokens;
 
@@ -89,8 +107,11 @@ std::vector<std::string> Config::tokenize(const std::string& line, ConfigFile::T
 
 	// Detect what kind of line this is, by peeking at the first char
 	if ( line.at(0) == TOK_L_BRAC ) {
-
-
+		std::string sectionName = line.substr(1, line.length() - 2);
+		tokens.push_back("[");
+		tokens.push_back(sectionName);
+		tokens.push_back("]");
+		type = TokenizedStringType::SECTION;
 		return tokens;
 	}
 	else if ( line.at(0) == TOK_COMMENT ) {
@@ -104,7 +125,6 @@ std::vector<std::string> Config::tokenize(const std::string& line, ConfigFile::T
 			std::string key   = line.substr(0, found);
 			std::string value = line.substr(found + 1, line.length() - found - 1);
 			tokens.push_back(key);
-			tokens.push_back(TOK_EQUALS);
 			tokens.push_back(value);
 			type = TokenizedStringType::KEY_VALUE_PAIR;
 		}
@@ -115,4 +135,25 @@ std::vector<std::string> Config::tokenize(const std::string& line, ConfigFile::T
 
 	return tokens;
 
+}
+
+std::string & ConfigFile::ConfigSection::get(const std::string & key)
+{
+	if (hasKey(key)) {
+		return keyValuePairs[key];
+	}
+	else {
+		return std::string("");
+	}
+}
+
+bool ConfigFile::ConfigSection::hasKey(const std::string & key)
+{
+	auto iter = keyValuePairs.find(key);
+	return (iter != keyValuePairs.end());
+}
+
+void ConfigFile::ConfigSection::set(const std::string & key, const std::string & value)
+{
+	keyValuePairs[key] = value;
 }

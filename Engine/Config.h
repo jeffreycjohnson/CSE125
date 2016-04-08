@@ -1,13 +1,7 @@
 #pragma once
-#include "ForwardDecs.h";
+#include "ForwardDecs.h"
 #include <vector>
 #include <map>
-
-// INI file constants
-#define TOK_L_BRAC "["
-#define TOK_R_BRAC "]"
-#define TOK_EQUALS "="
-#define TOK_COMMENT ";"
 
 /*
  Defines a helper class for easily reading from a series of configuration files
@@ -43,6 +37,12 @@ public:
 	ConfigFile(std::string& configFilePath);
 	~ConfigFile();
 
+	// INI file constants
+	static const char TOK_L_BRAC = '[';
+	static const char TOK_R_BRAC = ']';
+	static const char TOK_EQUALS = '=';
+	static const char TOK_COMMENT = ';';
+
 	// Retrieve a key from one of the many config files we've loaded
 	int getInt(const std::string& section, const std::string& key);
 	float getFloat(const std::string& section, const std::string& key);
@@ -55,7 +55,19 @@ private:
 		SECTION = 0x1,
 		KEY_VALUE_PAIR = 0x2,
 		UNKNOWN = 0x3
-	}
+	};
+
+	// A section of an .ini file
+	class ConfigSection {
+		friend ConfigFile;
+	public:
+		std::string& get(const std::string& key);
+		bool hasKey(const std::string& key);
+
+	private:
+		void set(const std::string& key, const std::string& value);
+		std::map<std::string, std::string> keyValuePairs;
+	};
 
 	// Member variables
 	std::string configFilePath;
@@ -65,20 +77,5 @@ private:
 	void load();
 	bool hasSection(std::string& section);
 	std::vector<std::string> tokenize(const std::string& line, ConfigFile::TokenizedStringType type);
-
-	// A section of an .ini file
-	class ConfigSection {
-		friend ConfigFile;
-	public:
-		ConfigSection();
-		~ConfigSection();
-
-		std::string& get(const std::string& key);
-		bool hasKey(const std::string& key);
-	
-	private:
-		void set(const std::string& key, const std::string& value);
-		std::map<std::string,std::string> keyValuePairs;
-	};
 
 };
