@@ -12,6 +12,7 @@ unordered_map<string, InputData> Input::inputs; // Finds custom named inputs
 unordered_map<int, Button> Input::keyboardMap;
 unordered_map<int, Button> Input::mouseMap;
 unordered_map<int, Button> Input::joystickMap;
+glm::vec2 Input::mousePosBuff;
 glm::vec2 Input::scrollBuff, Input::scrollAmount;
 
 Input::Input()
@@ -229,6 +230,11 @@ void Input::update()
 				changeState(joystickMap.find(it->second.id), joystickArray[it->second.id]);
 		}
 	}
+
+	double mx, my;
+	glfwGetCursorPos(window, &mx, &my);
+	mousePosBuff.x = (float) mx;
+	mousePosBuff.y = (float) my;
 
 	scrollAmount = scrollBuff;
 	scrollBuff.x = 0;
@@ -464,6 +470,11 @@ bool Input::getKeyUp(string button)
 bool Input::getKeyIdle(string button)
 {
 	return keyboardMap[inputMap[button].id].state == InputState::IDLE;
+}
+
+glm::vec2 Input::mousePosition()
+{
+	return mousePosBuff;
 }
 
 bool Input::getMouseDown(string button)

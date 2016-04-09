@@ -65,6 +65,7 @@ private:
 	static std::unordered_map<int, Button> keyboardMap;
 	static std::unordered_map<int, Button> mouseMap;
 	static std::unordered_map<int, Button> joystickMap;
+	static glm::vec2 mousePosBuff;
 	static glm::vec2 scrollBuff, scrollAmount;
 
 	static void changeState(std::unordered_map<int, Button>::iterator, int);
