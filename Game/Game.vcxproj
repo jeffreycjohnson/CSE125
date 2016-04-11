@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\ActivatorRegistrator.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\FPSMovement.cpp" />
   </ItemGroup>
@@ -28,6 +29,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\ActivatorRegistrator.h" />
     <ClInclude Include="source\FPSMovement.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
