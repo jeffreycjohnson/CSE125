@@ -124,8 +124,14 @@ void GameObject::update(float deltaTime)
 {
     for (auto component : componentList)
     {
-        if (newlyCreated || component->newlyCreated) component->create();
+		if (newlyCreated || component->newlyCreated) 
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
     }
+	newlyCreated = false;
+
     if (dead || !active) return;
 	for (unsigned int i = 0; i < transform.children.size(); i++)
     {
