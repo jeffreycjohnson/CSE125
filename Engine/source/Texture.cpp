@@ -1,22 +1,18 @@
 #include "Texture.h"
+#include "FileWatcher.h"
 #include <SOIL2.h>
 #include <unordered_map>
 
 std::unordered_map<std::string, GLuint> textures;
 
-Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
+Texture::Texture(const std::string& filename, bool srgb, GLenum wrap) : srgb(srgb) {
     if(textures.count(filename))
     {
         textureHandle = textures[filename];
         return;
     }
 
-    auto flags = srgb ? SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_SRGB_COLOR_SPACE : 0;
-    textureHandle = SOIL_load_OGL_texture(filename.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | flags);
-    if (textureHandle == 0) {
-        LOG(filename + ": Error during loading -> " + SOIL_last_result());
-        throw;
-    }
+    loadFromFile(filename);
 
     glBindTexture(GL_TEXTURE_2D, textureHandle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
@@ -32,6 +28,20 @@ Texture::Texture(std::string filename, bool srgb, GLenum wrap) {
     CHECK_ERROR();
 
     textures[filename] = textureHandle;
+    autoreload = true;
+    watcher = new FileWatcher(filename, 30);
+}
+
+void Texture::loadFromFile(const std::string& file, bool reuseHandle)
+{
+
+    auto flags = srgb ? SOIL_FLAG_COMPRESS_TO_DXT | SOIL_FLAG_SRGB_COLOR_SPACE : 0;
+    auto handle = reuseHandle ? textureHandle : SOIL_CREATE_NEW_ID;
+    textureHandle = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_AUTO, handle, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | flags);
+    if (textureHandle == 0) {
+        LOG(file + ": Error during loading -> " + SOIL_last_result());
+        throw;
+    }
 }
 
 Texture::Texture(GLuint handle) : textureHandle(handle) {
@@ -65,7 +75,8 @@ Texture::~Texture()
     //glDeleteTextures(1, &textureHandle);
 }
 
-void Texture::bindTexture(int slot) const {
+void Texture::bindTexture(int slot) {
+    if (autoreload && watcher->changed()) loadFromFile(watcher->file, true);
 	int textureSlot = GL_TEXTURE0 + slot;
 	glActiveTexture(textureSlot);
 	glBindTexture(GL_TEXTURE_2D, textureHandle);

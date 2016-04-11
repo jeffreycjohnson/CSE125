@@ -28,7 +28,7 @@ private:
         };
     };
     std::map<std::string, UniformType*> uniforms;
-    std::map<std::string, const Texture*> textures;
+    std::map<std::string, Texture*> textures;
     FileWatcher * watcher;
     bool hasAnimations = false;
 
@@ -62,7 +62,5 @@ public:
 
 template<>
 void Material::UniformSetter::operator=<Texture*>(Texture* value);
-template<>
-void Material::UniformSetter::operator=<const Texture*>(const Texture* value);
 
 #endif

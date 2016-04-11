@@ -107,11 +107,6 @@ void Material::UniformSetter::operator=<Texture*>(Texture* value) {
     mat->textures[name] = value;
 }
 
-template<>
-void Material::UniformSetter::operator=<const Texture*>(const Texture* value) {
-    mat->textures[name] = value;
-}
-
 Material::Material(Shader* shader, bool transparent) : shader(shader), transparent(transparent)
 {
 }
