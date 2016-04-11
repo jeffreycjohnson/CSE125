@@ -2,7 +2,9 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include "ObjectLoader.h"
-#include "PlayerMovement.h"
+#include "FPSMovement.h"
+#include "RenderPass.h"
+#include "Skybox.h"
 
 extern void RunEngine();
 extern void InitializeEngine();
@@ -11,20 +13,34 @@ int main(int argc, char** argv)
 {
     InitializeEngine();
 
-	/*
-	Skyboxes
+	for (auto& skybox : Renderer::mainCamera->passes)
+	{
+		SkyboxPass* sp = dynamic_cast<SkyboxPass*>(skybox.get());
+		if (sp != nullptr)
+		{
+			std::string imgs[] = {
+				"assets/skyboxes/icyhell/icyhell_lf.tga",
+				"assets/skyboxes/icyhell/icyhell_rt.tga",
+				"assets/skyboxes/icyhell/icyhell_up.tga",
+				"assets/skyboxes/icyhell/icyhell_dn.tga",
+				"assets/skyboxes/icyhell/icyhell_ft.tga",
+				"assets/skyboxes/icyhell/icyhell_bk.tga",
+			};
+			sp->skybox = new Skybox(imgs);
 
-	1. Renderer::mainCamera -> passes
-	2. dynamic_cast for SkyboxPass element in list
-	3. skyboxpass->skybox = new Skybox
-	*/
+			break;
+		}
+	}
 
+	GameObject *player = new GameObject;
+	player->addComponent(new FPSMovement(1.5f, .25f, glm::vec3(0,0,0), glm::vec3(0,1,0)));
+	player->addComponent(Renderer::mainCamera);
 
-	GameObject *ballman = loadScene("assets/ballman.dae");
-	ballman->transform.setPosition(0, 0, -3);
-	ballman->addComponent(new PlayerMovement);
+	GameObject::SceneRoot.addChild(player);
 
-	GameObject::SceneRoot.addChild(ballman);
-	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
+	GameObject *scene = loadScene("assets/artsy.dae");
+	scene->transform.setPosition(0, -1, 0);
+
+	GameObject::SceneRoot.addChild(scene);
     RunEngine();
 }

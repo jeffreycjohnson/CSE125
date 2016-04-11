@@ -549,7 +549,7 @@ bool Input::setCursor(int standardCursor)
 
 void Input::hideCursor()
 {
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Input::showCursor()

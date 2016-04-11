@@ -46,8 +46,7 @@ void Transform::rotate(const glm::quat& diff) {
 
 void Transform::setRotate(const glm::quat& diff) {
     setDirty();
-	rotation = glm::quat();
-	rotate(diff);
+	rotation = glm::quat(diff);
 }
 
 /**

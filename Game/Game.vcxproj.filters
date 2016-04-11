@@ -18,12 +18,12 @@
     <ClCompile Include="source\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\PlayerMovement.cpp">
+    <ClCompile Include="source\FPSMovement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\PlayerMovement.h">
+    <ClInclude Include="source\FPSMovement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
