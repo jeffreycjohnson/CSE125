@@ -53,12 +53,24 @@ glm::vec3 ConfigFile::getColor(const std::string& section, const std::string& ke
         if (str.length() != 7 || str[0] != '#') return glm::vec3();
         float r = stoi(str.substr(1, 2), nullptr, 16);
         float g = stoi(str.substr(3, 2), nullptr, 16);
-        float b = stoi(str.substr(4, 2), nullptr, 16);
+        float b = stoi(str.substr(5, 2), nullptr, 16);
         return glm::vec3(r / 256.f, g / 256.f, b / 256.f);
     }
     catch (...)
     {
         return glm::vec3();
+    }
+}
+
+bool ConfigFile::hasKey(const std::string& section, const std::string& key) const
+{
+    try
+    {
+        return sections.at(section).hasKey(key);
+    }
+    catch (...)
+    {
+        return false;
     }
 }
 
@@ -128,7 +140,7 @@ bool ConfigFile::hasSection(const std::string& section) const {
  *
  * NOTE:  If we were unable to determine
  */
-std::vector<std::string> ConfigFile::tokenize(const std::string& line, ConfigFile::TokenizedStringType type) {
+std::vector<std::string> ConfigFile::tokenize(const std::string& line, ConfigFile::TokenizedStringType& type) {
 
 	std::vector<std::string> tokens;
 

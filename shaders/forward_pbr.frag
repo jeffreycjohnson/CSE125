@@ -14,7 +14,9 @@ layout(location = 1) out vec4 frag_normal;
 layout(location = 2) out vec4 frag_material;
 
 uniform sampler2D colorTex; //color texture - rgb: color | a: team mask
-uniform sampler2D matTex; //material texture - r: metalness | g: IOR | b: roughness | a: unused
+uniform sampler2D roughnessTex;
+uniform sampler2D metalnessTex;
+uniform sampler2D heightTex;
 uniform sampler2D normalTex; //normal texture - rgb: normal | a: unused
 
 //world space camera position, to get view vector
@@ -26,19 +28,21 @@ uniform vec4 uLightData[3*lightCount];
 
 void main () {
   vec4 albedo = texture(colorTex, vTexCoord);
-  vec3 mat = texture(matTex, vTexCoord).rgb;
+  float roughness = texture(roughnessTex, vTexCoord).r;
+  float metalness = texture(metalnessTex, vTexCoord).r;
+  float height = texture(heightTex, vTexCoord).r;
 
   vec3 normal_tangent = 2*texture(normalTex, vTexCoord).rgb - 1;
   vec3 normal = normalize(vTangent * normal_tangent.x + vBitangent * normal_tangent.y + vNormal * normal_tangent.z);
   vec3 view = normalize(cameraPos - vPosition.xyz);
 
 
-  mat.b += 0.01; //there seem to be issues with roughness = 0 due to visibility
-  float a = sqrt(mat.z);// squaring it makes everything shiny, sqrting it looks like linear roughness
+  roughness += 0.01; //there seem to be issues with roughness = 0 due to visibility
+  float a = sqrt(roughness);// squaring it makes everything shiny, sqrting it looks like linear roughness
+  
+  vec3 F0 = MetalToF0(metalness, albedo.rgb);
 
-  vec3 F0 = IorToF0(mat.y, mat.x, albedo.rgb);
-
-  vec3 envColor = envMap(F0, normal.xyz, albedo.rgb, view, a, mat.x);
+  vec3 envColor = envMap(F0, normal.xyz, albedo.rgb, view, a, metalness);
   vec3 diffuseLight = vec3(0);
   vec3 specColor = vec3(0);
   
@@ -68,11 +72,11 @@ void main () {
 	specColor += GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightData[3*i+1].xyz, normal, view, lightDir, a, F0, 1) * power;
   }
 
-  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
+  vec3 diffuseColor = ((1.0-metalness) * albedo.rgb) * diffuseLight;
   vec3 color = diffuseColor + specColor + envColor;
   
 
   frag_color = vec4(color, albedo.a);
   frag_normal = vec4(normal, 1.0);
-  frag_material = vec4(mat, 1.0);
+  frag_material = vec4(vec3(metalness, height, roughness), 1.0);
 }

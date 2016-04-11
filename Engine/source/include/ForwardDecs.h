@@ -34,7 +34,7 @@ class Transform;
 #ifndef __func__
 #define __func__ __FUNCSIG__
 #endif
-#if MSC_VER < 1900
+#if _MSC_VER < 1900
 #define OLD_VS
 #define thread_local __declspec( thread )
 #endif

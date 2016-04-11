@@ -29,6 +29,8 @@ private:
     };
     std::map<std::string, UniformType*> uniforms;
     std::map<std::string, const Texture*> textures;
+    FileWatcher * watcher;
+    bool hasAnimations = false;
 
     class UniformSetter
     {
@@ -44,6 +46,8 @@ private:
         }
     };
 
+    void loadFromFile(const std::string& file);
+
 public:
     Shader * shader;
     bool transparent;
@@ -53,6 +57,7 @@ public:
     ~Material();
     UniformSetter operator[](const std::string& name);
     void bind();
+    const bool autoReload = false;
 };
 
 template<>

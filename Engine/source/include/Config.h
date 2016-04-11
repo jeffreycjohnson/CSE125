@@ -48,6 +48,7 @@ public:
 	std::string getString(const std::string& section, const std::string& key) const;
     glm::vec3 getColor(const std::string& section, const std::string& key) const;
 
+    bool hasKey(const std::string& section, const std::string& key) const;
     bool hasSection(const std::string& section) const;
 
 private:
@@ -77,6 +78,6 @@ private:
 
 	// Member functions
 	void load();
-	std::vector<std::string> tokenize(const std::string& line, ConfigFile::TokenizedStringType type);
+	std::vector<std::string> tokenize(const std::string& line, ConfigFile::TokenizedStringType& type);
 
 };
