@@ -6,7 +6,7 @@
 class Texture
 {
     bool autoreload = false;
-    FileWatcher * watcher;
+    std::unique_ptr<FileWatcher> watcher;
     bool srgb = false;
 
     void loadFromFile(const std::string& file, bool reuseHandle = false);

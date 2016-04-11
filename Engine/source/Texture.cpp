@@ -29,7 +29,7 @@ Texture::Texture(const std::string& filename, bool srgb, GLenum wrap) : srgb(srg
 
     textures[filename] = textureHandle;
     autoreload = true;
-    watcher = new FileWatcher(filename, 30);
+    watcher = std::make_unique<FileWatcher>(filename, 30);
 }
 
 void Texture::loadFromFile(const std::string& file, bool reuseHandle)

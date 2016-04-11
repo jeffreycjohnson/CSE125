@@ -16,10 +16,10 @@ static GLenum parseWrapMode(const std::string& str)
 static void loadTexture(const ConfigFile& config, Material& mat, const std::string& section, const std::string& name, const std::string& uniform, bool srgb)
 {
     auto tmp = config.getColor(section, name);
-    mat[uniform] = new Texture(glm::vec4(tmp, 1));
+    mat[uniform] = std::make_unique<Texture>(glm::vec4(tmp, 1));
     auto tex = config.getString(section, name + "Texture");
     auto wrapMode = config.getString(section, name + "TextureWrapping");
-    if (tex != "") mat[uniform] = new Texture(tex, srgb, parseWrapMode(wrapMode));
+    if (tex != "") mat[uniform] = std::make_unique<Texture>(tex, srgb, parseWrapMode(wrapMode));
 }
 
 void Material::loadFromFile(const std::string& file)
@@ -48,7 +48,7 @@ void Material::loadFromFile(const std::string& file)
     }
     else
     {
-        (*this)["colorTex"] = new Texture(glm::vec4(1));
+        (*this)["colorTex"] = std::make_unique<Texture>(glm::vec4(1));
     }
     if (config.hasSection("Normal"))
     {
@@ -56,7 +56,7 @@ void Material::loadFromFile(const std::string& file)
     }
     else
     {
-        (*this)["normalTex"] = new Texture(glm::vec4(0.5, 0.5, 1, 1));
+        (*this)["normalTex"] = std::make_unique<Texture>(glm::vec4(0.5, 0.5, 1, 1));
     }
     if (config.hasSection("Height"))
     {
@@ -64,7 +64,7 @@ void Material::loadFromFile(const std::string& file)
     }
     else
     {
-        (*this)["heightTex"] = new Texture(glm::vec4(0));
+        (*this)["heightTex"] = std::make_unique<Texture>(glm::vec4(0));
     }
     if (config.hasSection("Roughness"))
     {
@@ -72,7 +72,7 @@ void Material::loadFromFile(const std::string& file)
     }
     else
     {
-        (*this)["roughnessTex"] = new Texture(glm::vec4(0.5));
+        (*this)["roughnessTex"] = std::make_unique<Texture>(glm::vec4(0.5));
     }
     if (config.hasSection("Metalness"))
     {
@@ -80,7 +80,7 @@ void Material::loadFromFile(const std::string& file)
     }
     else
     {
-        (*this)["metalnessTex"] = new Texture(glm::vec4(0));
+        (*this)["metalnessTex"] = std::make_unique<Texture>(glm::vec4(0));
     }
 
     if (config.hasSection("Emission"))
@@ -103,8 +103,8 @@ void Material::loadFromFile(const std::string& file)
 }
 
 template<>
-void Material::UniformSetter::operator=<Texture*>(Texture* value) {
-    mat->textures[name] = value;
+void Material::UniformSetter::operator=<std::unique_ptr<Texture>>(std::unique_ptr<Texture> value) {
+    mat->textures[name] = std::move(value);
 }
 
 Material::Material(Shader* shader, bool transparent) : shader(shader), transparent(transparent)
@@ -114,14 +114,7 @@ Material::Material(Shader* shader, bool transparent) : shader(shader), transpare
 Material::Material(const std::string& file, bool hasAnimations) : hasAnimations(hasAnimations), autoReload(true)
 {
     loadFromFile(file);
-    watcher = new FileWatcher(file, 30);
-}
-
-Material::~Material()
-{
-    for (auto uniform : uniforms) {
-        if(uniform.second) delete uniform.second;
-    }
+    watcher = std::make_unique<FileWatcher>(file, 30);
 }
 
 Material::UniformSetter Material::operator[](const std::string& name)
@@ -133,12 +126,12 @@ void Material::bind()
 {
     if (autoReload && watcher->changed()) loadFromFile(watcher->file);
     shader->use();
-    for (auto uniform : uniforms)
+    for (auto& uniform : uniforms)
     {
         uniform.second->set((*shader)[uniform.first]);
     }
     int i = 0; //sampler seems to prefer glUniform1i
-    for (auto texture : textures)
+    for (auto& texture : textures)
     {
         texture.second->bindTexture(i);
         (*shader)[texture.first] = i;
