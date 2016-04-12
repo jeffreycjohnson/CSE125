@@ -1,5 +1,14 @@
 /*
  The entire collision detection system goes here.
+
+ - Implements an octree collision/culling detection system
+ - Implements a high-level interface for accessing the result of intersection
+   tests (CollisionInfo)
+ - (WILL) implement Raycasting
+
+ \/ Inspiration for handling octree edge cases
+ https://geidav.wordpress.com/2014/11/18/advanced-octrees-3-non-static-octrees/
+ 
  */
 #include "ForwardDecs.h"
 #include <vector>
@@ -17,12 +26,17 @@ public:
 
 	/* Maximum number of colliders allowed inside a single OctreeNode */
 	static const int LEAF_THRESHOLD = 10;
-
+	static const int CHILDREN = 8;
 	static const int MAX_DEPTH = 16;
 
-	void insert(BoxCollider&);
+	// Member Functions
+	void insert(const BoxCollider&);
 	void debugDraw();
-	Octree& getNodeById(NodeId id);
+	CollisionInfo raycast(const Ray&);
+	CollisionInfo intersects(const BoxCollider&);
+
+	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
+	OctreeNode* getNodeById(NodeId id);
 
 private:
 	OctreeNode* root;
@@ -43,7 +57,7 @@ private:
  PROPERTIES
 
  - Every octree node that is not a leaf, has 8 octree children.
- - Every octree node that is not a leaf, has an empty colliders list.
+ - Every object
  - Leaf nodes cannot have more than LEAF_THRESHOLD # of colliders, UNLESS
    the maximum recursion depth has been exceeded.
  
@@ -55,8 +69,9 @@ public:
 	OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth);
 	~OctreeNode();
 
-	void insert(BoxCollider&);
-	CollisionInfo intersects(BoxCollider&);
+	void insert(const BoxCollider&);
+	CollisionInfo raycast(const Ray&);
+	CollisionInfo intersects(const BoxCollider&);
 	bool isLeaf() const;
 
 private:
@@ -90,4 +105,14 @@ public:
 
 private:
 	std::vector<GameObject*> collidees;
+};
+
+/*
+ A simple ray class, for all your raycasting needs.
+ */
+struct Ray {
+	glm::vec3 origin, direction;
+	float t;
+
+	Ray(glm::vec3 o, glm::vec3 d) : origin(o), direction(d) {}
 };

@@ -24,6 +24,7 @@ class MathFunc;
 class Mesh;
 class Octree;
 class OctreeNode;
+class Ray;
 class Renderer;
 class RenderPass;
 class Shader;

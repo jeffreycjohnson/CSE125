@@ -199,6 +199,7 @@
     <ClCompile Include="source\ServerManager.cpp" />
     <ClCompile Include="source\ClientManager.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
+    <ClCompile Include="source\CollisionInfo.cpp" />
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\BloomPass.cpp" />
@@ -208,6 +209,8 @@
     <ClCompile Include="source\DeferredPass.cpp" />
     <ClCompile Include="source\FileWatcher.cpp" />
     <ClCompile Include="source\NetworkUtility.cpp" />
+    <ClCompile Include="source\Octree.cpp" />
+    <ClCompile Include="source\OctreeNode.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
@@ -237,6 +240,7 @@
     <ClInclude Include="source\include\ServerManager.h" />
     <ClInclude Include="source\include\ClientManager.h" />
     <ClInclude Include="source\include\ClientNetwork.h" />
+    <ClInclude Include="source\include\Collision.h" />
     <ClInclude Include="source\include\Config.h" />
     <ClInclude Include="source\include\Animation.h" />
     <ClInclude Include="source\include\BoxCollider.h" />

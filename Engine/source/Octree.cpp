@@ -18,3 +18,21 @@ void Octree::removeNode(NodeId node) {
 		nodeMap.erase(iter); // Remove the node
 	}
 };
+
+OctreeNode* Octree::getNodeById(NodeId node) {
+	auto iter = nodeMap.find(node);
+	if (iter != nodeMap.end()) {
+		return nodeMap[node];
+	}
+	else {
+		return nullptr;
+	}
+}
+
+CollisionInfo Octree::raycast(const Ray&) {
+
+};
+
+CollisionInfo Octree::intersects(const BoxCollider&) {
+
+};

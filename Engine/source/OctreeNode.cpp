@@ -7,13 +7,20 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 	this->parent = parent;
 	this->nodeId = tree->nodeCounter++;
 	this->depth = depth + 1;
-	tree->addNode(nodeId, this);
+	tree->addNode(this->nodeId, this);
 }
 
 OctreeNode::~OctreeNode() {
 	// Alert the tree that we're going away now
 	tree->removeNode(this->nodeId);
 }
+
+CollisionInfo OctreeNode::raycast(const Ray&) {
+
+};
+CollisionInfo OctreeNode::intersects(const BoxCollider&) {
+
+};
 
 void OctreeNode::subdivide() {
 	if (children.empty() && depth < Octree::MAX_DEPTH) {
@@ -36,5 +43,6 @@ void OctreeNode::subdivide() {
 }
 
 bool OctreeNode::isLeaf() const {
+	// An octree node with no children must be a leaf
 	return children.empty();
 }

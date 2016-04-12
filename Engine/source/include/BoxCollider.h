@@ -9,7 +9,9 @@ class BoxCollider : public Component
 {
 private:
 	static std::vector<BoxCollider*> colliders; // Naive algorithm
-	std::vector<NodeId> octreeNodes; // For Octree impl, we need to keep track of which nodes we're in
+	// A BoxCollider can only be a part of one octreeNode at a time
+	NodeId myOctreeNode;
+	//std::vector<NodeId> octreeNodes; // For Octree impl, we need to keep track of which nodes we're in
 
 	glm::vec3 points[8];
 	glm::vec3 transformPoints[8];
