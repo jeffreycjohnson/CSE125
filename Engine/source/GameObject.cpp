@@ -127,9 +127,10 @@ void GameObject::update(float deltaTime)
 		if (newlyCreated || component->newlyCreated) 
 		{
 			component->create();
-			// component->newlyCreated = false;
+			component->newlyCreated = false;
 		}
     }
+	newlyCreated = false;
 
     if (dead || !active) return;
 	for (unsigned int i = 0; i < transform.children.size(); i++)
@@ -228,6 +229,8 @@ void GameObject::collisionExit(GameObject* other)
 void GameObject::setName(const std::string& name)
 {
     removeName();
+
+	this->name = name;
     nameMap.insert(std::make_pair(name, this));
 }
 
@@ -238,6 +241,8 @@ std::string GameObject::getName() const
 
 void GameObject::removeName()
 {
+	this->name = "";
+
     auto range = nameMap.equal_range(name);
     while (range.first != range.second)
     {

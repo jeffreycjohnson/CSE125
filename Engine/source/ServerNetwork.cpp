@@ -58,14 +58,11 @@ ServerNetwork::~ServerNetwork() {
 
 void ServerNetwork::start() {
 	clientSocket = acceptTCPConnection(listenSocket);
-
-	while (true) {
-		handleClient(clientSocket);
-		//break;
-	}
 }
 
-void ServerNetwork::handleClient(int clientSocket) {
+std::string ServerNetwork::handleClient() { return handleClient(clientSocket); }
+
+std::string ServerNetwork::handleClient(int clientSocket) {
 		// Receive until the peer shuts down the connection
 	int iResult;
 	std::string data = "";
@@ -75,16 +72,15 @@ void ServerNetwork::handleClient(int clientSocket) {
 		char recvbuf[DEFAULT_BUFLEN];
 		iResult = recv(clientSocket, recvbuf, DEFAULT_BUFLEN-1, 0);
 		if (iResult > 0) {
-			printf("Bytes received: %d\n", iResult);
+			//printf("Bytes received: %d\n", iResult);
 			totalBytesRecvd += iResult;
 			recvbuf[iResult] = '\0';
 			if (totalBytesRecvd > sizeof(int) && data == "") {
 				contentLength = decodeContentLength(std::string(recvbuf, sizeof(int)));
-				std::cout << "Content-Length: " << contentLength << std::endl;
-
+				//std::cout << "Content-Length: " << contentLength << std::endl;
 			}
 			data += recvbuf + 4;
-			std::cout << "Received the following data: " << data << std::endl;
+			//std::cout << "Received the following data: " << data << std::endl;
 			char encodedMsg[DEFAULT_BUFLEN];
 
 			int contentLength = encodeContentLength(data, encodedMsg, DEFAULT_BUFLEN);
@@ -97,13 +93,13 @@ void ServerNetwork::handleClient(int clientSocket) {
 				closesocket(clientSocket);
 				WSACleanup();
 #endif
-				return;
+				return "";
 			}
-			printf("Bytes sent: %d\n", iSendResult);
+			//printf("Bytes sent: %d\n", iSendResult);
 			#ifdef __LINUX
 				close(clientSocket);
 			#endif
-			return;
+				return data;
 		}
 		else if (iResult == 0) {
 			//printf(".");
@@ -116,11 +112,13 @@ void ServerNetwork::handleClient(int clientSocket) {
 			closesocket(clientSocket);
 			WSACleanup();
 #endif
-			return;
+			return "";
 		}
 		if (contentLength == totalBytesRecvd) break;
 
 	} while (iResult > 0);
+
+	return data;
 }
 
 int ServerNetwork::acceptTCPConnection(int listenSocket) {

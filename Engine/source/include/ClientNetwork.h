@@ -9,13 +9,14 @@ private:
 	bool ConnectionEstablished;
 	int ConnectSocket;
 
-	int SetupTCPConnection(std::string serverip, std::string port);
 
 public:
 	ClientNetwork();
 	ClientNetwork(std::string ip, std::string port);
 	//Establishes a Connection based on the ip and port
 	//Returns 1 if failure
+
+	int SetupTCPConnection(std::string serverip, std::string port);
 
 	char  decodeMessage(std::string message);
 	//Requirements, need connection to be established... What should the data type be TODO:

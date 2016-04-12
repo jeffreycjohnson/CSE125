@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include "ClientNetwork.h"
-#include "ServerLoop.h"
+#include "ClientLoop.h"
 
 extern void RunEngine();
 extern void InitializeEngine();
@@ -38,16 +38,19 @@ int main(int argc, char** argv)
 	}
 
 	GameObject *player = new GameObject;
-	player->setName("player");
+	player->addComponent(new FPSMovement(1.5f, .25f, glm::vec3(0,0,0), glm::vec3(0,1,0)));
 	player->addComponent(Renderer::mainCamera);
+	player->setName("player");
 	GameObject::SceneRoot.addChild(player);
 
-	// add the server component
-	ServerLoop* sl = new ServerLoop("9876");
+	GameObject *scene = loadScene("assets/artsy.dae");
+	scene->transform.setPosition(0, -1, 0);
+	GameObject::SceneRoot.addChild(scene);
 
-	GameObject *server = new GameObject;
-	server->addComponent(sl);
-	GameObject::SceneRoot.addChild(server);
+	GameObject *client = new GameObject;
+	ClientLoop *cliLoop = new ClientLoop("127.0.0.1", "9876");
+	client->addComponent(cliLoop);
+	GameObject::SceneRoot.addChild(client);
 
     RunEngine();
 }
