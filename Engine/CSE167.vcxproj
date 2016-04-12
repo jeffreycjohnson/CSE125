@@ -194,6 +194,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\ClientNetwork.cpp" />
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\BloomPass.cpp" />
@@ -202,6 +203,7 @@
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferredPass.cpp" />
     <ClCompile Include="source\FileWatcher.cpp" />
+    <ClCompile Include="source\NetworkUtility.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
@@ -214,6 +216,7 @@
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
+    <ClCompile Include="source\ServerNetwork.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
@@ -224,11 +227,14 @@
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\ClientNetwork.h" />
     <ClInclude Include="source\include\Config.h" />
     <ClInclude Include="source\include\Animation.h" />
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
+    <ClInclude Include="source\include\NetworkUtility.h" />
+    <ClInclude Include="source\include\ServerNetwork.h" />
     <ClInclude Include="source\include\ThreadPool.h" />
     <ClInclude Include="source\include\FileWatcher.h" />
     <ClInclude Include="source\include\ParticleTrail.h" />

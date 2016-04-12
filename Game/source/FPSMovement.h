@@ -21,6 +21,7 @@ public:
 	~FPSMovement() {};
 
 	void create() override;
+	void fixedUpdate() override;
 	void update(float dt) override;
 };
 

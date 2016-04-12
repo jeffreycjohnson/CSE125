@@ -6,6 +6,8 @@
 
 #include "GameObject.h"
 #include "Input.h"
+#include "Renderer.h"
+#include "Timer.h"
 
 const float SPEED = 3.0f;
 
@@ -22,6 +24,20 @@ void FPSMovement::create()
 {
 	Input::hideCursor();
 	recalculate();
+}
+
+void FPSMovement::fixedUpdate()
+{
+	auto time = Timer::fixedTimestep;
+
+	/*
+	1. poll clients for recv
+	2. proc msgs
+	3. physics
+	4. game logic
+	5. send msg
+	*/
+
 }
 
 void FPSMovement::update(float dt)
