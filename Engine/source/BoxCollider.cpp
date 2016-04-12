@@ -119,6 +119,14 @@ void BoxCollider::updateColliders()
 	}
 }
 
+bool BoxCollider::intersects(BoxCollider& other) {
+	return (
+		this->xmin <= other.xmax && other.xmin <= this->xmax &&
+		this->xmin <= other.ymax && other.ymin <= this->ymax &&
+		this->xmin <= other.zmax && other.zmin <= this->zmax
+	);
+};
+
 bool BoxCollider::checkCollision(int aIndex, int bIndex)
 {
 	BoxCollider* a = colliders[aIndex];

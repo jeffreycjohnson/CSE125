@@ -2,17 +2,22 @@
 #define INCLUDE_BOX_COLLIDER_H
 
 #include "Component.h"
+#include "Collision.h"
 #include <vector>
 
 class BoxCollider : public Component
 {
 private:
-	static std::vector<BoxCollider*> colliders;
+	static std::vector<BoxCollider*> colliders; // Naive algorithm
+	std::vector<NodeId> octreeNodes; // For Octree impl, we need to keep track of which nodes we're in
+
 	glm::vec3 points[8];
 	glm::vec3 transformPoints[8];
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	bool colliding;
     glm::vec3 offset, dimensions;
+
+	bool intersects(BoxCollider& other);
 
 public:
 	bool passive;
