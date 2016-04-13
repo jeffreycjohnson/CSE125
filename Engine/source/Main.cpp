@@ -62,9 +62,10 @@ void InitializeEngine()
 	delete loadScene("assets/Primatives.obj");
 }
 
-void RunEngine(bool isClient)
+// Caller will be 0 if client, 1 if server, 2 if modelviewer.
+void RunEngine(int caller)
 {
-	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, isClient);
+	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
     auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);
 
@@ -74,7 +75,7 @@ void RunEngine(bool isClient)
         Input::update();
         workerPool->createJob(Sound::updateFMOD)->queue();
         Renderer::drawDebug = Input::getKey("escape");
-		Renderer::loop(isClient);
+		Renderer::loop(caller);
 	}
 
 	Renderer::shutdown = true;

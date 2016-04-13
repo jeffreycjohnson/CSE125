@@ -28,17 +28,17 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
     return ret;
 }
 
-void GameObject::UpdateScene(bool isClient)
+void GameObject::UpdateScene(int caller)
 {
-	if (isClient)
-		SceneRoot.update((float)Timer::deltaTime());
-	else {
+	if (caller == 1 || caller == 2) { // server or modelviewer
 		while (Timer::nextFixedStep())
 		{
 			SceneRoot.fixedUpdate();
 		}
 	}
-
+	if (caller == 0 || caller == 2)  { // client or modelviewer
+		SceneRoot.update((float)Timer::deltaTime());
+	}
 }
 
 GameObject::GameObject() {
