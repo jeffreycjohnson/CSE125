@@ -16,6 +16,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{b86542ff-74a8-43be-8801-208f8725c59b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Configuration">
+      <UniqueIdentifier>{0b9730de-6c7c-4dec-bd37-715d68b26b9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Shader.cpp">
@@ -236,6 +239,15 @@
     <ClInclude Include="source\include\Collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\CapsuleCollider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\SphereCollider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Collider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\deferred_gbuffer.frag">
@@ -313,5 +325,11 @@
     <None Include="..\shaders\ssao_blur.frag">
       <Filter>Shaders</Filter>
     </None>
+  </ItemGroup>
+</Project>
+  <ItemGroup>
+    <Text Include="..\config\options.ini">
+      <Filter>Configuration</Filter>
+    </Text>
   </ItemGroup>
 </Project>

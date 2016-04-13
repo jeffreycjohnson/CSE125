@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "ClientManager.h"
 #include "ServerManager.h"
+#include "Config.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
@@ -34,6 +35,12 @@ void InitializeEngine(std::string windowName)
 
     int width = 1024;
     int height = 768;
+
+	// Load from "config/options.ini"
+	ConfigFile file("config/options.ini");
+	width  = file.getInt("GraphicsOptions", "width");
+	height = file.getInt("GraphicsOptions", "height");
+	Renderer::drawDebug = file.getInt("GraphicsOptions", "drawDebug");
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);

@@ -119,7 +119,7 @@ void BoxCollider::updateColliders()
 	}
 }
 
-bool BoxCollider::intersects(BoxCollider& other) {
+bool BoxCollider::intersects(const BoxCollider& other) {
 	return (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
 		this->xmin <= other.ymax && other.ymin <= this->ymax &&

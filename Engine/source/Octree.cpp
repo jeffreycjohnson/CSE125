@@ -19,6 +19,11 @@ void Octree::removeNode(NodeId node) {
 	}
 };
 
+void Octree::insert(BoxCollider& box) {
+	if (root)
+		root->insert(box);
+}
+
 OctreeNode* Octree::getNodeById(NodeId node) {
 	auto iter = nodeMap.find(node);
 	if (iter != nodeMap.end()) {
@@ -30,9 +35,15 @@ OctreeNode* Octree::getNodeById(NodeId node) {
 }
 
 CollisionInfo Octree::raycast(const Ray&) {
-
+	return CollisionInfo(); // TODO: placeholder
 };
 
-CollisionInfo Octree::intersects(const BoxCollider&) {
-
+CollisionInfo Octree::collidesWith(const BoxCollider&) {
+	return CollisionInfo(); // TODO: placeholder
 };
+
+void Octree::debugDraw() {
+	if (root) {
+		root->debugDraw();
+	}
+}

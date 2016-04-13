@@ -10,6 +10,7 @@
  https://geidav.wordpress.com/2014/11/18/advanced-octrees-3-non-static-octrees/
  
  */
+#pragma once
 #include "ForwardDecs.h"
 #include <vector>
 #include <unordered_map>
@@ -28,19 +29,25 @@ public:
 	static const int LEAF_THRESHOLD = 10;
 	static const int CHILDREN = 8;
 	static const int MAX_DEPTH = 16;
+	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
 	// Member Functions
-	void insert(const BoxCollider&);
+
+	// Inserts a collider into the octree, and updating data in the collider
+	void insert(BoxCollider&);
+	void remove(BoxCollider&);
+
 	void debugDraw();
+
 	CollisionInfo raycast(const Ray&);
-	CollisionInfo intersects(const BoxCollider&);
+	CollisionInfo collidesWith(const BoxCollider&);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
 	OctreeNode* getNodeById(NodeId id);
 
 private:
 	OctreeNode* root;
-	NodeId nodeCounter = 0;
+	NodeId nodeCounter = UNKNOWN_NODE;
 	std::unordered_map<NodeId, OctreeNode*> nodeMap;
 
 	// OctreeNode(s) notify the Octree whenever they are created/destroyed
@@ -69,9 +76,8 @@ public:
 	OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth);
 	~OctreeNode();
 
-	void insert(const BoxCollider&);
 	CollisionInfo raycast(const Ray&);
-	CollisionInfo intersects(const BoxCollider&);
+	CollisionInfo collidesWith(const BoxCollider&);
 	bool isLeaf() const;
 
 private:
@@ -86,9 +92,18 @@ private:
 	std::vector<BoxCollider*> colliders;
 
 	/* Member Functions */
+
+	// Add or remove nodes to the data structure
+	void insert(BoxCollider&);
+	void remove(BoxCollider&);
+
+	// Used internally for inserting/moving colliders around the octree
+	bool intersects(const BoxCollider&);
 	void subdivide();
+
 	//void collapseIntoParent(); // Uhheeeh ummm,... figure this out
 	void debugDraw();
+
 };
 
 /*
@@ -102,6 +117,7 @@ class CollisionInfo {
 public:
 	CollisionInfo();
 	~CollisionInfo();
+	bool collisionOccurred;
 
 private:
 	std::vector<GameObject*> collidees;
@@ -110,7 +126,8 @@ private:
 /*
  A simple ray class, for all your raycasting needs.
  */
-struct Ray {
+class Ray {
+public:
 	glm::vec3 origin, direction;
 	float t;
 
