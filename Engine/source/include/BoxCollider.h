@@ -14,6 +14,7 @@ private:
 	glm::vec3 transformPoints[8];
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	bool colliding;
+	bool isAxisAligned;
     glm::vec3 offset, dimensions;
 
 public:
@@ -27,6 +28,7 @@ public:
 	void onCollisionEnter(GameObject* other);
 
 	bool intersects(const BoxCollider& other);
+	BoxCollider getAABB();
 
 	static void updateColliders();
 	static bool checkCollision(int a, int b);

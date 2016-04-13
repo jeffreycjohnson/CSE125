@@ -222,6 +222,7 @@
     <ClCompile Include="source\Material.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
+    <ClCompile Include="source\Plane.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\ServerNetwork.cpp" />
     <ClCompile Include="source\Shader.cpp" />
@@ -250,6 +251,7 @@
     <ClInclude Include="source\include\Component.h" />
     <ClInclude Include="source\include\NetworkUtility.h" />
     <ClInclude Include="source\include\ServerNetwork.h" />
+    <ClInclude Include="source\include\Plane.h" />
     <ClInclude Include="source\include\SphereCollider.h" />
     <ClInclude Include="source\include\ThreadPool.h" />
     <ClInclude Include="source\include\FileWatcher.h" />

@@ -18,9 +18,10 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	points[5] = offset + glm::vec3(-halfW, halfH, -halfD);
 	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
-	colliders.push_back(this);
+	colliders.push_back(this); // TODO: Remove naive implementation once octree is working
 	colliding = false;
 	passive = true;
+	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
 }
 
 BoxCollider::~BoxCollider()
@@ -63,6 +64,10 @@ void BoxCollider::update(float)
 		if (zmax < transformPoints[i].z)
 			zmax = transformPoints[i].z;
 	}
+}
+
+BoxCollider BoxCollider::getAABB() {
+	return *this;
 }
 
 void BoxCollider::debugDraw()

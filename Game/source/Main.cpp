@@ -6,6 +6,7 @@
 #include "RenderPass.h"
 #include "Skybox.h"
 #include "ActivatorRegistrator.h"
+#include "BoxCollider.h"
 
 #include <iostream>
 #include "ServerManager.h"
