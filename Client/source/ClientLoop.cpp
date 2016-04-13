@@ -14,7 +14,7 @@ ClientLoop::~ClientLoop()
 
 void ClientLoop::create()
 {
-	cliNet.SetupTCPConnection(serverIP, port);
+	ClientNetwork::SetupTCPConnection(serverIP, port);
 }
 
 void ClientLoop::update(float dt)
@@ -33,9 +33,9 @@ void ClientLoop::update(float dt)
 	qbuild << rotation.w << "," << rotation.x << "," << rotation.y << "," << rotation.z;
 
 	std::string qs = qbuild.str();
-	cliNet.sendMessage(qs);
+	ClientNetwork::sendMessage(qs);
 
-	std::string response = cliNet.receiveMessage();
+	std::string response = ClientNetwork::receiveMessage();
 	if (response != "") {
 		std::stringstream msgStrm(response);
 

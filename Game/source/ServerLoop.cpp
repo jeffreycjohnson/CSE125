@@ -5,15 +5,14 @@
 #include "GameObject.h"
 #include "Timer.h"
 
-ServerLoop::ServerLoop(std::string port) : servNet(port)
+ServerLoop::ServerLoop(std::string port)
 {
+	ServerNetwork::setup(port);
 }
 
 void ServerLoop::create()
 {
-	// don't render me, I'm not real!
-
-	servNet.start();
+	ServerNetwork::start();
 }
 
 void ServerLoop::fixedUpdate()
@@ -21,7 +20,7 @@ void ServerLoop::fixedUpdate()
 	float dt = Timer::fixedTimestep;
 
 	// 1. read msgs from client
-	std::string msg = servNet.handleClient();
+	std::string msg = ServerNetwork::handleClient();
 	if (msg != "")
 	{
 		std::stringstream msgStrm(msg);
@@ -52,6 +51,6 @@ void ServerLoop::fixedUpdate()
 		qbuild << rotation.w << "," << rotation.x << "," << rotation.y << "," << rotation.z;
 
 		std::string qs = qbuild.str();
-		servNet.sendMessage(qs);
+		ServerNetwork::sendMessage(qs);
 	}
 }

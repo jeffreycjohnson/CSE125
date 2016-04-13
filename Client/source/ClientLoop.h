@@ -11,8 +11,6 @@ class ClientLoop :
 private:
 	std::string serverIP;
 	std::string port;
-
-	ClientNetwork cliNet;
 public:
 	ClientLoop(std::string serverIP, std::string port);
 	~ClientLoop();

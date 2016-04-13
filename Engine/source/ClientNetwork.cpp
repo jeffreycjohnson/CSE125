@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <iostream>
 
-
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #ifdef __LINUX
 #else
@@ -35,54 +34,10 @@
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "5000"
 
-/**
-	Default ClientNetwork Constructor
-
-	@return an Empty ClientNetwork Object
-**/
-ClientNetwork::ClientNetwork() : ConnectionEstablished(false), ConnectSocket(INVALID_SOCKET)
-{
-}
-
-/**
-	Recommended ClientNetwork Constructor.
-	Sets up the ClientNetwork object.
-
-	@param std::string ip: string containing the ip. Preferably, in the dotted quads form, e.g. "192.168.0.1"
-	@param std::string port: string containing the port. Preferably, in an integer format, e.g. "42069"
-	@return an Empty ClientNetwork Object
-**/
-ClientNetwork::ClientNetwork(std::string ip, std::string port) {
-	this->ConnectionEstablished = false;
-	this->ConnectSocket = INVALID_SOCKET;
-	this->serverIp = ip;
-	this->port = port;
-	int result = SetupTCPConnection(ip, port);
-	if (result == -1) return;
-}
-
-/**
-	ClientNetwork Destructor.
-	Sets up the ClientNetwork object.
-**/
-ClientNetwork::~ClientNetwork()
-{
-
-#ifdef __LINUX
-#else
-	int iResult;
-	iResult = shutdown(ConnectSocket, SD_SEND);
-	if (iResult == SOCKET_ERROR) {
-		std::cerr << "shutdown failed: " << WSAGetLastError() << std::endl;
-	}
-	closesocket(ConnectSocket);
-
-	WSACleanup();
-#endif
-
-	this->ConnectionEstablished = false;
-	this->ConnectSocket = INVALID_SOCKET;
-}
+std::string ClientNetwork::serverIp;
+std::string ClientNetwork::port;
+bool ClientNetwork::ConnectionEstablished;
+int ClientNetwork::ConnectSocket;
 
 int ClientNetwork::CloseConnection(){
 	int iResult;
@@ -101,13 +56,23 @@ int ClientNetwork::CloseConnection(){
 		closeError = 1;
 	}
 	closesocket(ConnectSocket);
+
+	WSACleanup();
 #endif
 
-	this->ConnectionEstablished = false;
-	this->ConnectSocket = INVALID_SOCKET;
+	ConnectionEstablished = false;
+	ConnectSocket = INVALID_SOCKET;
 	return closeError;
 }
 
+/**
+
+	Sets up the ClientNetwork object.
+
+	@param std::string ip: string containing the ip. Preferably, in the dotted quads form, e.g. "192.168.0.1"
+	@param std::string port: string containing the port. Preferably, in an integer format, e.g. "42069"
+	@return a result code
+**/
 int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 
 	int ConnectSocket = INVALID_SOCKET;
@@ -181,10 +146,10 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	}
 
 	//Saving
-	this->ConnectionEstablished = true;
-	this->serverIp = serverIp;
-	this->port = port;
-	this->ConnectSocket = ConnectSocket;
+	ClientNetwork::ConnectionEstablished = true;
+	ClientNetwork::serverIp = serverIp;
+	ClientNetwork::port = port;
+	ClientNetwork::ConnectSocket = ConnectSocket;
 
 	return 0;
 }
@@ -201,7 +166,7 @@ int ClientNetwork::sendMessage(std::string message){
 		return 1;
 	}
 	//std::cout << "Encoded msg: " << buf << std::endl;
-	iResult = send(this->ConnectSocket, buf, contentLength, 0);
+	iResult = send(ClientNetwork::ConnectSocket, buf, contentLength, 0);
 	if (iResult == SOCKET_ERROR) {
 #ifdef __LINUX
 #else
@@ -209,8 +174,8 @@ int ClientNetwork::sendMessage(std::string message){
 		closesocket(ConnectSocket);
 		WSACleanup();
 #endif
-		this->ConnectionEstablished = false;
-		this->ConnectSocket = INVALID_SOCKET;
+		ClientNetwork::ConnectionEstablished = false;
+		ClientNetwork::ConnectSocket = INVALID_SOCKET;
 		return 1;
 	}
 
@@ -264,8 +229,8 @@ std::string ClientNetwork::receiveMessage(){
 		}
 		else{
 			//Shutdown the connections
-			this->ConnectionEstablished = false;
-			this->ConnectSocket = INVALID_SOCKET;
+			ClientNetwork::ConnectionEstablished = false;
+			ClientNetwork::ConnectSocket = INVALID_SOCKET;
 			//DO we want to return a blank one or a partial one?
 #ifdef __LINUX
 			if (errno == EWOULDBLOCK) {
@@ -285,9 +250,9 @@ std::string ClientNetwork::receiveMessage(){
 
 void ClientNetwork::GetStatus(std::string header){
 	std::cout << header;
-	std::cout << "Ip and Port are " << this->serverIp << ":" << this->port << std::endl;
-	std::cout << "Is the connection to the port established? " << this->ConnectionEstablished << std::endl;
-	std::cout << "Connect Socket is " << this->ConnectSocket << std::endl;
+	std::cout << "Ip and Port are " << ClientNetwork::serverIp << ":" << ClientNetwork::port << std::endl;
+	std::cout << "Is the connection to the port established? " << ClientNetwork::ConnectionEstablished << std::endl;
+	std::cout << "Connect Socket is " << ClientNetwork::ConnectSocket << std::endl;
 	std::cout << std::endl;
 }
 

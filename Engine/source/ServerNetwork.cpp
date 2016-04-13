@@ -26,18 +26,23 @@
 #endif
 // #pragma comment (lib, "Mswsock.lib")
 
-ServerNetwork::ServerNetwork(std::string port) {
-	this->port = port;
+int ServerNetwork::clientSocket;
+int ServerNetwork::listenSocket;
+std::string ServerNetwork::port;
+
+void ServerNetwork::setup(std::string port)
+{
+	ServerNetwork::port = port;
 	std::cout << "Starting server on port " << port << std::endl;
-	listenSocket = setupSocket(port);
-	
+	ServerNetwork::listenSocket = setupSocket(port);
+
 	if (listenSocket == -1) {
 		printf("Error in setupSocket()");
 	}
 }
 
-
-ServerNetwork::~ServerNetwork() {
+void ServerNetwork::closeConnection()
+{
 	// shutdown the connection since we're done
 	std::cout << "calling destructor" << std::endl;
 #ifdef __LINUX
@@ -57,7 +62,7 @@ ServerNetwork::~ServerNetwork() {
 }
 
 void ServerNetwork::start() {
-	clientSocket = acceptTCPConnection(listenSocket);
+	ServerNetwork::clientSocket = acceptTCPConnection(ServerNetwork::listenSocket);
 	std::cout << "Accepted tcp connection" << std::endl;
 }
 
@@ -75,7 +80,7 @@ std::string ServerNetwork::handleClient(int clientSocket) {
 
 	do {
 		char recvbuf[DEFAULT_BUFLEN];
-		iResult = recv(clientSocket, recvbuf, DEFAULT_BUFLEN-1, 0);
+		iResult = recv(ServerNetwork::clientSocket, recvbuf, DEFAULT_BUFLEN - 1, 0);
 
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) {
@@ -121,12 +126,12 @@ int ServerNetwork::sendMessage(std::string message) {
 
 	int contentLength = encodeContentLength(message, encodedMsg, DEFAULT_BUFLEN);
 	// Echo the buffer back to the sender
-	int iSendResult = send(clientSocket, encodedMsg, contentLength, 0);
+	int iSendResult = send(ServerNetwork::clientSocket, encodedMsg, contentLength, 0);
 	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
 #else
 		printf("send failed with error: %d\n", WSAGetLastError());
-		closesocket(clientSocket);
+		closesocket(ServerNetwork::clientSocket);
 		WSACleanup();
 #endif
 		return 1;

@@ -9,8 +9,6 @@
 class ServerLoop :
 	public Component
 {
-private:
-	ServerNetwork servNet;
 
 public:
 	ServerLoop(std::string port);

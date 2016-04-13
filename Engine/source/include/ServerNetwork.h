@@ -9,22 +9,26 @@ class ServerNetwork
 {
 
 private:
-	int clientSocket;
-	int listenSocket;
-	std::string port;
+	static int clientSocket;
+	static int listenSocket;
+	static std::string port;
 
-	int setupSocket(std::string port);
-	int acceptTCPConnection(int listenSocket);
-	std::string handleClient(int clientSocket);
+	static int setupSocket(std::string port);
+	static int acceptTCPConnection(int listenSocket);
+	static std::string handleClient(int clientSocket);
 
 	//std::string encodeMessage(std::string msg);
 
 public:
-	ServerNetwork(std::string port);
-	void start();
-	std::string handleClient();
-	int sendMessage(std::string message);
-
+	ServerNetwork();
 	~ServerNetwork();
+	
+	static void setup(std::string port);
+	static void closeConnection();
+
+	static void start();
+	static std::string handleClient();
+	static int sendMessage(std::string message);
+
 };
 
