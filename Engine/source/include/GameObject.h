@@ -16,7 +16,7 @@ public:
     static GameObject SceneRoot;
     static GameObject* FindByName(const std::string& name);
     static std::vector<GameObject*> FindAllByName(const std::string& name);
-    static void UpdateScene();
+	static void UpdateScene(bool isClient);
 
 	GameObject();
 	~GameObject();

@@ -16,12 +16,15 @@ private:
 	int setupSocket(std::string port);
 	int acceptTCPConnection(int listenSocket);
 	std::string handleClient(int clientSocket);
+
 	//std::string encodeMessage(std::string msg);
 
 public:
 	ServerNetwork(std::string port);
 	void start();
 	std::string handleClient();
+	int sendMessage(std::string message);
+
 	~ServerNetwork();
 };
 

@@ -141,7 +141,7 @@ void Renderer::init(int window_width, int window_height) {
     resize(windowWidth, windowHeight);
 }
 
-void Renderer::loop() {
+void Renderer::loop(bool isClient) {
     extractObjects();
 
     for(auto camera : cameras)
@@ -161,7 +161,8 @@ void Renderer::loop() {
     for (auto& pass : mainCamera->passes)
     {
         if (i++ == mainCamera->passes.size() - 1) {
-            auto job = workerPool->createJob(GameObject::UpdateScene)->queue();
+			std::function<void()> updateScene = std::bind(GameObject::UpdateScene, isClient);
+            auto job = workerPool->createJob(updateScene)->queue();
             pass->render(mainCamera);
             workerPool->wait(job);
         }

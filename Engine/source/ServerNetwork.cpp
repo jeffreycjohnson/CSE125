@@ -58,6 +58,7 @@ ServerNetwork::~ServerNetwork() {
 
 void ServerNetwork::start() {
 	clientSocket = acceptTCPConnection(listenSocket);
+	std::cout << "Accepted tcp connection" << std::endl;
 }
 
 std::string ServerNetwork::handleClient() { return handleClient(clientSocket); }
@@ -68,57 +69,73 @@ std::string ServerNetwork::handleClient(int clientSocket) {
 	std::string data = "";
 	int totalBytesRecvd = 0;
 	int contentLength = -1;
+	// non-blocking mode is enabled.
+	u_long iMode = 1;
+	ioctlsocket(clientSocket, FIONBIO, &iMode);
+
 	do {
 		char recvbuf[DEFAULT_BUFLEN];
 		iResult = recv(clientSocket, recvbuf, DEFAULT_BUFLEN-1, 0);
+
+		int nError = WSAGetLastError();
+		if (nError == WSAEWOULDBLOCK) {
+			std::cout << "No data to receive " << nError << std::endl;
+			break;
+		}
+
 		if (iResult > 0) {
 			//printf("Bytes received: %d\n", iResult);
 			totalBytesRecvd += iResult;
 			recvbuf[iResult] = '\0';
+
+			// sizeof(int) is for the 4 bytes used to represent the content length of message
 			if (totalBytesRecvd > sizeof(int) && data == "") {
 				contentLength = decodeContentLength(std::string(recvbuf, sizeof(int)));
 				//std::cout << "Content-Length: " << contentLength << std::endl;
 			}
-			data += recvbuf + 4;
+			data += recvbuf + sizeof(int);
 			//std::cout << "Received the following data: " << data << std::endl;
-			char encodedMsg[DEFAULT_BUFLEN];
-
-			int contentLength = encodeContentLength(data, encodedMsg, DEFAULT_BUFLEN);
-			// Echo the buffer back to the sender
-			int iSendResult = send(clientSocket, encodedMsg, contentLength, 0);
-			if (iSendResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
-				printf("send failed with error: %d\n", WSAGetLastError());
-				closesocket(clientSocket);
-				WSACleanup();
-#endif
-				return "";
-			}
-			//printf("Bytes sent: %d\n", iSendResult);
-			#ifdef __LINUX
-				close(clientSocket);
-			#endif
-				return data;
 		}
 		else if (iResult == 0) {
-			//printf(".");
 			break;
 		}
 		else  {
 #ifdef __LINUX
 #else
 			printf("recv failed with error: %d\n", WSAGetLastError());
+			getchar();
 			closesocket(clientSocket);
 			WSACleanup();
 #endif
 			return "";
 		}
-		if (contentLength == totalBytesRecvd) break;
+		if (contentLength + sizeof(int) == totalBytesRecvd) break;
 
 	} while (iResult > 0);
 
 	return data;
+}
+
+int ServerNetwork::sendMessage(std::string message) {
+	char encodedMsg[DEFAULT_BUFLEN];
+
+	int contentLength = encodeContentLength(message, encodedMsg, DEFAULT_BUFLEN);
+	// Echo the buffer back to the sender
+	int iSendResult = send(clientSocket, encodedMsg, contentLength, 0);
+	if (iSendResult == SOCKET_ERROR) {
+#ifdef __LINUX
+#else
+		printf("send failed with error: %d\n", WSAGetLastError());
+		closesocket(clientSocket);
+		WSACleanup();
+#endif
+		return 1;
+	}
+	//printf("Bytes sent: %d\n", iSendResult);
+#ifdef __LINUX
+	close(clientSocket);
+#endif
+	return 0;
 }
 
 int ServerNetwork::acceptTCPConnection(int listenSocket) {

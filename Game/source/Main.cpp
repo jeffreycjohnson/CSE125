@@ -11,7 +11,7 @@
 #include "ClientNetwork.h"
 #include "ServerLoop.h"
 
-extern void RunEngine();
+extern void RunEngine(bool client);
 extern void InitializeEngine();
 
 int main(int argc, char** argv)
@@ -44,10 +44,10 @@ int main(int argc, char** argv)
 
 	// add the server component
 	ServerLoop* sl = new ServerLoop("9876");
-
+	sl->create();
 	GameObject *server = new GameObject;
 	server->addComponent(sl);
 	GameObject::SceneRoot.addChild(server);
 
-    RunEngine();
+    RunEngine(false);
 }

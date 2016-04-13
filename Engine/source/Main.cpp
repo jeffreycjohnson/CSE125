@@ -62,9 +62,10 @@ void InitializeEngine()
 	delete loadScene("assets/Primatives.obj");
 }
 
-void RunEngine()
+void RunEngine(bool isClient)
 {
-    auto update = workerPool->createJob(GameObject::UpdateScene)->queue();
+	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, isClient);
+    auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);
 
 	while (!glfwWindowShouldClose(mainWindow))
@@ -73,7 +74,7 @@ void RunEngine()
         Input::update();
         workerPool->createJob(Sound::updateFMOD)->queue();
         Renderer::drawDebug = Input::getKey("escape");
-        Renderer::loop();
+		Renderer::loop(isClient);
 	}
 
 	Renderer::shutdown = true;

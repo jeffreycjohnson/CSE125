@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
+#include <iostream>
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -27,13 +28,17 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
     return ret;
 }
 
-void GameObject::UpdateScene()
+void GameObject::UpdateScene(bool isClient)
 {
-    while(Timer::nextFixedStep())
-    {
-        SceneRoot.fixedUpdate();
-    }
-    SceneRoot.update((float)Timer::deltaTime());
+	if (isClient)
+		SceneRoot.update((float)Timer::deltaTime());
+	else {
+		while (Timer::nextFixedStep())
+		{
+			SceneRoot.fixedUpdate();
+		}
+	}
+
 }
 
 GameObject::GameObject() {

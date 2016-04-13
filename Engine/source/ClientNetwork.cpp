@@ -191,7 +191,7 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 
 int ClientNetwork::sendMessage(std::string message){
 	int iResult;
-	std::cout << "encoding content length" << std::endl;
+	//std::cout << "encoding content length" << std::endl;
 	char buf[DEFAULT_BUFLEN];
 	int contentLength = encodeContentLength(message, buf, DEFAULT_BUFLEN);
 
@@ -200,7 +200,7 @@ int ClientNetwork::sendMessage(std::string message){
 		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
 		return 1;
 	}
-	std::cout << "Encoded msg: " << buf << std::endl;
+	//std::cout << "Encoded msg: " << buf << std::endl;
 	iResult = send(this->ConnectSocket, buf, contentLength, 0);
 	if (iResult == SOCKET_ERROR) {
 #ifdef __LINUX
@@ -215,7 +215,7 @@ int ClientNetwork::sendMessage(std::string message){
 	}
 
 	//Pound Define This
-	printf("Bytes Sent: %d\n", iResult);
+	//printf("Bytes Sent: %d\n", iResult);
 
 	return 0;
 }
@@ -228,7 +228,6 @@ std::string ClientNetwork::receiveMessage(){
 	memset(recvbuffer, 0, DEFAULT_BUFLEN);
 
 	//Need to Establish Connection
-	std::cout << "reached " << ConnectionEstablished << std::endl;
 	if (!ConnectionEstablished){
 		std::cerr << "Recv Refused. Please Establish Connection" << std::endl;
 		return std::string();
@@ -246,9 +245,9 @@ std::string ClientNetwork::receiveMessage(){
 			std::cerr << "Buffer Overflow!!!!!" << std::endl;
 			return std::string();
 		}
-		std::cout << "Receiving..." << std::endl;
+		//std::cout << "Receiving..." << std::endl;
 		iResult = recv(ConnectSocket, recvbuffer, DEFAULT_BUFLEN-1, 0);
-		std::cout << "Done!  iResult is " << iResult << std::endl;
+		//std::cout << "Done!  iResult is " << iResult << std::endl;
 		if (iResult > 0){
 			totalrecv += iResult;
 			recvbuffer[iResult] = '\0';
@@ -256,9 +255,9 @@ std::string ClientNetwork::receiveMessage(){
 			if (totalrecv > sizeof(int) && result == "") { // Recieved content length of data
 
 				contentLength = decodeContentLength(std::string(recvbuffer, sizeof(int)));
-				std::cout << "Content-Length: " << contentLength << std::endl;
+				//std::cout << "Content-Length: " << contentLength << std::endl;
 			} 
-			result += recvbuffer;
+			result += recvbuffer + sizeof(int);
 		}
 		else if (iResult == 0){
 			std::cerr << "Connection Closed." << std::endl;
@@ -276,7 +275,7 @@ std::string ClientNetwork::receiveMessage(){
 			std::cerr << "recv failed with error: " << WSAGetLastError() << std::endl;
 #endif
 		}
-		std::cout << "totalrecv: " << totalrecv << std::endl;
+		//std::cout << "totalrecv: " << totalrecv << std::endl;
 		if (contentLength + sizeof(int) == totalrecv) break;
 	} while (iResult > 0);
 

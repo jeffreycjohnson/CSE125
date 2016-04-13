@@ -36,10 +36,8 @@ int encodeContentLength(std::string message, char * buffer, int buflen) {
 		return 0;
 	}
 	int len = htonl(msgLen);
-	std::cout << "msgLen: " << msgLen << std::endl;
 	memcpy(buffer, &len, sizeof(unsigned int));
 	memcpy(buffer + sizeof(int), message.c_str(), message.size());
-	std::cout << "buf: " << buffer << std::endl;
 	return sizeof(int)+msgLen;
 
 }

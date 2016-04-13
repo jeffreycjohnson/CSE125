@@ -22,7 +22,6 @@ void ServerLoop::fixedUpdate()
 
 	// 1. read msgs from client
 	std::string msg = servNet.handleClient();
-
 	if (msg != "")
 	{
 		std::stringstream msgStrm(msg);
@@ -37,7 +36,7 @@ void ServerLoop::fixedUpdate()
 		msgStrm.ignore();
 		msgStrm >> z;
 
-		std::cout << w << "," << x << "," << y << "," << z << std::endl;
+		//std::cout << w << "," << x << "," << y << "," << z << std::endl;
 
 		glm::quat q(w, x, y, z);
 		GameObject *player = GameObject::FindByName("player");
@@ -46,5 +45,13 @@ void ServerLoop::fixedUpdate()
 		{
 			player->transform.setRotate(q);
 		}
+
+		glm::quat rotation = player->transform.getRotation();
+
+		std::stringstream qbuild;
+		qbuild << rotation.w << "," << rotation.x << "," << rotation.y << "," << rotation.z;
+
+		std::string qs = qbuild.str();
+		servNet.sendMessage(qs);
 	}
 }
