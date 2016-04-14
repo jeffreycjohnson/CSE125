@@ -133,6 +133,10 @@ void Renderer::init(int window_width, int window_height) {
 		"shaders/fbo.vert", "shaders/ssao.frag"
 		);
 
+	shaderList[SSAO_BLUR] = new Shader(
+		"shaders/fbo.vert", "shaders/ssao_blur.frag"
+		);
+
     mainCamera = new Camera(windowWidth, windowHeight, false);
     mainCamera->passes.push_back(std::make_unique<GBufferPass>());
 	mainCamera->passes.push_back(std::make_unique<LightingPass>());

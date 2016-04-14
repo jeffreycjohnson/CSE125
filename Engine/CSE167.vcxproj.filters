@@ -256,5 +256,8 @@
     <None Include="..\shaders\ssao.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\shaders\ssao_blur.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

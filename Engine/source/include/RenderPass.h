@@ -60,11 +60,11 @@ public:
 class SSAOPass : public RenderPass
 {
 public:
-	SSAOPass(unsigned int samples = 16, float radius = 1.0f);
+	SSAOPass(unsigned int samples = 16, float radius = 0.25f);
 	void render(Camera* camera) override;
 
 private:
-	int samples;
+	unsigned int samples;
 	float radius;
 	std::unique_ptr<Texture> noise;
 	std::unique_ptr<Framebuffer> aoBuffer;

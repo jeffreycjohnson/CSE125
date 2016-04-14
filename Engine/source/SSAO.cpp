@@ -8,7 +8,7 @@
 SSAOPass::SSAOPass(unsigned int samples, float radius) : samples(samples), radius(radius)
 {
 	// make_unique wasn't working???
-	std::vector<GLenum> format = { GL_R8 };
+	std::vector<GLenum> format = { GL_RGB8 };
 	aoBuffer = std::make_unique<Framebuffer>(Renderer::getWindowWidth(), Renderer::getWindowHeight(), format, false);
 
 	auto& shader = Renderer::getShader(SSAO_SHADER);
@@ -47,7 +47,7 @@ void SSAOPass::render(Camera* camera)
 	auto& shader = Renderer::getShader(SSAO_SHADER);
 	shader.use();
 	// pass samples to an array in the shader
-	for (int i = 0; i < samples; i++) {
+	for (unsigned int i = 0; i < samples; i++) {
 		shader[std::string("uSamples[") + std::to_string(i) + "]"] = sampleBuf[i];
 	}
 	shader["uSampleCount"] = samples;
@@ -62,9 +62,22 @@ void SSAOPass::render(Camera* camera)
 
 	noise->bindTexture(3);
 	shader["rotationTex"] = 3;
-    shader["uZFar"] = FAR_DEPTH;
 
 	GLuint drawBuffer = GL_COLOR_ATTACHMENT0;
 	aoBuffer->bind(1, &drawBuffer, false);
 	aoBuffer->draw();
+
+	//glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
+	auto& blurShader = Renderer::getShader(SSAO_BLUR);
+	blurShader.use();
+	drawBuffer = GL_COLOR_ATTACHMENT3;
+	camera->fbo->bind(1, &drawBuffer, false);
+	aoBuffer->bindTexture(0, 0);
+	blurShader["inputTex"] = 0;
+	camera->fbo->bindTexture(1, 0);
+	blurShader["colorTex"] = 1;
+	camera->fbo->draw();
+	glDisable(GL_BLEND);
 }
