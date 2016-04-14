@@ -8,7 +8,7 @@ layout(location = 0) out vec4 fragColor;
 
 void main()
 {
-	float ao = texture(inputTex, vTexCoord).r;
+	vec3 ao = texture(inputTex, vTexCoord).rgb;
 	vec3 color = texture(colorTex, vTexCoord).rgb;
     fragColor = vec4(vec3(ao) * color, 1);
 }
