@@ -89,6 +89,12 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0) {
 		printf("WSAStartup failed with error: %d\n", iResult);
+# ifdef _EXCEPTIONAL
+		std::string message = "WSAStartup failed with error: ";
+		message += iResult;
+		throw new std::runtime_error(message);
+# endif
+
 		return -1;
 	}
 	ZeroMemory(&hints, sizeof(hints));
@@ -102,6 +108,12 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	iResult = getaddrinfo(serverIp.c_str(), port.c_str(), &hints, &result);
 	if (iResult != 0) {
 		printf("getaddrinfo failed with error: %d\n", iResult);
+# ifdef _EXCEPTIONAL
+		std::string message = "getaddrinfo failed with error: ";
+		message += iResult;
+		throw new std::runtime_error(message);
+# endif
+
 #ifdef __LINUX
 #else
 		WSACleanup();
@@ -119,6 +131,12 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 #ifdef __LINUX
 #else
 			printf("socket failed with error: %ld\n", WSAGetLastError());
+# ifdef _EXCEPTIONAL
+			std::string message = "socket failed with error: ";
+			message += WSAGetLastError();
+			throw new std::runtime_error(message);
+# endif
+
 			WSACleanup();
 #endif
 			return -1;
@@ -139,6 +157,11 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	freeaddrinfo(result);
 	if (ConnectSocket == INVALID_SOCKET) {
 		printf("Unable to connect to server!\n");
+# ifdef _EXCEPTIONAL
+		std::string message = "Unable to connect to server!";
+		throw new std::runtime_error(message);
+# endif
+
 #ifdef __LINUX
 #else
 		WSACleanup();
@@ -175,6 +198,11 @@ int ClientNetwork::sendMessage(void * message, int msgType) {
 		{
 			std::cerr << "Send Failed with error: " << wsaLastError << std::endl;
 			closesocket(ConnectSocket);
+# ifdef _EXCEPTIONAL
+			std::string message = "Send Failed with error: ";
+			message += wsaLastError;
+			throw new std::runtime_error(message);
+# endif
 			WSACleanup();
 		}
 #endif
@@ -249,6 +277,11 @@ std::vector<char> ClientNetwork::receiveMessage(int * msgType){
 			}
 #else
 			std::cerr << "recv failed with error: " << WSAGetLastError() << std::endl;
+# ifdef _EXCEPTIONAL
+			std::string message = "recv Failed with error: ";
+			message += WSAGetLastError();
+			throw new std::runtime_error(message);
+# endif
 #endif
 		}
 		if (contentLength + sizeof(int) == totalrecv) break;
