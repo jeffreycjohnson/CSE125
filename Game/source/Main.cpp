@@ -11,11 +11,11 @@
 #include "ServerNetwork.h"
 
 extern void RunEngine(int caller);
-extern void InitializeEngine();
+extern void InitializeEngine(std::string windowName);
 
 int main(int argc, char** argv)
 {
-    InitializeEngine();
+    InitializeEngine("SERVER");
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{

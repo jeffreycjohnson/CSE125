@@ -14,7 +14,7 @@
 
 GLFWwindow * mainWindow;
 
-void InitializeEngine()
+void InitializeEngine(std::string windowName)
 {
     workerPool = new ThreadPool();
 
@@ -34,7 +34,7 @@ void InitializeEngine()
     int height = 768;
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 125", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
 
     //set callbacks
     //glfwSetWindowFocusCallback(window, window_focus_callback);
@@ -63,6 +63,8 @@ void InitializeEngine()
     // Loads mesh data for primatives, but we don't need it in a GameObject
 	delete loadScene("assets/Primatives.obj");
 }
+
+void InitializeEngine() { InitializeEngine("CSE 125"); }
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.
 void RunEngine(int caller)
