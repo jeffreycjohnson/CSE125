@@ -17,7 +17,7 @@ SSAOPass::SSAOPass(unsigned int samples, float radius) : samples(samples), radiu
 	std::default_random_engine generator;
 
 	// generate sample points
-	for (int i = 0; i < samples; i++) {
+	for (unsigned int i = 0; i < samples; i++) {
 		// generate random unit vector along hemisphere
 		auto vec = glm::normalize(glm::vec3(randomFloats(generator) * 2 - 1, randomFloats(generator) * 2 - 1, randomFloats(generator)));
 		// randomly scale it
@@ -28,11 +28,11 @@ SSAOPass::SSAOPass(unsigned int samples, float radius) : samples(samples), radiu
 	}
 
 	// generate rotations of the sample points to reduce banding
-	char noiseBuf[16 * 3];
-	for (int i = 0; i < 16; i++) {
-		noiseBuf[i * 3] = static_cast<char>((randomFloats(generator) * 2 - 1) * 255);
-		noiseBuf[i * 3 + 1] = static_cast<char>((randomFloats(generator) * 2 - 1) * 255);
-		noiseBuf[i * 3 + 2] = static_cast<char>(0.f);
+	unsigned char noiseBuf[16 * 3];
+	for (unsigned int i = 0; i < 16; i++) {
+		noiseBuf[i * 3] = static_cast<unsigned char>(randomFloats(generator) * 255);
+		noiseBuf[i * 3 + 1] = static_cast<unsigned char>(randomFloats(generator) * 255);
+		noiseBuf[i * 3 + 2] = static_cast<unsigned char>(0.f);
 	}
 	noise = std::make_unique<Texture>(noiseBuf, 4, 4, GL_RGB);
 }
@@ -53,20 +53,18 @@ void SSAOPass::render(Camera* camera)
 	shader["uSampleCount"] = samples;
 	shader["uRadius"] = radius;
 
-	camera->fbo->bindTexture(1, 0);
-	camera->fbo->bindTexture(2, 1);
+	camera->fbo->bindTexture(0, 1);
+	camera->fbo->bindTexture(1, 2);
+    camera->fbo->bindDepthTexture(2);
 	shader["normalTex"] = 0;
 	shader["posTex"] = 1;
+    shader["depthTex"] = 2;
 
-	noise->bindTexture(2);
-	shader["rotationTex"] = 2;
+	noise->bindTexture(3);
+	shader["rotationTex"] = 3;
+    shader["uZFar"] = FAR_DEPTH;
 
-	GLuint drawBuffer = GL_COLOR_ATTACHMENT3;
-	camera->fbo->bind(1, &drawBuffer, false);
-	camera->fbo->draw();
-	/*
 	GLuint drawBuffer = GL_COLOR_ATTACHMENT0;
 	aoBuffer->bind(1, &drawBuffer, false);
 	aoBuffer->draw();
-	*/
 }

@@ -19,8 +19,10 @@ void main() {
 	float ao = 0;
 	vec2 uvScale = textureSize(posTex, 0).xy / textureSize(rotationTex, 0).xy;
 	vec3 pos = texture(posTex, vTexCoord).xyz;
-	vec3 normal = texture(normalTex, vTexCoord).xyz;
+	vec3 normal = normalize((uV_Matrix * vec4(texture(normalTex, vTexCoord).xyz, 1)).xyz);
 	vec3 random = texture(rotationTex, vTexCoord * uvScale).xyz;
+	random.x = random.x * 2 - 1.f;
+	random.y = random.y * 2 - 1.f;
 
 	vec3 tangent = normalize(random - normal * dot(random, normal));
 	vec3 bitangent = cross(normal, tangent);

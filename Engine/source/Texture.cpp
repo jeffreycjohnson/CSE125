@@ -70,7 +70,7 @@ Texture::Texture(glm::vec4 color)
 }
 
 
-Texture::Texture(char buf[], size_t width, size_t height, GLenum format, bool srgb, GLenum wrap)
+Texture::Texture(unsigned char buf[], size_t width, size_t height, GLenum format, bool srgb, GLenum wrap)
 {
 	glGenTextures(1, &textureHandle);
 

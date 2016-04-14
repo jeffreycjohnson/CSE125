@@ -17,7 +17,7 @@ class Texture
         explicit Texture(const std::string& filename, bool srgb = true, GLenum wrap = GL_REPEAT);
 		explicit Texture(GLuint handle);
         explicit Texture(glm::vec4 color);
-		Texture(char buf[], size_t width, size_t height, GLenum format, bool srgb = false, GLenum wrap = GL_REPEAT);
+		Texture(unsigned char buf[], size_t width, size_t height, GLenum format, bool srgb = false, GLenum wrap = GL_REPEAT);
 		~Texture();
 
 		void bindTexture(int slot);
