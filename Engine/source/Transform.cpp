@@ -115,3 +115,31 @@ float Transform::getWorldScale() {
     }
     return cachedWorldScale;
 }
+
+// serialization
+TransformNetworkData Transform::serialize()
+{
+	TransformNetworkData tnd;
+
+	tnd.px = position.x;
+	tnd.py = position.y;
+	tnd.pz = position.z;
+
+	tnd.qw = rotation.w;
+	tnd.qx = rotation.x;
+	tnd.qy = rotation.y;
+	tnd.qz = rotation.z;
+
+	tnd.sx = scaleFactor.x;
+	tnd.sy = scaleFactor.y;
+	tnd.sz = scaleFactor.z;
+
+	return tnd;
+}
+
+void Transform::deserializeAndApply(TransformNetworkData tnd)
+{
+	setPosition(tnd.px, tnd.py, tnd.pz);
+	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
+	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));
+}

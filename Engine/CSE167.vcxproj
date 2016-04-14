@@ -194,6 +194,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />
     <ClCompile Include="source\ServerManager.cpp" />
     <ClCompile Include="source\ClientManager.cpp" />

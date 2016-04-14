@@ -33,8 +33,7 @@ int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen) 
 	return inputSize + METADATA_LEN;
 }
 
-// Returns int representing type of message
-void decodeStruct(void * input, char * buf, int buflen, int * msgType, int * msgLen) {
+void decodeStruct(std::vector<char> *input, char * buf, int buflen, int * msgType, int * msgLen) {
 	int inputSize = 0;
 
 	if (buflen < METADATA_LEN){ // Buffer can't store contentLength and msgType
@@ -47,12 +46,10 @@ void decodeStruct(void * input, char * buf, int buflen, int * msgType, int * msg
 	memcpy(msgType, buf + sizeof(int), sizeof(int));
 	*msgType = ntohl(*msgType);
 
-	if (*msgType == INPUT_NETWORK_DATA)
-	{
-		inputSize = sizeof(InputNetworkData);
-	}
+	inputSize = NetworkStruct::sizeOf(*msgType);	
+	input->resize(inputSize, 0);
 
-	memcpy(input, buf + METADATA_LEN, inputSize);
+	memcpy(input->data(), buf + METADATA_LEN, inputSize);
 }
 
 int decodeContentLength(std::string message){

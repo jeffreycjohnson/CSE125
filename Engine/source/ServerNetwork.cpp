@@ -13,12 +13,13 @@
 #endif
 
 #include "NetworkUtility.h"
+#include "NetworkStruct.h"
+#include "ServerNetwork.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
-#include "ServerNetwork.h"
 #include <iostream>
-#include "NetworkStruct.h"
+#include <vector>
 
 // Need to link with Ws2_32.lib
 #ifdef __LINUX
@@ -67,14 +68,16 @@ void ServerNetwork::start() {
 	std::cout << "Accepted tcp connection" << std::endl;
 }
 
-void ServerNetwork::handleClient(void * msg, int * msgType) { handleClient(clientSocket, msg, msgType); }
+std::vector<char> ServerNetwork::handleClient(int * msgType) { return handleClient(clientSocket, msgType); }
 
-void ServerNetwork::handleClient(int clientSocket, void * msg, int * msgType) {
+std::vector<char> ServerNetwork::handleClient(int clientSocket, int * msgType) {
 		// Receive until the peer shuts down the connection
 	int iResult;
 	std::string data = "";
 	int totalBytesRecvd = 0;
 	int contentLength = -1;
+
+	std::vector<char> msg;
 
 	// non-blocking mode is enabled.
 	u_long iMode = 1;
@@ -98,9 +101,9 @@ void ServerNetwork::handleClient(int clientSocket, void * msg, int * msgType) {
 			// sizeof(int) is for the 4 bytes used to represent the content length of message
 			if (totalBytesRecvd > sizeof(int) && data == "") {
 
-				decodeStruct(msg, recvbuf, DEFAULT_BUFLEN, msgType, &contentLength);
+				decodeStruct(&msg, recvbuf, DEFAULT_BUFLEN, msgType, &contentLength);
 				std::cout << "Content-Length: " << contentLength << std::endl;
-				std::cout << "Message Type: " << msgType << std::endl;
+				std::cout << "Message Type: " << *msgType << std::endl;
 				break;
 				//contentLength = decodeContentLength(std::string(recvbuf, sizeof(int)));
 
@@ -118,27 +121,30 @@ void ServerNetwork::handleClient(int clientSocket, void * msg, int * msgType) {
 			closesocket(clientSocket);
 			WSACleanup();
 #endif
-			return;
+			return msg;
 		}
 		if (contentLength + sizeof(int) == totalBytesRecvd) break;
 
 	} while (iResult > 0);
 
-	return;
+	return msg;
 }
 
-int ServerNetwork::sendMessage(std::string message) {
+int ServerNetwork::sendMessage(void * message, int msgType) {
 	char encodedMsg[DEFAULT_BUFLEN];
-	int contentLength = encodeContentLength(message, encodedMsg, DEFAULT_BUFLEN);
+	int contentLength = encodeStruct(message, NetworkStruct::sizeOf(msgType), msgType, encodedMsg, DEFAULT_BUFLEN);
 
-	// Echo the buffer back to the sender
 	int iSendResult = send(ServerNetwork::clientSocket, encodedMsg, contentLength, 0);
 	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
 #else
-		printf("send failed with error: %d\n", WSAGetLastError());
-		closesocket(ServerNetwork::clientSocket);
-		WSACleanup();
+		int wsaLastError = WSAGetLastError();
+		if (wsaLastError != WSAEWOULDBLOCK)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(ServerNetwork::clientSocket);
+			WSACleanup();
+		}
 #endif
 		return 1;
 	}

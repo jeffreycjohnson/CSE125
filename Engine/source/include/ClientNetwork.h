@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 class ClientNetwork
 {
@@ -19,10 +20,10 @@ public:
 
 	static char decodeMessage(std::string message);
 	//Requirements, need connection to be established... What should the data type be TODO:
-	static int sendMessage(char * buf, int contentLength);
+	static int sendMessage(void * message, int msgType);
 
 	//Returns string with recieved
-	static std::string receiveMessage();
+	static std::vector<char> receiveMessage(int * msgType);
 
 	//Manual Shutdown
 	static int CloseConnection();

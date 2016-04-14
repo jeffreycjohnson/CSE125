@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include "NetworkStruct.h"
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #ifdef __LINUX
@@ -154,8 +155,10 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	return 0;
 }
 
-int ClientNetwork::sendMessage(char * buf, int contentLength){
-	int iResult;	
+int ClientNetwork::sendMessage(void * message, int msgType) {
+	char encodedMsg[DEFAULT_BUFLEN];
+	int contentLength = encodeStruct(message, NetworkStruct::sizeOf(msgType), msgType, encodedMsg, DEFAULT_BUFLEN);
+
 	if (contentLength == 0) return 1;
 
 	//Need to Establish Connection
@@ -163,13 +166,17 @@ int ClientNetwork::sendMessage(char * buf, int contentLength){
 		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
 		return 1;
 	}
-	iResult = send(ClientNetwork::ConnectSocket, buf, contentLength, 0);
-	if (iResult == SOCKET_ERROR) {
+	int iSendResult = send(ClientNetwork::ConnectSocket, encodedMsg, contentLength, 0);
+	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
 #else
-		std::cerr << "Send Failed with error: " << WSAGetLastError() << std::endl;
-		closesocket(ConnectSocket);
-		WSACleanup();
+		int wsaLastError = WSAGetLastError();
+		if (wsaLastError != WSAEWOULDBLOCK)
+		{
+			std::cerr << "Send Failed with error: " << wsaLastError << std::endl;
+			closesocket(ConnectSocket);
+			WSACleanup();
+		}
 #endif
 		ClientNetwork::ConnectionEstablished = false;
 		ClientNetwork::ConnectSocket = INVALID_SOCKET;
@@ -177,20 +184,23 @@ int ClientNetwork::sendMessage(char * buf, int contentLength){
 	}
 
 	//Pound Define This
-	printf("Bytes Sent: %d\n", iResult);
+	printf("Bytes Sent: %d\n", iSendResult);
 
 	return 0;
 }
 
-std::string ClientNetwork::receiveMessage(){
+
+
+std::vector<char> ClientNetwork::receiveMessage(int * msgType){
 	int iResult;
 	char recvbuffer[DEFAULT_BUFLEN];
 	memset(recvbuffer, 0, DEFAULT_BUFLEN);
+	std::vector<char> msg;
 
 	//Need to Establish Connection
 	if (!ConnectionEstablished){
 		std::cerr << "Recv Refused. Please Establish Connection" << std::endl;
-		return std::string();
+		return msg;
 	}
 	//TODO: totalrecv was originally a ssize_t which is of type unsigned long, to prevent overflow..
 	int totalrecv = 0;
@@ -205,7 +215,7 @@ std::string ClientNetwork::receiveMessage(){
 	do {
 		if (totalrecv > DEFAULT_BUFLEN){
 			std::cerr << "Buffer Overflow!!!!!" << std::endl;
-			return std::string();
+			return msg;
 		}
 		iResult = recv(ConnectSocket, recvbuffer, DEFAULT_BUFLEN-1, 0);
 
@@ -220,11 +230,11 @@ std::string ClientNetwork::receiveMessage(){
 			recvbuffer[iResult] = '\0';
 
 			if (totalrecv > sizeof(int) && result == "") { // Recieved content length of data
-
-				contentLength = decodeContentLength(std::string(recvbuffer, sizeof(int)));
+				decodeStruct(&msg, recvbuffer, DEFAULT_BUFLEN, msgType, &contentLength);
+				break;
 				//std::cout << "Content-Length: " << contentLength << std::endl;
 			} 
-			result += recvbuffer + sizeof(int);
+			//result += recvbuffer + sizeof(int);
 		}
 		else if (iResult == 0){
 			std::cerr << "Connection Closed." << std::endl;
@@ -244,7 +254,7 @@ std::string ClientNetwork::receiveMessage(){
 		if (contentLength + sizeof(int) == totalrecv) break;
 	} while (iResult > 0);
 
-	return result;
+	return msg;
 }
 
 void ClientNetwork::GetStatus(std::string header){

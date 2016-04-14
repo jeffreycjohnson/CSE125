@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ClientNetwork.h"
+#include "GameObject.h"
 #include "Input.h"
 #include "NetworkStruct.h"
 #include "NetworkUtility.h"
@@ -11,13 +12,18 @@
 void ClientManager::sendMessages()
 {
 	InputNetworkData inputMessage = Input::serialize();
-	char buf[512];
-	int contentLength = encodeStruct(&inputMessage, sizeof(InputNetworkData), INPUT_NETWORK_DATA, buf, 512);
-	ClientNetwork::sendMessage(buf, contentLength);
+	ClientNetwork::sendMessage(&inputMessage, INPUT_NETWORK_DATA);
 }
 
 void ClientManager::receiveMessages()
 {
-	std::string received = ClientNetwork::receiveMessage();
-	std::cout << "recv message " << received << std::endl;
+	TransformNetworkData *tnd;
+	int msgType;
+
+	std::vector<char> received = ClientNetwork::receiveMessage(&msgType);
+	if (msgType == TRANSFORM_NETWORK_DATA)
+	{
+		tnd = (TransformNetworkData*)received.data();
+		GameObject::FindByName("player")->transform.deserializeAndApply(*tnd);
+	}
 }

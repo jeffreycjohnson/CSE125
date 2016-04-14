@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
@@ -15,7 +16,7 @@ private:
 
 	static int setupSocket(std::string port);
 	static int acceptTCPConnection(int listenSocket);
-	static void handleClient(int clientSocket, void * msg, int * msgType);
+	static std::vector<char> handleClient(int clientSocket, int * msgType);
 
 	//std::string encodeMessage(std::string msg);
 
@@ -27,8 +28,8 @@ public:
 	static void closeConnection();
 
 	static void start();
-	static void handleClient(void * msg, int * msgType);
-	static int sendMessage(std::string message);
+	static std::vector<char> handleClient(int * msgType);
+	static int sendMessage(void * message, int msgType);
 
 };
 
