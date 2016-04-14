@@ -1,4 +1,9 @@
 #include "Collision.h"
+#include "Collider.h"
+#include "BoxCollider.h"
+#include "SphereCollider.h"
+#include "CapsuleCollider.h"
+#include <stack>
 
 // Raycasting constants
 static const float RAY_MIN = FLT_EPSILON;
@@ -24,9 +29,58 @@ void Octree::removeNode(NodeId node) {
 	}
 };
 
-void Octree::insert(BoxCollider& box) {
+void Octree::insert(Collider* obj) {
 	if (root)
-		root->insert(box);
+		root->insert(obj, obj->getAABB());
+}
+
+void Octree::remove(Collider* obj) {
+	if (root)
+		root->remove(obj);
+}
+
+void Octree::build(BuildMode mode, const GameObject& root) {
+
+	// THIS IS EXPENSIVE, DON'T DO THIS A LOT!!!!
+	
+	std::stack<Transform> stack;
+	stack.push(root.transform);
+
+	// Traverse through the transform hierarchy (DFS)
+	while (!stack.empty()) {
+
+		// Get gameObject from the Transform
+		GameObject* current = stack.top().gameObject;
+		stack.pop();
+
+		if (current == nullptr) {
+			break; // Don't panic
+		}
+
+		// REMEMBER: Currently a game object can only have unique components.
+		//           If this ever changes, this code is 100% broken.
+		// Get colliders & insert them
+		BoxCollider* box         = current->getComponent<BoxCollider>();
+		SphereCollider* sphere   = current->getComponent<SphereCollider>();
+		CapsuleCollider* capsule = current->getComponent<CapsuleCollider>();
+
+		if (box != nullptr)  {
+			this->insert(box);
+		}
+		if (sphere != nullptr) {
+			this->insert(sphere);
+		}
+		if (capsule != nullptr) {
+			this->insert(capsule);
+		}
+
+		// Get the transform's children
+		Transform t = current->transform;
+		for (auto childPtr : t.children) {
+			stack.push(*childPtr);
+		}
+
+	}
 }
 
 OctreeNode* Octree::getNodeById(NodeId node) {

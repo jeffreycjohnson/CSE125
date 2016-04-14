@@ -199,6 +199,7 @@
     <ClCompile Include="source\ServerManager.cpp" />
     <ClCompile Include="source\ClientManager.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
+    <ClCompile Include="source\CapsuleCollider.cpp" />
     <ClCompile Include="source\CollisionInfo.cpp" />
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
@@ -229,6 +230,8 @@
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
     <ClCompile Include="source\SSAO.cpp" />
+    <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\SphereCollider.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />

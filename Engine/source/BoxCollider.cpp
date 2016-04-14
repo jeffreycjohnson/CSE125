@@ -26,6 +26,7 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 
 BoxCollider::~BoxCollider()
 {
+	// TODO: Remove code that erases this collider from the static list (in box destructor) (naive impl)
 	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i] == this)
@@ -96,6 +97,7 @@ void BoxCollider::destroy()
 // STATIC METHOD (Part of original naive implementation)
 void BoxCollider::updateColliders()
 {
+	// TODO: Remove this method, part of naive impl
 	// Optimize with sweep and prune eventually, for now use brute force
 	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
@@ -144,6 +146,7 @@ bool BoxCollider::intersects(const BoxCollider& other) {
 
 bool BoxCollider::checkCollision(int aIndex, int bIndex)
 {
+	// TODO: Also part of the naive impl
 	BoxCollider* a = colliders[aIndex];
 	BoxCollider* b = colliders[bIndex];
 

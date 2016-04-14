@@ -1,6 +1,8 @@
 #include "Collision.h"
 #include "Renderer.h"
 #include "BoxCollider.h"
+#include "SphereCollider.h"
+#include "CapsuleCollider.h"
 
 OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth) {
 	this->min = min;
@@ -23,8 +25,28 @@ OctreeNode::~OctreeNode() {
 }
 
 CollisionInfo OctreeNode::raycast(const Ray& ray) {
-	return CollisionInfo(); // TODO: implement octree node raycast
+	CollisionInfo colInfo;
+	glm::vec3 point = ray.getCurrentPosition();
+
+	for (auto obj : colliders) {
+		if (obj->insideOrIntersects(point)) {
+			colInfo.add(obj);
+		}
+	}
+
+	if (isLeaf()) {
+		return colInfo;
+	}
+	// TODO: Figure out which octant the point is in & recurse
+
+	for (auto child : children) {
+		// Figure out which octant 	
+	}
+	//colInfo.merge()
+
+	return colInfo;
 };
+
 CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 
 	// Check object against all of the objects in our colliders list
@@ -44,37 +66,43 @@ bool OctreeNode::intersects(const BoxCollider& box) {
 	return bounds.intersects(box);
 }
 
-bool OctreeNode::insert(BoxCollider& box) {
+bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& box) {
+	
 	// Keeps track of the number of intersections the box has with our children
 	int collisions = 0;
 	unsigned int index = 0;
 	
 	// If this node already has children, recurse
 	if (!isLeaf()) {
-		// Saves which children have registered collisions with the box
-		// e.g. |1|1|1|0|0|0|1|0|  -> child 1, 5, 6, 7 have collisions
+	
+		// <indicies> saves which children have registered collisions with the box
+		// e.g.             |1|1|1|0|0|0|1|0|  -> child 1, 5, 6, 7 have collisions
 		unsigned char indices = 0;
 		unsigned char mask = 0x00;
-		for (auto child : children) {
+		
+		for (auto child : children) {	
+			// Despite what kind of collider we are inserting, we always want
+			// to do intersection testing with axis-aligned bounding boxes, b/c they are cheap
 			if (child->intersects(box)) {
 				mask &= index;
 			}
 			++index;
 		}
+		
 		if (collisions == 0) {
 			// If for some reason this box does not collide with any of our children,
 			// it therefore cannot collide with this node. So if we get, here... wtf!?
-			box.nodeId = Octree::UNKNOWN_NODE;
+			colliderBeingInserted->nodeId = Octree::UNKNOWN_NODE;
 			return false;
 		}
 		else if (collisions == 1) {
 			// Insert our box into the chosen child.
-			return children[mask]->insert(box);
+			return children[mask]->insert(colliderBeingInserted, box);
 		}
 		else {
 			// Node successfully inserted into this node
-			box.nodeId = nodeId;
-			colliders.push_back(&box);
+			colliderBeingInserted->nodeId = nodeId;
+			colliders.push_back(colliderBeingInserted);
 
 			// If we have too many
 			if (colliders.size() > Octree::LEAF_THRESHOLD && depth < Octree::MAX_DEPTH) {
@@ -87,7 +115,7 @@ bool OctreeNode::insert(BoxCollider& box) {
 
 void OctreeNode::subdivide() {
 	if (children.empty() && depth < Octree::MAX_DEPTH) {
-		// Figure out hte dimensions of each child
+		// Figure out the dimensions of each child
 		glm::vec3 dims = max - min;
 		float xDist = dims.x / 2;
 		float yDist = dims.y / 2;
@@ -125,12 +153,13 @@ void OctreeNode::subdivide() {
 		children.push_back(new OctreeNode(min6, max6, tree, this, depth + 1));
 
 		// Insert all of our colliders into each of those children, and let recursion deal with it
-		std::vector<BoxCollider*> stragglers;
-		for (auto bbox : colliders) {
+		std::vector<Collider*> stragglers;
+		for (auto collider : colliders) {
 			for (auto child : children) {
-				if (!child->insert(*bbox)) {
+				// Aaaaand this method becomes MORE expensive b/c we have to compute the AABBs again...
+				if (!child->insert(collider, collider->getAABB())) {
 					// If we couldn't insert this guy further down the tree, keep it here
-					stragglers.push_back(bbox);
+					stragglers.push_back(collider);
 				}
 			}
 		}

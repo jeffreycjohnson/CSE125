@@ -4,6 +4,14 @@
 #include "Component.h"
 #include "Collision.h"
 
+enum ColliderType {
+	UNKNOWN,   // Unknown
+	AABB,
+	OBB,
+	SPHERE,
+	CAPSULE
+};
+
 class Collider : public Component {
 protected:
 	friend OctreeNode;
@@ -12,7 +20,7 @@ protected:
 	bool colliding;
 
 public:
-	bool passive;
+	bool passive; // Should be set to TRUE if the object is static; false otherwise
 
 	virtual ~Collider() {};
 	
@@ -33,4 +41,7 @@ public:
 	//virtual bool intersects(const SphereCollider& other) = 0;
 
 	virtual BoxCollider getAABB() = 0;
+	virtual ColliderType getColliderType() {
+		return ColliderType::UNKNOWN;
+	}
 };

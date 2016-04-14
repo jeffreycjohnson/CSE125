@@ -8,12 +8,13 @@
 #include <glm.hpp>
 #include <glew.h>
 
+// Classes
 class Animation;
 class BoxCollider;
 class Camera;
 class CapsuleCollider;
 class Component;
-class Collider;       
+class Collider;
 class CollisionInfo;
 class ConfigFile;
 class FileWatcher;
@@ -38,6 +39,9 @@ class Texture;
 class ThreadPool;
 class Timer;
 class Transform;
+
+// Enum types
+enum ColliderType;
 
 #ifdef _MSC_VER
 #ifndef __func__

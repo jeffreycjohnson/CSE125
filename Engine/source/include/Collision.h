@@ -12,6 +12,7 @@
  */
 #pragma once
 #include "ForwardDecs.h"
+#include "GameObject.h"
 #include <set>
 #include <vector>
 #include <unordered_map>
@@ -35,13 +36,22 @@ public:
 	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
+	enum BuildMode {
+		STATIC_ONLY,  // Only includes colliders with passive = TRUE
+		DYNAMIC_ONLY, // Only includes colliders with passive = FALSE
+		BOTH          // Errythand. (DO NOT DO THIS, YOU WILL HAVE REGRETS!)
+	};
+
 	// Member Functions
 
 	// Inserts a collider into the octree, and updating data in the collider
-	void insert(BoxCollider&);
-	void remove(BoxCollider&);
+	void insert(Collider*);
+	void remove(Collider*);
 
 	void debugDraw();
+
+	// Creates an octree, starting at the given root
+	void build(BuildMode mode = BOTH, const GameObject& root = GameObject::SceneRoot);
 
 	CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
 	CollisionInfo collidesWith(const BoxCollider&);
@@ -91,7 +101,7 @@ private:
 	int depth;
 
 	/* Only leaf nodes should contain colliders */
-	std::vector<BoxCollider*> colliders;
+	std::vector<Collider*> colliders;
 
 	/* Member Functions */
 
@@ -99,8 +109,8 @@ private:
 	CollisionInfo collidesWith(const BoxCollider&);
 
 	// Add or remove nodes to the data structure
-	bool insert(BoxCollider&); // Returns true if the node was successfully inserted
-	void remove(BoxCollider&);
+	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted
+	void remove(Collider* colliderBeingRemoved);
 
 	// Used internally for inserting/moving colliders around the octree
 	bool intersects(const BoxCollider&);
@@ -125,9 +135,11 @@ public:
 	bool collisionOccurred;
 	int numCollisions;
 
+
 private:
 	std::set<GameObject*> collidees;
 
+	void add(Collider*);
 	void merge(const CollisionInfo&);
 };
 
@@ -145,10 +157,10 @@ public:
 	}
 
 	// Returns a discrete point along the ray at the timestep t
-	glm::vec3 getCurrentPosition() {
+	glm::vec3 getCurrentPosition() const {
 		return origin + t * direction;
 	}
-	glm::vec3 getPos(float tt) {
+	glm::vec3 getPos(float tt) const {
 		return origin + tt * direction;
 	}
 };

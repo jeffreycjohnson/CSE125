@@ -141,6 +141,15 @@
     <ClCompile Include="source\Plane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\SphereCollider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CapsuleCollider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
