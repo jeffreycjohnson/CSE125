@@ -5,7 +5,7 @@
 #include "Collision.h"
 
 class Collider : public Component {
-private:
+protected:
 	friend OctreeNode;
 	NodeId nodeId = Octree::UNKNOWN_NODE;
 	Octree* octree;
@@ -14,15 +14,20 @@ private:
 public:
 	bool passive;
 
-	virtual ~Collider() {
-		// TODO: Remove this collider from the octree
-	};
+	virtual ~Collider() {};
 	
-	virtual void destroy() = 0;
+	virtual void destroy() {
+		if (octree != nullptr) {
+			//octree->remove(*this); // TODO: Uncomment this once Octree allows for generic Collider&
+			octree = nullptr;
+			nodeId = Octree::UNKNOWN_NODE;
+		}
+	};
 	virtual void update(float) = 0;
 	virtual void debugDraw() = 0;
 	virtual void onCollisionEnter(GameObject* other) = 0;
 
+	virtual bool insideOrIntersects(const glm::vec3& point) = 0;
 	virtual bool intersects(const BoxCollider& other) = 0; 
 	//virtual bool intersects(const CapsuleCollider& other) = 0;
 	//virtual bool intersects(const SphereCollider& other) = 0;

@@ -13,7 +13,6 @@ private:
 	glm::vec3 points[8];
 	glm::vec3 transformPoints[8];
 	float xmin, xmax, ymin, ymax, zmin, zmax;
-	bool colliding;
 	bool isAxisAligned;
     glm::vec3 offset, dimensions;
 
@@ -27,7 +26,9 @@ public:
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other);
 
+	bool insideOrIntersects(const glm::vec3& point);
 	bool intersects(const BoxCollider& other);
+	
 	BoxCollider getAABB();
 
 	static void updateColliders();

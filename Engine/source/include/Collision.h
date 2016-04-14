@@ -12,6 +12,7 @@
  */
 #pragma once
 #include "ForwardDecs.h"
+#include <set>
 #include <vector>
 #include <unordered_map>
 
@@ -22,13 +23,16 @@ typedef unsigned long NodeId;
 class Octree {
 public:
 	friend OctreeNode;
-	Octree();
+	Octree(glm::vec3 min, glm::vec3 max);
 	~Octree();
 
 	/* Maximum number of colliders allowed inside a single OctreeNode */
 	static const int LEAF_THRESHOLD = 10;
 	static const int CHILDREN = 8;
-	static const int MAX_DEPTH = 16;
+	static const int MAX_DEPTH = 12;
+	static const float RAY_MIN;
+	static const float RAY_MAX;
+	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
 	// Member Functions
@@ -39,7 +43,7 @@ public:
 
 	void debugDraw();
 
-	CollisionInfo raycast(const Ray&);
+	CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
 	CollisionInfo collidesWith(const BoxCollider&);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
@@ -73,11 +77,9 @@ class OctreeNode {
 public:
 	friend Octree;
 
-	OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth);
+	OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent = nullptr, int depth = 0);
 	~OctreeNode();
 
-	CollisionInfo raycast(const Ray&);
-	CollisionInfo collidesWith(const BoxCollider&);
 	bool isLeaf() const;
 
 private:
@@ -93,8 +95,11 @@ private:
 
 	/* Member Functions */
 
+	CollisionInfo raycast(const Ray&);
+	CollisionInfo collidesWith(const BoxCollider&);
+
 	// Add or remove nodes to the data structure
-	void insert(BoxCollider&);
+	bool insert(BoxCollider&); // Returns true if the node was successfully inserted
 	void remove(BoxCollider&);
 
 	// Used internally for inserting/moving colliders around the octree
@@ -118,9 +123,12 @@ public:
 	CollisionInfo();
 	~CollisionInfo();
 	bool collisionOccurred;
+	int numCollisions;
 
 private:
-	std::vector<GameObject*> collidees;
+	std::set<GameObject*> collidees;
+
+	void merge(const CollisionInfo&);
 };
 
 /*
@@ -131,5 +139,16 @@ public:
 	glm::vec3 origin, direction;
 	float t;
 
-	Ray(glm::vec3 o, glm::vec3 d) : origin(o), direction(d) {}
+	Ray(glm::vec3 o, glm::vec3 d) : origin(o), direction(d) {
+		direction = glm::normalize(direction);
+		t = 0.0f;
+	}
+
+	// Returns a discrete point along the ray at the timestep t
+	glm::vec3 getCurrentPosition() {
+		return origin + t * direction;
+	}
+	glm::vec3 getPos(float tt) {
+		return origin + tt * direction;
+	}
 };

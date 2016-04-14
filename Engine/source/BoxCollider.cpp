@@ -90,8 +90,10 @@ void BoxCollider::destroy()
 		if (colliders[i] == this)
 			colliders.erase(colliders.begin() + i);
 	}
+	Collider::destroy();
 }
 
+// STATIC METHOD (Part of original naive implementation)
 void BoxCollider::updateColliders()
 {
 	// Optimize with sweep and prune eventually, for now use brute force
@@ -122,6 +124,14 @@ void BoxCollider::updateColliders()
 			}
 		}
 	}
+}
+
+bool BoxCollider::insideOrIntersects(const glm::vec3& point) {
+	return (
+		this->xmin <= point.x && point.x <= this->xmax &&
+		this->xmin <= point.y && point.y <= this->ymax &&
+		this->xmin <= point.z && point.z <= this->zmax
+	);
 }
 
 bool BoxCollider::intersects(const BoxCollider& other) {
