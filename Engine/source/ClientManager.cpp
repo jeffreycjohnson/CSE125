@@ -5,13 +5,15 @@
 
 #include "ClientNetwork.h"
 #include "Input.h"
+#include "NetworkStruct.h"
+#include "NetworkUtility.h"
 
 void ClientManager::sendMessages()
 {
-	std::string inputMessage = Input::serializeAsString();
-	ClientNetwork::sendMessage(inputMessage);
-
-	std::cout << "sent message " << inputMessage << std::endl;
+	InputNetworkData inputMessage = Input::serialize();
+	char buf[512];
+	int contentLength = encodeStruct(&inputMessage, sizeof(InputNetworkData), INPUT_NETWORK_DATA, buf, 512);
+	ClientNetwork::sendMessage(buf, contentLength);
 }
 
 void ClientManager::receiveMessages()

@@ -19,7 +19,7 @@ public:
 
 	static char decodeMessage(std::string message);
 	//Requirements, need connection to be established... What should the data type be TODO:
-	static int sendMessage(std::string message);
+	static int sendMessage(char * buf, int contentLength);
 
 	//Returns string with recieved
 	static std::string receiveMessage();

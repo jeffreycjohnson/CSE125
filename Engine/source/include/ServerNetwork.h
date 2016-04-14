@@ -15,7 +15,7 @@ private:
 
 	static int setupSocket(std::string port);
 	static int acceptTCPConnection(int listenSocket);
-	static std::string handleClient(int clientSocket);
+	static void handleClient(int clientSocket, void * msg, int * msgType);
 
 	//std::string encodeMessage(std::string msg);
 
@@ -27,7 +27,7 @@ public:
 	static void closeConnection();
 
 	static void start();
-	static std::string handleClient();
+	static void handleClient(void * msg, int * msgType);
 	static int sendMessage(std::string message);
 
 };

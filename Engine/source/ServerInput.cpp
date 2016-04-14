@@ -38,3 +38,13 @@ void ServerInput::deserializeStringAndApply(std::string serialized)
 	ss.ignore();
 	ss >> ServerInput::mousePos.y;
 }
+
+void ServerInput::deserializeAndApply(InputNetworkData serialized)
+{
+	ServerInput::yaw = serialized.yaw;
+	ServerInput::pitch = serialized.pitch;
+	ServerInput::roll = serialized.roll;
+
+	ServerInput::mousePos.x = serialized.mouseX;
+	ServerInput::mousePos.y = serialized.mouseY;
+}

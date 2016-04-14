@@ -13,14 +13,52 @@
 #include <windows.h>
 #endif
 #include <iostream>
-
+#include "NetworkStruct.h"
 
 #define DEFAULT_BUFLEN 512
+#define DEBUG 0
 
+int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen) {
+	memset(buf, 0, buflen);
+	int rawByteLen = htonl(inputSize + METADATA_LEN);
+	if (inputSize + METADATA_LEN > buflen) {
+		if (DEBUG) std::cerr << "Error encoding struct!" << std::endl;
+		return 0;
+	}	
+	
+	int encodedType = htonl(type);
+	memcpy(buf, &rawByteLen, sizeof(int));
+	memcpy(buf + sizeof(int), &encodedType, sizeof(int));
+	memcpy(buf + METADATA_LEN, input, inputSize);
+	return inputSize + METADATA_LEN;
+}
+
+// Returns int representing type of message
+void decodeStruct(void * input, char * buf, int buflen, int * msgType, int * msgLen) {
+	int inputSize = 0;
+
+	if (buflen < METADATA_LEN){ // Buffer can't store contentLength and msgType
+		if (DEBUG) std::cerr << "Error decoding struct!" << std::endl;
+		return;
+	}
+
+	memcpy(msgLen, buf, sizeof(int));
+	*msgLen = ntohl(*msgLen);
+	memcpy(msgType, buf + sizeof(int), sizeof(int));
+	*msgType = ntohl(*msgType);
+
+	if (*msgType == INPUT_NETWORK_DATA)
+	{
+		inputSize = sizeof(InputNetworkData);
+	}
+
+	memcpy(input, buf + METADATA_LEN, inputSize);
+}
 
 int decodeContentLength(std::string message){
 	int messageAsInt;
 	if (message.size() < 4){
+		if (DEBUG) std::cerr << "Error decoding Content Length!" << std::endl;
 		return 0;
 	}
 	memcpy_s((void *) &messageAsInt, sizeof(int), message.c_str(), sizeof(int));
@@ -32,7 +70,7 @@ int encodeContentLength(std::string message, char * buffer, int buflen) {
 
 	unsigned int msgLen = message.size();
 	if (msgLen > buflen - sizeof(int)) {
-		printf("Error encoding Message!");
+		if (DEBUG) std::cerr << "Error encoding Content Length!" << std::endl;
 		return 0;
 	}
 	int len = htonl(msgLen);

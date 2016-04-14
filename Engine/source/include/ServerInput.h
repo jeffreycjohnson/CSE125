@@ -3,6 +3,7 @@
 
 #include "ForwardDecs.h"
 #include <unordered_map>
+#include "NetworkStruct.h"
 
 #include "Input.h"
 
@@ -26,6 +27,7 @@ public:
 	static float getAxis(std::string name);
 
 	static void deserializeStringAndApply(std::string serialized);
+	static void deserializeAndApply(InputNetworkData serialized);
 };
 
 #endif SERVER_INPUT_H

@@ -4,6 +4,7 @@
 #include "ForwardDecs.h"
 #include <unordered_map>
 #include <glfw3.h>
+#include "NetworkStruct.h"
 
 enum AxisType
 {
@@ -113,6 +114,7 @@ public:
 
 	/// serialization
 	static std::string Input::serializeAsString();
+	static InputNetworkData Input::serialize();
 };
 
 #endif

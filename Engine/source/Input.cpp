@@ -580,3 +580,17 @@ std::string Input::serializeAsString()
 
 	return ss.str();
 }
+
+InputNetworkData Input::serialize()
+{
+	InputNetworkData ind;
+
+	ind.playerID = 0;
+	ind.yaw = Input::getAxis("yaw");
+	ind.pitch = Input::getAxis("pitch");
+	ind.roll = Input::getAxis("roll");
+	ind.mouseX = Input::mousePosition().x;
+	ind.mouseY = Input::mousePosition().y;
+
+	return ind;
+}

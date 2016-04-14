@@ -215,6 +215,9 @@
     <ClInclude Include="source\include\ServerInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\NetworkStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\deferred_gbuffer.frag">

@@ -230,6 +230,7 @@
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\NetworkStruct.h" />
     <ClInclude Include="source\include\ServerInput.h" />
     <ClInclude Include="source\include\ServerManager.h" />
     <ClInclude Include="source\include\ClientManager.h" />

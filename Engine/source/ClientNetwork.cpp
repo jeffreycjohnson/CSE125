@@ -154,18 +154,15 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	return 0;
 }
 
-int ClientNetwork::sendMessage(std::string message){
-	int iResult;
-	//std::cout << "encoding content length" << std::endl;
-	char buf[DEFAULT_BUFLEN];
-	int contentLength = encodeContentLength(message, buf, DEFAULT_BUFLEN);
+int ClientNetwork::sendMessage(char * buf, int contentLength){
+	int iResult;	
+	if (contentLength == 0) return 1;
 
 	//Need to Establish Connection
 	if (!ConnectionEstablished){
 		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
 		return 1;
 	}
-	//std::cout << "Encoded msg: " << buf << std::endl;
 	iResult = send(ClientNetwork::ConnectSocket, buf, contentLength, 0);
 	if (iResult == SOCKET_ERROR) {
 #ifdef __LINUX
@@ -180,7 +177,7 @@ int ClientNetwork::sendMessage(std::string message){
 	}
 
 	//Pound Define This
-	//printf("Bytes Sent: %d\n", iResult);
+	printf("Bytes Sent: %d\n", iResult);
 
 	return 0;
 }
