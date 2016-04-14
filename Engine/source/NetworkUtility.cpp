@@ -33,12 +33,19 @@ int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen) 
 	return inputSize + METADATA_LEN;
 }
 
-void decodeStruct(std::vector<char> *input, char * buf, int buflen, int * msgType, int * msgLen) {
+std::vector<char> decodeStruct(char * buf, int buflen, int * msgType, int * msgLen) {
 	int inputSize = 0;
+
+	std::vector<char> empty;
 
 	if (buflen < METADATA_LEN){ // Buffer can't store contentLength and msgType
 		if (DEBUG) std::cerr << "Error decoding struct!" << std::endl;
-		return;
+		return empty;
+	}
+
+	if (buf == nullptr)
+	{
+		std::cerr << "HEY WE GETTIN NULL BUFFER IN DECODE STRUCT MANG" << std::endl;
 	}
 
 	memcpy(msgLen, buf, sizeof(int));
@@ -46,10 +53,10 @@ void decodeStruct(std::vector<char> *input, char * buf, int buflen, int * msgTyp
 	memcpy(msgType, buf + sizeof(int), sizeof(int));
 	*msgType = ntohl(*msgType);
 
-	inputSize = NetworkStruct::sizeOf(*msgType);	
-	input->resize(inputSize, 0);
+	inputSize = NetworkStruct::sizeOf(*msgType);
+	std::vector<char> input(buf + METADATA_LEN, buf + METADATA_LEN + inputSize);
 
-	memcpy(input->data(), buf + METADATA_LEN, inputSize);
+	return input;
 }
 
 int decodeContentLength(std::string message){

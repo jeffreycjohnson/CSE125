@@ -70,7 +70,7 @@ void ServerNetwork::start() {
 
 std::vector<char> ServerNetwork::handleClient(int * msgType) { return handleClient(clientSocket, msgType); }
 
-std::vector<char> ServerNetwork::handleClient(int clientSocket, int * msgType) {
+std::vector<char> ServerNetwork::handleClient(int clientSocket, int *msgType) {
 		// Receive until the peer shuts down the connection
 	int iResult;
 	std::string data = "";
@@ -101,7 +101,9 @@ std::vector<char> ServerNetwork::handleClient(int clientSocket, int * msgType) {
 			// sizeof(int) is for the 4 bytes used to represent the content length of message
 			if (totalBytesRecvd > sizeof(int) && data == "") {
 
-				decodeStruct(&msg, recvbuf, DEFAULT_BUFLEN, msgType, &contentLength);
+				std::vector<char> temp = decodeStruct(recvbuf, DEFAULT_BUFLEN, msgType, &contentLength);
+				msg = temp;
+
 				std::cout << "Content-Length: " << contentLength << std::endl;
 				std::cout << "Message Type: " << *msgType << std::endl;
 				break;

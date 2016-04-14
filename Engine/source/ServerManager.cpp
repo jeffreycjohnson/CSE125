@@ -16,8 +16,8 @@ void ServerManager::sendMessages()
 
 void ServerManager::receiveMessages()
 {
-	InputNetworkData* msg;
-	int msgType;
+	InputNetworkData* msg = new InputNetworkData;
+	int msgType = -1;
 
 	// for now, all received messages are client-side input
 	std::vector<char> buf = ServerNetwork::handleClient(&msgType);

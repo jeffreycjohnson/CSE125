@@ -230,7 +230,7 @@ std::vector<char> ClientNetwork::receiveMessage(int * msgType){
 			recvbuffer[iResult] = '\0';
 
 			if (totalrecv > sizeof(int) && result == "") { // Recieved content length of data
-				decodeStruct(&msg, recvbuffer, DEFAULT_BUFLEN, msgType, &contentLength);
+				msg = decodeStruct(recvbuffer, DEFAULT_BUFLEN, msgType, &contentLength);
 				break;
 				//std::cout << "Content-Length: " << contentLength << std::endl;
 			} 

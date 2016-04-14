@@ -6,7 +6,7 @@
 
 int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen);
 
-void decodeStruct(std::vector<char> *input, char * buf, int buflen, int * msgType, int * msgLen);
+std::vector<char> decodeStruct(char * buf, int buflen, int * msgType, int * msgLen);
 
 int decodeContentLength(std::string message);
 

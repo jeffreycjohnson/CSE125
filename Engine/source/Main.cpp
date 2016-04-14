@@ -30,6 +30,8 @@ void InitializeEngine(std::string windowName)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
+	glfwSwapInterval(1);
+
     int width = 1024;
     int height = 768;
 
