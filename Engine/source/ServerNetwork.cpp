@@ -115,7 +115,6 @@ void ServerNetwork::handleClient(int clientSocket, void * msg, int * msgType) {
 #ifdef __LINUX
 #else
 			printf("recv failed with error: %d\n", WSAGetLastError());
-			getchar();
 			closesocket(clientSocket);
 			WSACleanup();
 #endif

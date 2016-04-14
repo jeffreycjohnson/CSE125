@@ -184,8 +184,6 @@ int ClientNetwork::sendMessage(char * buf, int contentLength){
 
 std::string ClientNetwork::receiveMessage(){
 	int iResult;
-	//CHANGE THE DEFAULT_BUFLEN TO DESIRE
-	int buflen = DEFAULT_BUFLEN;
 	char recvbuffer[DEFAULT_BUFLEN];
 	memset(recvbuffer, 0, DEFAULT_BUFLEN);
 
@@ -196,20 +194,27 @@ std::string ClientNetwork::receiveMessage(){
 	}
 	//TODO: totalrecv was originally a ssize_t which is of type unsigned long, to prevent overflow..
 	int totalrecv = 0;
-	//struct timeval tv;
-	//tv.tv_sec = 5;
-	//tv.tv_usec = 0;
-	//setsockopt(ConnectSocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,sizeof(struct timeval));
+
 	std::string result = "";
 	int contentLength = -1;
+
+	// non-blocking mode is enabled.
+	u_long iMode = 1;
+	ioctlsocket(ConnectSocket, FIONBIO, &iMode);
+
 	do {
-		if (totalrecv > buflen){
+		if (totalrecv > DEFAULT_BUFLEN){
 			std::cerr << "Buffer Overflow!!!!!" << std::endl;
 			return std::string();
 		}
-		//std::cout << "Receiving..." << std::endl;
 		iResult = recv(ConnectSocket, recvbuffer, DEFAULT_BUFLEN-1, 0);
-		//std::cout << "Done!  iResult is " << iResult << std::endl;
+
+		int nError = WSAGetLastError();
+		if (nError == WSAEWOULDBLOCK) {
+			// std::cout << "No data to receive " << nError << std::endl;
+			break;
+		}
+
 		if (iResult > 0){
 			totalrecv += iResult;
 			recvbuffer[iResult] = '\0';
@@ -228,7 +233,6 @@ std::string ClientNetwork::receiveMessage(){
 			//Shutdown the connections
 			ClientNetwork::ConnectionEstablished = false;
 			ClientNetwork::ConnectSocket = INVALID_SOCKET;
-			//DO we want to return a blank one or a partial one?
 #ifdef __LINUX
 			if (errno == EWOULDBLOCK) {
 				std::cerr << "errno is " << EWOULDBLOCK << std::endl;
@@ -237,11 +241,9 @@ std::string ClientNetwork::receiveMessage(){
 			std::cerr << "recv failed with error: " << WSAGetLastError() << std::endl;
 #endif
 		}
-		//std::cout << "totalrecv: " << totalrecv << std::endl;
 		if (contentLength + sizeof(int) == totalrecv) break;
 	} while (iResult > 0);
 
-	//TODO:: IS THIS ACCURATE?
 	return result;
 }
 
