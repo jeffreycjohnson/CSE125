@@ -8,6 +8,8 @@
 #include "ObjectLoader.h"
 #include "ThreadPool.h"
 #include "Camera.h"
+#include "ClientManager.h"
+#include "ServerManager.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
@@ -73,7 +75,13 @@ void RunEngine(int caller)
 	{
         Timer::update();
         Input::update();
-        workerPool->createJob(Sound::updateFMOD)->queue();
+
+		/**
+		 * Note: Client/server managing is done within GameObject::UpdateScene
+		 *       to guarantee synchronization with fixed tick rate or variable tick rate
+		 */
+
+		workerPool->createJob(Sound::updateFMOD)->queue();
         Renderer::drawDebug = Input::getKey("escape");
 		Renderer::loop(caller);
 	}

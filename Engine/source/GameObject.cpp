@@ -6,6 +6,8 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
+#include "ServerManager.h"
+#include "ClientManager.h"
 #include <iostream>
 
 GameObject GameObject::SceneRoot;
@@ -30,14 +32,26 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 
 void GameObject::UpdateScene(int caller)
 {
-	if (caller == 1 || caller == 2) { // server or modelviewer
-		while (Timer::nextFixedStep())
-		{
+	if (caller == 1 || caller == 2) 
+	{ 
+		while (Timer::nextFixedStep()) {
+			if (caller == 1) ServerManager::receiveMessages();
+
+			// server or offline
 			SceneRoot.fixedUpdate();
+
+			if (caller == 1) ServerManager::sendMessages();
 		}
 	}
-	if (caller == 0 || caller == 2)  { // client or modelviewer
+
+	if (caller == 0 || caller == 2)  
+	{
+		if (caller == 0) ClientManager::sendMessages();
+
+		// client or offline
 		SceneRoot.update((float)Timer::deltaTime());
+
+		if (caller == 0) ClientManager::receiveMessages();
 	}
 }
 
@@ -156,6 +170,16 @@ void GameObject::update(float deltaTime)
 
 void GameObject::fixedUpdate()
 {
+	for (auto component : componentList)
+	{
+		if (newlyCreated || component->newlyCreated)
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
+	}
+	newlyCreated = false;
+
     if (dead || !active) return;
     for (unsigned int i = 0; i < transform.children.size(); i++)
     {

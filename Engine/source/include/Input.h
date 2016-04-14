@@ -110,6 +110,9 @@ public:
 	static void showCursor();
 
 	static void scroll_callback(GLFWwindow*, double, double);
+
+	/// serialization
+	static std::string Input::serializeAsString();
 };
 
 #endif

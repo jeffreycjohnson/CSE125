@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include "ClientNetwork.h"
-#include "ClientLoop.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine();
@@ -38,7 +37,6 @@ int main(int argc, char** argv)
 	}
 
 	GameObject *player = new GameObject;
-	player->addComponent(new FPSMovement(1.5f, .25f, glm::vec3(0,0,0), glm::vec3(0,1,0)));
 	player->addComponent(Renderer::mainCamera);
 	player->setName("player");
 	GameObject::SceneRoot.addChild(player);
@@ -47,10 +45,8 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
 
-	GameObject *client = new GameObject;
-	ClientLoop *cliLoop = new ClientLoop("127.0.0.1", "9876");
-	client->addComponent(cliLoop);
-	GameObject::SceneRoot.addChild(client);
+	// setup network
+	ClientNetwork::SetupTCPConnection("127.0.0.1", "9876");
 
     RunEngine(0); // running engine as client
 }

@@ -8,8 +8,7 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
-#include "ClientNetwork.h"
-#include "ServerLoop.h"
+#include "ServerNetwork.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine();
@@ -38,16 +37,17 @@ int main(int argc, char** argv)
 	}
 
 	GameObject *player = new GameObject;
+	player->addComponent(new FPSMovement(1.5f, .25f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
 	player->setName("player");
 	player->addComponent(Renderer::mainCamera);
 	GameObject::SceneRoot.addChild(player);
 
-	// add the server component
-	ServerLoop* sl = new ServerLoop("9876");
-	sl->create();
-	GameObject *server = new GameObject;
-	server->addComponent(sl);
-	GameObject::SceneRoot.addChild(server);
-
+	GameObject *scene = loadScene("assets/artsy.dae");
+	scene->transform.setPosition(0, -1, 0);
+	GameObject::SceneRoot.addChild(scene);
+	
+	ServerNetwork::setup("9876");
+	ServerNetwork::start();
+	
     RunEngine(1); // Run engine as server
 }

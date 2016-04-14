@@ -20,8 +20,8 @@ private:
 	//std::string encodeMessage(std::string msg);
 
 public:
-	ServerNetwork();
-	~ServerNetwork();
+	ServerNetwork() {}
+	~ServerNetwork() { ServerNetwork::closeConnection(); }
 	
 	static void setup(std::string port);
 	static void closeConnection();

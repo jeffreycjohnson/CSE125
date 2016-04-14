@@ -84,7 +84,7 @@ std::string ServerNetwork::handleClient(int clientSocket) {
 
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) {
-			std::cout << "No data to receive " << nError << std::endl;
+			// std::cout << "No data to receive " << nError << std::endl;
 			break;
 		}
 

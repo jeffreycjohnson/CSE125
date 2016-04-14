@@ -5,7 +5,7 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 
 #include "GameObject.h"
-#include "Input.h"
+#include "ServerInput.h"
 #include "Renderer.h"
 #include "Timer.h"
 
@@ -22,28 +22,16 @@ FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 posi
 
 void FPSMovement::create()
 {
-	Input::hideCursor();
+	// Input::hideCursor();
 	recalculate();
 }
 
 void FPSMovement::fixedUpdate()
 {
-	auto time = Timer::fixedTimestep;
-
-	/*
-	1. poll clients for recv
-	2. proc msgs
-	3. physics
-	4. game logic
-	5. send msg
-	*/
-
-}
-
-void FPSMovement::update(float dt)
-{
+	auto dt = Timer::fixedTimestep;
+	
 	// act on mouse
-	glm::vec2 currMousePosition = Input::mousePosition();
+	glm::vec2 currMousePosition = ServerInput::mousePosition();
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
 
 	yaw += mouseDelta.x * mouseSensitivity;
@@ -59,10 +47,11 @@ void FPSMovement::update(float dt)
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	position += Input::getAxis("roll") * worldFront * speed;
-	position += Input::getAxis("pitch") * normRight * speed;
-
+	position += ServerInput::getAxis("roll") * worldFront * speed;
+	position += ServerInput::getAxis("pitch") * normRight * speed;
+	
 	recalculate();
+
 }
 
 void FPSMovement::recalculate()

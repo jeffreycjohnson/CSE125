@@ -3,6 +3,8 @@
 #include <gtx/compatibility.hpp>
 #include <SOIL2.h>
 
+#include <sstream>
+
 using namespace std;
 
 GLFWcursor* Input::cursor = nullptr;
@@ -561,4 +563,20 @@ void Input::scroll_callback(GLFWwindow*, double xoffset, double yoffset)
 {
 	scrollBuff.x += (float) xoffset;
 	scrollBuff.y += (float) yoffset;
+}
+
+// ------------ Serialization Functions ------
+
+std::string Input::serializeAsString()
+{
+	std::stringstream ss;
+	
+	ss <<
+		Input::getAxis("yaw") << ";" <<
+		Input::getAxis("pitch") << ";" <<
+		Input::getAxis("roll") << ";" <<
+		Input::mousePosition().x << ";" <<
+		Input::mousePosition().y;
+
+	return ss.str();
 }

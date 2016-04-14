@@ -11,7 +11,7 @@ private:
 
 public:
 	ClientNetwork() {}
-	~ClientNetwork() {}
+	~ClientNetwork() { ClientNetwork::CloseConnection(); }
 	//Establishes a Connection based on the ip and port
 	//Returns 1 if failure
 
