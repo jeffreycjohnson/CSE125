@@ -55,10 +55,8 @@ void SSAOPass::render(Camera* camera)
 
 	camera->fbo->bindTexture(0, 1);
 	camera->fbo->bindTexture(1, 2);
-    camera->fbo->bindDepthTexture(2);
 	shader["normalTex"] = 0;
 	shader["posTex"] = 1;
-    shader["depthTex"] = 2;
 
 	noise->bindTexture(3);
 	shader["rotationTex"] = 3;

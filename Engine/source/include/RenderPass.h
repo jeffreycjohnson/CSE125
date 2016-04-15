@@ -60,7 +60,7 @@ public:
 class SSAOPass : public RenderPass
 {
 public:
-	SSAOPass(unsigned int samples = 16, float radius = 0.25f);
+	explicit SSAOPass(unsigned int samples = 16, float radius = 0.5f);
 	void render(Camera* camera) override;
 
 private:

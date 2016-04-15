@@ -28,8 +28,8 @@ void InitializeEngine()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    int width = 1024;
-    int height = 768;
+    int width = 1920;
+    int height = 1080;
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
     GLFWwindow* window = glfwCreateWindow(width, height, "CSE 125", nullptr, nullptr);
