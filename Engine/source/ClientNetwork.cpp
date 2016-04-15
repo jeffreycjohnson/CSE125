@@ -212,7 +212,7 @@ int ClientNetwork::sendMessage(void * message, int msgType) {
 	}
 
 	//Pound Define This
-	printf("Bytes Sent: %d\n", iSendResult);
+	// printf("Bytes Sent: %d\n", iSendResult);
 
 	return 0;
 }

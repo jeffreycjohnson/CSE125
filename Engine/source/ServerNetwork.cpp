@@ -34,6 +34,9 @@ int ServerNetwork::clientSocket;
 int ServerNetwork::listenSocket;
 std::string ServerNetwork::port;
 
+char ServerNetwork::lastBuf[DEFAULT_BUFLEN];
+int ServerNetwork::lastLen = 0;
+
 void ServerNetwork::setup(std::string port)
 {
 	ServerNetwork::port = port;
@@ -81,50 +84,80 @@ void ServerNetwork::start() {
 	std::cout << "Accepted tcp connection" << std::endl;
 }
 
-std::vector<char> ServerNetwork::handleClient(int * msgType) { return handleClient(clientSocket, msgType); }
+std::vector<NetworkResponse> ServerNetwork::handleClient() { return handleClient(clientSocket); }
 
-std::vector<char> ServerNetwork::handleClient(int clientSocket, int *msgType) {
-		// Receive until the peer shuts down the connection
+std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
+	// Receive until the peer shuts down the connection
 	int iResult;
-	std::string data = "";
 	int totalBytesRecvd = 0;
 	int contentLength = -1;
 
+	std::vector<NetworkResponse> msgs;
 	std::vector<char> msg;
 
 	// non-blocking mode is enabled.
 	u_long iMode = 1;
 	ioctlsocket(clientSocket, FIONBIO, &iMode);
 
+	char recvbuf[DEFAULT_BUFLEN];
+
+	if (ServerNetwork::lastLen != 0)
+	{
+		memcpy(recvbuf, ServerNetwork::lastBuf, DEFAULT_BUFLEN);
+		totalBytesRecvd += ServerNetwork::lastLen;
+	}
+
 	do {
-		char recvbuf[DEFAULT_BUFLEN];
-		iResult = recv(ServerNetwork::clientSocket, recvbuf, DEFAULT_BUFLEN - 1, 0);
+		iResult = recv(ServerNetwork::clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
 
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) {
-			// std::cout << "No data to receive " << nError << std::endl;
 			break;
 		}
 
 		if (iResult > 0) {
-			//printf("Bytes received: %d\n", iResult);
 			totalBytesRecvd += iResult;
-			//recvbuf[iResult] = '\0';
+			int msgLength = 0;
+			int totalBytesProcd = 0;
 
-			// sizeof(int) is for the 4 bytes used to represent the content length of message
-			if (totalBytesRecvd > sizeof(int) && data == "") {
+			// only read a message once we've gotten enough bytes tbh
+			do
+			{
+				// what do if we don't even have enough for the message length
+				if ((totalBytesRecvd - totalBytesProcd) < sizeof(int))
+				{
+					memcpy(ServerNetwork::lastBuf, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+					ServerNetwork::lastLen = totalBytesRecvd - totalBytesProcd;
 
-				std::vector<char> temp = decodeStruct(recvbuf, DEFAULT_BUFLEN, msgType, &contentLength);
-				msg = temp;
+					break;
+				}
 
-				std::cout << "Content-Length: " << contentLength << std::endl;
-				std::cout << "Message Type: " << *msgType << std::endl;
-				break;
-				//contentLength = decodeContentLength(std::string(recvbuf, sizeof(int)));
+				// grab the message length to see if we have enough
+				memcpy(&msgLength, recvbuf + totalBytesProcd, sizeof(int));
+				msgLength = ntohl(msgLength);
 
+				// what do if we don't have enough bytes for the whole message
+				if ((totalBytesRecvd - totalBytesProcd) < msgLength)
+				{
+					memcpy(ServerNetwork::lastBuf, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+					ServerNetwork::lastLen = totalBytesRecvd - totalBytesProcd;
+
+					break;
+				}
+
+				// parse the whole message
+				int msgType = -1;
+				msg = decodeStruct(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &contentLength);
+				totalBytesProcd += contentLength;
+
+				NetworkResponse response(msgType, msg);
+				msgs.push_back(response);
 			}
-			//data += recvbuf + sizeof(int);
-			//std::cout << "Received the following data: " << data << std::endl;
+			while (totalBytesRecvd > totalBytesProcd);
+			
+			std::cerr << "We found " << msgs.size() << " messages" << std::endl;
+			break;
+
 		}
 		else if (iResult == 0) {
 			break;
@@ -142,15 +175,12 @@ std::vector<char> ServerNetwork::handleClient(int clientSocket, int *msgType) {
 # endif
 			WSACleanup();
 #endif
-
-
-			return msg;
+			return msgs;
 		}
-		if (contentLength + sizeof(int) == totalBytesRecvd) break;
 
 	} while (iResult > 0);
 
-	return msg;
+	return msgs;
 }
 
 int ServerNetwork::sendMessage(void * message, int msgType) {
@@ -177,7 +207,6 @@ int ServerNetwork::sendMessage(void * message, int msgType) {
 #endif
 		return 1;
 	}
-	//printf("Bytes sent: %d\n", iSendResult);
 #ifdef __LINUX
 	close(clientSocket);
 #endif

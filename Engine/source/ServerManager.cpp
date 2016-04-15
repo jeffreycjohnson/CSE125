@@ -17,13 +17,15 @@ void ServerManager::sendMessages()
 void ServerManager::receiveMessages()
 {
 	InputNetworkData* msg = new InputNetworkData;
-	int msgType = -1;
 
 	// for now, all received messages are client-side input
-	std::vector<char> buf = ServerNetwork::handleClient(&msgType);
-	if (msgType == INPUT_NETWORK_DATA)
+	std::vector<NetworkResponse> responses = ServerNetwork::handleClient();
+	if (responses.size() < 1) return;
+
+	NetworkResponse final = responses.back();
+	if (final.messageType == INPUT_NETWORK_DATA)
 	{
-		msg = (InputNetworkData*)buf.data();
+		msg = (InputNetworkData*)final.body.data();
 		ServerInput::deserializeAndApply(*msg);
 	}
 }

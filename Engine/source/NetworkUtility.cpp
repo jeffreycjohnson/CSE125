@@ -42,12 +42,7 @@ std::vector<char> decodeStruct(char * buf, int buflen, int * msgType, int * msgL
 		if (DEBUG) std::cerr << "Error decoding struct!" << std::endl;
 		return empty;
 	}
-
-	if (buf == nullptr)
-	{
-		std::cerr << "HEY WE GETTIN NULL BUFFER IN DECODE STRUCT MANG" << std::endl;
-	}
-
+	
 	memcpy(msgLen, buf, sizeof(int));
 	*msgLen = ntohl(*msgLen);
 	memcpy(msgType, buf + sizeof(int), sizeof(int));
