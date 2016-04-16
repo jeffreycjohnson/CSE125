@@ -10,8 +10,8 @@ SSAOPass::SSAOPass(unsigned int samples, float radius) : samples(samples), radiu
 	// make_unique wasn't working???
 	std::vector<GLenum> format = { GL_RGB8 };
 	aoBuffer = std::make_unique<Framebuffer>(Renderer::getWindowWidth(), Renderer::getWindowHeight(), format, false);
-
-	auto& shader = Renderer::getShader(SSAO_SHADER);
+    // use the following if there are performance or vram problems (runs at 1/2 resolution)
+    //aoBuffer = std::make_unique<Framebuffer>(Renderer::getWindowWidth()/2, Renderer::getWindowHeight()/2, format, false);
 
 	std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
 	std::default_random_engine generator;
@@ -46,7 +46,7 @@ void SSAOPass::render(Camera* camera)
 
 	auto& shader = Renderer::getShader(SSAO_SHADER);
 	shader.use();
-	// pass samples to an array in the shader
+	// pass random samples to an array in the shader
 	for (unsigned int i = 0; i < samples; i++) {
 		shader[std::string("uSamples[") + std::to_string(i) + "]"] = sampleBuf[i];
 	}
@@ -63,19 +63,24 @@ void SSAOPass::render(Camera* camera)
 
 	GLuint drawBuffer = GL_COLOR_ATTACHMENT0;
 	aoBuffer->bind(1, &drawBuffer, false);
-	aoBuffer->draw();
+	aoBuffer->draw(); // first pass that fills the ao buffer
 
-	//glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
 	glBlendFunc(GL_ONE, GL_ONE);
+
 	auto& blurShader = Renderer::getShader(SSAO_BLUR);
 	blurShader.use();
+
 	drawBuffer = GL_COLOR_ATTACHMENT3;
 	camera->fbo->bind(1, &drawBuffer, false);
+
 	aoBuffer->bindTexture(0, 0);
 	blurShader["inputTex"] = 0;
 	camera->fbo->bindTexture(1, 0);
 	blurShader["colorTex"] = 1;
-	camera->fbo->draw();
+    blurShader["ambientColor"] = ambientColor;
+
+	camera->fbo->draw(); // second pass that blurs and applies the ao
 	glDisable(GL_BLEND);
 }

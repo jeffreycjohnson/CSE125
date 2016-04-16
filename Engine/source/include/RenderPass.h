@@ -62,6 +62,7 @@ class SSAOPass : public RenderPass
 public:
 	explicit SSAOPass(unsigned int samples = 16, float radius = 0.5f);
 	void render(Camera* camera) override;
+    glm::vec3 ambientColor = glm::vec3(0.25f);
 
 private:
 	unsigned int samples;

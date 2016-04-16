@@ -3,6 +3,7 @@ in vec2 vTexCoord;
 
 uniform sampler2D inputTex;
 uniform sampler2D colorTex;
+uniform vec3 ambientColor;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -18,5 +19,5 @@ void main()
             result += texture(inputTex, vTexCoord + offset).r;
         }
     }
-    fragColor = texture(colorTex, vTexCoord) * result / (4.0 * 4.0);
+    fragColor = vec4(texture(colorTex, vTexCoord).xyz * result / (4.0 * 4.0) * ambientColor, 1.0);
 }
