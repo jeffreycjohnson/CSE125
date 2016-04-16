@@ -11,11 +11,11 @@
 
 const float SPEED = 3.0f;
 
-FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up) 
+FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up) 
 	: moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up)
 {
 	this->front = glm::vec3(0, 0, -1);
-
+	this->clientId = clientId;
 	this->yaw = -90.0f;
 	this->pitch = 0.0f;
 }
@@ -31,7 +31,7 @@ void FPSMovement::fixedUpdate()
 	auto dt = Timer::fixedTimestep;
 	
 	// act on mouse
-	glm::vec2 currMousePosition = ServerInput::mousePosition();
+	glm::vec2 currMousePosition = ServerInput::mousePosition(clientId);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
 
 	yaw += mouseDelta.x * mouseSensitivity;
@@ -47,8 +47,8 @@ void FPSMovement::fixedUpdate()
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	position += ServerInput::getAxis("roll") * worldFront * speed;
-	position += ServerInput::getAxis("pitch") * normRight * speed;
+	position += ServerInput::getAxis("roll", clientId) * worldFront * speed;
+	position += ServerInput::getAxis("pitch", clientId) * normRight * speed;
 	
 	recalculate();
 

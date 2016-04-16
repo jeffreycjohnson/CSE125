@@ -3,48 +3,47 @@
 #include <iostream>
 #include <sstream>
 
-float ServerInput::yaw = 0.0f, ServerInput::pitch = 0.0f, ServerInput::roll = 0.0f;
-glm::vec2 ServerInput::mousePos = glm::vec2(0.0f, 0.0f);
+std::unordered_map<int, MovementData> ServerInput::clientMovementData;
 
 ServerInput::~ServerInput() {}
 
-glm::vec2 ServerInput::mousePosition()
+glm::vec2 ServerInput::mousePosition(int clientId)
 {
-	return ServerInput::mousePos;
+	return ServerInput::clientMovementData[clientId].mousePos;
 }
 
-float ServerInput::getAxis(std::string name)
+float ServerInput::getAxis(std::string name, int clientId)
 {
-	if (name == "yaw") return yaw;
-	if (name == "pitch") return pitch;
-	if (name == "roll") return roll;
+	if (name == "yaw") ServerInput::clientMovementData[clientId].yaw;
+	if (name == "pitch") return ServerInput::clientMovementData[clientId].pitch;
+	if (name == "roll") return ServerInput::clientMovementData[clientId].roll;
 
 	std::cerr << "Requesting invalid axis " << name << std::endl;
 	return 0.0f;
 }
 
-void ServerInput::deserializeStringAndApply(std::string serialized)
+void ServerInput::deserializeStringAndApply(std::string serialized, int clientId)
 {
 	std::stringstream ss(serialized);
 
-	ss >> ServerInput::yaw;
+	ss >> ServerInput::clientMovementData[clientId].yaw;
 	ss.ignore(); // DEM SEMICOLONS
-	ss >> ServerInput::pitch;
+	ss >> ServerInput::clientMovementData[clientId].pitch;
 	ss.ignore();
-	ss >> ServerInput::roll;
+	ss >> ServerInput::clientMovementData[clientId].roll;
 	ss.ignore();
 
-	ss >> ServerInput::mousePos.x;
+	ss >> ServerInput::clientMovementData[clientId].mousePos.x;
 	ss.ignore();
-	ss >> ServerInput::mousePos.y;
+	ss >> ServerInput::clientMovementData[clientId].mousePos.y;
 }
 
-void ServerInput::deserializeAndApply(InputNetworkData serialized)
+void ServerInput::deserializeAndApply(InputNetworkData serialized, int clientId)
 {
-	ServerInput::yaw = serialized.yaw;
-	ServerInput::pitch = serialized.pitch;
-	ServerInput::roll = serialized.roll;
+	ServerInput::clientMovementData[clientId].yaw = serialized.yaw;
+	ServerInput::clientMovementData[clientId].pitch = serialized.pitch;
+	ServerInput::clientMovementData[clientId].roll = serialized.roll;
 
-	ServerInput::mousePos.x = serialized.mouseX;
-	ServerInput::mousePos.y = serialized.mouseY;
+	ServerInput::clientMovementData[clientId].mousePos.x = serialized.mouseX;
+	ServerInput::clientMovementData[clientId].mousePos.y = serialized.mouseY;
 }

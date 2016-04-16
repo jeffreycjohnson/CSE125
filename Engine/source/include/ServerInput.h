@@ -13,21 +13,25 @@
  *
  * Functions need to be written as different sources of input are required.
  */
+struct MovementData {
+	float yaw, pitch, roll;
+	glm::vec2 mousePos;
+};
+
 class ServerInput
 {
 private:
-	static float yaw, pitch, roll;
-	static glm::vec2 mousePos;
+	static std::unordered_map<int, MovementData> clientMovementData;
 
 public:
 	ServerInput();
 	~ServerInput();
 
-	static glm::vec2 mousePosition();
-	static float getAxis(std::string name);
+	static glm::vec2 mousePosition(int clientId);
+	static float getAxis(std::string name, int clientId);
 
-	static void deserializeStringAndApply(std::string serialized);
-	static void deserializeAndApply(InputNetworkData serialized);
+	static void deserializeStringAndApply(std::string serialized, int clientId);
+	static void deserializeAndApply(InputNetworkData serialized, int clientId);
 };
 
 #endif SERVER_INPUT_H

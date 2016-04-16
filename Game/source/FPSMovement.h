@@ -6,6 +6,7 @@
 class FPSMovement : public Component
 {
 private:
+	int clientId;
 	float moveSpeed, mouseSensitivity;
 
 	glm::vec3 position, front, up, right, worldUp;
@@ -15,7 +16,7 @@ private:
 
 	void recalculate();
 public:
-	FPSMovement(
+	FPSMovement( int clientId,
 		float moveSpeed, float mouseSensitivity,
 		glm::vec3 position, glm::vec3 up);
 	~FPSMovement() {};
