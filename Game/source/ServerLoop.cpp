@@ -7,12 +7,10 @@
 
 ServerLoop::ServerLoop(std::string port)
 {
-	ServerNetwork::setup(port);
 }
 
 void ServerLoop::create()
 {
-	ServerNetwork::start();
 }
 
 void ServerLoop::fixedUpdate()

@@ -8,10 +8,18 @@
 #include "ServerNetwork.h"
 #include "NetworkStruct.h"
 
+std::vector<int> ServerManager::clientIDs;
+
+void ServerManager::initialize(std::string port, int numberOfClients)
+{
+	ServerNetwork::setup(port);
+	ServerManager::clientIDs = ServerNetwork::startMultiple(numberOfClients);
+}
+
 void ServerManager::sendMessages()
 {
 	TransformNetworkData msg = GameObject::FindByName("player")->transform.serialize();
-	ServerNetwork::sendMessage(&msg, TRANSFORM_NETWORK_DATA);
+	ServerNetwork::broadcastMessage(&msg, TRANSFORM_NETWORK_DATA);
 }
 
 void ServerManager::receiveMessages()
@@ -19,10 +27,11 @@ void ServerManager::receiveMessages()
 	InputNetworkData* msg = new InputNetworkData;
 
 	// for now, all received messages are client-side input
-	std::vector<NetworkResponse> responses = ServerNetwork::handleClient();
+	std::vector<std::vector<NetworkResponse>> responses = ServerNetwork::selectClients();
 	if (responses.size() < 1) return;
+	if (responses[0].size() < 1) return;
 
-	NetworkResponse final = responses.back();
+	NetworkResponse final = responses[0].back();
 	if (final.messageType == INPUT_NETWORK_DATA)
 	{
 		msg = (InputNetworkData*)final.body.data();

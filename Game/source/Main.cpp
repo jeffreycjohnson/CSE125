@@ -8,7 +8,7 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
-#include "ServerNetwork.h"
+#include "ServerManager.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -45,9 +45,8 @@ int main(int argc, char** argv)
 	GameObject *scene = loadScene("assets/artsy.dae");
 	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
-	
-	ServerNetwork::setup("9876");
-	ServerNetwork::start();
-	
+
+	ServerManager::initialize("9876", 2);
+		
     RunEngine(1); // Run engine as server
 }

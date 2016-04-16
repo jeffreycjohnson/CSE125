@@ -217,8 +217,6 @@ int ClientNetwork::sendMessage(void * message, int msgType) {
 	return 0;
 }
 
-
-
 std::vector<char> ClientNetwork::receiveMessage(int * msgType){
 	int iResult;
 	char recvbuffer[DEFAULT_BUFLEN];

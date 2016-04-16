@@ -30,12 +30,11 @@
 #endif
 // #pragma comment (lib, "Mswsock.lib")
 
-int ServerNetwork::clientSocket;
 int ServerNetwork::listenSocket;
 std::string ServerNetwork::port;
 
-char ServerNetwork::lastBuf[DEFAULT_BUFLEN];
-int ServerNetwork::lastLen = 0;
+std::vector<int> ServerNetwork::clients;
+std::unordered_map<int, PreviousData> ServerNetwork::previousClientData;
 
 void ServerNetwork::setup(std::string port)
 {
@@ -56,35 +55,32 @@ void ServerNetwork::closeConnection()
 {
 	// shutdown the connection since we're done
 	std::cout << "calling destructor" << std::endl;
+
+	for (int clientSocket : clients)
+	{
 #ifdef __LINUX
 #else
-	int iResult = shutdown(clientSocket, SD_SEND);
-	if (iResult == SOCKET_ERROR) {
-		printf("shutdown failed with error: %d\n", WSAGetLastError());
-		closesocket(clientSocket);
+		int iResult = shutdown(clientSocket, SD_SEND);
+		if (iResult == SOCKET_ERROR) {
+			printf("shutdown failed with error: %d\n", WSAGetLastError());
+			closesocket(clientSocket);
 
 # ifdef _EXCEPTIONAL
-		std::string message = "shutdown failed with error: ";
-		message += WSAGetLastError();
-		throw new std::runtime_error(message);
+			std::string message = "shutdown failed with error: ";
+			message += WSAGetLastError();
+			throw new std::runtime_error(message);
 # endif
+			WSACleanup();
+
+			return;
+		}
+
+		// cleanup
+		closesocket(clientSocket);
 		WSACleanup();
-
-		return;
-	}
-
-	// cleanup
-	closesocket(clientSocket);
-	WSACleanup();
 #endif
+	}
 }
-
-void ServerNetwork::start() {
-	ServerNetwork::clientSocket = acceptTCPConnection(ServerNetwork::listenSocket);
-	std::cout << "Accepted tcp connection" << std::endl;
-}
-
-std::vector<NetworkResponse> ServerNetwork::handleClient() { return handleClient(clientSocket); }
 
 std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 	// Receive until the peer shuts down the connection
@@ -100,15 +96,16 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 	ioctlsocket(clientSocket, FIONBIO, &iMode);
 
 	char recvbuf[DEFAULT_BUFLEN];
+	PreviousData& prevData = ServerNetwork::previousClientData[clientSocket];
 
-	if (ServerNetwork::lastLen != 0)
+	if (prevData.length != 0)
 	{
-		memcpy(recvbuf, ServerNetwork::lastBuf, DEFAULT_BUFLEN);
-		totalBytesRecvd += ServerNetwork::lastLen;
+		memcpy(recvbuf, prevData.buffer, DEFAULT_BUFLEN);
+		totalBytesRecvd += prevData.length;
 	}
 
 	do {
-		iResult = recv(ServerNetwork::clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
+		iResult = recv(clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
 
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) {
@@ -120,42 +117,44 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 			int msgLength = 0;
 			int totalBytesProcd = 0;
 
-			// only read a message once we've gotten enough bytes tbh
-			do
+		// only read a message once we've gotten enough bytes tbh
+		do
+		{
+			// what do if we don't even have enough for the message length
+			if ((totalBytesRecvd - totalBytesProcd) < sizeof(int))
 			{
-				// what do if we don't even have enough for the message length
-				if ((totalBytesRecvd - totalBytesProcd) < sizeof(int))
-				{
-					memcpy(ServerNetwork::lastBuf, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
-					ServerNetwork::lastLen = totalBytesRecvd - totalBytesProcd;
+				memset(prevData.buffer, 0, DEFAULT_BUFLEN);
+				memcpy(prevData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+				prevData.length = totalBytesRecvd - totalBytesProcd;
 
-					break;
-				}
-
-				// grab the message length to see if we have enough
-				memcpy(&msgLength, recvbuf + totalBytesProcd, sizeof(int));
-				msgLength = ntohl(msgLength);
-
-				// what do if we don't have enough bytes for the whole message
-				if ((totalBytesRecvd - totalBytesProcd) < msgLength)
-				{
-					memcpy(ServerNetwork::lastBuf, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
-					ServerNetwork::lastLen = totalBytesRecvd - totalBytesProcd;
-
-					break;
-				}
-
-				// parse the whole message
-				int msgType = -1;
-				msg = decodeStruct(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &contentLength);
-				totalBytesProcd += contentLength;
-
-				NetworkResponse response(msgType, msg);
-				msgs.push_back(response);
+				break;
 			}
-			while (totalBytesRecvd > totalBytesProcd);
+
+			// grab the message length to see if we have enough
+			memcpy(&msgLength, recvbuf + totalBytesProcd, sizeof(int));
+			msgLength = ntohl(msgLength);
+
+			// what do if we don't have enough bytes for the whole message
+			if ((totalBytesRecvd - totalBytesProcd) < msgLength)
+			{
+				memset(prevData.buffer, 0, DEFAULT_BUFLEN);
+				memcpy(prevData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+				prevData.length = totalBytesRecvd - totalBytesProcd;
+
+				break;
+			}
+
+			// parse the whole message
+			int msgType = -1;
+			msg = decodeStruct(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &contentLength);
+			totalBytesProcd += contentLength;
+
+			NetworkResponse response(msgType, msg);
+			msgs.push_back(response);
+		}
+		while (totalBytesRecvd > totalBytesProcd);
 			
-			std::cerr << "We found " << msgs.size() << " messages" << std::endl;
+			std::cerr << clientSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
 
 		}
@@ -183,11 +182,105 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 	return msgs;
 }
 
-int ServerNetwork::sendMessage(void * message, int msgType) {
+std::vector<int> ServerNetwork::startMultiple(int numClients)
+{
+	std::vector<int> clientIDs;
+
+	for (int sofar = 0; sofar < numClients; sofar++)
+	{
+		// we don't need to crash and burn here, let's just crash and burn in acceptTCPConnection
+		int potentialClient = acceptTCPConnection(ServerNetwork::listenSocket);
+
+		clientIDs.push_back(sofar);
+
+		// add the clientID -> socket mapping
+		ServerNetwork::clients.push_back(potentialClient);
+
+		// and create some default previous data
+		ServerNetwork::previousClientData[potentialClient] = PreviousData();
+	}
+
+	return clientIDs;
+}
+
+std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
+{
+	std::vector<std::vector<NetworkResponse>> responses;
+	responses.resize(clients.size()); // size it to how it needs to be
+
+	// create and zero file descriptor set for select population
+	fd_set readfds;
+	FD_ZERO(&readfds);
+
+	// add clients to fd_set
+	for (int clientSock : clients)
+	{
+		FD_SET(clientSock, &readfds);
+	}
+
+	// 1ms timeout for detecting messages
+	// we dont got time for waiting!
+	timeval tv;
+	tv.tv_usec = 1000;
+
+	/**
+	 * Realtalk: is doing select necessary? As the sockets are all nonblocking what's
+	 * the harm in just polling *all* of them to see if they have data?
+	 */
+	int selResult = select(clients.back() + 1, &readfds, NULL, NULL, &tv);
+	if (selResult < 0)
+	{
+#ifdef __LINUX
+		perror("select failed with error");
+#else
+		printf("select failed with error: %d\n", WSAGetLastError());
+# ifdef _EXCEPTIONAL
+		std::string message = "recv failed with error: ";
+		message += WSAGetLastError();
+		throw new std::runtime_error(message);
+# endif
+		WSACleanup();
+#endif
+	}
+
+	// iterate through meaningful client sockets
+	for (int i = 0; i < readfds.fd_count; i++)
+	{
+		// get the socket that has data on it
+		int relevantSocket = readfds.fd_array[i];
+
+		// get the client ID for this socket
+		auto it = std::find(clients.begin(), clients.end(), relevantSocket);
+		if (it == clients.end())
+		{
+			std::cerr << "select gave us an unknown socket descriptor" << std::endl;
+			continue;
+		}
+		int relevantClientID = std::distance(clients.begin(), it);
+
+		std::vector<NetworkResponse> relevantResponse = ServerNetwork::handleClient(relevantSocket);
+		responses[relevantClientID] = relevantResponse;
+	}
+
+	return responses;
+}
+
+void ServerNetwork::broadcastMessage(void * message, int msgType)
+{
+	for (int clientID = 0; clientID < clients.size(); clientID++)
+	{
+		ServerNetwork::sendMessage(clientID, message, msgType);
+	}
+}
+
+void ServerNetwork::sendMessage(int clientID, void * message, int msgType)
+{
+	int clientSock = ServerNetwork::clients[clientID];
+
 	char encodedMsg[DEFAULT_BUFLEN];
 	int contentLength = encodeStruct(message, NetworkStruct::sizeOf(msgType), msgType, encodedMsg, DEFAULT_BUFLEN);
 
-	int iSendResult = send(ServerNetwork::clientSocket, encodedMsg, contentLength, 0);
+	int iSendResult = send(clientSock, encodedMsg, contentLength, 0);
 	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
 #else
@@ -195,7 +288,7 @@ int ServerNetwork::sendMessage(void * message, int msgType) {
 		if (wsaLastError != WSAEWOULDBLOCK)
 		{
 			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(ServerNetwork::clientSocket);
+			closesocket(clientSock);
 # ifdef _EXCEPTIONAL
 			std::string message = "send failed with error: ";
 			message += WSAGetLastError();
@@ -205,12 +298,12 @@ int ServerNetwork::sendMessage(void * message, int msgType) {
 			WSACleanup();
 		}
 #endif
-		return 1;
+		return;
 	}
 #ifdef __LINUX
 	close(clientSocket);
 #endif
-	return 0;
+	return;
 }
 
 int ServerNetwork::acceptTCPConnection(int listenSocket) {
@@ -234,11 +327,7 @@ int ServerNetwork::acceptTCPConnection(int listenSocket) {
 		return -1;
 	}
 
-	// No longer need server socket
-#ifdef __LINUX
-#else
-	closesocket(listenSocket);
-#endif
+	std::cout << "accepted client!" << std::endl;
 
 	return clientSocket;
 }
