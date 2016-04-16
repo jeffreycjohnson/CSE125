@@ -14,7 +14,7 @@ glm::vec2 ServerInput::mousePosition(int clientId)
 
 float ServerInput::getAxis(std::string name, int clientId)
 {
-	if (name == "yaw") ServerInput::clientMovementData[clientId].yaw;
+	if (name == "yaw") return ServerInput::clientMovementData[clientId].yaw;
 	if (name == "pitch") return ServerInput::clientMovementData[clientId].pitch;
 	if (name == "roll") return ServerInput::clientMovementData[clientId].roll;
 
