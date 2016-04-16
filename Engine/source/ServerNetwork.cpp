@@ -243,23 +243,14 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 #endif
 	}
 
-	// iterate through meaningful client sockets
-	for (int i = 0; i < readfds.fd_count; i++)
-	{
-		// get the socket that has data on it
-		int relevantSocket = readfds.fd_array[i];
+	for (int client_id = 0; client_id < clients.size(); ++client_id){
+		int relevantSocket = clients[client_id];
 
-		// get the client ID for this socket
-		auto it = std::find(clients.begin(), clients.end(), relevantSocket);
-		if (it == clients.end())
-		{
-			std::cerr << "select gave us an unknown socket descriptor" << std::endl;
-			continue;
+		if (!FD_ISSET(relevantSocket, &readfds)){
+			std::cerr << client_id << " with socket " << relevantSocket << "is not ready to be read" << std::endl;
 		}
-		int relevantClientID = std::distance(clients.begin(), it);
-
 		std::vector<NetworkResponse> relevantResponse = ServerNetwork::handleClient(relevantSocket);
-		responses[relevantClientID] = relevantResponse;
+		responses[client_id] = relevantResponse;
 	}
 
 	return responses;
