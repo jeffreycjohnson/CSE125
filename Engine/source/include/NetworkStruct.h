@@ -4,6 +4,14 @@
 #include <unordered_map>
 #include <stdio.h>
 
+#define CLIENTS_CONN_NETWORK_DATA 0
+#pragma pack(push, 1)
+struct ClientsConnNetworkData
+{
+	unsigned int connected;
+};
+#pragma pack(pop)
+
 #define INPUT_NETWORK_DATA 1
 #pragma pack(push, 1)
 struct InputNetworkData
@@ -26,6 +34,7 @@ struct TransformNetworkData
 	float sx, sy, sz;
 };
 #pragma pack(pop)
+
 
 class NetworkStruct
 {

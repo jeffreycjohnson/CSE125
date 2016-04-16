@@ -200,6 +200,11 @@ std::vector<int> ServerNetwork::startMultiple(int numClients)
 		ServerNetwork::previousClientData[potentialClient] = PreviousData();
 	}
 
+	// broadcast message saying all client connections have been accepted.
+	ClientsConnNetworkData msg;
+	msg.connected = 1;
+	broadcastMessage(&msg, CLIENTS_CONN_NETWORK_DATA);
+	std::cout << "All clients connected!" << std::endl;
 	return clientIDs;
 }
 

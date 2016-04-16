@@ -3,6 +3,8 @@
 
 class ClientManager
 {
+	static bool allClientsConnected;
+
 public:
 	ClientManager() {};
 	~ClientManager() {};
