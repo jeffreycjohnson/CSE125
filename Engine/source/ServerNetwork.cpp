@@ -205,6 +205,7 @@ std::vector<int> ServerNetwork::startMultiple(int numClients)
 	msg.connected = 1;
 	broadcastMessage(&msg, CLIENTS_CONN_NETWORK_DATA);
 	std::cout << "All clients connected!" << std::endl;
+
 	return clientIDs;
 }
 

@@ -29,12 +29,16 @@ void ServerManager::receiveMessages()
 	// for now, all received messages are client-side input
 	std::vector<std::vector<NetworkResponse>> responses = ServerNetwork::selectClients();
 	if (responses.size() < 1) return;
-	if (responses[0].size() < 1) return;
 
-	NetworkResponse final = responses[0].back();
-	if (final.messageType == INPUT_NETWORK_DATA)
-	{
-		msg = (InputNetworkData*)final.body.data();
-		ServerInput::deserializeAndApply(*msg);
+	for (int i = 0; i < responses.size(); i++) {
+		if (responses[i].size() < 1) return;
+
+		NetworkResponse final = responses[i].back();
+		if (final.messageType == INPUT_NETWORK_DATA)
+		{
+			msg = (InputNetworkData*)final.body.data();
+			std::cout << "playerId: " << msg->playerID << std::endl;
+			ServerInput::deserializeAndApply(*msg, msg->playerID);
+		}
 	}
 }

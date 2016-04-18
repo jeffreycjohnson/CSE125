@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 	}
 
 	GameObject *player = new GameObject;
-	player->addComponent(new FPSMovement(1.5f, .25f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+	player->addComponent(new FPSMovement(0, 1.5f, .25f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
 	player->setName("player");
 	player->addComponent(Renderer::mainCamera);
 	GameObject::SceneRoot.addChild(player);
