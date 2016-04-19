@@ -230,6 +230,7 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
 		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
 		return 1;
 	}
+	std::cout << "Sending " << encodedMsg.size() << " bytes" << std::endl;
 	int iSendResult = send(ClientNetwork::ConnectSocket, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
@@ -306,8 +307,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 				}
 
 				// grab the message length to see if we have enough
-				memcpy(&msgLength, recvbuf + totalBytesProcd, sizeof(int));
-				msgLength = ntohl(msgLength);
+				msgLength = ntohl(*((int *)(recvbuf + totalBytesProcd)));
 
 				// what do if we don't have enough bytes for the whole message
 				if ((totalBytesRecvd - totalBytesProcd) < msgLength)

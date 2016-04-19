@@ -130,8 +130,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 			}
 
 			// grab the message length to see if we have enough
-			memcpy(&msgLength, recvbuf + totalBytesProcd, sizeof(int));
-			msgLength = ntohl(msgLength);
+			msgLength = ntohl(*((int *)(recvbuf + totalBytesProcd)));
 
 			// what do if we don't have enough bytes for the whole message
 			if ((totalBytesRecvd - totalBytesProcd) < msgLength)

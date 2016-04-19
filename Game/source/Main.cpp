@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addChild(scene);
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
-	auto clientIDs = ServerManager::initialize("9876", 4);
+	auto clientIDs = ServerManager::initialize("9876", 2);
 	for (auto clientID : clientIDs)
 	{
 		GameObject *player = loadScene("assets/ball.dae");
