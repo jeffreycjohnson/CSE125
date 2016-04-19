@@ -14,6 +14,7 @@ enum ColliderType {
 
 class Collider : public Component {
 protected:
+	friend Octree;
 	friend OctreeNode;
 	NodeId nodeId = Octree::UNKNOWN_NODE;
 	Octree* octree;
@@ -35,12 +36,12 @@ public:
 	virtual void debugDraw() = 0;
 	virtual void onCollisionEnter(GameObject* other) = 0;
 
-	virtual bool insideOrIntersects(const glm::vec3& point) = 0;
-	virtual bool intersects(const BoxCollider& other) = 0; 
-	//virtual bool intersects(const CapsuleCollider& other) = 0;
-	//virtual bool intersects(const SphereCollider& other) = 0;
+	virtual bool insideOrIntersects(const glm::vec3& point) const = 0;
+	virtual bool intersects(const BoxCollider& other) const = 0; 
+	virtual bool intersects(const CapsuleCollider& other) const = 0;
+	virtual bool intersects(const SphereCollider& other) const = 0;
 
-	virtual BoxCollider getAABB() = 0;
+	virtual BoxCollider getAABB() const = 0;
 	virtual ColliderType getColliderType() {
 		return ColliderType::UNKNOWN;
 	}

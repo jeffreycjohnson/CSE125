@@ -1,4 +1,4 @@
-// TODO: Implement a capsule collider
+// TODO: Create definitions for CapsuleCollider, and implement
 
 #include "ForwardDecs.h"
 #include "Collider.h"
@@ -23,12 +23,12 @@ public:
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other) override;
 
-	bool insideOrIntersects(const glm::vec3& point) override;
-	bool intersects(const BoxCollider& other) override;
-	//bool intersects(const CapsuleCollider& other) override;
-	//bool intersects(const SphereCollider& other) override;
+	bool insideOrIntersects(const glm::vec3& point) const override;
+	bool intersects(const BoxCollider& other) const override;
+	bool intersects(const CapsuleCollider& other) const override;
+	bool intersects(const SphereCollider& other) const override;
 
-	BoxCollider getAABB() override;
+	BoxCollider getAABB() const override;
 	ColliderType getColliderType() override {
 		return ColliderType::CAPSULE;
 	};

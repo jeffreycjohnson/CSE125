@@ -12,7 +12,7 @@ private:
 	float radius;
 
 public:
-
+	
 	SphereCollider(glm::vec3 c, float r) : center(c), radius(r) {};
 	~SphereCollider();
 	void destroy() override;
@@ -20,12 +20,12 @@ public:
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other) override;
 
-	bool insideOrIntersects(const glm::vec3& point) override;
-	bool intersects(const BoxCollider& other) override;
-	//bool intersects(const CapsuleCollider& other) override;
-	//bool intersects(const SphereCollider& other) override;
+	bool insideOrIntersects(const glm::vec3& point) const override;
+	bool intersects(const BoxCollider& other) const override;
+	bool intersects(const CapsuleCollider& other) const override;
+	bool intersects(const SphereCollider& other) const override;
 
-	BoxCollider getAABB() override;
+	BoxCollider getAABB() const override;
 	ColliderType getColliderType() override {
 		return ColliderType::SPHERE;
 	};

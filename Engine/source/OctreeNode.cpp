@@ -37,23 +37,64 @@ CollisionInfo OctreeNode::raycast(const Ray& ray) {
 	if (isLeaf()) {
 		return colInfo;
 	}
-	// TODO: Figure out which octant the point is in & recurse
+	
+	// TODO: Figure out which octant the point is in & recurse only there (optimization)
 
 	for (auto child : children) {
-		// Figure out which octant 	
+		if (child != nullptr)
+			colInfo.merge(child->raycast(ray));
 	}
-	//colInfo.merge()
 
 	return colInfo;
 };
 
 CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 
+	// TODO: Probably refactor this header to take a Collider* or use dynamic_cast<> (?)
+	CollisionInfo info;
+
 	// Check object against all of the objects in our colliders list
+	for (auto colliderPtr : colliders) {
+		switch (colliderPtr->getColliderType()) {
+		
+		case ColliderType::AABB:
+			BoxCollider* myBox = (BoxCollider*)colliderPtr;
+			if (myBox->intersects(box)) {
+				info.add(myBox);
+			}
+			break;
+		
+		case ColliderType::SPHERE:
+			SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+			if (mySphere->intersects(box)) {
+				info.add(mySphere);
+			}
+			break;
+
+		case ColliderType::CAPSULE:
+			CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+			if (myCapsule->intersects(box)) {
+				info.add(myCapsule);
+			}
+			break;
+
+		// If unknown, try to compute an AABB on the fly
+		default:
+			BoxCollider myBox = colliderPtr->getAABB();
+			if (myBox->intersects(box)) {
+				info.add(myBox);
+			}
+			break;
+		}
+	}
 
 	// If we have children, check them afterwards
+	for (auto child : children) {
+		info.merge(child->collidesWith(box));
+	}
 
-	return CollisionInfo(); // TODO: implement API for collidesWith for octree
+	return info;
+
 };
 
 bool OctreeNode::intersects(const BoxCollider& box) {
@@ -109,6 +150,16 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& box)
 				subdivide();
 			}
 			return true;
+		}
+	}
+}
+
+void OctreeNode::remove(Collider * colliderBeingRemoved)
+{
+	for (auto iter = colliders.begin(); iter != colliders.end(); ++iter) {
+		// TODO: Double check that this will function properly
+		if (*iter == colliderBeingRemoved) {
+			colliders.erase(iter, iter + 1);
 		}
 	}
 }

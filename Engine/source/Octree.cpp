@@ -35,8 +35,10 @@ void Octree::insert(Collider* obj) {
 }
 
 void Octree::remove(Collider* obj) {
-	if (root)
-		root->remove(obj);
+	if (root) {
+		OctreeNode* node = nodeMap[obj->nodeId];
+		node->remove(obj); // Skip having to search through the whole entire tree!
+	}
 }
 
 void Octree::build(BuildMode mode, const GameObject& root) {

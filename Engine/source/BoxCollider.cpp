@@ -1,4 +1,6 @@
 #include "BoxCollider.h"
+#include "CapsuleCollider.h"
+#include "SphereCollider.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "Renderer.h"
@@ -67,7 +69,7 @@ void BoxCollider::update(float)
 	}
 }
 
-BoxCollider BoxCollider::getAABB() {
+BoxCollider BoxCollider::getAABB() const {
 	return *this;
 }
 
@@ -128,7 +130,7 @@ void BoxCollider::updateColliders()
 	}
 }
 
-bool BoxCollider::insideOrIntersects(const glm::vec3& point) {
+bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 	return (
 		this->xmin <= point.x && point.x <= this->xmax &&
 		this->xmin <= point.y && point.y <= this->ymax &&
@@ -136,12 +138,31 @@ bool BoxCollider::insideOrIntersects(const glm::vec3& point) {
 	);
 }
 
-bool BoxCollider::intersects(const BoxCollider& other) {
+bool BoxCollider::intersects(const BoxCollider& other) const {
 	return (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
 		this->xmin <= other.ymax && other.ymin <= this->ymax &&
 		this->xmin <= other.zmax && other.zmin <= this->zmax
 	);
+}
+
+bool BoxCollider::intersects(const CapsuleCollider & other) const
+{
+	// TODO: Implement Box->Capsule intersection
+	return false;
+}
+
+bool BoxCollider::intersects(const SphereCollider & other) const 
+{
+	// This functions assumes that all 8 points in the points[] are
+	// properly defined & transformed before this call.
+
+	for (int i = 0; i < 8; ++i) {
+		if ( other.insideOrIntersects(points[i]) ) {
+			return true;
+		}
+	}
+	return false;
 };
 
 bool BoxCollider::checkCollision(int aIndex, int bIndex)

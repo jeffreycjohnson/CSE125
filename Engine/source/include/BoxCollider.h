@@ -34,10 +34,13 @@ public:
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other) override;
 
-	bool insideOrIntersects(const glm::vec3& point) override;
-	bool intersects(const BoxCollider& other) override;
+	bool insideOrIntersects(const glm::vec3& point) const override;
+
+	bool intersects(const BoxCollider& other) const;
+	bool intersects(const CapsuleCollider& other) const;
+	bool intersects(const SphereCollider& other) const;
 	
-	BoxCollider getAABB() override;
+	BoxCollider getAABB() const override;
 	ColliderType getColliderType() override {
 		return ColliderType::AABB;
 	};
