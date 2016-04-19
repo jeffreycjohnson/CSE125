@@ -36,6 +36,9 @@ public:
 	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
+	static Octree* STATIC_TREE;
+	static Octree* DYNAMIC_TREE;
+
 	enum BuildMode {
 		STATIC_ONLY,  // Only includes colliders with passive = TRUE
 		DYNAMIC_ONLY, // Only includes colliders with passive = FALSE

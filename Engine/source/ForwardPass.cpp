@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "Material.h"
+#include "Collision.h"
 
 void ForwardPass::render(Camera* camera) {
 	unsigned int lightIndex = 0;
@@ -28,7 +29,15 @@ void ParticlePass::render(Camera* camera) {
 }
 
 void DebugPass::render(Camera* camera) {
-    if(Renderer::drawDebug) GameObject::SceneRoot.debugDraw();
+	if (Renderer::drawDebug) {
+		GameObject::SceneRoot.debugDraw();
+		if (Octree::DYNAMIC_TREE != nullptr) {
+			Octree::DYNAMIC_TREE->debugDraw();
+		}
+		if (Octree::STATIC_TREE != nullptr) {
+			Octree::STATIC_TREE->debugDraw();
+		}
+	}
 }
 
 void ShadowPass::render(Camera* camera)

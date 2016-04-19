@@ -56,35 +56,31 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 	// Check object against all of the objects in our colliders list
 	for (auto colliderPtr : colliders) {
 		switch (colliderPtr->getColliderType()) {
-		
-		case ColliderType::AABB:
-			BoxCollider* myBox = (BoxCollider*)colliderPtr;
-			if (myBox->intersects(box)) {
-				info.add(myBox);
-			}
-			break;
-		
-		case ColliderType::SPHERE:
-			SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-			if (mySphere->intersects(box)) {
-				info.add(mySphere);
-			}
-			break;
 
-		case ColliderType::CAPSULE:
-			CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-			if (myCapsule->intersects(box)) {
-				info.add(myCapsule);
+			case ColliderType::AABB:
+			{
+			   BoxCollider* myBox = (BoxCollider*)colliderPtr;
+			   if (myBox->intersects(box)) {
+				   info.add(myBox);
+			   }
+			   break;
 			}
-			break;
-
-		// If unknown, try to compute an AABB on the fly
-		default:
-			BoxCollider myBox = colliderPtr->getAABB();
-			if (myBox->intersects(box)) {
-				info.add(myBox);
+			case ColliderType::SPHERE:
+			{
+				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+				if (mySphere->intersects(box)) {
+					info.add(mySphere);
+				}
+				break;
 			}
-			break;
+			case ColliderType::CAPSULE:
+			{
+				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+				if (myCapsule->intersects(box)) {
+					info.add(myCapsule);
+				}
+				break;
+			}
 		}
 	}
 
@@ -230,11 +226,11 @@ bool OctreeNode::isLeaf() const {
 
 void OctreeNode::debugDraw() {
 	// Only draw octree leaves that have objects
-	if (children.empty() && !colliders.empty()) {
+	if (true){//children.empty() && !colliders.empty()) {
 		glm::vec3 center = (max - min); // TODO: Our debug drawing should probably be more descriptive & configurable
 		center /= 2;
 		glm::vec3 scale(1, 1, 1);
-		glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
+		glm::vec4 color(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
 		Renderer::drawBox(center, scale, color);
 	}
 }

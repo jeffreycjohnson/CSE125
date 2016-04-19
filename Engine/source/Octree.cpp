@@ -3,12 +3,16 @@
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
+#include "Renderer.h"
 #include <stack>
 
 // Raycasting constants
 static const float RAY_MIN = FLT_EPSILON;
 static const float RAY_MAX = FLT_MAX;
 static const float RAY_STEP = 0.01f;
+
+Octree* Octree::STATIC_TREE  = nullptr;
+Octree* Octree::DYNAMIC_TREE = nullptr;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
 	root = new OctreeNode(min, max, this);
@@ -45,6 +49,7 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 
 	// THIS IS EXPENSIVE, DON'T DO THIS A LOT!!!!
 	
+	long objCounter = 0;
 	std::stack<Transform> stack;
 	stack.push(root.transform);
 
@@ -68,12 +73,15 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 
 		if (box != nullptr)  {
 			this->insert(box);
+			++objCounter;
 		}
 		if (sphere != nullptr) {
 			this->insert(sphere);
+			++objCounter;
 		}
 		if (capsule != nullptr) {
 			this->insert(capsule);
+			++objCounter;
 		}
 
 		// Get the transform's children
@@ -81,8 +89,10 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 		for (auto childPtr : t.children) {
 			stack.push(*childPtr);
 		}
-
 	}
+
+	LOG(objCounter); // TODO: remove debug log later
+
 }
 
 OctreeNode* Octree::getNodeById(NodeId node) {

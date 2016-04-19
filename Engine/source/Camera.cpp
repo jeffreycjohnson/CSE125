@@ -10,6 +10,7 @@
 #include "Sound.h"
 #include "Framebuffer.h"
 #include "RenderPass.h"
+#include "Collision.h"
 
 Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats) : width(w), height(h)
 {
@@ -113,4 +114,9 @@ glm::vec3 Camera::getVelocity() const
 float Camera::getFOV() const
 {
 	return currentFOV;
+}
+
+Ray Camera::getEyeRay() const
+{
+	return Ray(position, forward);
 }

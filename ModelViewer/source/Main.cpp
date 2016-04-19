@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "ObjectLoader.h"
 #include "Input.h"
+#include "Collision.h"
 #include <iostream>
 
 extern void RunEngine(int caller);
@@ -38,6 +39,13 @@ int main(int argc, char** argv)
 	auto scene = loadScene(name);
 	scene->addComponent(new Controls());
 	GameObject::SceneRoot.addChild(scene);
+
+	// Octree stuff
+	Octree::DYNAMIC_TREE = new Octree(glm::vec3(-10, -10, -10), glm::vec3(10, 10, 10));
+	Octree::DYNAMIC_TREE->build(Octree::BOTH); // Include all objs for now
+	RunEngine();
+	delete Octree::DYNAMIC_TREE;
+	Octree::DYNAMIC_TREE = nullptr;
 
 	RunEngine(2); // Run Engine as modelviewer
 }

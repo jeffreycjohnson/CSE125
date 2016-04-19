@@ -10,8 +10,11 @@ CapsuleCollider::~CapsuleCollider() {
 
 void CapsuleCollider::debugDraw()
 {
-	// TODO: Jeff, pls
-	// Renderer::drawDebugCapsule(a, b, dist);   // I would love you 4ever :3
+	glm::vec4 color(1,1,0,1); // Yellow for capsule colliders
+	if (colliding) {
+		color = glm::vec4(1, 0, 0, 1); // Red
+	}
+	Renderer::drawCapsule(a, b, dist, color);
 }
 
 // TODO: Implement CapsuleCollider member functions
