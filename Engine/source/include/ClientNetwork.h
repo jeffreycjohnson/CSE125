@@ -1,6 +1,9 @@
 #pragma once
+
 #include <string>
 #include <vector>
+
+#include "NetworkUtility.h"
 
 class ClientNetwork
 {
@@ -10,13 +13,14 @@ private:
 	static bool ConnectionEstablished;
 	static int ConnectSocket;
 
+	static PreviousData previousServerData;
 public:
 	ClientNetwork() {}
-	~ClientNetwork() { ClientNetwork::CloseConnection(); }
+	~ClientNetwork() { ClientNetwork::closeConnection(); }
 	//Establishes a Connection based on the ip and port
 	//Returns 1 if failure
 
-	static int SetupTCPConnection(std::string serverip, std::string port);
+	static int setup(std::string serverip, std::string port);
 
 	static char decodeMessage(std::string message);
 	//Requirements, need connection to be established... What should the data type be TODO:
@@ -24,12 +28,12 @@ public:
 	static int sendBytes(std::vector<char> bytes, int msgType);
 
 	//Returns string with recieved
-	static std::vector<char> receiveMessage(int * msgType);
+	static std::vector<NetworkResponse> receiveMessages();
 
 	//Manual Shutdown
-	static int CloseConnection();
+	static int closeConnection();
 
 	//Status
-	static void GetStatus(std::string header = std::string());
+	static void getStatus(std::string header = std::string());
 };
 

@@ -16,33 +16,35 @@ int ClientManager::myClientID;
 const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
 {
 	// setup the connection
-	ClientNetwork::SetupTCPConnection(serverIP, port);
+	ClientNetwork::setup(serverIP, port);
 
 	// WAIT FOR THE ALL CLEAR
 	while (!ClientManager::allClientsConnected)
 	{
-		int msgType;
-		std::vector<char> received = ClientNetwork::receiveMessage(&msgType);
-
-		if (msgType == CLIENTS_CONN_NETWORK_DATA)
+		std::vector<NetworkResponse> messages = ClientNetwork::receiveMessages();
+		
+		for (auto& response : messages)
 		{
-			ClientsConnNetworkData *c = (ClientsConnNetworkData *)received.data();
-			ClientManager::allClientsConnected = c->connected;
-			if (!ClientManager::allClientsConnected) continue;
-
-			ClientManager::myClientID = c->yourClientID;
-
-			for (int clientID = 0; clientID < c->numClients; clientID++)
+			if (response.messageType == CLIENTS_CONN_NETWORK_DATA)
 			{
-				ClientManager::clientIDs.push_back(clientID);
-			}
+				ClientsConnNetworkData *c = (ClientsConnNetworkData *)response.body.data();
+				ClientManager::allClientsConnected = c->connected;
+				if (!ClientManager::allClientsConnected) continue;
 
-			std::cout << "All clients connected!" << std::endl;
-			return ClientManager::clientIDs;
-		}
-		else if (received.size() != 0)
-		{
-			std::cerr << "Wrong message received before all clear..." << std::endl;
+				ClientManager::myClientID = c->yourClientID;
+
+				for (int clientID = 0; clientID < c->numClients; clientID++)
+				{
+					ClientManager::clientIDs.push_back(clientID);
+				}
+
+				std::cout << "All clients connected!" << std::endl;
+				return ClientManager::clientIDs;
+			}
+			else if (response.body.size() != 0)
+			{
+				std::cerr << "Wrong message received before all clear..." << std::endl;
+			}
 		}
 	}
 }
@@ -62,20 +64,21 @@ void ClientManager::sendMessages()
 void ClientManager::receiveMessages()
 {
 	TransformNetworkData *tnd;
-	int msgType;
 
-	std::vector<char> received = ClientNetwork::receiveMessage(&msgType);
-	if (msgType == CLIENTS_CONN_NETWORK_DATA) {
-		ClientsConnNetworkData * c = (ClientsConnNetworkData *)received.data();
-		if (c->connected)
-			ClientManager::allClientsConnected = true;
-		std::cout << "All clients connected!" << std::endl;
-	}
-	else if (msgType == TRANSFORM_NETWORK_DATA)
+	std::vector<NetworkResponse> receivedMessages = ClientNetwork::receiveMessages();
+
+	for (auto& received : receivedMessages)
 	{
-		tnd = (TransformNetworkData*)received.data();
+		int& msgType = received.messageType;
+		if (msgType == CLIENTS_CONN_NETWORK_DATA) {
+			std::cerr << "RECEIVED ALL CLEAR MESSAGE AFTER SERVER INITIALIZATION" << std::endl;
+		}
+		else if (msgType == TRANSFORM_NETWORK_DATA)
+		{
+			tnd = (TransformNetworkData*)received.body.data();
 
-		std::string playerName = std::string("player_") + std::to_string(tnd->transformID);
-		GameObject::FindByName(playerName)->transform.deserializeAndApply(received);
+			std::string playerName = std::string("player_") + std::to_string(tnd->transformID);
+			GameObject::FindByName(playerName)->transform.deserializeAndApply(received.body);
+		}
 	}
 }

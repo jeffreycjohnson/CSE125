@@ -12,7 +12,6 @@
 #include <windows.h>
 #endif
 
-#include "NetworkUtility.h"
 #include "NetworkStruct.h"
 #include "ServerNetwork.h"
 #include <stdlib.h>

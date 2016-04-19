@@ -41,11 +41,11 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addChild(scene);
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
-	auto clientIDs = ServerManager::initialize("9876", 2);
+	auto clientIDs = ServerManager::initialize("9876", 4);
 	for (auto clientID : clientIDs)
 	{
-		GameObject *player = loadScene("assets/ballman.dae");
-		player->addComponent(new FPSMovement(clientID, 1.5f, .25f, glm::vec3(clientID, -1, clientID), glm::vec3(0, 1, 0)));
+		GameObject *player = loadScene("assets/ball.dae");
+		player->addComponent(new FPSMovement(clientID, 1.5f, .25f, glm::vec3(clientID, .25f, clientID), glm::vec3(0, 1, 0)));
 
 		player->setName(std::string("player_") + std::to_string(clientID));
 		GameObject::SceneRoot.addChild(player);

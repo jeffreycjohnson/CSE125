@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
 	for (auto clientID : clientIDs)
 	{
-		GameObject *player = new GameObject;
+		GameObject *player = loadScene("assets/ball.dae");
 		player->setName(std::string("player_") + std::to_string(clientID));
 
 		if (clientID == ClientManager::myClientID)

@@ -16,7 +16,6 @@
 #include <windows.h>
 #endif
 #include "ClientNetwork.h"
-#include "NetworkUtility.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,7 +39,9 @@ std::string ClientNetwork::port;
 bool ClientNetwork::ConnectionEstablished;
 int ClientNetwork::ConnectSocket;
 
-int ClientNetwork::CloseConnection(){
+PreviousData ClientNetwork::previousServerData;
+
+int ClientNetwork::closeConnection(){
 	int iResult;
 	int closeError = 0;
 	//Need to Establish Connection
@@ -74,7 +75,7 @@ int ClientNetwork::CloseConnection(){
 	@param std::string port: string containing the port. Preferably, in an integer format, e.g. "42069"
 	@return a result code
 **/
-int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
+int ClientNetwork::setup(std::string serverIp, std::string port){
 
 	int ConnectSocket = INVALID_SOCKET;
 	struct addrinfo *result = NULL,
@@ -175,6 +176,9 @@ int ClientNetwork::SetupTCPConnection(std::string serverIp, std::string port){
 	ClientNetwork::port = port;
 	ClientNetwork::ConnectSocket = ConnectSocket;
 
+	// get some dummy previous data
+	previousServerData = PreviousData();
+
 	return 0;
 }
 
@@ -251,78 +255,110 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
 	return 0;
 }
 
-std::vector<char> ClientNetwork::receiveMessage(int * msgType){
-	int iResult;
-	char recvbuffer[DEFAULT_BUFLEN];
-	memset(recvbuffer, 0, DEFAULT_BUFLEN);
+std::vector<NetworkResponse> ClientNetwork::receiveMessages()
+{
+	int iResult = 0;
+	int totalBytesRecvd = 0;
+	int contentLength = -1;
+	int msgType = -1;
+
+	std::vector<NetworkResponse> msgs;
 	std::vector<char> msg;
 
-	//Need to Establish Connection
-	if (!ConnectionEstablished){
-		std::cerr << "Recv Refused. Please Establish Connection" << std::endl;
-		return msg;
-	}
-	//TODO: totalrecv was originally a ssize_t which is of type unsigned long, to prevent overflow..
-	int totalrecv = 0;
-
-	std::string result = "";
-	int contentLength = -1;
-
-	// non-blocking mode is enabled.
+	// enable nonblocking
 	u_long iMode = 1;
 	ioctlsocket(ConnectSocket, FIONBIO, &iMode);
 
-	do {
-		if (totalrecv > DEFAULT_BUFLEN){
-			std::cerr << "Buffer Overflow!!!!!" << std::endl;
-			return msg;
-		}
-		iResult = recv(ConnectSocket, recvbuffer, DEFAULT_BUFLEN-1, 0);
+	char recvbuf[DEFAULT_BUFLEN];
+	memset(recvbuf, 0, DEFAULT_BUFLEN);
+	
+	// is there leftovers from last time?
+	if (previousServerData.length != 0)
+	{
+		memcpy(recvbuf, previousServerData.buffer, DEFAULT_BUFLEN);
+		totalBytesRecvd += previousServerData.length;
+	}
 
+	do
+	{
+		iResult = recv(ConnectSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1, 0);
+
+		// if there's nothing, just leave
 		int nError = WSAGetLastError();
-		if (nError == WSAEWOULDBLOCK) {
-			// std::cout << "No data to receive " << nError << std::endl;
+		if (nError == WSAEWOULDBLOCK) break;
+
+		if (iResult > 0) // if there's data to fetch
+		{
+			totalBytesRecvd += iResult;
+			int msgLength = 0;
+			int totalBytesProcd = 0;
+
+			do
+			{
+				// what do if we don't even have enough for the message length
+				if ((totalBytesRecvd - totalBytesProcd) < sizeof(int))
+				{
+					memset(previousServerData.buffer, 0, DEFAULT_BUFLEN);
+					memcpy(previousServerData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+					previousServerData.length = totalBytesRecvd - totalBytesProcd;
+
+					break;
+				}
+
+				// grab the message length to see if we have enough
+				memcpy(&msgLength, recvbuf + totalBytesProcd, sizeof(int));
+				msgLength = ntohl(msgLength);
+
+				// what do if we don't have enough bytes for the whole message
+				if ((totalBytesRecvd - totalBytesProcd) < msgLength)
+				{
+					memset(previousServerData.buffer, 0, DEFAULT_BUFLEN);
+					memcpy(previousServerData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+					previousServerData.length = totalBytesRecvd - totalBytesProcd;
+
+					break;
+				}
+
+				// parse the whole message
+				int msgType = -1;
+				msg = decodeStruct(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &contentLength);
+				totalBytesProcd += contentLength;
+
+				NetworkResponse response(msgType, msg);
+				msgs.push_back(response);
+			}
+			while (totalBytesRecvd > totalBytesProcd);
+
+			std::cout << ConnectSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
 		}
-
-		if (iResult > 0){
-			totalrecv += iResult;
-			recvbuffer[iResult] = '\0';
-
-			if (totalrecv > sizeof(int) && result == "") { // Recieved content length of data
-				msg = decodeStruct(recvbuffer, DEFAULT_BUFLEN, msgType, &contentLength);
-				break;
-				//std::cout << "Content-Length: " << contentLength << std::endl;
-			} 
-			//result += recvbuffer + sizeof(int);
+		else if (iResult == 0) // there's fookin nothin
+		{
+			break;
 		}
-		else if (iResult == 0){
-			std::cerr << "Connection Closed." << std::endl;
-		}
-		else{
-			//Shutdown the connections
-			ClientNetwork::ConnectionEstablished = false;
-			ClientNetwork::ConnectSocket = INVALID_SOCKET;
+		else // error
+		{ 
 #ifdef __LINUX
-			if (errno == EWOULDBLOCK) {
-				std::cerr << "errno is " << EWOULDBLOCK << std::endl;
-			}
 #else
-			std::cerr << "recv failed with error: " << WSAGetLastError() << std::endl;
+			printf("recv failed with error: %d\n", WSAGetLastError());
+			closesocket(ConnectSocket);
+
 # ifdef _EXCEPTIONAL
-			std::string message = "recv Failed with error: ";
+			std::string message = "recv failed with error: ";
 			message += WSAGetLastError();
 			throw new std::runtime_error(message);
 # endif
+			WSACleanup();
 #endif
+			return msgs;
 		}
-		if (contentLength + sizeof(int) == totalrecv) break;
-	} while (iResult > 0);
+	}
+	while (iResult > 0);
 
-	return msg;
+	return msgs;
 }
 
-void ClientNetwork::GetStatus(std::string header){
+void ClientNetwork::getStatus(std::string header){
 	std::cout << header;
 	std::cout << "Ip and Port are " << ClientNetwork::serverIp << ":" << ClientNetwork::port << std::endl;
 	std::cout << "Is the connection to the port established? " << ClientNetwork::ConnectionEstablished << std::endl;
