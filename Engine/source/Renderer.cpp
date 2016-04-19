@@ -25,12 +25,12 @@ Shader* shaderList[SHADER_COUNT];
 int Renderer::shaderForwardLightList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM };
 int shaderViewList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, EMITTER_SHADER, EMITTER_BURST_SHADER,
     PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING, SKYBOX_SHADER,
-    SHADOW_SHADER, SHADOW_SHADER_ANIM, DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
+    SHADOW_SHADER, SHADOW_SHADER_ANIM, DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE, SSAO_SHADER };
 int shaderCameraPosList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderEnvironmentList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING };
 int shaderPerspectiveList[] = { FORWARD_PBR_SHADER, FORWARD_PBR_SHADER_ANIM, SKYBOX_SHADER, EMITTER_SHADER,
     EMITTER_BURST_SHADER, PARTICLE_TRAIL_SHADER, DEFERRED_PBR_SHADER, DEFERRED_PBR_SHADER_ANIM, DEFERRED_SHADER_LIGHTING,
-    DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE };
+    DEBUG_SHADER, FORWARD_UNLIT, FORWARD_EMISSIVE, SSAO_SHADER };
 
 Camera* Renderer::mainCamera;
 Camera* Renderer::currentCamera;
@@ -129,9 +129,18 @@ void Renderer::init(int window_width, int window_height) {
 		"shaders/fbo.vert", "shaders/fbo_pass.frag"
 		);
 
+	shaderList[SSAO_SHADER] = new Shader(
+		"shaders/fbo.vert", "shaders/ssao.frag"
+		);
+
+	shaderList[SSAO_BLUR] = new Shader(
+		"shaders/fbo.vert", "shaders/ssao_blur.frag"
+		);
+
     mainCamera = new Camera(windowWidth, windowHeight, false);
     mainCamera->passes.push_back(std::make_unique<GBufferPass>());
-    mainCamera->passes.push_back(std::make_unique<LightingPass>());
+	mainCamera->passes.push_back(std::make_unique<LightingPass>());
+	mainCamera->passes.push_back(std::make_unique<SSAOPass>());
     mainCamera->passes.push_back(std::make_unique<SkyboxPass>(nullptr));
     mainCamera->passes.push_back(std::make_unique<ForwardPass>());
     mainCamera->passes.push_back(std::make_unique<ParticlePass>());

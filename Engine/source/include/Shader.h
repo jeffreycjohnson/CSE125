@@ -40,6 +40,8 @@ public:
 
 private:
     FileWatcher * vertWatcher, * fragWatcher;
+
+    Shader(Shader&) = delete;
 };
 
 #endif

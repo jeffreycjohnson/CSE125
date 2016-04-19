@@ -56,6 +56,22 @@ public:
     void render(Camera* camera) override;
 };
 
+// Samples controls quality, radius the SSAO coverage
+class SSAOPass : public RenderPass
+{
+public:
+	explicit SSAOPass(unsigned int samples = 16, float radius = 0.5f);
+	void render(Camera* camera) override;
+    glm::vec3 ambientColor = glm::vec3(0.25f);
+
+private:
+	unsigned int samples;
+	float radius;
+	std::unique_ptr<Texture> noise;
+	std::unique_ptr<Framebuffer> aoBuffer;
+	std::vector<glm::vec3> sampleBuf;
+};
+
 class BloomPass : public RenderPass
 {
 public:

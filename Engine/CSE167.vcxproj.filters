@@ -102,6 +102,9 @@
     <ClCompile Include="source\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\SSAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\Camera.h">
@@ -248,6 +251,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\shaders\skybox.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\ssao.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\ssao_blur.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

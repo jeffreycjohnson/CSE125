@@ -9,7 +9,7 @@
 #define NEAR_DEPTH 0.2f
 #define FAR_DEPTH 1500.f
 
-#define SHADER_COUNT 17
+#define SHADER_COUNT 19
 #define FORWARD_PBR_SHADER_ANIM 0
 #define FORWARD_PBR_SHADER 1
 #define SKYBOX_SHADER 2
@@ -27,6 +27,8 @@
 #define FORWARD_EMISSIVE 14
 #define FBO_BLUR 15
 #define FBO_PASS 16
+#define SSAO_SHADER 17
+#define SSAO_BLUR 18
 
 #define FORWARD_SHADER_LIGHT_MAX 5
 

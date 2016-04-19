@@ -217,6 +217,7 @@
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
+    <ClCompile Include="source\SSAO.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />
@@ -274,6 +275,8 @@
     <None Include="..\shaders\simple.vert" />
     <None Include="..\shaders\skybox.frag" />
     <None Include="..\shaders\skybox.vert" />
+    <None Include="..\shaders\ssao.frag" />
+    <None Include="..\shaders\ssao_blur.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
