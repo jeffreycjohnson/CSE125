@@ -83,4 +83,5 @@ void SSAOPass::render(Camera* camera)
 
 	camera->fbo->draw(); // second pass that blurs and applies the ao
 	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }
