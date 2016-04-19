@@ -8,11 +8,13 @@
 #include "ObjectLoader.h"
 #include "ThreadPool.h"
 #include "Camera.h"
+#include "ClientManager.h"
+#include "ServerManager.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
 
-void InitializeEngine()
+void InitializeEngine(std::string windowName)
 {
     workerPool = new ThreadPool();
 
@@ -28,11 +30,13 @@ void InitializeEngine()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    int width = 1920;
-    int height = 1080;
+	glfwSwapInterval(1);
+
+    int width = 1024;
+    int height = 768;
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    GLFWwindow* window = glfwCreateWindow(width, height, "CSE 125", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
 
     //set callbacks
     //glfwSetWindowFocusCallback(window, window_focus_callback);
@@ -49,7 +53,7 @@ void InitializeEngine()
 
     glewExperimental = GL_TRUE;
     glewInit();
-    glfwSwapInterval(0);
+    // glfwSwapInterval(0);
 	Sound::init();
 	Renderer::init(width, height);
     Input::init(window);
@@ -62,18 +66,28 @@ void InitializeEngine()
 	delete loadScene("assets/Primatives.obj");
 }
 
-void RunEngine()
+void InitializeEngine() { InitializeEngine("CSE 125"); }
+
+// Caller will be 0 if client, 1 if server, 2 if modelviewer.
+void RunEngine(int caller)
 {
-    auto update = workerPool->createJob(GameObject::UpdateScene)->queue();
+	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
+    auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
         Timer::update();
         Input::update();
-        workerPool->createJob(Sound::updateFMOD)->queue();
+
+		/**
+		 * Note: Client/server managing is done within GameObject::UpdateScene
+		 *       to guarantee synchronization with fixed tick rate or variable tick rate
+		 */
+
+		workerPool->createJob(Sound::updateFMOD)->queue();
         Renderer::drawDebug = Input::getKey("escape");
-        Renderer::loop();
+		Renderer::loop(caller);
 	}
 
 	Renderer::shutdown = true;

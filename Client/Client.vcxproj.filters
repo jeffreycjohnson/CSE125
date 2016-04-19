@@ -24,7 +24,7 @@
     <ClCompile Include="source\ActivatorRegistrator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ServerLoop.cpp">
+    <ClCompile Include="source\ClientLoop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClInclude Include="source\ActivatorRegistrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\ServerLoop.h">
+    <ClInclude Include="source\ClientLoop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

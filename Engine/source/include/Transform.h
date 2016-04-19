@@ -5,6 +5,7 @@
 #include <gtc/quaternion.hpp>
 #include <vector>
 #include "Component.h"
+#include "NetworkStruct.h"
 
 class Transform : public Component
 {
@@ -72,6 +73,9 @@ class Transform : public Component
 		glm::vec3 getWorldPosition();
         glm::vec3 getScale() const;
 		float getWorldScale();
+
+		std::vector<char> serialize() override;
+		void deserializeAndApply(std::vector<char> tnd) override;
 };
 
 #endif

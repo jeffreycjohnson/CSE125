@@ -62,7 +62,7 @@ class Renderer
 		static int shaderForwardLightList[2];
 
 		static void init(int w, int h);
-		static void loop();
+		static void loop(int caller);
 
 		static void extractObjects();
 		static void applyPerFrameData(Camera* camera);

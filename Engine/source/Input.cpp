@@ -3,6 +3,8 @@
 #include <gtx/compatibility.hpp>
 #include <SOIL2.h>
 
+#include <sstream>
+
 using namespace std;
 
 GLFWcursor* Input::cursor = nullptr;
@@ -549,7 +551,7 @@ bool Input::setCursor(int standardCursor)
 
 void Input::hideCursor()
 {
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Input::showCursor()
@@ -561,4 +563,29 @@ void Input::scroll_callback(GLFWwindow*, double xoffset, double yoffset)
 {
 	scrollBuff.x += (float) xoffset;
 	scrollBuff.y += (float) yoffset;
+}
+
+// ------------ Serialization Functions ------
+
+std::vector<char> Input::serialize()
+{
+	return Input::serialize(0);
+}
+
+std::vector<char> Input::serialize(int playerID)
+{
+	InputNetworkData ind;
+
+	ind.playerID = playerID;
+	ind.yaw = Input::getAxis("yaw");
+	ind.pitch = Input::getAxis("pitch");
+	ind.roll = Input::getAxis("roll");
+	ind.mouseX = Input::mousePosition().x;
+	ind.mouseY = Input::mousePosition().y;
+
+	std::vector<char> bytes;
+	bytes.resize(sizeof(ind));
+	memcpy(bytes.data(), &ind, sizeof(ind));
+
+	return bytes;
 }

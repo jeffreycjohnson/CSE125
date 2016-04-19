@@ -5,7 +5,7 @@
 #include "Input.h"
 #include <iostream>
 
-extern void RunEngine();
+extern void RunEngine(int caller);
 extern void InitializeEngine();
 
 // provides camera controls
@@ -39,5 +39,5 @@ int main(int argc, char** argv)
 	scene->addComponent(new Controls());
 	GameObject::SceneRoot.addChild(scene);
 
-	RunEngine();
+	RunEngine(2); // Run Engine as modelviewer
 }

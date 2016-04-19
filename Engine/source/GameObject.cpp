@@ -6,6 +6,9 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
+#include "ServerManager.h"
+#include "ClientManager.h"
+#include <iostream>
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -27,13 +30,29 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
     return ret;
 }
 
-void GameObject::UpdateScene()
+void GameObject::UpdateScene(int caller)
 {
-    while(Timer::nextFixedStep())
-    {
-        SceneRoot.fixedUpdate();
-    }
-    SceneRoot.update((float)Timer::deltaTime());
+	if (caller == 1 || caller == 2) 
+	{ 
+		while (Timer::nextFixedStep()) {
+			if (caller == 1) ServerManager::receiveMessages();
+
+			// server or offline
+			SceneRoot.fixedUpdate();
+
+			if (caller == 1) ServerManager::sendMessages();
+		}
+	}
+
+	if (caller == 0 || caller == 2)  
+	{
+		if (caller == 0) ClientManager::sendMessages();
+
+		// client or offline
+		SceneRoot.update((float)Timer::deltaTime());
+
+		if (caller == 0) ClientManager::receiveMessages();
+	}
 }
 
 GameObject::GameObject() {
@@ -151,6 +170,16 @@ void GameObject::update(float deltaTime)
 
 void GameObject::fixedUpdate()
 {
+	for (auto component : componentList)
+	{
+		if (newlyCreated || component->newlyCreated)
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
+	}
+	newlyCreated = false;
+
     if (dead || !active) return;
     for (unsigned int i = 0; i < transform.children.size(); i++)
     {
@@ -229,6 +258,8 @@ void GameObject::collisionExit(GameObject* other)
 void GameObject::setName(const std::string& name)
 {
     removeName();
+
+	this->name = name;
     nameMap.insert(std::make_pair(name, this));
 }
 
@@ -239,6 +270,8 @@ std::string GameObject::getName() const
 
 void GameObject::removeName()
 {
+	this->name = "";
+
     auto range = nameMap.equal_range(name);
     while (range.first != range.second)
     {

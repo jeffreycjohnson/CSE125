@@ -46,8 +46,7 @@ void Transform::rotate(const glm::quat& diff) {
 
 void Transform::setRotate(const glm::quat& diff) {
     setDirty();
-	rotation = glm::quat();
-	rotate(diff);
+	rotation = glm::quat(diff);
 }
 
 /**
@@ -115,4 +114,42 @@ float Transform::getWorldScale() {
         worldScaleDirty = false;
     }
     return cachedWorldScale;
+}
+
+#include <iostream>
+
+// serialization
+std::vector<char> Transform::serialize()
+{
+	TransformNetworkData tnd;
+
+	tnd.transformID = this->componentID;
+
+	tnd.px = position.x;
+	tnd.py = position.y;
+	tnd.pz = position.z;
+
+	tnd.qw = rotation.w;
+	tnd.qx = rotation.x;
+	tnd.qy = rotation.y;
+	tnd.qz = rotation.z;
+
+	tnd.sx = scaleFactor.x;
+	tnd.sy = scaleFactor.y;
+	tnd.sz = scaleFactor.z;
+	
+	std::vector<char> bytes;
+	bytes.resize(sizeof(tnd));
+	memcpy(bytes.data(), &tnd, sizeof(tnd));
+
+	return bytes;
+}
+
+void Transform::deserializeAndApply(std::vector<char> bytes)
+{
+	TransformNetworkData tnd = *((TransformNetworkData*)bytes.data());
+
+	setPosition(tnd.px, tnd.py, tnd.pz);
+	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
+	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));
 }
