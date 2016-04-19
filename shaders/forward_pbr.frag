@@ -1,9 +1,11 @@
-#version 430
+#version 410
 precision mediump float;
 
 #include shaders/lighting.glsl
+#include shaders/geom_pass.glsl
 
 in vec4 vPosition;
+in vec4 vWorldPosition;
 in vec3 vNormal;
 in vec2 vTexCoord;
 in vec3 vTangent;
@@ -13,11 +15,9 @@ layout(location = 0) out vec4 frag_color;
 layout(location = 1) out vec4 frag_normal;
 layout(location = 2) out vec4 frag_material;
 
-uniform sampler2D colorTex; //color texture - rgb: color | a: team mask
+uniform sampler2D colorTex; //color texture - rgb: color
 uniform sampler2D roughnessTex;
 uniform sampler2D metalnessTex;
-uniform sampler2D heightTex;
-uniform sampler2D normalTex; //normal texture - rgb: normal | a: unused
 
 //world space camera position, to get view vector
 uniform vec3 cameraPos;
@@ -27,15 +27,14 @@ const int lightCount = 5;
 uniform vec4 uLightData[3*lightCount];
 
 void main () {
-  vec4 albedo = texture(colorTex, vTexCoord);
-  float roughness = texture(roughnessTex, vTexCoord).r;
-  float metalness = texture(metalnessTex, vTexCoord).r;
-  float height = texture(heightTex, vTexCoord).r;
+  mat3 TBN = computeTBN(vNormal, vTangent, vBitangent);
+  vec3 view = normalize(vWorldPosition.xyz/vWorldPosition.w - cameraPos);
+  vec2 UV = POM(vTexCoord, normalize(transpose(TBN) * view));
 
-  vec3 normal_tangent = 2*texture(normalTex, vTexCoord).rgb - 1;
-  vec3 normal = normalize(vTangent * normal_tangent.x + vBitangent * normal_tangent.y + vNormal * normal_tangent.z);
-  vec3 view = normalize(cameraPos - vPosition.xyz);
-
+  vec4 albedo = texture(colorTex, UV);
+  float roughness = texture(roughnessTex, UV).r;
+  float metalness = texture(metalnessTex, UV).r;
+  vec3 normal = normalMap(UV, TBN);
 
   roughness += 0.01; //there seem to be issues with roughness = 0 due to visibility
   float a = sqrt(roughness);// squaring it makes everything shiny, sqrting it looks like linear roughness
@@ -78,5 +77,5 @@ void main () {
 
   frag_color = vec4(color, albedo.a);
   frag_normal = vec4(normal, 1.0);
-  frag_material = vec4(vec3(metalness, height, roughness), 1.0);
+  frag_material = vec4(vec3(metalness, 1.0, roughness), 1.0);
 }

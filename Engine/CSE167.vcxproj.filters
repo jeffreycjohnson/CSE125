@@ -317,6 +317,9 @@
     <None Include="..\shaders\ssao_blur.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\shaders\geom_pass.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">

@@ -61,6 +61,8 @@ void Material::loadFromFile(const std::string& file)
     if (config.hasSection("Height"))
     {
         loadTexture(config, *this, "Height", "Height", "heightTex", false);
+        (*this)["uParallax"] = true;
+        (*this)["uDepthScale"] = config.getFloat("Height", "DepthScale");
     }
     else
     {

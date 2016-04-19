@@ -289,6 +289,7 @@
     <None Include="..\shaders\forward_pbr.vert" />
     <None Include="..\shaders\forward_pbr_skeletal.vert" />
     <None Include="..\shaders\forward_unlit.frag" />
+    <None Include="..\shaders\geom_pass.glsl" />
     <None Include="..\shaders\gpu_particle.frag" />
     <None Include="..\shaders\gpu_particle.vert" />
     <None Include="..\shaders\gpu_particle_burst.vert" />
