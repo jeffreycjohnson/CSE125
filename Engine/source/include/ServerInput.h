@@ -30,8 +30,7 @@ public:
 	static glm::vec2 mousePosition(int clientId);
 	static float getAxis(std::string name, int clientId);
 
-	static void deserializeStringAndApply(std::string serialized, int clientId);
-	static void deserializeAndApply(InputNetworkData serialized, int clientId);
+	static void deserializeAndApply(std::vector<char> bytes, int clientId);
 };
 
 #endif SERVER_INPUT_H

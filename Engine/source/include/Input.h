@@ -113,8 +113,8 @@ public:
 	static void scroll_callback(GLFWwindow*, double, double);
 
 	/// serialization
-	static std::string Input::serializeAsString();
-	static InputNetworkData Input::serialize();
+	static std::vector<char> Input::serialize();
+	static std::vector<char> Input::serialize(int playerID);
 };
 
 #endif

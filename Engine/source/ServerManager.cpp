@@ -10,16 +10,44 @@
 
 std::vector<int> ServerManager::clientIDs;
 
-void ServerManager::initialize(std::string port, int numberOfClients)
+std::vector<int> ServerManager::initialize(std::string port, int numberOfClients)
 {
+	// setup the server for listening
 	ServerNetwork::setup(port);
+
+	// wait until all clients have registered
 	ServerManager::clientIDs = ServerNetwork::startMultiple(numberOfClients);
+
+	// send out all clear
+	for (auto clientID : clientIDs)
+	{
+		ClientsConnNetworkData cnd;
+		cnd.connected = 1;
+		cnd.numClients = clientIDs.size();
+		cnd.yourClientID = clientID;
+
+		ServerNetwork::sendMessage(clientID, &cnd, CLIENTS_CONN_NETWORK_DATA);
+	}
+
+	return ServerManager::clientIDs;
 }
 
 void ServerManager::sendMessages()
 {
-	TransformNetworkData msg = GameObject::FindByName("player")->transform.serialize();
-	ServerNetwork::broadcastMessage(&msg, TRANSFORM_NETWORK_DATA);
+	// TODO FOUR PLAYERS
+
+	for (auto clientID : ServerManager::clientIDs)
+	{
+		std::string playerName = std::string("player_") + std::to_string(clientID);
+		std::vector<char> bytes = GameObject::FindByName(playerName)->transform.serialize();
+
+		ServerNetwork::broadcastBytes(bytes, TRANSFORM_NETWORK_DATA);
+	}
+
+	/*
+	std::vector<char> bytes = GameObject::FindByName("player")->transform.serialize();
+	ServerNetwork::broadcastMessage(bytes.data(), TRANSFORM_NETWORK_DATA);
+	*/
 }
 
 void ServerManager::receiveMessages()
@@ -37,8 +65,8 @@ void ServerManager::receiveMessages()
 		if (final.messageType == INPUT_NETWORK_DATA)
 		{
 			msg = (InputNetworkData*)final.body.data();
-			std::cout << "playerId: " << msg->playerID << std::endl;
-			ServerInput::deserializeAndApply(*msg, msg->playerID);
+
+			ServerInput::deserializeAndApply(final.body, msg->playerID);
 		}
 	}
 }

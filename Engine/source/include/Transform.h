@@ -74,8 +74,8 @@ class Transform : public Component
         glm::vec3 getScale() const;
 		float getWorldScale();
 
-		TransformNetworkData serialize();
-		void deserializeAndApply(TransformNetworkData tnd);
+		std::vector<char> serialize() override;
+		void deserializeAndApply(std::vector<char> tnd) override;
 };
 
 #endif

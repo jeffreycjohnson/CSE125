@@ -116,10 +116,14 @@ float Transform::getWorldScale() {
     return cachedWorldScale;
 }
 
+#include <iostream>
+
 // serialization
-TransformNetworkData Transform::serialize()
+std::vector<char> Transform::serialize()
 {
 	TransformNetworkData tnd;
+
+	tnd.transformID = this->componentID;
 
 	tnd.px = position.x;
 	tnd.py = position.y;
@@ -133,12 +137,18 @@ TransformNetworkData Transform::serialize()
 	tnd.sx = scaleFactor.x;
 	tnd.sy = scaleFactor.y;
 	tnd.sz = scaleFactor.z;
+	
+	std::vector<char> bytes;
+	bytes.resize(sizeof(tnd));
+	memcpy(bytes.data(), &tnd, sizeof(tnd));
 
-	return tnd;
+	return bytes;
 }
 
-void Transform::deserializeAndApply(TransformNetworkData tnd)
+void Transform::deserializeAndApply(std::vector<char> bytes)
 {
+	TransformNetworkData tnd = *((TransformNetworkData*)bytes.data());
+
 	setPosition(tnd.px, tnd.py, tnd.pz);
 	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
 	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));

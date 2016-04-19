@@ -18,6 +18,23 @@
 #define DEFAULT_BUFLEN 512
 #define DEBUG 0
 
+std::vector<char> encodeMessage(std::vector<char> message, int messageType)
+{
+	std::vector<char> encodedMsg;
+	encodedMsg.resize(METADATA_LEN + message.size());
+
+	// get extra params
+	int rawByteLen = htonl(METADATA_LEN + message.size());
+	int encodedType = htonl(messageType);
+
+	//
+	memcpy(encodedMsg.data(), &rawByteLen, sizeof(int));
+	memcpy(encodedMsg.data() + sizeof(int), &encodedType, sizeof(int));
+	memcpy(encodedMsg.data() + METADATA_LEN, message.data(), message.size());
+
+	return encodedMsg;
+}
+
 int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen) {
 	memset(buf, 0, buflen);
 	int rawByteLen = htonl(inputSize + METADATA_LEN);

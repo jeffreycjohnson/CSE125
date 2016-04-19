@@ -22,28 +22,14 @@ float ServerInput::getAxis(std::string name, int clientId)
 	return 0.0f;
 }
 
-void ServerInput::deserializeStringAndApply(std::string serialized, int clientId)
+void ServerInput::deserializeAndApply(std::vector<char> bytes, int clientId)
 {
-	std::stringstream ss(serialized);
+	InputNetworkData ind = *((InputNetworkData*)bytes.data());
 
-	ss >> ServerInput::clientMovementData[clientId].yaw;
-	ss.ignore(); // DEM SEMICOLONS
-	ss >> ServerInput::clientMovementData[clientId].pitch;
-	ss.ignore();
-	ss >> ServerInput::clientMovementData[clientId].roll;
-	ss.ignore();
+	ServerInput::clientMovementData[clientId].yaw = ind.yaw;
+	ServerInput::clientMovementData[clientId].pitch = ind.pitch;
+	ServerInput::clientMovementData[clientId].roll = ind.roll;
 
-	ss >> ServerInput::clientMovementData[clientId].mousePos.x;
-	ss.ignore();
-	ss >> ServerInput::clientMovementData[clientId].mousePos.y;
-}
-
-void ServerInput::deserializeAndApply(InputNetworkData serialized, int clientId)
-{
-	ServerInput::clientMovementData[clientId].yaw = serialized.yaw;
-	ServerInput::clientMovementData[clientId].pitch = serialized.pitch;
-	ServerInput::clientMovementData[clientId].roll = serialized.roll;
-
-	ServerInput::clientMovementData[clientId].mousePos.x = serialized.mouseX;
-	ServerInput::clientMovementData[clientId].mousePos.y = serialized.mouseY;
+	ServerInput::clientMovementData[clientId].mousePos.x = ind.mouseX;
+	ServerInput::clientMovementData[clientId].mousePos.y = ind.mouseY;
 }

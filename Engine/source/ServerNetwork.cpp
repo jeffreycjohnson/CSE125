@@ -201,9 +201,6 @@ std::vector<int> ServerNetwork::startMultiple(int numClients)
 	}
 
 	// broadcast message saying all client connections have been accepted.
-	ClientsConnNetworkData msg;
-	msg.connected = 1;
-	broadcastMessage(&msg, CLIENTS_CONN_NETWORK_DATA);
 	std::cout << "All clients connected!" << std::endl;
 
 	return clientIDs;
@@ -278,6 +275,47 @@ void ServerNetwork::sendMessage(int clientID, void * message, int msgType)
 	int contentLength = encodeStruct(message, NetworkStruct::sizeOf(msgType), msgType, encodedMsg, DEFAULT_BUFLEN);
 
 	int iSendResult = send(clientSock, encodedMsg, contentLength, 0);
+	if (iSendResult == SOCKET_ERROR) {
+#ifdef __LINUX
+#else
+		int wsaLastError = WSAGetLastError();
+		if (wsaLastError != WSAEWOULDBLOCK)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(clientSock);
+# ifdef _EXCEPTIONAL
+			std::string message = "send failed with error: ";
+			message += WSAGetLastError();
+			throw new std::runtime_error(message);
+# endif
+
+			WSACleanup();
+		}
+#endif
+		return;
+	}
+#ifdef __LINUX
+	close(clientSocket);
+#endif
+	return;
+}
+
+void ServerNetwork::broadcastBytes(std::vector<char> bytes, int msgType)
+{
+	for (int clientID = 0; clientID < clients.size(); clientID++)
+	{
+		ServerNetwork::sendBytes(clientID, bytes, msgType);
+	}
+}
+
+void ServerNetwork::sendBytes(int clientID, std::vector<char> bytes, int msgType)
+{
+	int clientSock = ServerNetwork::clients[clientID];
+
+	// insert encoded type
+	std::vector<char> encodedMsg = encodeMessage(bytes, msgType);
+
+	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
 #else

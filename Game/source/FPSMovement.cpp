@@ -22,7 +22,9 @@ FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, 
 
 void FPSMovement::create()
 {
-	// Input::hideCursor();
+	// TODO make better registration system
+	this->gameObject->transform.componentID = this->clientId;
+
 	recalculate();
 }
 

@@ -23,6 +23,7 @@ FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 posi
 void FPSMovement::create()
 {
 	Input::hideCursor();
+
 	recalculate();
 }
 

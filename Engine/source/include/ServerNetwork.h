@@ -70,5 +70,8 @@ public:
 
 	static void broadcastMessage(void *message, int msgType);
 	static void sendMessage(int clientID, void *message, int msgType);
+
+	static void broadcastBytes(std::vector<char> bytes, int msgType);
+	static void sendBytes(int clientID, std::vector<char> bytes, int msgType);
 };
 

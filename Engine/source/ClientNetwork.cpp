@@ -32,7 +32,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 2048
 #define DEFAULT_PORT "5000"
 
 std::string ClientNetwork::serverIp;
@@ -214,6 +214,40 @@ int ClientNetwork::sendMessage(void * message, int msgType) {
 	//Pound Define This
 	// printf("Bytes Sent: %d\n", iSendResult);
 
+	return 0;
+}
+
+int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
+{
+	std::vector<char> encodedMsg = encodeMessage(bytes, msgType);
+
+	//Need to Establish Connection
+	if (!ConnectionEstablished){
+		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
+		return 1;
+	}
+	int iSendResult = send(ClientNetwork::ConnectSocket, encodedMsg.data(), encodedMsg.size(), 0);
+	if (iSendResult == SOCKET_ERROR) {
+#ifdef __LINUX
+#else
+		int wsaLastError = WSAGetLastError();
+		if (wsaLastError != WSAEWOULDBLOCK)
+		{
+			std::cerr << "Send Failed with error: " << wsaLastError << std::endl;
+			closesocket(ConnectSocket);
+# ifdef _EXCEPTIONAL
+			std::string message = "Send Failed with error: ";
+			message += wsaLastError;
+			throw new std::runtime_error(message);
+# endif
+			WSACleanup();
+		}
+#endif
+		ClientNetwork::ConnectionEstablished = false;
+		ClientNetwork::ConnectSocket = INVALID_SOCKET;
+		return 1;
+	}
+	
 	return 0;
 }
 

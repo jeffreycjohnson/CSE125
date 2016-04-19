@@ -21,6 +21,7 @@ public:
 	static char decodeMessage(std::string message);
 	//Requirements, need connection to be established... What should the data type be TODO:
 	static int sendMessage(void * message, int msgType);
+	static int sendBytes(std::vector<char> bytes, int msgType);
 
 	//Returns string with recieved
 	static std::vector<char> receiveMessage(int * msgType);

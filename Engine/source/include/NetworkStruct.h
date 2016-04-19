@@ -9,6 +9,8 @@
 struct ClientsConnNetworkData
 {
 	unsigned int connected;
+	unsigned int numClients;
+	int yourClientID;
 };
 #pragma pack(pop)
 

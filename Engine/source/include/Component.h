@@ -2,32 +2,40 @@
 #define INCLUDE_COMPONENT_H
 
 #include "ForwardDecs.h"
+#include <vector>
 
 class Component
 {
-    friend class GameObject;
+	friend class GameObject;
+
+private:
     bool newlyCreated = true;
 
-	public:
-        GameObject* gameObject = nullptr;
-        bool visible = true;
-        bool active = true;
+public:
+	GameObject* gameObject = nullptr;
+	bool visible = true;
+	bool active = true;
 
-        virtual ~Component() = default;
-        virtual void setGameObject(GameObject* go);
+	virtual ~Component() = default;
+	virtual void setGameObject(GameObject* go);
 
-        virtual void update(float deltaTime);
-        virtual void fixedUpdate();
-		virtual void draw();
-		virtual void debugDraw();
-        virtual void create(); // (called on first update after fully constructed)
-        virtual void destroy(); // (called before any components, children, parents, or siblings are actually destroyed)
-        virtual void collisionEnter(GameObject* other);
-        // TODO : IMPLEMENT
-        /*virtual void collisionExit(GameObject* other);
-        virtual void collisionStay(GameObject* other);
-        virtual void activate();
-        virtual void deactivate();*/
+	virtual void update(float deltaTime);
+	virtual void fixedUpdate();
+	virtual void draw();
+	virtual void debugDraw();
+	virtual void create(); // (called on first update after fully constructed)
+	virtual void destroy(); // (called before any components, children, parents, or siblings are actually destroyed)
+	virtual void collisionEnter(GameObject* other);
+	// TODO : IMPLEMENT
+	/*virtual void collisionExit(GameObject* other);
+	virtual void collisionStay(GameObject* other);
+	virtual void activate();
+	virtual void deactivate();*/
+
+	// serialization
+	unsigned int componentID;
+	virtual std::vector<char> serialize();
+	virtual void deserializeAndApply(std::vector<char> bytes);
 };
 
 #endif

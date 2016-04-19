@@ -12,7 +12,7 @@ public:
 	ServerManager() {};
 	~ServerManager() {};
 
-	static void initialize(std::string port, int numberOfClients);
+	static std::vector<int> initialize(std::string port, int numberOfClients);
 
 	static void sendMessages();
 	static void receiveMessages();

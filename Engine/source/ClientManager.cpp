@@ -10,16 +10,53 @@
 #include "NetworkUtility.h"
 
 bool ClientManager::allClientsConnected;
+std::vector<int> ClientManager::clientIDs;
+int ClientManager::myClientID;
+
+const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
+{
+	// setup the connection
+	ClientNetwork::SetupTCPConnection(serverIP, port);
+
+	// WAIT FOR THE ALL CLEAR
+	while (!ClientManager::allClientsConnected)
+	{
+		int msgType;
+		std::vector<char> received = ClientNetwork::receiveMessage(&msgType);
+
+		if (msgType == CLIENTS_CONN_NETWORK_DATA)
+		{
+			ClientsConnNetworkData *c = (ClientsConnNetworkData *)received.data();
+			ClientManager::allClientsConnected = c->connected;
+			if (!ClientManager::allClientsConnected) continue;
+
+			ClientManager::myClientID = c->yourClientID;
+
+			for (int clientID = 0; clientID < c->numClients; clientID++)
+			{
+				ClientManager::clientIDs.push_back(clientID);
+			}
+
+			std::cout << "All clients connected!" << std::endl;
+			return ClientManager::clientIDs;
+		}
+		else if (received.size() != 0)
+		{
+			std::cerr << "Wrong message received before all clear..." << std::endl;
+		}
+	}
+}
 
 void ClientManager::sendMessages()
 {
-	if (ClientManager::allClientsConnected) {
-		InputNetworkData inputMessage = Input::serialize();
-		ClientNetwork::sendMessage(&inputMessage, INPUT_NETWORK_DATA);
+	if (!ClientManager::allClientsConnected)
+	{
+		std::cerr << "Tried to send a message before all clients had connected..." << std::endl;
 	}
-	else {
-		std::cout << "Waiting for all clients to connect..." << std::endl;
-	}
+
+	std::vector<char> bytes = Input::serialize(ClientManager::myClientID);
+
+	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA);
 }
 
 void ClientManager::receiveMessages()
@@ -37,6 +74,8 @@ void ClientManager::receiveMessages()
 	else if (msgType == TRANSFORM_NETWORK_DATA)
 	{
 		tnd = (TransformNetworkData*)received.data();
-		GameObject::FindByName("player")->transform.deserializeAndApply(*tnd);
+
+		std::string playerName = std::string("player_") + std::to_string(tnd->transformID);
+		GameObject::FindByName(playerName)->transform.deserializeAndApply(received);
 	}
 }

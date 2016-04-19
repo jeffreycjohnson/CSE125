@@ -567,30 +567,25 @@ void Input::scroll_callback(GLFWwindow*, double xoffset, double yoffset)
 
 // ------------ Serialization Functions ------
 
-std::string Input::serializeAsString()
+std::vector<char> Input::serialize()
 {
-	std::stringstream ss;
-	
-	ss <<
-		Input::getAxis("yaw") << ";" <<
-		Input::getAxis("pitch") << ";" <<
-		Input::getAxis("roll") << ";" <<
-		Input::mousePosition().x << ";" <<
-		Input::mousePosition().y;
-
-	return ss.str();
+	return Input::serialize(0);
 }
 
-InputNetworkData Input::serialize()
+std::vector<char> Input::serialize(int playerID)
 {
 	InputNetworkData ind;
 
-	ind.playerID = 0;
+	ind.playerID = playerID;
 	ind.yaw = Input::getAxis("yaw");
 	ind.pitch = Input::getAxis("pitch");
 	ind.roll = Input::getAxis("roll");
 	ind.mouseX = Input::mousePosition().x;
 	ind.mouseY = Input::mousePosition().y;
 
-	return ind;
+	std::vector<char> bytes;
+	bytes.resize(sizeof(ind));
+	memcpy(bytes.data(), &ind, sizeof(ind));
+
+	return bytes;
 }

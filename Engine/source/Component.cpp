@@ -38,3 +38,7 @@ void Component::deactivate()
 void Component::fixedUpdate()
 {
 }
+
+// serialization
+std::vector<char> Component::serialize() { return std::vector<char>(); };
+void Component::deserializeAndApply(std::vector<char> bytes) {};

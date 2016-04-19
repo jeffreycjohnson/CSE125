@@ -8,7 +8,7 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
-#include "ClientNetwork.h"
+#include "ClientManager.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -35,18 +35,23 @@ int main(int argc, char** argv)
 			break;
 		}
 	}
-
-	GameObject *player = new GameObject;
-	player->addComponent(Renderer::mainCamera);
-	player->setName("player");
-	GameObject::SceneRoot.addChild(player);
-
+	
 	GameObject *scene = loadScene("assets/artsy.dae");
 	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	// setup network
-	ClientNetwork::SetupTCPConnection("127.0.0.1", "9876");
+	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
+	for (auto clientID : clientIDs)
+	{
+		GameObject *player = new GameObject;
+		player->setName(std::string("player_") + std::to_string(clientID));
+
+		if (clientID == ClientManager::myClientID)
+			player->addComponent(Renderer::mainCamera);
+
+		GameObject::SceneRoot.addChild(player);
+	}
 
     RunEngine(0); // running engine as client
 }
