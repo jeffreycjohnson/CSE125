@@ -8,10 +8,12 @@
 #include "Input.h"
 #include "NetworkStruct.h"
 #include "NetworkUtility.h"
+//#include "ObjectLoader.h"
 
 bool ClientManager::allClientsConnected;
 std::vector<int> ClientManager::clientIDs;
 int ClientManager::myClientID;
+//bool objectCreated = false;
 
 const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
 {
@@ -59,6 +61,22 @@ void ClientManager::sendMessages()
 	std::vector<char> bytes = Input::serialize(ClientManager::myClientID);
 
 	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA);
+	/*if (Input::getButtonDown("afterburner")) {
+		std::cout << "Client creating object..." << std::endl;
+		CreateObjectNetworkData createObj;
+		createObj.objectID = 12;
+		
+		std::vector<char> createBytes;
+		createBytes.resize(sizeof(createObj));
+		
+		memcpy(createBytes.data(), &createObj, sizeof(createObj));
+
+		ClientNetwork::sendBytes(createBytes, CREATE_OBJECT_NETWORK_DATA);
+		objectCreated = true;
+	}
+	else if (Input::getButtonDown("fire")) {
+		std::cout << "Destroying object" << std::endl;
+	}*/
 }
 
 void ClientManager::receiveMessages()
@@ -80,5 +98,16 @@ void ClientManager::receiveMessages()
 			std::string playerName = std::string("player_") + std::to_string(tnd->transformID);
 			GameObject::FindByName(playerName)->transform.deserializeAndApply(received.body);
 		}
+		/*else if (msgType == CREATE_OBJECT_NETWORK_DATA) {
+			CreateObjectNetworkData * c = (CreateObjectNetworkData*)received.body.data();
+			GameObject * g = loadScene("assets/ball.dae");
+			g->ID = c->objectID;
+			std::cout << "Client created object with id " << g->ID << std::endl;
+			GameObject::SceneRoot.addChild(g);
+		}
+		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) {
+			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)received.body.data();
+			
+		}*/
 	}
 }

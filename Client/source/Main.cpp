@@ -38,15 +38,16 @@ int main(int argc, char** argv)
 	
 	GameObject *scene = loadScene("assets/artsy.dae");
 	scene->transform.setPosition(0, -1, 0);
+	//scene->ID = 101;
 	GameObject::SceneRoot.addChild(scene);
-
+	//GameObject::SceneRoot.ID = 102;
 	// setup network
 	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
 	for (auto clientID : clientIDs)
 	{
 		GameObject *player = loadScene("assets/ball.dae");
 		player->setName(std::string("player_") + std::to_string(clientID));
-
+		//player->ID = 103;
 		if (clientID == ClientManager::myClientID)
 			player->addComponent(Renderer::mainCamera);
 

@@ -8,16 +8,27 @@
 #include "Material.h"
 #include "ServerManager.h"
 #include "ClientManager.h"
+//#include "ObjectLoader.h"
 #include <iostream>
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
+//std::multimap<int, GameObject*> GameObject::idMap;
+//int GameObject::objectIDCounter;
 
 GameObject * GameObject::FindByName(const std::string& name)
 {
     auto iter = nameMap.find(name);
     return iter == nameMap.end() ? nullptr : iter->second;
 }
+
+/*
+GameObject * GameObject::FindByID(const int& id)
+{
+	auto iter = idMap.find(id);
+	return iter == idMap.end() ? nullptr : iter->second;
+}
+*/
 
 std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 {
@@ -61,8 +72,18 @@ GameObject::GameObject() {
     active = true;
 	visible = true;
     newlyCreated = true;
+	//ID = GameObject::objectIDCounter++;
 }
-
+/*
+GameObject::GameObject(int id) {
+	transform.setGameObject(this);
+	dead = false;
+	active = true;
+	visible = true;
+	newlyCreated = true;
+	ID = id;
+}
+*/
 GameObject::~GameObject() {
 	for (auto child : transform.children) {
 		if(child && child->gameObject) delete child->gameObject;
@@ -71,6 +92,7 @@ GameObject::~GameObject() {
 		if(component) delete component;
 	}
     removeName();
+	//removeID();
 }
 
 void GameObject::addChild(GameObject* go) {
@@ -282,3 +304,33 @@ void GameObject::removeName()
         ++range.first;
     }
 }
+/*
+void GameObject::removeID()
+{
+
+	auto range = idMap.equal_range(this->ID);
+	while (range.first != range.second)
+	{
+		if (range.first->second == this) {
+			idMap.erase(range.first);
+			return;
+		}
+		++range.first;
+	}
+}
+
+
+int GameObject::createObject() {
+	GameObject * g = new GameObject();
+	g->ID = GameObject::objectIDCounter++;
+	//idMap.insert(std::make_pair(g->ID, g));
+	SceneRoot.addChild(g);
+	return g->ID;
+}
+
+void GameObject::destroyObjectByID(int objectID) {
+	GameObject * obj = SceneRoot.FindByID(objectID);
+	obj->removeID();
+	obj->removeName();
+	obj->destroy();
+}*/

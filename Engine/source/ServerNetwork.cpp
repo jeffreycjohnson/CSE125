@@ -152,7 +152,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 		}
 		while (totalBytesRecvd > totalBytesProcd);
 			
-			std::cerr << clientSocket << ": We found " << msgs.size() << " messages" << std::endl;
+			//std::cerr << clientSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
 
 		}
@@ -248,7 +248,7 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 		int relevantSocket = clients[client_id];
 
 		if (!FD_ISSET(relevantSocket, &readfds)){
-			std::cerr << client_id << " with socket " << relevantSocket << "is not ready to be read" << std::endl;
+			//std::cerr << client_id << " with socket " << relevantSocket << "is not ready to be read" << std::endl;
 		}
 		std::vector<NetworkResponse> relevantResponse = ServerNetwork::handleClient(relevantSocket);
 		responses[client_id] = relevantResponse;

@@ -68,5 +68,17 @@ void ServerManager::receiveMessages()
 
 			ServerInput::deserializeAndApply(final.body, msg->playerID);
 		}
+		/*else if (final.messageType == CREATE_OBJECT_NETWORK_DATA) {
+			CreateObjectNetworkData * c = (CreateObjectNetworkData*)final.body.data();
+			int id = GameObject::createObject();
+			c->objectID = id;
+			std::cout << "Server created object with ID " << id << std::endl;
+			ServerNetwork::broadcastBytes(final.body, CREATE_OBJECT_NETWORK_DATA);
+		}
+		else if (final.messageType == DESTROY_OBJECT_NETWORK_DATA) {
+			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)final.body.data();
+			GameObject::destroyObjectByID(d->objectID);
+			ServerNetwork::broadcastBytes(final.body, DESTROY_OBJECT_NETWORK_DATA);
+		}*/
 	}
 }

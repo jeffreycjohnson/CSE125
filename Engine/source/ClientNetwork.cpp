@@ -230,7 +230,7 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
 		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
 		return 1;
 	}
-	std::cout << "Sending " << encodedMsg.size() << " bytes" << std::endl;
+	//std::cout << "Sending " << encodedMsg.size() << " bytes" << std::endl;
 	int iSendResult = send(ClientNetwork::ConnectSocket, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
 #ifdef __LINUX
@@ -329,7 +329,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 			}
 			while (totalBytesRecvd > totalBytesProcd);
 
-			std::cout << ConnectSocket << ": We found " << msgs.size() << " messages" << std::endl;
+			//std::cout << ConnectSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
 		}
 		else if (iResult == 0) // there's fookin nothin

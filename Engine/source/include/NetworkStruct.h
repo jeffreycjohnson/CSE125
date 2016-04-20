@@ -37,6 +37,23 @@ struct TransformNetworkData
 };
 #pragma pack(pop)
 
+#define CREATE_OBJECT_NETWORK_DATA 3
+#pragma pack(push, 1)
+struct CreateObjectNetworkData
+{
+	int objectID; // dummy arg to create object. Server keeps track of ID's.
+	
+};
+#pragma pack(pop)
+
+#define DESTROY_OBJECT_NETWORK_DATA 4
+#pragma pack(push, 1)
+struct DestroyObjectNetworkData
+{
+	int objectID; // dummy arg to create object. Server keeps track of ID's.
+
+};
+#pragma pack(pop)
 
 class NetworkStruct
 {
