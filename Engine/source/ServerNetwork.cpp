@@ -114,7 +114,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 		if (iResult > 0) {
 			totalBytesRecvd += iResult;
 			int msgLength = 0;
-			int totalBytesProcd = 0;
+			unsigned int totalBytesProcd = 0;
 
 		// only read a message once we've gotten enough bytes tbh
 		do

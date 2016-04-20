@@ -292,7 +292,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 		{
 			totalBytesRecvd += iResult;
 			int msgLength = 0;
-			int totalBytesProcd = 0;
+			unsigned int totalBytesProcd = 0;
 
 			do
 			{
