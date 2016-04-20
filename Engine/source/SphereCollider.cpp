@@ -1,6 +1,7 @@
 #include "SphereCollider.h"
 #include "BoxCollider.h"
 #include "Renderer.h"
+#include "RenderPass.h"
 
 SphereCollider::~SphereCollider() {
 
@@ -16,14 +17,16 @@ void SphereCollider::update(float)
 
 void SphereCollider::debugDraw()
 {
-	glm::vec4 color;
-	if (colliding) {
-		color = glm::vec4(1, 0, 0, 1);
+	if (DebugPass::drawColliders) {
+		glm::vec4 color;
+		if (colliding) {
+			color = glm::vec4(DebugPass::collidingColor, 1);
+		}
+		else {
+			color = glm::vec4(DebugPass::colliderColor, 1);
+		}
+		Renderer::drawSphere(center, radius, color);
 	}
-	else {
-		color = glm::vec4(1, 1, 1, 1);
-	}
-	Renderer::drawSphere(center,radius,color);
 }
 
 void SphereCollider::onCollisionEnter(GameObject * other)

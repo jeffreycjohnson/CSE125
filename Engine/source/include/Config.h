@@ -44,6 +44,7 @@ public:
 
 	// Retrieve a key from one of the many config files we've loaded
 	int getInt(const std::string& section, const std::string& key) const;
+	bool getBool(const std::string& section, const std::string& key) const;
 	float getFloat(const std::string& section, const std::string& key) const;
 	std::string getString(const std::string& section, const std::string& key) const;
     glm::vec3 getColor(const std::string& section, const std::string& key) const;

@@ -1,5 +1,6 @@
 #include "ForwardDecs.h"
 #include "Renderer.h"
+#include "RenderPass.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "Timer.h"
@@ -40,7 +41,11 @@ void InitializeEngine(std::string windowName)
 	ConfigFile file("config/options.ini");
 	width  = file.getInt("GraphicsOptions", "width");
 	height = file.getInt("GraphicsOptions", "height");
-	Renderer::drawDebug = file.getInt("GraphicsOptions", "drawDebug");
+
+	DebugPass::drawColliders = file.getBool("DebugOptions", "drawColliders");
+	DebugPass::drawLights    = file.getBool("DebugOptions", "drawLights");
+	DebugPass::colliderColor = file.getColor("DebugOptions", "colliderColor");
+	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);

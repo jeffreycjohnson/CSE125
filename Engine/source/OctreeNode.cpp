@@ -229,8 +229,8 @@ void OctreeNode::debugDraw() {
 	if (true){//children.empty() && !colliders.empty()) {
 		glm::vec3 center = (max - min); // TODO: Our debug drawing should probably be more descriptive & configurable
 		center /= 2;
-		glm::vec3 scale(1, 1, 1);
-		glm::vec4 color(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
+		glm::vec3 scale(max.x - min.x, max.y - min.y, max.z - min.z);
+		glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f); // White
 		Renderer::drawBox(center, scale, color);
 	}
 }

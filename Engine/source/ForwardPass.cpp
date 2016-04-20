@@ -28,6 +28,12 @@ void ParticlePass::render(Camera* camera) {
     }
 }
 
+// All of these options are overrideable by config/options.ini
+bool DebugPass::drawColliders = false;
+bool DebugPass::drawLights = false;
+glm::vec3 DebugPass::colliderColor = glm::vec3(1, 1, 1); // White
+glm::vec3 DebugPass::collidingColor = glm::vec3(1, 0, 0); // Red
+
 void DebugPass::render(Camera* camera) {
 	if (Renderer::drawDebug) {
 		GameObject::SceneRoot.debugDraw();

@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "Input.h"
 #include "Renderer.h"
+#include "RenderPass.h"
 
 std::vector<BoxCollider*> BoxCollider::colliders;
 
@@ -75,9 +76,15 @@ BoxCollider BoxCollider::getAABB() const {
 
 void BoxCollider::debugDraw()
 {
-    if(colliding) Renderer::drawBox(offset, dimensions, glm::vec4(0, 0, 1, 1), &gameObject->transform);
-    else Renderer::drawBox(offset, dimensions, glm::vec4(1, 0, 0, 1), &gameObject->transform);
-	colliding = false;
+	if (DebugPass::drawColliders) {
+		if (colliding) {
+			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::collidingColor, 1.0), &gameObject->transform);
+		}
+		else {
+			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::colliderColor, 1), &gameObject->transform);
+		}
+		colliding = false; // TODO: Why is this there? Could this cause a bug?!?
+	}
 }
 
 void BoxCollider::onCollisionEnter(GameObject* other)
