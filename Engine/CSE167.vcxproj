@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -199,6 +199,8 @@
     <ClCompile Include="source\ServerManager.cpp" />
     <ClCompile Include="source\ClientManager.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
+    <ClCompile Include="source\CapsuleCollider.cpp" />
+    <ClCompile Include="source\CollisionInfo.cpp" />
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\BloomPass.cpp" />
@@ -208,6 +210,8 @@
     <ClCompile Include="source\DeferredPass.cpp" />
     <ClCompile Include="source\FileWatcher.cpp" />
     <ClCompile Include="source\NetworkUtility.cpp" />
+    <ClCompile Include="source\Octree.cpp" />
+    <ClCompile Include="source\OctreeNode.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
@@ -219,12 +223,14 @@
     <ClCompile Include="source\Material.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
+    <ClCompile Include="source\Plane.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\ServerNetwork.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
     <ClCompile Include="source\SSAO.cpp" />
+    <ClCompile Include="source\SphereCollider.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />
@@ -237,6 +243,9 @@
     <ClInclude Include="source\include\ServerManager.h" />
     <ClInclude Include="source\include\ClientManager.h" />
     <ClInclude Include="source\include\ClientNetwork.h" />
+    <ClInclude Include="source\include\CapsuleCollider.h" />
+    <ClInclude Include="source\include\Collider.h" />
+    <ClInclude Include="source\include\Collision.h" />
     <ClInclude Include="source\include\Config.h" />
     <ClInclude Include="source\include\Animation.h" />
     <ClInclude Include="source\include\BoxCollider.h" />
@@ -244,6 +253,8 @@
     <ClInclude Include="source\include\Component.h" />
     <ClInclude Include="source\include\NetworkUtility.h" />
     <ClInclude Include="source\include\ServerNetwork.h" />
+    <ClInclude Include="source\include\Plane.h" />
+    <ClInclude Include="source\include\SphereCollider.h" />
     <ClInclude Include="source\include\ThreadPool.h" />
     <ClInclude Include="source\include\FileWatcher.h" />
     <ClInclude Include="source\include\ParticleTrail.h" />
@@ -291,6 +302,14 @@
     <None Include="..\shaders\skybox.vert" />
     <None Include="..\shaders\ssao.frag" />
     <None Include="..\shaders\ssao_blur.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\config\options.ini">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

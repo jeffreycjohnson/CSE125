@@ -1,7 +1,10 @@
 #include "BoxCollider.h"
+#include "CapsuleCollider.h"
+#include "SphereCollider.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "Renderer.h"
+#include "RenderPass.h"
 
 std::vector<BoxCollider*> BoxCollider::colliders;
 
@@ -18,13 +21,15 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	points[5] = offset + glm::vec3(-halfW, halfH, -halfD);
 	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
-	colliders.push_back(this);
+	colliders.push_back(this); // TODO: Remove naive implementation once octree is working
 	colliding = false;
 	passive = true;
+	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
 }
 
 BoxCollider::~BoxCollider()
 {
+	// TODO: Remove code that erases this collider from the static list (in box destructor) (naive impl)
 	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
 		if (colliders[i] == this)
@@ -65,11 +70,21 @@ void BoxCollider::update(float)
 	}
 }
 
+BoxCollider BoxCollider::getAABB() const {
+	return *this;
+}
+
 void BoxCollider::debugDraw()
 {
-    if(colliding) Renderer::drawBox(offset, dimensions, glm::vec4(0, 0, 1, 1), &gameObject->transform);
-    else Renderer::drawBox(offset, dimensions, glm::vec4(1, 0, 0, 1), &gameObject->transform);
-	colliding = false;
+	if (DebugPass::drawColliders) {
+		if (colliding) {
+			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::collidingColor, 1.0), &gameObject->transform);
+		}
+		else {
+			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::colliderColor, 1), &gameObject->transform);
+		}
+		colliding = false; // TODO: Why is this there? Could this cause a bug?!?
+	}
 }
 
 void BoxCollider::onCollisionEnter(GameObject* other)
@@ -85,10 +100,13 @@ void BoxCollider::destroy()
 		if (colliders[i] == this)
 			colliders.erase(colliders.begin() + i);
 	}
+	Collider::destroy();
 }
 
+// STATIC METHOD (Part of original naive implementation)
 void BoxCollider::updateColliders()
 {
+	// TODO: Remove this method, part of naive impl
 	// Optimize with sweep and prune eventually, for now use brute force
 	for (unsigned int i = 0; i < colliders.size(); i++)
 	{
@@ -119,8 +137,44 @@ void BoxCollider::updateColliders()
 	}
 }
 
+bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
+	return (
+		this->xmin <= point.x && point.x <= this->xmax &&
+		this->xmin <= point.y && point.y <= this->ymax &&
+		this->xmin <= point.z && point.z <= this->zmax
+	);
+}
+
+bool BoxCollider::intersects(const BoxCollider& other) const {
+	return (
+		this->xmin <= other.xmax && other.xmin <= this->xmax &&
+		this->xmin <= other.ymax && other.ymin <= this->ymax &&
+		this->xmin <= other.zmax && other.zmin <= this->zmax
+	);
+}
+
+bool BoxCollider::intersects(const CapsuleCollider & other) const
+{
+	// TODO: Implement Box->Capsule intersection
+	return false;
+}
+
+bool BoxCollider::intersects(const SphereCollider & other) const 
+{
+	// This functions assumes that all 8 points in the points[] are
+	// properly defined & transformed before this call.
+
+	for (int i = 0; i < 8; ++i) {
+		if ( other.insideOrIntersects(points[i]) ) {
+			return true;
+		}
+	}
+	return false;
+};
+
 bool BoxCollider::checkCollision(int aIndex, int bIndex)
 {
+	// TODO: Also part of the naive impl
 	BoxCollider* a = colliders[aIndex];
 	BoxCollider* b = colliders[bIndex];
 

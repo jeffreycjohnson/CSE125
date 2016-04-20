@@ -33,6 +33,7 @@ class Camera : public Component
 		glm::vec3 getForward() const;
 		glm::vec3 getVelocity() const;
 		float getFOV() const;
+		Ray getEyeRay() const;
 };
 
 #endif

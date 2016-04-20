@@ -21,6 +21,26 @@ int ConfigFile::getInt(const std::string & section, const std::string & key) con
     }
 }
 
+bool ConfigFile::getBool(const std::string & section, const std::string & key) const
+{
+	try
+	{
+		std::string str = sections.at(section).get(key);
+		if ( str.compare("true") == 0 || str.compare("True") == 0 || str.compare("TRUE") == 0 ) {
+			return true;
+		}
+		else if (str.compare("false") == 0 || str.compare("False") == 0 || str.compare("FALSE") == 0) {
+			return false;
+		}
+		else
+			return (std::stoi(sections.at(section).get(key)) != 0); // If 0 -> false, else true
+	}
+	catch (...)
+	{
+		return 0;
+	}
+}
+
 float ConfigFile::getFloat(const std::string & section, const std::string & key) const
 {
     try
@@ -159,6 +179,7 @@ std::vector<std::string> ConfigFile::tokenize(const std::string& line, ConfigFil
 		return tokens;
 	}
 	else if ( line.at(0) == TOK_COMMENT ) {
+		type = TokenizedStringType::COMMENT;
 		return tokens;
 	}
 	else {

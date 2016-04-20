@@ -47,7 +47,7 @@ void Input::init(GLFWwindow* win)
 	inputMap.insert({ "delete",{ InputType::KEYBOARD, 261 } });
 	inputMap.insert({ "right",{ InputType::KEYBOARD, 262 } });
 	inputMap.insert({ "left",{ InputType::KEYBOARD, 263 } });
-	inputMap.insert({ "down",{ InputType::KEYBOARD, 264 } });
+	inputMap.insert({ "down",{ InputType::KEYBOARD, 264 } }); // broken
 	inputMap.insert({ "up",{ InputType::KEYBOARD, 265 } });
 	inputMap.insert({ "page up",{ InputType::KEYBOARD, 266 } });
 	inputMap.insert({ "page down",{ InputType::KEYBOARD, 267 } });

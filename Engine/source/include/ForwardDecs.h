@@ -8,10 +8,15 @@
 #include <glm.hpp>
 #include <glew.h>
 
+// Classes
 class Animation;
 class BoxCollider;
 class Camera;
+class CapsuleCollider;
 class Component;
+class Collider;
+class CollisionInfo;
+class ConfigFile;
 class FileWatcher;
 class Framebuffer;
 class GameObject;
@@ -21,14 +26,22 @@ class Light;
 class Material;
 class MathFunc;
 class Mesh;
+class Octree;
+class OctreeNode;
+class Plane;
+class Ray;
 class Renderer;
 class RenderPass;
 class Shader;
 class Skybox;
+class SphereCollider;
 class Texture;
 class ThreadPool;
 class Timer;
 class Transform;
+
+// Enum types
+enum ColliderType;
 
 #ifdef _MSC_VER
 #ifndef __func__

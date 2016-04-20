@@ -277,3 +277,9 @@ void Renderer::drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& c
     (*currentShader)["uColor"] = color;
     m.draw();
 }
+
+void Renderer::drawCapsule(glm::vec3 pointA, glm::vec3 pointB, float radius, const glm::vec4& color) {
+	// TODO: Actually draw a capsule later, for now I will just use two spheres
+	drawSphere(pointA, radius, color);
+	drawSphere(pointB, radius, color);
+}

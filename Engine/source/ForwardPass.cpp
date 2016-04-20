@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "Material.h"
+#include "Collision.h"
 
 void ForwardPass::render(Camera* camera) {
 	unsigned int lightIndex = 0;
@@ -27,8 +28,22 @@ void ParticlePass::render(Camera* camera) {
     }
 }
 
+// All of these options are overrideable by config/options.ini
+bool DebugPass::drawColliders = false;
+bool DebugPass::drawLights = false;
+glm::vec3 DebugPass::colliderColor = glm::vec3(1, 1, 1); // White
+glm::vec3 DebugPass::collidingColor = glm::vec3(1, 0, 0); // Red
+
 void DebugPass::render(Camera* camera) {
-    if(Renderer::drawDebug) GameObject::SceneRoot.debugDraw();
+	if (Renderer::drawDebug) {
+		GameObject::SceneRoot.debugDraw();
+		if (Octree::DYNAMIC_TREE != nullptr) {
+			Octree::DYNAMIC_TREE->debugDraw();
+		}
+		if (Octree::STATIC_TREE != nullptr) {
+			Octree::STATIC_TREE->debugDraw();
+		}
+	}
 }
 
 void ShadowPass::render(Camera* camera)

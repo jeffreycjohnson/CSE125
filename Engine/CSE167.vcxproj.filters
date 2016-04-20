@@ -1,228 +1,244 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Shaders">
-      <UniqueIdentifier>{b86542ff-74a8-43be-8801-208f8725c59b}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="source\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Material.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Light.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Animation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\GPUEmitter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ObjectLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ForwardPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ParticleTrail.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BoxCollider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Sound.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\FileWatcher.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ThreadPool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\BloomPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DeferredPass.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="source\Config.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\General</Filter>
     </ClCompile>
-    <ClCompile Include="source\SSAO.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\ForwardPass.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\ClientNetwork.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\Framebuffer.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\NetworkUtility.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\GPUEmitter.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="source\ServerNetwork.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\BloomPass.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Animation.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\FileWatcher.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Input.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Main.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\BoxCollider.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CapsuleCollider.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CollisionInfo.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\OctreeNode.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Octree.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Plane.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SphereCollider.cpp">
+      <Filter>Source\Collision</Filter>
     </ClCompile>
     <ClCompile Include="source\ClientManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\Network</Filter>
     </ClCompile>
-    <ClCompile Include="source\ServerManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ServerInput.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\ClientNetwork.cpp">
+      <Filter>Source\Network</Filter>
     </ClCompile>
     <ClCompile Include="source\NetworkStruct.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\NetworkUtility.cpp">
+      <Filter>Source\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ServerInput.cpp">
+      <Filter>Source\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ServerManager.cpp">
+      <Filter>Source\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ServerNetwork.cpp">
+      <Filter>Source\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Component.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\GameObject.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Light.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DeferredPass.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Material.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Mesh.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ParticleTrail.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Renderer.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Shader.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Skybox.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ObjectLoader.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Texture.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SSAO.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Sound.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ThreadPool.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Timer.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Transform.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Util.cpp">
+      <Filter>Source\General</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\include\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Component.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Framebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Transform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\include\ForwardDecs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\GameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\Skybox.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="source\include\Animation.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\RenderPass.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Camera.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\Timer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Framebuffer.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="source\include\GPUEmitter.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\ObjectLoader.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Material.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Mesh.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Light.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="source\include\ParticleTrail.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\BoxCollider.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Renderer.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\Sound.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\RenderPass.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\FileWatcher.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Skybox.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\ThreadPool.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Shader.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\ClientNetwork.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\NetworkUtility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\ServerNetwork.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\Texture.h">
+      <Filter>Headers\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="source\include\ClientManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Network</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\ServerManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\ServerInput.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\include\ClientNetwork.h">
+      <Filter>Headers\Network</Filter>
     </ClInclude>
     <ClInclude Include="source\include\NetworkStruct.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\NetworkUtility.h">
+      <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ServerInput.h">
+      <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ServerManager.h">
+      <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ServerNetwork.h">
+      <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Component.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Config.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\FileWatcher.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\GameObject.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Input.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Sound.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Timer.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ThreadPool.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Transform.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\ObjectLoader.h">
+      <Filter>Headers\General</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\BoxCollider.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\CapsuleCollider.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Collider.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Collision.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\SphereCollider.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Plane.h">
+      <Filter>Headers\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -301,5 +317,48 @@
     <None Include="..\shaders\ssao_blur.frag">
       <Filter>Shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Configuration">
+      <UniqueIdentifier>{37554155-e256-49ec-8f3b-c42fd31ffd4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{bbd8e6a5-3021-4cca-bc7d-d97a7c17ffda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{ea93c0b7-fbd9-4cae-b691-27dd1f538883}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{fd174f19-2e3f-4f9e-9f95-44e19bc3b1d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\General">
+      <UniqueIdentifier>{acec5c95-8941-4a90-a06c-7e8732ece942}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Graphics">
+      <UniqueIdentifier>{d7172603-5dcd-4e9a-8192-b93b59ca07da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Network">
+      <UniqueIdentifier>{dc3936a3-e8b6-44b3-bd14-6b408e2e8444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Collision">
+      <UniqueIdentifier>{343c06f8-2096-45cc-bab9-3efad79bdb00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\General">
+      <UniqueIdentifier>{7f1f0f7f-ed61-444e-b214-c60743008b3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics">
+      <UniqueIdentifier>{bfbf086a-a30b-4eb2-9f75-e10767c72cd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Network">
+      <UniqueIdentifier>{e290788b-850a-4ad3-baad-ee2e62ca5988}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Collision">
+      <UniqueIdentifier>{3fd70865-c2a3-40e3-b8be-128445228e75}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\config\options.ini">
+      <Filter>Configuration</Filter>
+    </Text>
   </ItemGroup>
 </Project>
