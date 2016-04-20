@@ -230,7 +230,6 @@
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
     <ClCompile Include="source\SSAO.cpp" />
-    <ClCompile Include="source\Source.cpp" />
     <ClCompile Include="source\SphereCollider.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\ThreadPool.cpp" />

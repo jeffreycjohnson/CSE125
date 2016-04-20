@@ -46,9 +46,9 @@ int main(int argc, char** argv)
 	// Octree stuff
 	Octree::DYNAMIC_TREE = new Octree(glm::vec3(-10, -10, -10), glm::vec3(10, 10, 10));
 	Octree::DYNAMIC_TREE->build(Octree::BOTH); // Include all objs for now
-	RunEngine();
+	
+	RunEngine(2); // Run Engine as modelviewer
+	
 	delete Octree::DYNAMIC_TREE;
 	Octree::DYNAMIC_TREE = nullptr;
-
-	RunEngine(2); // Run Engine as modelviewer
 }
