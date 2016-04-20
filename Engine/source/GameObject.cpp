@@ -8,13 +8,13 @@
 #include "Material.h"
 #include "ServerManager.h"
 #include "ClientManager.h"
-//#include "ObjectLoader.h"
+#include "ObjectLoader.h"
 #include <iostream>
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
-//std::multimap<int, GameObject*> GameObject::idMap;
-//int GameObject::objectIDCounter;
+std::multimap<int, GameObject*> GameObject::idMap;
+int GameObject::objectIDCounter;
 
 GameObject * GameObject::FindByName(const std::string& name)
 {
@@ -22,13 +22,13 @@ GameObject * GameObject::FindByName(const std::string& name)
     return iter == nameMap.end() ? nullptr : iter->second;
 }
 
-/*
+
 GameObject * GameObject::FindByID(const int& id)
 {
 	auto iter = idMap.find(id);
 	return iter == idMap.end() ? nullptr : iter->second;
 }
-*/
+
 
 std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 {
@@ -72,9 +72,9 @@ GameObject::GameObject() {
     active = true;
 	visible = true;
     newlyCreated = true;
-	//ID = GameObject::objectIDCounter++;
+	ID = GameObject::objectIDCounter++;
 }
-/*
+
 GameObject::GameObject(int id) {
 	transform.setGameObject(this);
 	dead = false;
@@ -83,7 +83,7 @@ GameObject::GameObject(int id) {
 	newlyCreated = true;
 	ID = id;
 }
-*/
+
 GameObject::~GameObject() {
 	for (auto child : transform.children) {
 		if(child && child->gameObject) delete child->gameObject;
@@ -92,7 +92,7 @@ GameObject::~GameObject() {
 		if(component) delete component;
 	}
     removeName();
-	//removeID();
+	removeID();
 }
 
 void GameObject::addChild(GameObject* go) {
@@ -304,7 +304,7 @@ void GameObject::removeName()
         ++range.first;
     }
 }
-/*
+
 void GameObject::removeID()
 {
 
@@ -319,11 +319,10 @@ void GameObject::removeID()
 	}
 }
 
-
 int GameObject::createObject() {
-	GameObject * g = new GameObject();
+	GameObject * g = loadScene("assets/ball.dae");
 	g->ID = GameObject::objectIDCounter++;
-	//idMap.insert(std::make_pair(g->ID, g));
+	idMap.insert(std::make_pair(g->ID, g));
 	SceneRoot.addChild(g);
 	return g->ID;
 }
@@ -333,4 +332,4 @@ void GameObject::destroyObjectByID(int objectID) {
 	obj->removeID();
 	obj->removeName();
 	obj->destroy();
-}*/
+}

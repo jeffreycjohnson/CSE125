@@ -12,11 +12,11 @@ class GameObject
 public:
 	Transform transform;
 	bool visible, active;
-	//static int objectIDCounter;
-	//int ID;
+	static int objectIDCounter;
+	int ID;
     static GameObject SceneRoot;
 	static GameObject* FindByName(const std::string& name);
-	//static GameObject* FindByID(const int& id);
+	static GameObject* FindByID(const int& id);
 	static std::vector<GameObject*> FindAllByName(const std::string& name);
 	static void UpdateScene(int caller);
 
@@ -70,21 +70,21 @@ public:
     void update(float deltaTime);
     void fixedUpdate();
     void collisionEnter(GameObject* other);
-    //void collisionStay(GameObject* other);
-    //void collisionExit(GameObject* other);
+    void collisionStay(GameObject* other);
+    void collisionExit(GameObject* other);
 
 	void extract();
-	//static int createObject();
-	//static void destroyObjectByID(int objectID);
+	static int createObject();
+	static void destroyObjectByID(int objectID);
 
 protected:
     bool dead, newlyCreated;
     std::vector<Component*> componentList;
     std::string name;
 	static std::multimap<std::string, GameObject*> nameMap;
-	//static std::multimap<int, GameObject*> idMap;
+	static std::multimap<int, GameObject*> idMap;
 	void removeName();
-	//void removeID();
+	void removeID();
 };
 
 #endif
