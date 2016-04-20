@@ -12,6 +12,9 @@
 
 #include "Animation.h"
 #include "Light.h"
+#include "BoxCollider.h"
+#include "SphereCollider.h"
+#include "CapsuleCollider.h"
 
 std::unordered_multimap<std::string, std::function<void(GameObject*)>> componentMap;
 
@@ -25,7 +28,38 @@ static std::string getPath(const std::string& name)
     return name.substr(0, index + 1);
 }
 
-GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
+static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode) {
+	GameObject* nodeObject = new GameObject();
+
+	aiVector3D pos;
+	aiVector3D scale;
+	aiQuaternion rotate;
+
+	currentNode->mTransformation.Decompose(scale, rotate, pos);
+
+	nodeObject->transform.scale(scale.x);
+	nodeObject->transform.translate(pos.x, pos.y, pos.z);
+	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
+
+	std::string name = currentNode->mName.C_Str();
+	if (name.find("BoxCollider") == 0) {
+		nodeObject->addComponent(new BoxCollider(glm::vec3(0), glm::vec3(1)));
+	}
+	else if (name.find("SphereCollider") == 0) {
+		nodeObject->addComponent(new SphereCollider(glm::vec3(0), 1.f));
+	}
+	else if (name.find("CapsuleCollider") == 0) {
+		//nodeObject->addComponent(new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f));
+	}
+
+	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
+		nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c]));
+	}
+
+	return nodeObject;
+}
+
+static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
     GameObject* nodeObject = new GameObject();
 
     //add mesh to this object
@@ -71,7 +105,12 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 
     //load child objects
     for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-        nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+		if (std::string(currentNode->mChildren[c]->mName.C_Str()) == "Colliders") {
+			nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c]));
+		}
+		else {
+			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+		}
     }
 
 	//To auto load components, use name before period
