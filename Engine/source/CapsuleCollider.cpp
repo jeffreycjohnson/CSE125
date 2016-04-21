@@ -57,6 +57,11 @@ void CapsuleCollider::debugDraw()
 	}
 }
 
+bool CapsuleCollider::insideOrIntersects(const glm::vec3& point) const {
+	// TODO: Implement this for capsules
+	return false;
+}
+
 bool CapsuleCollider::intersects(const BoxCollider& other) const {
 	// TODO: Box -> Capsule intersection
 	return false;
