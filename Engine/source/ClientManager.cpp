@@ -13,7 +13,7 @@
 bool ClientManager::allClientsConnected;
 std::vector<int> ClientManager::clientIDs;
 int ClientManager::myClientID;
-int lastObjectID = 0;
+int ClientManager::lastObjectCreated;
 
 const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
 {
@@ -73,14 +73,15 @@ void ClientManager::sendMessages()
 		ClientNetwork::sendBytes(bytes, CREATE_OBJECT_NETWORK_DATA);
 	}
 	else if (Input::getButtonDown("fire")) {
-		std::cout << "Destroying object" << std::endl;
 		DestroyObjectNetworkData destroyObj;
-		destroyObj.objectID = lastObjectID;
+		destroyObj.objectID = ClientManager::lastObjectCreated;
+		std::cout << "Destroying object with ID " << ClientManager::lastObjectCreated << std::endl;
+
 		std::vector<char> bytes;
 		bytes.resize(sizeof(destroyObj));
 
 		memcpy(bytes.data(), &destroyObj, sizeof(destroyObj));
-		ClientNetwork::sendBytes(bytes, CREATE_OBJECT_NETWORK_DATA);
+		ClientNetwork::sendBytes(bytes, DESTROY_OBJECT_NETWORK_DATA);
 	}
 }
 
@@ -110,7 +111,7 @@ void ClientManager::receiveMessages()
 			std::cout << "Client created object with id " << g->ID << std::endl;
 			g->transform.setPosition(g->ID, -1, 0);
 			GameObject::SceneRoot.addChild(g);
-			lastObjectID = g->ID;
+			ClientManager::lastObjectCreated = g->ID;
 		}
 		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) {
 			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)received.body.data();

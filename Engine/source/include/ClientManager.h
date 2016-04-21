@@ -7,7 +7,7 @@ class ClientManager
 {
 	static bool allClientsConnected;
 	static std::vector<int> clientIDs;
-
+	static int lastObjectCreated;
 public:
 	ClientManager() {};
 	~ClientManager() {};

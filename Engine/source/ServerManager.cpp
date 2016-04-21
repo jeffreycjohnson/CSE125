@@ -78,6 +78,8 @@ void ServerManager::receiveMessages()
 		else if (final.messageType == DESTROY_OBJECT_NETWORK_DATA) {
 			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)final.body.data();
 			GameObject::destroyObjectByID(d->objectID);
+			std::cout << "Server destroyed object with ID " << d->objectID << std::endl;
+
 			ServerNetwork::broadcastBytes(final.body, DESTROY_OBJECT_NETWORK_DATA);
 		}
 	}

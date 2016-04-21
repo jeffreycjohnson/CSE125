@@ -329,7 +329,10 @@ int GameObject::createObject() {
 
 void GameObject::destroyObjectByID(int objectID) {
 	GameObject * obj = SceneRoot.FindByID(objectID);
-	obj->removeID();
-	obj->removeName();
-	obj->destroy();
+	if (obj != NULL) {
+		std::cout << "Trying to destroy object " << obj->ID << std::endl;
+		//obj->removeID();
+		//obj->removeName();
+		obj->destroy();
+	}
 }
