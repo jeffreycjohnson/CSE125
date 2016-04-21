@@ -42,8 +42,8 @@ void CapsuleCollider::update(float) {
 
 void CapsuleCollider::onCollisionEnter(GameObject * other)
 {
-	if (colliding)
-		gameObject->collisionEnter(other);
+	if (!passive)
+		colliding = true; // TODO: Revisit this once OctreeManager is written
 }
 
 void CapsuleCollider::debugDraw()

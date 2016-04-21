@@ -85,14 +85,14 @@ void BoxCollider::debugDraw()
 		else {
 			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::colliderColor, 1), &gameObject->transform);
 		}
-		colliding = false; // TODO: Why is this there? Could this cause a bug?!?
+		//colliding = false; // TODO: Why is this there? Could this cause a bug?!?
 	}
 }
 
 void BoxCollider::onCollisionEnter(GameObject* other)
 {
 	if (!passive)
-		colliding = true;
+		colliding = true;  // TODO: Revisit this once OctreeManager is written
 }
 
 void BoxCollider::destroy()

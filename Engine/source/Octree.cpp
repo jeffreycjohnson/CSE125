@@ -19,7 +19,7 @@ Octree::Octree(glm::vec3 min, glm::vec3 max) {
 };
 
 Octree::~Octree() {
-
+	delete root;
 };
 
 void Octree::addNode(NodeId node, OctreeNode* self) {
@@ -48,6 +48,7 @@ void Octree::remove(Collider* obj) {
 void Octree::build(BuildMode mode, const GameObject& root) {
 
 	// THIS IS EXPENSIVE, DON'T DO THIS A LOT!!!!
+	// TODO: Implement some kind of clear method for the octree
 	
 	long objCounter = 0;
 	std::stack<Transform> stack;
@@ -103,6 +104,14 @@ OctreeNode* Octree::getNodeById(NodeId node) {
 	else {
 		return nullptr;
 	}
+}
+
+std::unordered_map<NodeId, OctreeNode*>::iterator Octree::begin() {
+	return nodeMap.begin();
+}
+
+std::unordered_map<NodeId, OctreeNode*>::iterator Octree::end() {
+	return nodeMap.end();
 }
 
 CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {

@@ -62,6 +62,10 @@ public:
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
 	OctreeNode* getNodeById(NodeId id);
 
+	/* Allow iterating through all of the nodes */
+	std::unordered_map<NodeId, OctreeNode*>::iterator begin();
+	std::unordered_map<NodeId, OctreeNode*>::iterator end();
+
 private:
 	OctreeNode* root;
 	NodeId nodeCounter = UNKNOWN_NODE;
@@ -94,6 +98,10 @@ public:
 	~OctreeNode();
 
 	bool isLeaf() const;
+
+	// Returns an iterator into the colliders list
+	std::vector<Collider*>::iterator begin();
+	std::vector<Collider*>::iterator end();
 
 private:
 	std::vector<OctreeNode*> children;
