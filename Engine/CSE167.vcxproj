@@ -277,6 +277,9 @@
     <ClInclude Include="source\include\Transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\config\buttons.ini">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\shaders\deferred_gbuffer.frag" />
     <None Include="..\shaders\deferred_lighting.frag" />
     <None Include="..\shaders\deferred_lighting.vert" />

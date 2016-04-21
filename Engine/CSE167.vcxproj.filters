@@ -320,6 +320,9 @@
     <None Include="..\shaders\geom_pass.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\config\buttons.ini">
+      <Filter>Configuration</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
