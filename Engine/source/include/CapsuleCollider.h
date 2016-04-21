@@ -1,5 +1,4 @@
-// TODO: Create definitions for CapsuleCollider, and implement
-
+#pragma once
 #include "ForwardDecs.h"
 #include "Collider.h"
 
@@ -14,9 +13,13 @@ private:
 	glm::vec3 a, b;
 	float dist;
 
+	// A, B, and dist, after applying releveant Object -> World transformation
+	glm::vec3 a_world, b_world;
+	float dist_world;
+
 public:
 
-	CapsuleCollider(glm::vec3 a, glm::vec3 b, float dist) : a(a), b(b), dist(dist) {};
+	CapsuleCollider(glm::vec3 a, glm::vec3 b, float dist);
 	~CapsuleCollider();
 	void destroy() override;
 	void update(float) override;

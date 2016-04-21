@@ -18,9 +18,7 @@ public:
 		glm::quat pitch = glm::angleAxis(Input::getAxis("yaw") * dt * 2, glm::vec3(0, -1, 0));
 		glm::quat yaw = glm::angleAxis(Input::getAxis("pitch") * dt * 2, glm::vec3(-1, 0, 0));
 		//gameObject->transform.rotate(roll*pitch*yaw);
-		if (Input::getAxis("pitch")) {
-			Renderer::mainCamera->offset.translate(glm::vec3(Input::getAxis("roll") * dt * 2, 0, Input::getAxis("pitch") * 2 * dt));
-		}
+		Renderer::mainCamera->gameObject->transform.translate(glm::vec3(Input::getAxis("roll") * dt * 2, Input::getAxis("yaw") * dt * 2, Input::getAxis("pitch") * 2 * dt));
 	}
 };
 

@@ -13,6 +13,8 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	float halfW = dimensions.x / 2;
 	float halfH = dimensions.y / 2;
 	float halfD = dimensions.z / 2;
+
+	// points[] array is in object space!
 	points[0] = offset + glm::vec3(halfW, halfH, halfD);
 	points[1] = offset + glm::vec3(halfW, halfH, -halfD);
 	points[2] = offset + glm::vec3(halfW, -halfH, halfD);
@@ -136,6 +138,7 @@ void BoxCollider::updateColliders()
 		}
 	}
 }
+// ^ naive implementation
 
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 	return (
@@ -161,15 +164,34 @@ bool BoxCollider::intersects(const CapsuleCollider & other) const
 
 bool BoxCollider::intersects(const SphereCollider & other) const 
 {
-	// This functions assumes that all 8 points in the points[] are
-	// properly defined & transformed before this call.
+	// Using algorithm from this paper: http://www.mrtc.mdh.se/projects/3Dgraphics/paperF.pdf
+	// From section (3) {branch elimination & vectorization}, and no, I don't understand it
 
-	for (int i = 0; i < 8; ++i) {
-		if ( other.insideOrIntersects(points[i]) ) {
-			return true;
-		}
+	float d = 0;
+	float e;
+	glm::vec3 c = other.getCenterWorld();
+	float radius = other.getRadiusWorld();
+	float r_squared = radius * radius;
+
+	e = std::fmaxf(xmin - c.x, 0) + std::fmaxf(c.x - xmax, 0);
+	if (e <= radius) return false;
+	d += e * e;
+
+	e = std::fmaxf(ymin - c.y, 0) + std::fmaxf(c.y - ymax, 0);
+	if (e <= radius) return false;
+	d += e * e;
+
+	e = std::fmaxf(zmin - c.z, 0) + std::fmaxf(c.z - zmax, 0);
+	if (e <= radius) return false;
+	d += e * e;
+
+	if (d <= r_squared) {
+		return true;
 	}
-	return false;
+	else {
+		return false;
+	}
+
 };
 
 bool BoxCollider::checkCollision(int aIndex, int bIndex)

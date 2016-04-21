@@ -19,8 +19,13 @@ class BoxCollider : public Collider
 private:
 	static std::vector<BoxCollider*> colliders; // TODO: Remove naive algorithm once everything is good
 
+	// Object space points
 	glm::vec3 points[8];
+
+	// World space points
 	glm::vec3 transformPoints[8];
+
+	// *min, *max stored in world space
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	bool isAxisAligned;
     glm::vec3 offset, dimensions;
