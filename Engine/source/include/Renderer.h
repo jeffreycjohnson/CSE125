@@ -3,6 +3,7 @@
 
 #include "ForwardDecs.h"
 #include "Shader.h"
+#include <glfw3.h>  // I'm so sorry, Jeff
 #include <vector>
 #include <list>
 
@@ -81,6 +82,7 @@ class Renderer
 		static int getWindowHeight() { return windowHeight; }
 
 		static void resize(int width, int height);
+		static void focus(GLFWwindow* window, int focused);
 
         static void drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform = nullptr);
         static void drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform = nullptr);

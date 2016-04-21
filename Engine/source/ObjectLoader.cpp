@@ -49,7 +49,7 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode) 
 		nodeObject->addComponent(new SphereCollider(glm::vec3(0), 1.f));
 	}
 	else if (name.find("CapsuleCollider") == 0) {
-		//nodeObject->addComponent(new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f));
+		nodeObject->addComponent(new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f));
 	}
 
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {

@@ -254,6 +254,15 @@ void Renderer::resize(int width, int height) {
 	updatePerspective(perspective);
 }
 
+void Renderer::focus(GLFWwindow* window, int focused) {
+	// "I thought this might do something to help fix the brown-screen-of-death"  -- Dexter
+	if (focused == GL_TRUE) {
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		Renderer::resize(width, height);
+	}
+}
+
 void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)
 {
     Mesh m("Sphere_Outline");

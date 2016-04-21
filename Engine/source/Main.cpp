@@ -51,8 +51,7 @@ void InitializeEngine(std::string windowName)
 	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
 
     //set callbacks
-    //glfwSetWindowFocusCallback(window, window_focus_callback);
-    //void window_focus_callback(GLFWwindow* window, int focused)
+    glfwSetWindowFocusCallback(window, Renderer::focus);
 
     if (!window)
     {
