@@ -19,7 +19,6 @@ public:
 	Transform transform;
 	bool visible, active;
 	static int objectIDCounter;
-	int ID;
     static GameObject SceneRoot;
 	static GameObject* FindByName(const std::string& name);
 	static GameObject* FindByID(const int& id);
@@ -31,6 +30,10 @@ public:
 	static void AddPostFixedUpdateCallback(void(*callback)(void));
 	static void AddPreUpdateCallback(void(*callback)(void));
 	static void AddPostUpdateCallback(void(*callback)(void));
+
+	static int createObject();
+	static int createObject(int id);
+	static void destroyObjectByID(int objectID);
 
 	GameObject();
 	GameObject(int id);
@@ -77,6 +80,8 @@ public:
     GameObject* findChildByName(const std::string& name);
     void setName(const std::string& name);
     std::string getName() const;
+	void setID(const int ID);
+	int getID() const;
 
 	void debugDraw();
     void update(float deltaTime);
@@ -86,14 +91,17 @@ public:
     void collisionExit(GameObject* other);
 
 	void extract();
-	static int createObject();
-	static int createObject(int id);
-	static void destroyObjectByID(int objectID);
+
+	std::vector<std::vector<char>> serializeCreation(int parentID);
+
+	enum DeserializeCreateResult { SUCCESS=0, ID_ALREADY_EXISTS, NO_PARENT_FOUND };
+	DeserializeCreateResult deserializeAndCreate(std::vector<char> bytes);
 
 protected:
     bool dead, newlyCreated;
     std::vector<Component*> componentList;
     std::string name;
+	int ID;
 	static std::multimap<std::string, GameObject*> nameMap;
 	static std::multimap<int, GameObject*> idMap;
 	void removeName();

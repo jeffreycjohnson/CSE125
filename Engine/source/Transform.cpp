@@ -121,6 +121,26 @@ float Transform::getWorldScale() {
 // serialization
 std::vector<char> Transform::serialize()
 {
+	TransformNetworkData tnd = serializeAsStruct();
+	
+	std::vector<char> bytes;
+	bytes.resize(sizeof(tnd));
+	memcpy(bytes.data(), &tnd, sizeof(tnd));
+
+	return bytes;
+}
+
+void Transform::deserializeAndApply(std::vector<char> bytes)
+{
+	TransformNetworkData tnd = *((TransformNetworkData*)bytes.data());
+
+	setPosition(tnd.px, tnd.py, tnd.pz);
+	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
+	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));
+}
+
+TransformNetworkData Transform::serializeAsStruct()
+{
 	TransformNetworkData tnd;
 
 	tnd.transformID = this->componentID;
@@ -137,19 +157,6 @@ std::vector<char> Transform::serialize()
 	tnd.sx = scaleFactor.x;
 	tnd.sy = scaleFactor.y;
 	tnd.sz = scaleFactor.z;
-	
-	std::vector<char> bytes;
-	bytes.resize(sizeof(tnd));
-	memcpy(bytes.data(), &tnd, sizeof(tnd));
 
-	return bytes;
-}
-
-void Transform::deserializeAndApply(std::vector<char> bytes)
-{
-	TransformNetworkData tnd = *((TransformNetworkData*)bytes.data());
-
-	setPosition(tnd.px, tnd.py, tnd.pz);
-	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
-	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));
+	return tnd;
 }

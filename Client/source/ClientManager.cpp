@@ -65,28 +65,6 @@ void ClientManager::sendMessages()
 	std::vector<char> bytes = Input::serialize(ClientManager::myClientID);
 
 	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA);
-	if (Input::getButtonDown("afterburner")) {
-		std::cout << "Client creating object..." << std::endl;
-		CreateObjectNetworkData createObj;
-		createObj.objectID = 12;
-		
-		std::vector<char> bytes;
-		bytes.resize(sizeof(createObj));
-		
-		memcpy(bytes.data(), &createObj, sizeof(createObj));
-		ClientNetwork::sendBytes(bytes, CREATE_OBJECT_NETWORK_DATA);
-	}
-	else if (Input::getButtonDown("fire")) {
-		DestroyObjectNetworkData destroyObj;
-		destroyObj.objectID = ClientManager::lastObjectCreated;
-		std::cout << "Destroying object with ID " << ClientManager::lastObjectCreated << std::endl;
-
-		std::vector<char> bytes;
-		bytes.resize(sizeof(destroyObj));
-
-		memcpy(bytes.data(), &destroyObj, sizeof(destroyObj));
-		ClientNetwork::sendBytes(bytes, DESTROY_OBJECT_NETWORK_DATA);
-	}
 }
 
 void ClientManager::receiveMessages()
@@ -114,9 +92,9 @@ void ClientManager::receiveMessages()
 
 			GameObject * g = GameObject::SceneRoot.FindByID(c->objectID);
 			
-			std::cout << "Client created object with id " << g->ID << std::endl;
-			g->transform.setPosition(g->ID, -1, 0);
-			ClientManager::lastObjectCreated = g->ID;
+			std::cout << "Client created object with id " << g->getID() << std::endl;
+			g->transform.setPosition(g->getID(), -1, 0);
+			ClientManager::lastObjectCreated = g->getID();
 		}
 		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) {
 			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)received.body.data();

@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <stdio.h>
 
+#define MAX_MESH_NAME 64
+
 #define CLIENTS_CONN_NETWORK_DATA 0
 #pragma pack(push, 1)
 struct ClientsConnNetworkData
@@ -41,8 +43,18 @@ struct TransformNetworkData
 #pragma pack(push, 1)
 struct CreateObjectNetworkData
 {
-	int objectID; // dummy arg to create object. Server keeps track of ID's.
-	
+	int objectID;
+	int parentID;
+	char meshName[MAX_MESH_NAME];
+
+	TransformNetworkData tnd;
+
+	CreateObjectNetworkData(int objectID, int parentID, std::string meshName, TransformNetworkData tnd)
+		: objectID(objectID), parentID(parentID), tnd(tnd)
+	{
+		memset(this->meshName, 0, sizeof(char) * MAX_MESH_NAME);
+		strncpy_s(this->meshName, meshName.c_str(), MAX_MESH_NAME - 1);
+	}
 };
 #pragma pack(pop)
 
@@ -51,7 +63,6 @@ struct CreateObjectNetworkData
 struct DestroyObjectNetworkData
 {
 	int objectID; // dummy arg to create object. Server keeps track of ID's.
-
 };
 #pragma pack(pop)
 

@@ -76,6 +76,8 @@ class Transform : public Component
 
 		std::vector<char> serialize() override;
 		void deserializeAndApply(std::vector<char> tnd) override;
+
+		TransformNetworkData serializeAsStruct();
 };
 
 #endif

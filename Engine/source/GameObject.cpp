@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "Material.h"
 #include "ObjectLoader.h"
+#include <iterator>
 #include <iostream>
 
 std::vector<void(*)(void)> GameObject::preFixedCallbacks;
@@ -327,8 +328,24 @@ void GameObject::removeName()
     }
 }
 
+// TODO wait why is ID a multimap?? 
+void GameObject::setID(const int ID)
+{
+	removeID();
+
+	this->ID = ID;
+	idMap.insert(std::make_pair(ID, this));
+}
+
+int GameObject::getID() const
+{
+	return ID;
+}
+
 void GameObject::removeID()
 {
+	this->ID = -1;
+
 	auto range = idMap.equal_range(this->ID);
 	while (range.first != range.second)
 	{
@@ -346,16 +363,49 @@ int GameObject::createObject() {
 
 int GameObject::createObject(int id) {
 	GameObject * g = loadScene("assets/ball.dae");
-	g->ID = id;
-	idMap.insert(std::make_pair(g->ID, g));
+	g->setID(id);
 	SceneRoot.addChild(g);
-	return g->ID;
+	return g->getID();
 }
 
 void GameObject::destroyObjectByID(int objectID) {
 	GameObject * obj = SceneRoot.FindByID(objectID);
 	if (obj != NULL) {
 		obj->destroy();
-		std::cout << "Destroyed object " << obj->ID << std::endl;
+		std::cout << "Destroyed object " << obj->getID() << std::endl;
 	}
+}
+
+std::vector<std::vector<char>> GameObject::serializeCreation(int parentID)
+{
+	std::vector<std::vector<char>> allMessages;
+
+	int myID = getID();
+	std::string meshName;
+
+	Mesh* possibleMesh = this->getComponent<Mesh>();
+	if (possibleMesh != nullptr)
+	{
+		meshName = possibleMesh->name;
+	}
+
+	TransformNetworkData tnd = transform.serializeAsStruct();
+	CreateObjectNetworkData cond(myID, parentID, meshName, tnd);
+
+	std::vector<char> myCreation;
+	myCreation.resize(sizeof(cond), 0);
+	memcpy(myCreation.data(), &cond, sizeof(cond));
+
+	for (auto& childTransform : transform.children)
+	{
+		auto& child = childTransform->gameObject;
+		std::vector<std::vector<char>> childMessages = child->serializeCreation(myID);
+
+		// extend allMessages with the creation messages of my children
+		allMessages.insert(allMessages.end(),
+			std::make_move_iterator(childMessages.begin()),
+			std::make_move_iterator(childMessages.end()));
+	}
+
+	return allMessages;
 }
