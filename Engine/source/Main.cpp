@@ -8,8 +8,6 @@
 #include "ObjectLoader.h"
 #include "ThreadPool.h"
 #include "Camera.h"
-#include "ClientManager.h"
-#include "ServerManager.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;

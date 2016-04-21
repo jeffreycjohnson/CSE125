@@ -196,8 +196,6 @@
   <ItemGroup>
     <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />
-    <ClCompile Include="source\ServerManager.cpp" />
-    <ClCompile Include="source\ClientManager.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
@@ -234,8 +232,6 @@
   <ItemGroup>
     <ClInclude Include="source\include\NetworkStruct.h" />
     <ClInclude Include="source\include\ServerInput.h" />
-    <ClInclude Include="source\include\ServerManager.h" />
-    <ClInclude Include="source\include\ClientManager.h" />
     <ClInclude Include="source\include\ClientNetwork.h" />
     <ClInclude Include="source\include\Config.h" />
     <ClInclude Include="source\include\Animation.h" />

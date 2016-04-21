@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="source\ClientLoop.cpp" />
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
+    <ClCompile Include="source\ClientManager.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\FPSMovement.cpp" />
   </ItemGroup>
@@ -32,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="source\ClientLoop.h" />
     <ClInclude Include="source\ActivatorRegistrator.h" />
+    <ClInclude Include="source\ClientManager.h" />
     <ClInclude Include="source\FPSMovement.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

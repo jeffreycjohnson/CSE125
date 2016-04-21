@@ -9,6 +9,12 @@
 
 class GameObject
 {
+private:
+	static std::vector<void (*)(void)> preFixedCallbacks;
+	static std::vector<void (*)(void)> postFixedCallbacks;
+	static std::vector<void (*)(void)> preVarCallbacks;
+	static std::vector<void (*)(void)> postVarCallbacks;
+
 public:
 	Transform transform;
 	bool visible, active;
@@ -19,6 +25,12 @@ public:
 	static GameObject* FindByID(const int& id);
 	static std::vector<GameObject*> FindAllByName(const std::string& name);
 	static void UpdateScene(int caller);
+
+	// registering callbacks for updates
+	static void AddPreFixedUpdateCallback(void(*callback)(void));
+	static void AddPostFixedUpdateCallback(void(*callback)(void));
+	static void AddPreUpdateCallback(void(*callback)(void));
+	static void AddPostUpdateCallback(void(*callback)(void));
 
 	GameObject();
 	GameObject(int id);

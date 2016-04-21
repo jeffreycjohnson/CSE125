@@ -6,10 +6,13 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
-#include "ServerManager.h"
-#include "ClientManager.h"
 #include "ObjectLoader.h"
 #include <iostream>
+
+std::vector<void(*)(void)> GameObject::preFixedCallbacks;
+std::vector<void(*)(void)> GameObject::postFixedCallbacks;
+std::vector<void(*)(void)> GameObject::preVarCallbacks;
+std::vector<void(*)(void)> GameObject::postVarCallbacks;
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -43,27 +46,46 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 
 void GameObject::UpdateScene(int caller)
 {
-	if (caller == 1 || caller == 2) 
-	{ 
-		while (Timer::nextFixedStep()) {
-			if (caller == 1) ServerManager::receiveMessages();
+	while (Timer::nextFixedStep()) {
+		for (auto& callback : preFixedCallbacks) callback();
 
-			// server or offline
-			SceneRoot.fixedUpdate();
+		// server or offline
+		SceneRoot.fixedUpdate();
 
-			if (caller == 1) ServerManager::sendMessages();
-		}
+		for (auto& callback : postFixedCallbacks) callback();
 	}
 
+	// ONLY client and offline get variable update
 	if (caller == 0 || caller == 2)  
 	{
-		if (caller == 0) ClientManager::sendMessages();
+		for (auto& callback : preVarCallbacks) callback();
 
 		// client or offline
 		SceneRoot.update((float)Timer::deltaTime());
 
-		if (caller == 0) ClientManager::receiveMessages();
+		for (auto& callback : postVarCallbacks) callback();
+
 	}
+}
+
+void GameObject::AddPreFixedUpdateCallback(void(*callback)(void))
+{
+	GameObject::preFixedCallbacks.push_back(callback);
+}
+
+void GameObject::AddPostFixedUpdateCallback(void(*callback)(void))
+{
+	GameObject::postFixedCallbacks.push_back(callback);
+}
+
+void GameObject::AddPreUpdateCallback(void(*callback)(void))
+{
+	GameObject::preVarCallbacks.push_back(callback);
+}
+
+void GameObject::AddPostUpdateCallback(void(*callback)(void))
+{
+	GameObject::postVarCallbacks.push_back(callback);
 }
 
 GameObject::GameObject() {
@@ -307,7 +329,6 @@ void GameObject::removeName()
 
 void GameObject::removeID()
 {
-
 	auto range = idMap.equal_range(this->ID);
 	while (range.first != range.second)
 	{
@@ -330,8 +351,6 @@ int GameObject::createObject(int id) {
 	SceneRoot.addChild(g);
 	return g->ID;
 }
-
-
 
 void GameObject::destroyObjectByID(int objectID) {
 	GameObject * obj = SceneRoot.FindByID(objectID);

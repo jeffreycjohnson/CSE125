@@ -12,6 +12,10 @@ std::vector<int> ServerManager::clientIDs;
 
 std::vector<int> ServerManager::initialize(std::string port, int numberOfClients)
 {
+	// register hooks in game loop
+	GameObject::AddPreFixedUpdateCallback(ServerManager::receiveMessages);
+	GameObject::AddPostFixedUpdateCallback(ServerManager::sendMessages);
+
 	// setup the server for listening
 	ServerNetwork::setup(port);
 

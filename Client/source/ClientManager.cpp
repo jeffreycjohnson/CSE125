@@ -17,6 +17,10 @@ int ClientManager::lastObjectCreated; // This is just for now to show delete on 
 
 const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
 {
+	// register hooks in the game loop
+	GameObject::AddPreFixedUpdateCallback(ClientManager::receiveMessages);
+	GameObject::AddPostFixedUpdateCallback(ClientManager::sendMessages);
+
 	// setup the connection
 	ClientNetwork::setup(serverIP, port);
 
