@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include <gtx/compatibility.hpp>
 #include <SOIL2.h>
+#include "Config.h"
 
 #include <sstream>
 
@@ -132,6 +133,7 @@ void Input::init(GLFWwindow* win)
 	}
 
 	// Add custom inputs
+#ifdef __testtering
 	InputData data;
 	data.name = "yaw";
 	data.positiveButton = "e";
@@ -201,6 +203,36 @@ void Input::init(GLFWwindow* win)
 	data.axis = AxisType::X;
 	data.invert = false; // Left trigger
 	addInput(data);
+#else
+	addInputsFromConfig("config/buttons.ini");
+#endif
+}
+
+void Input::addInputsFromConfig(std::string configfile){
+	ConfigFile file("config/buttons.ini");
+	std::string list = file.getString("ButtonList", "buttonlist");
+	std::vector<std::string> buttonsname;
+	
+	//Split
+	size_t pos = 0;
+	std::string token;
+	while ((pos = list.find(";")) != std::string::npos){
+		token = list.substr(0, pos);
+		buttonsname.push_back(token);
+		list.erase(0, pos + 1);
+	}
+	for (auto i = buttonsname.begin(); i != buttonsname.end(); ++i){
+		InputData data;
+		data.name = *i;
+		data.negativeButton = file.getString(*i, "negativeButton");
+		data.positiveButton = file.getString(*i, "positiveButton");
+		data.altNegativeButton = file.getString(*i, "altNegativeButton");
+		data.altPositiveButton = file.getString(*i, "altPositiveButton");
+		data.dead = file.getFloat(*i, "dead");
+		data.sensitivity = file.getFloat(*i, "sensitivity");
+		data.invert = file.getBool(*i, "invert");
+		addInput(data);
+	}
 }
 
 void Input::update()

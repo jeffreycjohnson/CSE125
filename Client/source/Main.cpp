@@ -6,6 +6,7 @@
 #include "RenderPass.h"
 #include "Skybox.h"
 #include "ActivatorRegistrator.h"
+#include "Config.h"
 
 #include <iostream>
 #include "ClientManager.h"
@@ -16,6 +17,10 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
     InitializeEngine("CLIENT");
+	ConfigFile file("config/options.ini");
+
+	std::string serverip = file.getString("NetworkOptions", "serverip");
+	std::string port = file.getString("NetworkOptions", "port");
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -41,7 +46,7 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addChild(scene);
 
 	// setup network
-	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
+	auto clientIDs = ClientManager::initialize(serverip, port);
 	for (auto clientID : clientIDs)
 	{
 		GameObject *player = loadScene("assets/ball.dae");
