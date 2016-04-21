@@ -7,6 +7,7 @@
 #include "Skybox.h"
 #include "ActivatorRegistrator.h"
 #include "BoxCollider.h"
+#include "Config.h"
 
 #include <iostream>
 #include "ServerManager.h"
@@ -17,6 +18,9 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
     InitializeEngine("SERVER");
+	ConfigFile file("config/options.ini");
+	std::string port = file.getString("NetworkOptions", "port");
+	int numberOfClients = file.getInt("NetworkOptions", "numclients");
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -42,7 +46,7 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addChild(scene);
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
-	auto clientIDs = ServerManager::initialize("9876", 2);
+	auto clientIDs = ServerManager::initialize(port, numberOfClients);
 	for (auto clientID : clientIDs)
 	{
 		GameObject *player = loadScene("assets/ball.dae");
