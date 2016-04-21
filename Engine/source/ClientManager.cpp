@@ -13,7 +13,7 @@
 bool ClientManager::allClientsConnected;
 std::vector<int> ClientManager::clientIDs;
 int ClientManager::myClientID;
-bool objectCreated = false;
+int lastObjectID = 0;
 
 const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
 {
@@ -66,16 +66,21 @@ void ClientManager::sendMessages()
 		CreateObjectNetworkData createObj;
 		createObj.objectID = 12;
 		
-		std::vector<char> createBytes;
-		createBytes.resize(sizeof(createObj));
+		std::vector<char> bytes;
+		bytes.resize(sizeof(createObj));
 		
-		memcpy(createBytes.data(), &createObj, sizeof(createObj));
-
-		ClientNetwork::sendBytes(createBytes, CREATE_OBJECT_NETWORK_DATA);
-		objectCreated = true;
+		memcpy(bytes.data(), &createObj, sizeof(createObj));
+		ClientNetwork::sendBytes(bytes, CREATE_OBJECT_NETWORK_DATA);
 	}
 	else if (Input::getButtonDown("fire")) {
 		std::cout << "Destroying object" << std::endl;
+		DestroyObjectNetworkData destroyObj;
+		destroyObj.objectID = lastObjectID;
+		std::vector<char> bytes;
+		bytes.resize(sizeof(destroyObj));
+
+		memcpy(bytes.data(), &destroyObj, sizeof(destroyObj));
+		ClientNetwork::sendBytes(bytes, CREATE_OBJECT_NETWORK_DATA);
 	}
 }
 
@@ -103,11 +108,15 @@ void ClientManager::receiveMessages()
 			GameObject * g = loadScene("assets/ball.dae");
 			g->ID = c->objectID;
 			std::cout << "Client created object with id " << g->ID << std::endl;
+			g->transform.setPosition(g->ID, -1, 0);
 			GameObject::SceneRoot.addChild(g);
+			lastObjectID = g->ID;
 		}
 		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) {
 			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)received.body.data();
-			
+			GameObject * g = GameObject::SceneRoot.FindByID(d->objectID);
+			GameObject::destroyObjectByID(d->objectID);
+			delete g;
 		}
 	}
 }
