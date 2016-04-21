@@ -13,7 +13,7 @@
 bool ClientManager::allClientsConnected;
 std::vector<int> ClientManager::clientIDs;
 int ClientManager::myClientID;
-int ClientManager::lastObjectCreated;
+int ClientManager::lastObjectCreated; // This is just for now to show delete on the last obj that was created.
 
 const std::vector<int>& ClientManager::initialize(std::string serverIP, std::string port)
 {
@@ -107,17 +107,17 @@ void ClientManager::receiveMessages()
 		else if (msgType == CREATE_OBJECT_NETWORK_DATA) {
 			CreateObjectNetworkData * c = (CreateObjectNetworkData*)received.body.data();
 			GameObject::createObject(c->objectID);
+
 			GameObject * g = GameObject::SceneRoot.FindByID(c->objectID);
+			
 			std::cout << "Client created object with id " << g->ID << std::endl;
 			g->transform.setPosition(g->ID, -1, 0);
-			GameObject::SceneRoot.addChild(g);
 			ClientManager::lastObjectCreated = g->ID;
 		}
 		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) {
 			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)received.body.data();
 			GameObject * g = GameObject::SceneRoot.FindByID(d->objectID);
 			GameObject::destroyObjectByID(d->objectID);
-			delete g;
 		}
 	}
 }
