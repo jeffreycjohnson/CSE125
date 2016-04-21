@@ -10,8 +10,8 @@ const std::vector<GLenum> defaultFormats{ GL_RGBA8, GL_RGBA16, GL_RGBA16F, GL_RG
 class Camera : public Component
 {
 	private:
-		float shakeAmount, startShakeAmount, shakeDuration, startShakeDuration;
-		bool isShaking;
+		float shakeAmount = 0.f, startShakeAmount = 0.f, shakeDuration = 0.f, startShakeDuration = 0.f;
+		bool isShaking = false;
 		float currentFOV, prevFOV, fovStartTime;
 		glm::vec3 forward, up, position, prevPosition, velocity;
 		glm::mat4 matrix;

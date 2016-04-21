@@ -14,7 +14,7 @@
 
 Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats) : width(w), height(h)
 {
-	currentFOV = fov = atan(1.f) * 4.0f / 3.0f;
+	currentFOV = prevFOV = fov = atan(1.f) * 4.0f / 3.0f;
 	fovDuration = 1;
 	offset.setPosition(0, 0, 0);
 	up = {0, 1, 0};
@@ -39,14 +39,7 @@ Camera::~Camera()
 
 glm::mat4 Camera::getCameraMatrix()
 {
-	//glm::affineInverse seems to have a bug with inverting scales atm (fixed in git, but not in lastest stable release), so we need to remove the scale manually
-	
-	matrix = gameObject->transform.getTransformMatrix() * offset.getTransformMatrix();
-	glm::vec3 scale;
-	scale[0] = 1/glm::length(glm::vec3(matrix[0][0], matrix[1][0], matrix[2][0]));
-	scale[1] = 1/glm::length(glm::vec3(matrix[0][1], matrix[1][1], matrix[2][1]));
-	scale[2] = 1/glm::length(glm::vec3(matrix[0][2], matrix[1][2], matrix[2][2]));
-	return glm::affineInverse(glm::scale(matrix, scale));
+	return glm::affineInverse(gameObject->transform.getTransformMatrix() * offset.getTransformMatrix());
 }
 
 void Camera::update(float deltaTime)
