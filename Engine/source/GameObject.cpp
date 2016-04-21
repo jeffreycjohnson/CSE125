@@ -38,7 +38,9 @@ void GameObject::UpdateScene(int caller)
 			if (caller == 1) ServerManager::receiveMessages();
 
 			// server or offline
+			SceneRoot.beforeFixedUpdate();
 			SceneRoot.fixedUpdate();
+			SceneRoot.afterFixedUpdate();
 
 			if (caller == 1) ServerManager::sendMessages();
 		}
@@ -168,6 +170,29 @@ void GameObject::update(float deltaTime)
     }
 }
 
+void GameObject::beforeFixedUpdate()
+{
+	for (auto component : componentList)
+	{
+		if (newlyCreated || component->newlyCreated)
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
+	}
+	newlyCreated = false;
+
+	if (dead || !active) return;
+	for (unsigned int i = 0; i < transform.children.size(); i++)
+	{
+		transform.children[i]->gameObject->beforeFixedUpdate();
+	}
+	for (auto component : componentList)
+	{
+		if (component->active) component->beforeFixedUpdate();
+	}
+}
+
 void GameObject::fixedUpdate()
 {
 	for (auto component : componentList)
@@ -189,6 +214,29 @@ void GameObject::fixedUpdate()
     {
         if (component->active) component->fixedUpdate();
     }
+}
+
+void GameObject::afterFixedUpdate()
+{
+	for (auto component : componentList)
+	{
+		if (newlyCreated || component->newlyCreated)
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
+	}
+	newlyCreated = false;
+
+	if (dead || !active) return;
+	for (unsigned int i = 0; i < transform.children.size(); i++)
+	{
+		transform.children[i]->gameObject->beforeFixedUpdate();
+	}
+	for (auto component : componentList)
+	{
+		if (component->active) component->afterFixedUpdate();
+	}
 }
 
 void GameObject::extract()

@@ -63,8 +63,12 @@ public:
     std::string getName() const;
 
 	void debugDraw();
-    void update(float deltaTime);
+    
+	void update(float deltaTime);
+	void beforeFixedUpdate(); // <-- Do not use this for gameplay logic!!!
     void fixedUpdate();
+	void afterFixedUpdate();  // <-- Do not use this for gameplay logic!!!
+
     void collisionEnter(GameObject* other);
     //void collisionStay(GameObject* other);
     //void collisionExit(GameObject* other);

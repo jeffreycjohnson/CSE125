@@ -224,6 +224,13 @@ bool OctreeNode::isLeaf() const {
 	return children.empty();
 }
 
+std::vector<Collider*>::iterator OctreeNode::begin() {
+	return colliders.begin();
+};
+std::vector<Collider*>::iterator OctreeNode::end() {
+	return colliders.end();
+};
+
 void OctreeNode::debugDraw() {
 	// Only draw octree leaves that have objects
 	if (true){//children.empty() && !colliders.empty()) {
