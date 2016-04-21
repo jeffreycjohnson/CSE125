@@ -83,6 +83,7 @@ public:
 	static void init(GLFWwindow* win);
 	static void update();
 
+	static void addInputsFromConfig(std::string configfile);
 	static void addInput(InputData data);
 
 	static glm::vec2 mousePosition();
