@@ -143,6 +143,9 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 			return -1;
 		}
 
+		const char shouldNoDelay = 1;
+		setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &shouldNoDelay, sizeof(shouldNoDelay));
+
 		// Connect to server.
 		iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 		if (iResult == SOCKET_ERROR) {

@@ -360,6 +360,9 @@ int ServerNetwork::acceptTCPConnection(int listenSocket) {
 		return -1;
 	}
 
+	const char shouldNoDelay = 1;
+	setsockopt(clientSocket, IPPROTO_TCP, TCP_NODELAY, &shouldNoDelay, sizeof(shouldNoDelay));
+
 	std::cout << "accepted client!" << std::endl;
 
 	return clientSocket;
