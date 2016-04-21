@@ -27,7 +27,7 @@ public:
 	
 	virtual void destroy() {
 		if (octree != nullptr) {
-			//octree->remove(*this); // TODO: Uncomment this once Octree allows for generic Collider&
+			octree->remove(this);
 			octree = nullptr;
 			nodeId = Octree::UNKNOWN_NODE;
 		}
@@ -41,6 +41,7 @@ public:
 	virtual bool intersects(const CapsuleCollider& other) const = 0;
 	virtual bool intersects(const SphereCollider& other) const = 0;
 
+	// Returns an axis-aligned bounding box defined for WORLD coordinates
 	virtual BoxCollider getAABB() const = 0;
 	virtual ColliderType getColliderType() {
 		return ColliderType::UNKNOWN;

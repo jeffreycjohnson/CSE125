@@ -1,7 +1,24 @@
 #include "SphereCollider.h"
 #include "BoxCollider.h"
+#include "CapsuleCollider.h"
 #include "Renderer.h"
 #include "RenderPass.h"
+
+SphereCollider::SphereCollider(glm::vec3 c, float r) {
+	center = c;
+	radius = r;
+	if (gameObject != nullptr) {
+		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
+		centerWorld = glm::vec3(matrix * glm::vec4(c, 1));
+		radiusWorld = r * gameObject->transform.getWorldScale();
+	}
+	else {
+		// Assume world space coordinates
+		LOG("Warning: collider specified with no gameObject! Assuming world space coordinates.");
+		centerWorld = c;
+		radiusWorld = r;
+	}
+}
 
 SphereCollider::~SphereCollider() {
 
@@ -9,10 +26,17 @@ SphereCollider::~SphereCollider() {
 
 void SphereCollider::destroy()
 {
+	Collider::destroy();
 }
 
 void SphereCollider::update(float)
 {
+	// Make sure our world coordinates are properly updated
+	if (gameObject != nullptr) {
+		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
+		centerWorld = glm::vec3(matrix * glm::vec4(center, 1));
+		radiusWorld = radius * gameObject->transform.getWorldScale();
+	}
 }
 
 void SphereCollider::debugDraw()
@@ -50,17 +74,26 @@ bool SphereCollider::intersects(const BoxCollider & other) const
 
 bool SphereCollider::intersects(const CapsuleCollider & other) const
 {
-	// TODO: Implement Sphere->Capsule intersection
-	return false;
+	SphereCollider s = *this;
+	return other.intersects(s);
 }
 
 bool SphereCollider::intersects(const SphereCollider & other) const
 {
-	// TODO: Implement Sphere->Sphere intersection
-	return false;
+	float distance = (other.centerWorld - centerWorld).length();
+	return (distance <= radiusWorld);
 }
 
 BoxCollider SphereCollider::getAABB() const
 {
-	return BoxCollider(center, glm::vec3(radius,radius,radius));
+	// Remember to pass in the world coordinates
+	return BoxCollider(centerWorld, glm::vec3(radiusWorld,radiusWorld,radiusWorld));
+};
+
+glm::vec3 SphereCollider::getCenterWorld() const {
+	return centerWorld;
+};
+
+float SphereCollider::getRadiusWorld() const {
+	return radiusWorld;
 };

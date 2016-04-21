@@ -138,7 +138,6 @@ public:
 	bool collisionOccurred;
 	int numCollisions;
 
-
 private:
 	std::set<GameObject*> collidees;
 
@@ -154,16 +153,9 @@ public:
 	glm::vec3 origin, direction;
 	float t;
 
-	Ray(glm::vec3 o, glm::vec3 d) : origin(o), direction(d) {
-		direction = glm::normalize(direction);
-		t = 0.0f;
-	}
+	Ray(glm::vec3 o, glm::vec3 d);
 
 	// Returns a discrete point along the ray at the timestep t
-	glm::vec3 getCurrentPosition() const {
-		return origin + t * direction;
-	}
-	glm::vec3 getPos(float tt) const {
-		return origin + tt * direction;
-	}
+	glm::vec3 getCurrentPosition() const;
+	glm::vec3 getPos(float tt) const;
 };
