@@ -75,6 +75,7 @@ public:
 
 	void extract();
 	static int createObject();
+	static int createObject(int id);
 	static void destroyObjectByID(int objectID);
 
 protected:

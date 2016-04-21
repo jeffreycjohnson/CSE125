@@ -320,12 +320,18 @@ void GameObject::removeID()
 }
 
 int GameObject::createObject() {
+	return createObject(GameObject::objectIDCounter++);
+}
+
+int GameObject::createObject(int id) {
 	GameObject * g = loadScene("assets/ball.dae");
-	g->ID = GameObject::objectIDCounter++;
+	g->ID = id;
 	idMap.insert(std::make_pair(g->ID, g));
 	SceneRoot.addChild(g);
 	return g->ID;
 }
+
+
 
 void GameObject::destroyObjectByID(int objectID) {
 	GameObject * obj = SceneRoot.FindByID(objectID);

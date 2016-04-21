@@ -106,8 +106,8 @@ void ClientManager::receiveMessages()
 		}
 		else if (msgType == CREATE_OBJECT_NETWORK_DATA) {
 			CreateObjectNetworkData * c = (CreateObjectNetworkData*)received.body.data();
-			GameObject * g = loadScene("assets/ball.dae");
-			g->ID = c->objectID;
+			GameObject::createObject(c->objectID);
+			GameObject * g = GameObject::SceneRoot.FindByID(c->objectID);
 			std::cout << "Client created object with id " << g->ID << std::endl;
 			g->transform.setPosition(g->ID, -1, 0);
 			GameObject::SceneRoot.addChild(g);
