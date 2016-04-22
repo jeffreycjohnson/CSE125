@@ -1,5 +1,6 @@
 #include "Collision.h"
 #include "Renderer.h"
+#include "RenderPass.h"
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
@@ -48,13 +49,15 @@ CollisionInfo OctreeNode::raycast(const Ray& ray) {
 	return colInfo;
 };
 
+// TODO: Condense the "collidesWith" methods into one method, since there's a lot of repetition
 CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 
-	// TODO: Probably refactor this header to take a Collider* or use dynamic_cast<> (?)
 	CollisionInfo info;
+	info.collider = (Collider*)&box;
 
 	// Check object against all of the objects in our colliders list
 	for (auto colliderPtr : colliders) {
+		if (colliderPtr == &box) continue; // Don't check colliders against themselves
 		switch (colliderPtr->getColliderType()) {
 
 			case ColliderType::AABB:
@@ -87,6 +90,96 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 	// If we have children, check them afterwards
 	for (auto child : children) {
 		info.merge(child->collidesWith(box));
+	}
+
+	return info;
+
+};
+
+CollisionInfo OctreeNode::collidesWith(const SphereCollider& collider) {
+
+	CollisionInfo info;
+	info.collider = (Collider*)&collider;
+
+	// Check object against all of the objects in our colliders list
+	for (auto colliderPtr : colliders) {
+		if (colliderPtr == &collider) continue; // Don't check colliders against themselves
+		switch (colliderPtr->getColliderType()) {
+			case ColliderType::AABB:
+			{
+				BoxCollider* myBox = (BoxCollider*)colliderPtr;
+				if (myBox->intersects(collider)) {
+					info.add(myBox);
+				}
+				break;
+			}
+			case ColliderType::SPHERE:
+			{
+				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+				if (mySphere->intersects(collider)) {
+					info.add(mySphere);
+				}
+				break;
+			}
+			case ColliderType::CAPSULE:
+			{
+				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+				if (myCapsule->intersects(collider)) {
+					info.add(myCapsule);
+				}
+				break;
+			}
+		}
+	}
+
+	// If we have children, check them afterwards
+	for (auto child : children) {
+		info.merge(child->collidesWith(collider));
+	}
+
+	return info;
+
+};
+
+CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider) {
+
+	CollisionInfo info;
+	info.collider = (Collider*)&collider;
+
+	// Check object against all of the objects in our colliders list
+	for (auto colliderPtr : colliders) {
+		if (colliderPtr == &collider) continue; // Don't check colliders against themselves
+		switch (colliderPtr->getColliderType()) {
+			case ColliderType::AABB:
+			{
+				BoxCollider* myBox = (BoxCollider*)colliderPtr;
+				if (myBox->intersects(collider)) {
+					info.add(myBox);
+				}
+				break;
+			}
+			case ColliderType::SPHERE:
+			{
+				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+				if (mySphere->intersects(collider)) {
+					info.add(mySphere);
+				}
+				break;
+			}
+			case ColliderType::CAPSULE:
+			{
+				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+				if (myCapsule->intersects(collider)) {
+					info.add(myCapsule);
+				}
+				break;
+			}
+		}
+	}
+
+	// If we have children, check them afterwards
+	for (auto child : children) {
+		info.merge(child->collidesWith(collider));
 	}
 
 	return info;
@@ -237,7 +330,7 @@ void OctreeNode::debugDraw() {
 		glm::vec3 center = (max - min); // TODO: Our debug drawing should probably be more descriptive & configurable
 		center /= 2;
 		glm::vec3 scale(max.x - min.x, max.y - min.y, max.z - min.z);
-		glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f); // White
+		glm::vec4 color = glm::vec4(DebugPass::octreeColor, 1);
 		Renderer::drawBox(center, scale, color);
 	}
 }

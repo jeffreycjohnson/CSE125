@@ -9,6 +9,8 @@ private:
 	Octree* staticObjects;
 	Octree* dynamicObjects;
 
+	//std::vector<std::pair<GameObject*, CollisionInfo>> staticCollisions;
+	//std::vector<std::pair<GameObject*, CollisionInfo>> dynamicCollisions;
 	std::vector<CollisionInfo> staticCollisions;
 	std::vector<CollisionInfo> dynamicCollisions;
 
@@ -26,5 +28,8 @@ public:
 	void beforeFixedUpdate() override;
 	void fixedUpdate() override;
 	void afterFixedUpdate() override;
+
+	void debugDraw() override;
+
 };
 
