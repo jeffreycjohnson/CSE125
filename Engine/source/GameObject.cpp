@@ -9,7 +9,7 @@
 #include "OctreeManager.h"
 #include <iostream>
 #include <functional>
-#include "Networkmanager.h"
+#include "NetworkManager.h"
 #include "NetworkUtility.h"
 #include "ObjectLoader.h"
 #include <algorithm>

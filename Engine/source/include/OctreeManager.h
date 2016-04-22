@@ -10,6 +10,8 @@ private:
 	Octree* dynamicObjects;
 	int dynamicCollisionsThisFrame, staticCollisionsThisFrame;
 
+	//std::vector<std::pair<GameObject*, CollisionInfo>> staticCollisions;
+	//std::vector<std::pair<GameObject*, CollisionInfo>> dynamicCollisions;
 	std::vector<CollisionInfo> staticCollisions;
 	std::vector<CollisionInfo> dynamicCollisions;
 

@@ -41,6 +41,7 @@ void Octree::removeNode(NodeId node) {
 };
 
 void Octree::insert(Collider* obj) {
+
 	if (root && obj != nullptr) {
 		if (obj->nodeId == UNKNOWN_NODE) {
 			if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
@@ -53,6 +54,7 @@ void Octree::insert(Collider* obj) {
 			}
 		}
 	}
+
 }
 
 void Octree::remove(Collider* obj) {
@@ -171,15 +173,18 @@ CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	}
 };
 
+
 CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
 	CollisionInfo colInfo;
 	colInfo.collider = ptr;
+
 	if (root) {
 		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
 		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
 		CapsuleCollider* capsule = dynamic_cast<CapsuleCollider*>(ptr);
 
 		if (box != nullptr) {
+
 			return root->collidesWith(*box, colInfo);
 		}
 		else if (sphere != nullptr) {
@@ -187,6 +192,7 @@ CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a b
 		}
 		else if (capsule != nullptr) {
 			return root->collidesWith(*capsule, colInfo);
+
 		}
 
 	}

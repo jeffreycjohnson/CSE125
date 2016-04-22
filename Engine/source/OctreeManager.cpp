@@ -114,7 +114,9 @@ void OctreeManager::probeForStaticCollisions() {
 
 	if (staticObjects != nullptr && dynamicObjects != nullptr) {
 		for (auto nodeIter = dynamicObjects->begin(); nodeIter != dynamicObjects->end(); ++nodeIter) {
+
 			OctreeNode* node = nodeIter->second;
+			OctreeNode* node = (*nodeIter).second;
 			if (node != nullptr) {
 				
 				for (auto colliderIter = node->begin(); colliderIter != node->end(); ++colliderIter) {
@@ -281,7 +283,6 @@ void OctreeManager::fixedUpdate() {
 };
 
 void OctreeManager::afterFixedUpdate() {
-
 	// Before the fixed update, we did all the collision detection for N - 1,
 	// but the previouslyCollding boolean reflected the colliding state of N - 2,
 	// so we need to update it to whatever happened *this* frame.
