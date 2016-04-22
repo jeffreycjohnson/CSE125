@@ -27,6 +27,7 @@
 std::unordered_map<std::string, MeshData> Mesh::meshMap;
 std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
 
+Mesh::Mesh() {}
 
 Mesh::Mesh(std::string name) : name(name) {
     if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) throw;
@@ -236,4 +237,15 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
     meshData.wireframe = mesh->mPrimitiveTypes == aiPrimitiveType_LINE;
 
 	Mesh::meshMap[name] = meshData;
+}
+
+Mesh* Mesh::fromCachedMeshData(std::string name)
+{
+	auto iter = Mesh::meshMap.find(name);
+	assert(iter != Mesh::meshMap.end()); // can only access if cached
+
+	Mesh *created = new Mesh;
+	created->name = name;
+
+	return created;
 }

@@ -31,7 +31,8 @@ struct InputNetworkData
 #pragma pack(push, 1)
 struct TransformNetworkData
 {
-	unsigned int transformID;
+	unsigned int objectID;
+	unsigned int parentID;
 
 	float px, py, pz;
 	float qw, qx, qy, qz;
@@ -44,13 +45,10 @@ struct TransformNetworkData
 struct CreateObjectNetworkData
 {
 	int objectID;
-	int parentID;
 	char meshName[MAX_MESH_NAME];
 
-	TransformNetworkData tnd;
-
-	CreateObjectNetworkData(int objectID, int parentID, std::string meshName, TransformNetworkData tnd)
-		: objectID(objectID), parentID(parentID), tnd(tnd)
+	CreateObjectNetworkData(int objectID, std::string meshName)
+		: objectID(objectID)
 	{
 		memset(this->meshName, 0, sizeof(char) * MAX_MESH_NAME);
 		strncpy_s(this->meshName, meshName.c_str(), MAX_MESH_NAME - 1);

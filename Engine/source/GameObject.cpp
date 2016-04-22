@@ -7,8 +7,10 @@
 #include "Renderer.h"
 #include "Material.h"
 #include "ObjectLoader.h"
+#include <algorithm>
 #include <iterator>
 #include <iostream>
+#include <string>
 
 std::vector<void(*)(void)> GameObject::preFixedCallbacks;
 std::vector<void(*)(void)> GameObject::postFixedCallbacks;
@@ -95,7 +97,7 @@ GameObject::GameObject() {
     active = true;
 	visible = true;
     newlyCreated = true;
-	ID = GameObject::objectIDCounter++;
+	this->setID(GameObject::objectIDCounter++);
 }
 
 GameObject::GameObject(int id) {
@@ -104,7 +106,7 @@ GameObject::GameObject(int id) {
 	active = true;
 	visible = true;
 	newlyCreated = true;
-	ID = id;
+	this->setID(id);
 }
 
 GameObject::~GameObject() {
@@ -121,6 +123,15 @@ GameObject::~GameObject() {
 void GameObject::addChild(GameObject* go) {
     transform.children.push_back(&go->transform);
     go->transform.parent = &transform;
+}
+
+void GameObject::removeChild(GameObject * go)
+{
+	auto child = std::find(transform.children.begin(), transform.children.end(), &go->transform);
+	assert(child != transform.children.end());
+
+	transform.children.erase(child);
+	go->transform.parent = nullptr;
 }
 
 void GameObject::destroy() {
@@ -357,14 +368,42 @@ void GameObject::removeID()
 	}
 }
 
-int GameObject::createObject() {
-	return createObject(GameObject::objectIDCounter++);
+int GameObject::createObject() 
+{
+	GameObject *g = new GameObject;
+	return g->getID();
+}
+
+int GameObject::createObject(std::string meshName)
+{
+	GameObject *g = new GameObject;
+
+	if (!meshName.empty())
+	{
+		Mesh *relevant = Mesh::fromCachedMeshData(meshName);
+		g->addComponent(relevant);
+	}
+
+	return g->getID();
 }
 
 int GameObject::createObject(int id) {
-	GameObject * g = loadScene("assets/ball.dae");
+	GameObject *g = new GameObject;
 	g->setID(id);
-	SceneRoot.addChild(g);
+
+	return g->getID();
+}
+
+int GameObject::createObject(int id, std::string meshName) {
+	GameObject *g = new GameObject;
+	g->setID(id);
+
+	if (!meshName.empty())
+	{
+		Mesh *relevant = Mesh::fromCachedMeshData(meshName);
+		g->addComponent(relevant);
+	}
+
 	return g->getID();
 }
 
@@ -376,10 +415,8 @@ void GameObject::destroyObjectByID(int objectID) {
 	}
 }
 
-std::vector<std::vector<char>> GameObject::serializeCreation(int parentID)
+std::vector<char> GameObject::serialize()
 {
-	std::vector<std::vector<char>> allMessages;
-
 	int myID = getID();
 	std::string meshName;
 
@@ -389,23 +426,24 @@ std::vector<std::vector<char>> GameObject::serializeCreation(int parentID)
 		meshName = possibleMesh->name;
 	}
 
-	TransformNetworkData tnd = transform.serializeAsStruct();
-	CreateObjectNetworkData cond(myID, parentID, meshName, tnd);
+	CreateObjectNetworkData cond(myID, meshName);
 
 	std::vector<char> myCreation;
 	myCreation.resize(sizeof(cond), 0);
 	memcpy(myCreation.data(), &cond, sizeof(cond));
 
-	for (auto& childTransform : transform.children)
-	{
-		auto& child = childTransform->gameObject;
-		std::vector<std::vector<char>> childMessages = child->serializeCreation(myID);
+	return myCreation;
+}
 
-		// extend allMessages with the creation messages of my children
-		allMessages.insert(allMessages.end(),
-			std::make_move_iterator(childMessages.begin()),
-			std::make_move_iterator(childMessages.end()));
+bool GameObject::deserializeAndCreate(std::vector<char> bytes)
+{
+	CreateObjectNetworkData cond = *((CreateObjectNetworkData*)bytes.data());
+	if (GameObject::FindByID(cond.objectID) != nullptr)
+	{
+		std::cerr << "Cannot create object with ID " << cond.objectID << ", object with ID already exists" << std::endl;
+		return false;
 	}
 
-	return allMessages;
+	GameObject::createObject(cond.objectID, cond.meshName);
+	return true;
 }

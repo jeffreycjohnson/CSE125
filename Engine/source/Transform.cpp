@@ -1,6 +1,8 @@
 #include "Transform.h"
 #include <gtc/matrix_transform.hpp>
 
+#include "GameObject.h"
+
 void Transform::setDirty()
 {
     transformMatrixDirty = true;
@@ -137,13 +139,33 @@ void Transform::deserializeAndApply(std::vector<char> bytes)
 	setPosition(tnd.px, tnd.py, tnd.pz);
 	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
 	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));
+
+	int myParentID = this->parent != nullptr ? parent->gameObject->getID() : -1;
+	if (tnd.parentID != myParentID)
+	{
+		// if I have an actual parent to emancipate from
+		if (myParentID != -1)
+		{
+			parent->gameObject->removeChild(this->gameObject);
+		}
+
+		// now, if we have an actual parent to adopt me
+		if (tnd.parentID != -1)
+		{
+			GameObject *parentGO = GameObject::FindByID(tnd.parentID);
+			assert(parentGO != nullptr);
+
+			parentGO->addChild(this->gameObject);
+		}
+	}
 }
 
 TransformNetworkData Transform::serializeAsStruct()
 {
 	TransformNetworkData tnd;
 
-	tnd.transformID = this->componentID;
+	tnd.objectID = gameObject->getID();
+	tnd.parentID = parent != nullptr ? parent->gameObject->getID() : -1;
 
 	tnd.px = position.x;
 	tnd.py = position.y;

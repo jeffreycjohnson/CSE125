@@ -22,9 +22,6 @@ FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, 
 
 void FPSMovement::create()
 {
-	// TODO make better registration system
-	this->gameObject->transform.componentID = this->clientId;
-
 	recalculate();
 }
 
@@ -53,7 +50,6 @@ void FPSMovement::fixedUpdate()
 	position += ServerInput::getAxis("pitch", clientId) * normRight * speed;
 	
 	recalculate();
-
 }
 
 void FPSMovement::recalculate()

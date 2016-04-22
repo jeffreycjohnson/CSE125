@@ -83,7 +83,7 @@ void ClientManager::receiveMessages()
 		{
 			tnd = (TransformNetworkData*)received.body.data();
 
-			std::string playerName = std::string("player_") + std::to_string(tnd->transformID);
+			std::string playerName = std::string("player_") + std::to_string(tnd->objectID);
 			GameObject::FindByName(playerName)->transform.deserializeAndApply(received.body);
 		}
 		else if (msgType == CREATE_OBJECT_NETWORK_DATA) {

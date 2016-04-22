@@ -32,7 +32,9 @@ public:
 	static void AddPostUpdateCallback(void(*callback)(void));
 
 	static int createObject();
+	static int createObject(std::string meshName);
 	static int createObject(int id);
+	static int createObject(int id, std::string meshName);
 	static void destroyObjectByID(int objectID);
 
 	GameObject();
@@ -73,7 +75,8 @@ public:
         return nullptr;
     }
 
-    void addChild(GameObject* go);
+	void addChild(GameObject* go);
+	void removeChild(GameObject* go);
 	void destroy();
 	void hideAll();
     bool isChildOf(GameObject* go) const;
@@ -92,10 +95,8 @@ public:
 
 	void extract();
 
-	std::vector<std::vector<char>> serializeCreation(int parentID);
-
-	enum DeserializeCreateResult { SUCCESS=0, ID_ALREADY_EXISTS, NO_PARENT_FOUND };
-	DeserializeCreateResult deserializeAndCreate(std::vector<char> bytes);
+	std::vector<char> serialize();
+	static bool deserializeAndCreate(std::vector<char> bytes);
 
 protected:
     bool dead, newlyCreated;

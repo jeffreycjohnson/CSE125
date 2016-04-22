@@ -33,7 +33,6 @@ public:
 	virtual void deactivate();*/
 
 	// serialization
-	unsigned int componentID;
 	virtual std::vector<char> serialize();
 	virtual void deserializeAndApply(std::vector<char> bytes);
 };
