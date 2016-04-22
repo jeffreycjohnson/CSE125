@@ -1,20 +1,6 @@
-/*
- * PLEASE #DEFINE __LINUX IN EITHER YOUR COMPILER FLAGS
- * IF COMPILING ON NON WINDOWS MACHINES USING BSD SOCKETS
- */
-#ifdef __LINUX
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
-#else
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-#endif
 #include "ClientNetwork.h"
 
 #include <stdlib.h>
@@ -23,15 +9,11 @@
 #include "NetworkStruct.h"
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
-#ifdef __LINUX
-#else
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 #define WIN32_LEAN_AND_MEAN
-#endif
 
-#define DEFAULT_BUFLEN 2048
 #define DEFAULT_PORT "5000"
 
 std::string ClientNetwork::serverIp;
@@ -50,8 +32,6 @@ int ClientNetwork::closeConnection(){
 		return 1;
 	}
 
-#ifdef __LINUX
-#else
 	iResult = shutdown(ConnectSocket, SD_SEND);
 	if (iResult == SOCKET_ERROR) {
 		std::cerr << "shutdown failed: " << WSAGetLastError() << std::endl;
@@ -60,7 +40,6 @@ int ClientNetwork::closeConnection(){
 	closesocket(ConnectSocket);
 
 	WSACleanup();
-#endif
 
 	ConnectionEstablished = false;
 	ConnectSocket = INVALID_SOCKET;
@@ -84,8 +63,6 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 	int iResult;
 
 	// Initialize Winsock
-#if __LINUX
-#else
 	WSADATA wsaData;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0) {
@@ -99,7 +76,6 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 		return -1;
 	}
 	ZeroMemory(&hints, sizeof(hints));
-#endif
 
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -115,10 +91,7 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 		throw new std::runtime_error(message);
 # endif
 
-#ifdef __LINUX
-#else
 		WSACleanup();
-#endif
 		return -1;
 	}
 
@@ -129,8 +102,6 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 		ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
 			ptr->ai_protocol);
 		if (ConnectSocket == INVALID_SOCKET) {
-#ifdef __LINUX
-#else
 			printf("socket failed with error: %ld\n", WSAGetLastError());
 # ifdef _EXCEPTIONAL
 			std::string message = "socket failed with error: ";
@@ -139,7 +110,6 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 # endif
 
 			WSACleanup();
-#endif
 			return -1;
 		}
 
@@ -149,10 +119,7 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 		// Connect to server.
 		iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 		if (iResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
 			closesocket(ConnectSocket);
-#endif
 			ConnectSocket = INVALID_SOCKET;
 			continue;
 		}
@@ -166,10 +133,7 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 		throw new std::runtime_error(message);
 # endif
 
-#ifdef __LINUX
-#else
 		WSACleanup();
-#endif
 		return -1;
 	}
 
@@ -185,48 +149,9 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 	return 0;
 }
 
-int ClientNetwork::sendMessage(void * message, int msgType) {
-	char encodedMsg[DEFAULT_BUFLEN];
-	int contentLength = encodeStruct(message, NetworkStruct::sizeOf(msgType), msgType, encodedMsg, DEFAULT_BUFLEN);
-
-	if (contentLength == 0) return 1;
-
-	//Need to Establish Connection
-	if (!ConnectionEstablished){
-		std::cerr << "Send Refused. Please Establish Connection" << std::endl;
-		return 1;
-	}
-	int iSendResult = send(ClientNetwork::ConnectSocket, encodedMsg, contentLength, 0);
-	if (iSendResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
-		int wsaLastError = WSAGetLastError();
-		if (wsaLastError != WSAEWOULDBLOCK)
-		{
-			std::cerr << "Send Failed with error: " << wsaLastError << std::endl;
-			closesocket(ConnectSocket);
-# ifdef _EXCEPTIONAL
-			std::string message = "Send Failed with error: ";
-			message += wsaLastError;
-			throw new std::runtime_error(message);
-# endif
-			WSACleanup();
-		}
-#endif
-		ClientNetwork::ConnectionEstablished = false;
-		ClientNetwork::ConnectSocket = INVALID_SOCKET;
-		return 1;
-	}
-
-	//Pound Define This
-	// printf("Bytes Sent: %d\n", iSendResult);
-
-	return 0;
-}
-
-int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
+int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType, int id)
 {
-	std::vector<char> encodedMsg = encodeMessage(bytes, msgType);
+	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
 
 	//Need to Establish Connection
 	if (!ConnectionEstablished){
@@ -236,8 +161,6 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
 	//std::cout << "Sending " << encodedMsg.size() << " bytes" << std::endl;
 	int iSendResult = send(ClientNetwork::ConnectSocket, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
 		int wsaLastError = WSAGetLastError();
 		if (wsaLastError != WSAEWOULDBLOCK)
 		{
@@ -250,7 +173,6 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType)
 # endif
 			WSACleanup();
 		}
-#endif
 		ClientNetwork::ConnectionEstablished = false;
 		ClientNetwork::ConnectSocket = INVALID_SOCKET;
 		return 1;
@@ -324,10 +246,11 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 
 				// parse the whole message
 				int msgType = -1;
-				msg = decodeStruct(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &contentLength);
+				int msgId = -1;
+				msg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
 				totalBytesProcd += contentLength;
 
-				NetworkResponse response(msgType, msg);
+				NetworkResponse response(msgType, msgId, msg);
 				msgs.push_back(response);
 			}
 			while (totalBytesRecvd > totalBytesProcd);
@@ -341,8 +264,6 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 		}
 		else // error
 		{ 
-#ifdef __LINUX
-#else
 			printf("recv failed with error: %d\n", WSAGetLastError());
 			closesocket(ConnectSocket);
 
@@ -352,7 +273,6 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 			throw new std::runtime_error(message);
 # endif
 			WSACleanup();
-#endif
 			return msgs;
 		}
 	}
@@ -361,7 +281,8 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 	return msgs;
 }
 
-void ClientNetwork::getStatus(std::string header){
+void ClientNetwork::getStatus(std::string header)
+{
 	std::cout << header;
 	std::cout << "Ip and Port are " << ClientNetwork::serverIp << ":" << ClientNetwork::port << std::endl;
 	std::cout << "Is the connection to the port established? " << ClientNetwork::ConnectionEstablished << std::endl;

@@ -3,15 +3,17 @@
 #include <vector>
 
 #define DEFAULT_BUFLEN 2048
-#define METADATA_LEN 8
+#define METADATA_LEN 12
+#define METADATA_CNT 3
 
 struct NetworkResponse
 {
 	int messageType;
+	int id;
 	std::vector<char> body;
 
-	NetworkResponse(int messageType, std::vector<char> body) :
-		messageType(messageType), body(body)
+	NetworkResponse(int messageType, int msgId, std::vector<char> body) :
+		messageType(messageType), id(msgId), body(body)
 	{}
 
 	~NetworkResponse() {}
@@ -31,11 +33,9 @@ struct PreviousData
 	~PreviousData() {}
 };
 
-std::vector<char> encodeMessage(std::vector<char> message, int messageType);
+std::vector<char> encodeMessage(std::vector<char> message, int messageType, int id);
 
-int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen);
-
-std::vector<char> decodeStruct(char * buf, int buflen, int * msgType, int * msgLen);
+std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id, int * msgLen);
 
 int decodeContentLength(std::string message);
 

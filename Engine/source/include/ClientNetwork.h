@@ -21,11 +21,7 @@ public:
 	//Returns 1 if failure
 
 	static int setup(std::string serverip, std::string port);
-
-	static char decodeMessage(std::string message);
-	//Requirements, need connection to be established... What should the data type be TODO:
-	static int sendMessage(void * message, int msgType);
-	static int sendBytes(std::vector<char> bytes, int msgType);
+	static int sendBytes(std::vector<char> bytes, int msgType, int id);
 
 	//Returns string with recieved
 	static std::vector<NetworkResponse> receiveMessages();

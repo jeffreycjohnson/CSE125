@@ -1,17 +1,6 @@
-#ifdef __LINUX
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
-#else
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-#endif
-
 #include "NetworkStruct.h"
 #include "ServerNetwork.h"
 #include <stdlib.h>
@@ -23,10 +12,7 @@
 #include <stdexcept>
 
 // Need to link with Ws2_32.lib
-#ifdef __LINUX
-#else
 #pragma comment (lib, "Ws2_32.lib")
-#endif
 // #pragma comment (lib, "Mswsock.lib")
 
 int ServerNetwork::listenSocket;
@@ -57,8 +43,6 @@ void ServerNetwork::closeConnection()
 
 	for (int clientSocket : clients)
 	{
-#ifdef __LINUX
-#else
 		int iResult = shutdown(clientSocket, SD_SEND);
 		if (iResult == SOCKET_ERROR) {
 			printf("shutdown failed with error: %d\n", WSAGetLastError());
@@ -77,11 +61,11 @@ void ServerNetwork::closeConnection()
 		// cleanup
 		closesocket(clientSocket);
 		WSACleanup();
-#endif
 	}
 }
 
-std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
+std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) 
+{
 	// Receive until the peer shuts down the connection
 	int iResult;
 	int totalBytesRecvd = 0;
@@ -144,24 +128,24 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 
 			// parse the whole message
 			int msgType = -1;
-			msg = decodeStruct(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &contentLength);
+			int msgId = -1;
+			msg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
 			totalBytesProcd += contentLength;
 
-			NetworkResponse response(msgType, msg);
+			NetworkResponse response(msgType, msgId, msg);
 			msgs.push_back(response);
 		}
 		while (totalBytesRecvd > totalBytesProcd);
 			
 			//std::cerr << clientSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
-
 		}
-		else if (iResult == 0) {
+		else if (iResult == 0) 
+		{
 			break;
 		}
-		else  {
-#ifdef __LINUX
-#else
+		else  
+		{
 			printf("recv failed with error: %d\n", WSAGetLastError());
 			closesocket(clientSocket);
 
@@ -171,7 +155,6 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) {
 			throw new std::runtime_error(message);
 # endif
 			WSACleanup();
-#endif
 			return msgs;
 		}
 
@@ -231,9 +214,6 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 	int selResult = select(clients.back() + 1, &readfds, NULL, NULL, &tv);
 	if (selResult < 0)
 	{
-#ifdef __LINUX
-		perror("select failed with error");
-#else
 		printf("select failed with error: %d\n", WSAGetLastError());
 # ifdef _EXCEPTIONAL
 		std::string message = "recv failed with error: ";
@@ -241,7 +221,6 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 		throw new std::runtime_error(message);
 # endif
 		WSACleanup();
-#endif
 	}
 
 	for (int client_id = 0; client_id < clients.size(); ++client_id){
@@ -257,66 +236,23 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 	return responses;
 }
 
-void ServerNetwork::broadcastMessage(void * message, int msgType)
+void ServerNetwork::broadcastBytes(std::vector<char> bytes, int msgType, int id)
 {
 	for (int clientID = 0; clientID < clients.size(); clientID++)
 	{
-		ServerNetwork::sendMessage(clientID, message, msgType);
+		ServerNetwork::sendBytes(clientID, bytes, msgType, id);
 	}
 }
 
-void ServerNetwork::sendMessage(int clientID, void * message, int msgType)
-{
-	int clientSock = ServerNetwork::clients[clientID];
-
-	char encodedMsg[DEFAULT_BUFLEN];
-	int contentLength = encodeStruct(message, NetworkStruct::sizeOf(msgType), msgType, encodedMsg, DEFAULT_BUFLEN);
-
-	int iSendResult = send(clientSock, encodedMsg, contentLength, 0);
-	if (iSendResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
-		int wsaLastError = WSAGetLastError();
-		if (wsaLastError != WSAEWOULDBLOCK)
-		{
-			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(clientSock);
-# ifdef _EXCEPTIONAL
-			std::string message = "send failed with error: ";
-			message += WSAGetLastError();
-			throw new std::runtime_error(message);
-# endif
-
-			WSACleanup();
-		}
-#endif
-		return;
-	}
-#ifdef __LINUX
-	close(clientSocket);
-#endif
-	return;
-}
-
-void ServerNetwork::broadcastBytes(std::vector<char> bytes, int msgType)
-{
-	for (int clientID = 0; clientID < clients.size(); clientID++)
-	{
-		ServerNetwork::sendBytes(clientID, bytes, msgType);
-	}
-}
-
-void ServerNetwork::sendBytes(int clientID, std::vector<char> bytes, int msgType)
+void ServerNetwork::sendBytes(int clientID, std::vector<char> bytes, int msgType, int id)
 {
 	int clientSock = ServerNetwork::clients[clientID];
 
 	// insert encoded type
-	std::vector<char> encodedMsg = encodeMessage(bytes, msgType);
+	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
 
 	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
 		int wsaLastError = WSAGetLastError();
 		if (wsaLastError != WSAEWOULDBLOCK)
 		{
@@ -330,12 +266,8 @@ void ServerNetwork::sendBytes(int clientID, std::vector<char> bytes, int msgType
 
 			WSACleanup();
 		}
-#endif
 		return;
 	}
-#ifdef __LINUX
-	close(clientSocket);
-#endif
 	return;
 }
 
@@ -345,8 +277,6 @@ int ServerNetwork::acceptTCPConnection(int listenSocket) {
 	clientSocket = accept(listenSocket, NULL, NULL);
 
 	if (clientSocket == INVALID_SOCKET) {
-#ifdef __LINUX
-#else
 		printf("accept failed with error: %d\n", WSAGetLastError());
 		closesocket(listenSocket);
 # ifdef _EXCEPTIONAL
@@ -356,7 +286,6 @@ int ServerNetwork::acceptTCPConnection(int listenSocket) {
 # endif
 
 		WSACleanup();
-#endif
 		return -1;
 	}
 
@@ -368,12 +297,9 @@ int ServerNetwork::acceptTCPConnection(int listenSocket) {
 	return clientSocket;
 }
 
-int ServerNetwork::setupSocket(std::string port) {
-
-#ifdef __LINUX
-#else
+int ServerNetwork::setupSocket(std::string port) 
+{
 	WSADATA wsaData;
-#endif
 
 	int iResult;
 
@@ -388,10 +314,7 @@ int ServerNetwork::setupSocket(std::string port) {
 	int recvbuflen = DEFAULT_BUFLEN;
 
 	// Initialize Winsock
-#ifdef __LINUX
-#else
-		iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-#endif
+	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
 	if (iResult != 0) {
 		printf("WSAStartup failed with error: %d\n", iResult);
@@ -402,10 +325,7 @@ int ServerNetwork::setupSocket(std::string port) {
 # endif
 		return -1;
 	}
-#ifdef __LINUX
-#else
 	ZeroMemory(&hints, sizeof(hints));
-#endif
 
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
@@ -422,18 +342,13 @@ int ServerNetwork::setupSocket(std::string port) {
 		throw new std::runtime_error(message);
 # endif
 
-#ifdef __LINUX
-#else
 		WSACleanup();
-#endif
 		return -1;
 	}
 
 	// Create a SOCKET for connecting to server
 	ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	if (ListenSocket == INVALID_SOCKET) {
-#ifdef __LINUX
-#else
 		printf("socket failed with error: %ld\n", WSAGetLastError());
 		freeaddrinfo(result);
 # ifdef _EXCEPTIONAL
@@ -443,15 +358,12 @@ int ServerNetwork::setupSocket(std::string port) {
 # endif
 
 		WSACleanup();
-#endif
 		return -1;
 	}
 
 	// Setup the TCP listening socket
 	iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (iResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		freeaddrinfo(result);
 		closesocket(ListenSocket);
@@ -462,7 +374,6 @@ int ServerNetwork::setupSocket(std::string port) {
 # endif
 
 		WSACleanup();
-#endif
 		return -1;
 	}
 
@@ -470,8 +381,6 @@ int ServerNetwork::setupSocket(std::string port) {
 
 	iResult = listen(ListenSocket, SOMAXCONN);
 	if (iResult == SOCKET_ERROR) {
-#ifdef __LINUX
-#else
 		printf("listen failed with error: %d\n", WSAGetLastError());
 		closesocket(ListenSocket);
 # ifdef _EXCEPTIONAL
@@ -481,7 +390,6 @@ int ServerNetwork::setupSocket(std::string port) {
 # endif
 
 		WSACleanup();
-#endif
 		return -1;
 	}
 	return ListenSocket;
