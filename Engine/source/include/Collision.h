@@ -36,8 +36,8 @@ public:
 	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
-	static Octree* STATIC_TREE;
-	static Octree* DYNAMIC_TREE;
+	//static Octree* STATIC_TREE;
+	//static Octree* DYNAMIC_TREE;
 
 	enum BuildMode {
 		STATIC_ONLY,  // Only includes colliders with passive = TRUE
@@ -57,7 +57,7 @@ public:
 	void build(BuildMode mode = BOTH, const GameObject& root = GameObject::SceneRoot);
 
 	CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
-	CollisionInfo collidesWith(const BoxCollider&);
+	CollisionInfo collidesWith(Collider*);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
 	OctreeNode* getNodeById(NodeId id);
@@ -118,7 +118,9 @@ private:
 
 	CollisionInfo raycast(const Ray&);
 	CollisionInfo collidesWith(const BoxCollider&);
-
+	CollisionInfo collidesWith(const CapsuleCollider&);
+	CollisionInfo collidesWith(const SphereCollider&);
+	
 	// Add or remove nodes to the data structure
 	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted
 	void remove(Collider* colliderBeingRemoved);
@@ -146,9 +148,9 @@ public:
 	bool collisionOccurred;
 	int numCollisions;
 
-private:
+//private:
+	Collider* collider; // The collider upon which collisionXXXX() will be called
 	std::set<GameObject*> collidees;
-
 	void add(Collider*);
 	void merge(const CollisionInfo&);
 };

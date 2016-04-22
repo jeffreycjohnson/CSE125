@@ -11,10 +11,14 @@
 #include "Camera.h"
 #include "ClientManager.h"
 #include "ServerManager.h"
+#include "OctreeManager.h"
 #include "Config.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
+
+void LoadDebugOptions(ConfigFile&);
+void LoadOctreeOptionsAndInitialize(ConfigFile&);
 
 void InitializeEngine(std::string windowName)
 {
@@ -42,10 +46,8 @@ void InitializeEngine(std::string windowName)
 	width  = file.getInt("GraphicsOptions", "width");
 	height = file.getInt("GraphicsOptions", "height");
 
-	DebugPass::drawColliders = file.getBool("DebugOptions", "drawColliders");
-	DebugPass::drawLights    = file.getBool("DebugOptions", "drawLights");
-	DebugPass::colliderColor = file.getColor("DebugOptions", "colliderColor");
-	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
+	LoadDebugOptions(file);
+	LoadOctreeOptionsAndInitialize(file);
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
@@ -78,6 +80,39 @@ void InitializeEngine(std::string windowName)
 }
 
 void InitializeEngine() { InitializeEngine("CSE 125"); }
+
+// ConfigFile is a local variable in InitializeEngine, but we will likely be adding
+// lots more to this section, so I split it off from the main function.
+void LoadDebugOptions(ConfigFile& file) {
+
+	DebugPass::drawColliders = file.getBool("DebugOptions", "drawColliders");
+	DebugPass::drawLights = file.getBool("DebugOptions", "drawLights");
+	DebugPass::drawDynamicOctree = file.getBool("DebugOptions", "drawDynamicOctree");
+	DebugPass::drawStaticOctree = file.getBool("DebugOptions", "drawStaticOctree");
+	DebugPass::colliderColor = file.getColor("DebugOptions", "colliderColor");
+	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
+	DebugPass::octreeColor = file.getColor("DebugOptions", "octreeColor");
+
+}
+
+void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
+
+	OctreeManager* manager = new OctreeManager();
+	GameObject::SceneRoot.addComponent(manager);
+
+	glm::vec3 min, max;
+	min.x = file.getFloat("OctreeOptions", "xmin");
+	max.x = file.getFloat("OctreeOptions", "xmax");
+	min.y = file.getFloat("OctreeOptions", "ymin");
+	max.y = file.getFloat("OctreeOptions", "ymax");
+	min.z = file.getFloat("OctreeOptions", "zmin");
+	max.z = file.getFloat("OctreeOptions", "zmax");
+	
+	// Build the octrees; although no objects have been loaded yet
+	manager->buildStaticOctree(min, max);
+	manager->buildDynamicOctree(min, max);
+
+}
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.
 void RunEngine(int caller)

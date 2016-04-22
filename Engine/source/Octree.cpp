@@ -11,8 +11,8 @@ static const float RAY_MIN = FLT_EPSILON;
 static const float RAY_MAX = FLT_MAX;
 static const float RAY_STEP = 0.01f;
 
-Octree* Octree::STATIC_TREE  = nullptr;
-Octree* Octree::DYNAMIC_TREE = nullptr;
+//Octree* Octree::STATIC_TREE  = nullptr; // Globals are bad.
+//Octree* Octree::DYNAMIC_TREE = nullptr;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
 	root = new OctreeNode(min, max, this);
@@ -23,6 +23,9 @@ Octree::~Octree() {
 };
 
 void Octree::addNode(NodeId node, OctreeNode* self) {
+	if (self == nullptr) {
+		LOG("Trying to add null OctreeNode, with nodeID: " + std::to_string(node));
+	}
 	nodeMap[node] = self;
 };
 
@@ -31,15 +34,18 @@ void Octree::removeNode(NodeId node) {
 	if (iter != nodeMap.end()) {
 		nodeMap.erase(iter); // Remove the node
 	}
+	else {
+		LOG("Tried to remove nonexisting OctreeNode, with nodeID: " + std::to_string(node));
+	}
 };
 
 void Octree::insert(Collider* obj) {
-	if (root)
+	if (root && obj != nullptr)
 		root->insert(obj, obj->getAABB());
 }
 
 void Octree::remove(Collider* obj) {
-	if (root) {
+	if (root && obj != nullptr) {
 		OctreeNode* node = nodeMap[obj->nodeId];
 		node->remove(obj); // Skip having to search through the whole entire tree!
 	}
@@ -92,7 +98,7 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 		}
 	}
 
-	LOG(objCounter); // TODO: remove debug log later
+	LOG("Created Octree with { " + std::to_string(objCounter) + " } colliders.");
 
 }
 
@@ -117,6 +123,7 @@ std::unordered_map<NodeId, OctreeNode*>::iterator Octree::end() {
 CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	if (root && min < max) {
 		CollisionInfo colInfo;
+		colInfo.collider = nullptr; // TODO: Handle gameobject ptr for raycasts
 		int steps = std::ceil((max - min) / step);
 		for (int i = 0; i < steps; ++i) {
 			ray.t = i * step + min;
@@ -132,9 +139,22 @@ CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	}
 };
 
-CollisionInfo Octree::collidesWith(const BoxCollider& box) {
+CollisionInfo Octree::collidesWith(Collider* ptr) {
 	if (root) {
-		return root->collidesWith(box);
+		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
+		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
+		CapsuleCollider* capsule = dynamic_cast<CapsuleCollider*>(ptr);
+
+		if (box != nullptr) {
+			return root->collidesWith(*box);
+		}
+		else if (sphere != nullptr) {
+			return root->collidesWith(*sphere);
+		}
+		else if (capsule != nullptr) {
+			return root->collidesWith(*capsule);
+		}
+
 	}
 	else {
 		return CollisionInfo();

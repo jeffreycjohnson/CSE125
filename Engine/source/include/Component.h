@@ -38,15 +38,13 @@ public:
 	*/
 
 	virtual void collisionEnter(GameObject* other);
-	// TODO : IMPLEMENT
-	/*
 	virtual void collisionExit(GameObject* other);
 	virtual void collisionStay(GameObject* other);
 	
 	virtual void staticCollisionEnter(GameObject* other);
 	virtual void staticCollisionStay(GameObject* other);
 	virtual void staticCollisionExit(GameObject* other);
-
+	/*
 	virtual void activate();
 	virtual void deactivate();*/
 

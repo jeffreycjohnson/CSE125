@@ -9,6 +9,7 @@
 #include "ServerManager.h"
 #include "ClientManager.h"
 #include <iostream>
+#include <functional>
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -278,6 +279,20 @@ void GameObject::collisionEnter(GameObject* other)
 	{
         if (!component->active) continue;
 		component->collisionEnter(other);
+	}
+}
+
+// Okay, I think the Component::* is called the "member function" pointer
+// And I totally, 100% take the blame for this black magic
+//  -- Dexter
+void GameObject::collisionCallback(GameObject* other, void(Component::*callback)(GameObject*)) {
+	if (!active || dead) return;
+	for (auto component : componentList)
+	{
+		if (!component->active) continue;
+		// Bind the arguments to an std::function, which is a callable object
+		auto func = std::bind(callback, component, other);
+		func(); // gah, this is so freaking cool, but so... sooo bad
 	}
 }
 

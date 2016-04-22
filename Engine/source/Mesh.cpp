@@ -90,6 +90,12 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	std::vector<int> idArray;
 	std::vector<int> indexArray;
 
+	// Calculate min/max points (these get sent to the Octree when a scene is loaded)
+	float xmin, ymin, zmin;
+	float xmax, ymax, zmax;
+	xmax = ymax = zmax = -FLT_MAX;
+	xmin = ymin = zmin = FLT_MAX;
+
 	bool enabledTexCoord[8];
 	for (int t = 0; t < 8; ++t) {
 		enabledTexCoord[t] = mesh->HasTextureCoords(t);
@@ -140,7 +146,14 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		for (int p = 0; p < POSITION_COUNT; ++p) {
-			megaArray.push_back(mesh->mVertices[i][p]);
+			auto vertex = mesh->mVertices[i];
+			xmin = std::fminf(vertex.x, xmin);
+			ymin = std::fminf(vertex.y, ymin);
+			zmin = std::fminf(vertex.z, zmin);
+			xmax = std::fminf(vertex.x, xmax);
+			ymax = std::fminf(vertex.y, ymax);
+			zmax = std::fminf(vertex.z, zmax);
+			megaArray.push_back(vertex[p]);
 		}
         if (hasNormals) {
             for (int p = 0; p < NORMAL_COUNT; ++p) {
@@ -234,6 +247,9 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	meshData.vaoHandle = vao;
 	meshData.indexSize = static_cast<GLsizei>(indexArray.size());
     meshData.wireframe = mesh->mPrimitiveTypes == aiPrimitiveType_LINE;
+	meshData.min = glm::vec3(xmin, ymin, zmin);
+	meshData.max = glm::vec3(xmax, ymax, zmax);
 
 	Mesh::meshMap[name] = meshData;
+
 }

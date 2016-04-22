@@ -18,7 +18,8 @@ public:
 		glm::quat pitch = glm::angleAxis(Input::getAxis("yaw") * dt * 2, glm::vec3(0, -1, 0));
 		glm::quat yaw = glm::angleAxis(Input::getAxis("pitch") * dt * 2, glm::vec3(-1, 0, 0));
 		//gameObject->transform.rotate(roll*pitch*yaw);
-		Renderer::mainCamera->gameObject->transform.translate(glm::vec3(Input::getAxis("roll") * dt * 2, Input::getAxis("yaw") * dt * 2, Input::getAxis("pitch") * 2 * dt));
+		float speed = 10.0; // 10 units/sec
+		Renderer::mainCamera->gameObject->transform.translate(glm::vec3(Input::getAxis("roll") * dt * speed, Input::getAxis("yaw") * dt * speed, Input::getAxis("pitch") * speed * dt));
 	}
 };
 
@@ -41,12 +42,6 @@ int main(int argc, char** argv)
 	scene->addComponent(new Controls());
 	GameObject::SceneRoot.addChild(scene);
 
-	// Octree stuff
-	Octree::DYNAMIC_TREE = new Octree(glm::vec3(-10, -10, -10), glm::vec3(10, 10, 10));
-	Octree::DYNAMIC_TREE->build(Octree::BOTH); // Include all objs for now
-	
 	RunEngine(2); // Run Engine as modelviewer
 	
-	delete Octree::DYNAMIC_TREE;
-	Octree::DYNAMIC_TREE = nullptr;
 }

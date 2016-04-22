@@ -41,6 +41,8 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode) 
 	nodeObject->transform.translate(pos.x, pos.y, pos.z);
 	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
 
+	// TODO: Add these colliders when they are created to the OctreeManager component that should be added to root
+
 	std::string name = currentNode->mName.C_Str();
 	if (name.find("BoxCollider") == 0) {
 		nodeObject->addComponent(new BoxCollider(glm::vec3(0), glm::vec3(1)));

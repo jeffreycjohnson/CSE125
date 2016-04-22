@@ -31,18 +31,22 @@ void ParticlePass::render(Camera* camera) {
 // All of these options are overrideable by config/options.ini
 bool DebugPass::drawColliders = false;
 bool DebugPass::drawLights = false;
+bool DebugPass::drawDynamicOctree = false;
+bool DebugPass::drawStaticOctree = false;
 glm::vec3 DebugPass::colliderColor = glm::vec3(1, 1, 1); // White
 glm::vec3 DebugPass::collidingColor = glm::vec3(1, 0, 0); // Red
+glm::vec3 DebugPass::octreeColor = glm::vec3(1, 1, 0); // Yellow
 
 void DebugPass::render(Camera* camera) {
 	if (Renderer::drawDebug) {
 		GameObject::SceneRoot.debugDraw();
-		if (Octree::DYNAMIC_TREE != nullptr) {
+		// SceneRoot should have an OctreeManager component; no more need for globals
+		/*if (Octree::DYNAMIC_TREE != nullptr) { 
 			Octree::DYNAMIC_TREE->debugDraw();
 		}
 		if (Octree::STATIC_TREE != nullptr) {
 			Octree::STATIC_TREE->debugDraw();
-		}
+		}*/
 	}
 }
 
