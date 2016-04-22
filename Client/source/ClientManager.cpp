@@ -53,6 +53,8 @@ const std::vector<int>& ClientManager::initialize(std::string serverIP, std::str
 			}
 		}
 	}
+
+	return ClientManager::clientIDs;
 }
 
 void ClientManager::sendMessages()
@@ -69,36 +71,32 @@ void ClientManager::sendMessages()
 
 void ClientManager::receiveMessages()
 {
-	TransformNetworkData *tnd;
-
 	std::vector<NetworkResponse> receivedMessages = ClientNetwork::receiveMessages();
 
 	for (auto& received : receivedMessages)
 	{
 		int& msgType = received.messageType;
-		if (msgType == CLIENTS_CONN_NETWORK_DATA) {
+		if (msgType == CLIENTS_CONN_NETWORK_DATA) 
+		{
 			std::cerr << "RECEIVED ALL CLEAR MESSAGE AFTER SERVER INITIALIZATION" << std::endl;
 		}
 		else if (msgType == TRANSFORM_NETWORK_DATA)
 		{
-			tnd = (TransformNetworkData*)received.body.data();
+			TransformNetworkData *tnd = (TransformNetworkData*)received.body.data();
 
-			std::string playerName = std::string("player_") + std::to_string(tnd->objectID);
-			GameObject::FindByName(playerName)->transform.deserializeAndApply(received.body);
+			GameObject *target = GameObject::FindByID(tnd->objectID);
+			assert(target != nullptr);
+
+			target->transform.deserializeAndApply(received.body);
 		}
-		else if (msgType == CREATE_OBJECT_NETWORK_DATA) {
+		else if (msgType == CREATE_OBJECT_NETWORK_DATA) 
+		{
 			CreateObjectNetworkData * c = (CreateObjectNetworkData*)received.body.data();
-			GameObject::createObject(c->objectID);
-
-			GameObject * g = GameObject::SceneRoot.FindByID(c->objectID);
-			
-			std::cout << "Client created object with id " << g->getID() << std::endl;
-			g->transform.setPosition(g->getID(), -1, 0);
-			ClientManager::lastObjectCreated = g->getID();
+			GameObject::deserializeAndCreate(received.body);
 		}
-		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) {
-			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)received.body.data();
-			GameObject * g = GameObject::SceneRoot.FindByID(d->objectID);
+		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) 
+		{
+			DestroyObjectNetworkData *d = (DestroyObjectNetworkData*)received.body.data();
 			GameObject::destroyObjectByID(d->objectID);
 		}
 	}

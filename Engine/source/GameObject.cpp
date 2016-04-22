@@ -413,6 +413,10 @@ void GameObject::destroyObjectByID(int objectID) {
 		obj->destroy();
 		std::cout << "Destroyed object " << obj->getID() << std::endl;
 	}
+	else
+	{
+		std::cerr << "Tried to destroy non-existant object ID " << objectID << std::endl;
+	}
 }
 
 std::vector<char> GameObject::serialize()
