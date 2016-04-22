@@ -141,15 +141,15 @@ void OctreeManager::beforeFixedUpdate() {
 
 		for (auto other : collisionData.collidees) {
 			if (colliding && previouslyColliding) {
-				// Collision Stay
+				// Static Collision Stay
 				caller->collisionCallback(other, &Component::staticCollisionStay);
 			}
 			else if (colliding && !previouslyColliding) {
-				// Collision Enter
+				// Static Collision Enter
 				caller->collisionCallback(other, &Component::staticCollisionEnter);
 			}
 			else if (!colliding && previouslyColliding) {
-				// Collision Exit
+				// Static Collision Exit
 				caller->collisionCallback(other, &Component::staticCollisionExit);
 			}
 		}
@@ -157,7 +157,35 @@ void OctreeManager::beforeFixedUpdate() {
 		// *** end of black magic ***
 	}
 
-	// 3. We explicitly check 
+	// For now we're doing static & dynamic at the same time. It seems like this
+	// *could* be bad, but otherwise we'd need to rebuild the octree twice per frame
+	// as opposed to once, and honestly, doing them at the same time might not matter
+	// as much as one would think
+
+	for (auto collisionData : dynamicCollisions) {
+		GameObject* caller = collisionData.collider->gameObject;
+
+		// state @ N - 1
+		bool colliding = collisionData.collider->colliding = true;
+
+		// state @ N - 2
+		bool previouslyColliding = collisionData.collider->previouslyColliding;
+
+		for (auto other : collisionData.collidees) {
+			if (colliding && previouslyColliding) {
+				// Collision Stay
+				caller->collisionCallback(other, &Component::collisionStay);
+			}
+			else if (colliding && !previouslyColliding) {
+				// Collision Enter
+				caller->collisionCallback(other, &Component::collisionEnter);
+			}
+			else if (!colliding && previouslyColliding) {
+				// Collision Exit
+				caller->collisionCallback(other, &Component::collisionExit);
+			}
+		}
+	}
 
 };
 
@@ -175,6 +203,10 @@ void OctreeManager::afterFixedUpdate() {
 	for (auto collision : dynamicCollisions) {
 		collision.collider->previouslyColliding = collision.collider->colliding;
 	}
+
+	// Flush the collisions buffer
+	dynamicCollisions.clear();
+	staticCollisions.clear();
 };
 
 void OctreeManager::debugDraw() {
