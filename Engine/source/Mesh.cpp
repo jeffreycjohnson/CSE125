@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "NetworkUtility.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
@@ -26,6 +27,40 @@
 
 std::unordered_map<std::string, MeshData> Mesh::meshMap;
 std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
+
+
+Mesh* Mesh::fromCachedMeshData(std::string name)
+{
+	auto iter = Mesh::meshMap.find(name);
+	assert(iter != Mesh::meshMap.end()); // can only access if cached
+
+	Mesh *created = new Mesh;
+	created->name = name;
+
+	return created;
+}
+
+void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
+{
+	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
+
+	GameObject *go = GameObject::FindByID(messageId);
+	assert(go != nullptr);
+
+	Mesh *goMesh = go->getComponent<Mesh>();
+	if (goMesh != nullptr)
+	{
+		// it already has a mesh
+		// change what it points to
+		goMesh->deserializeAndApply(bytes);
+	}
+	else
+	{
+		// it doesn't have a mesh
+		// assign it the correct one
+		go->addComponent(Mesh::fromCachedMeshData(std::string(mnd.meshName)));
+	}
+}
 
 Mesh::Mesh() {}
 
@@ -76,7 +111,23 @@ void Mesh::draw() {
     }
 }
 
-void Mesh::setMaterial(Material *mat) {
+std::vector<char> Mesh::serialize()
+{
+	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name);
+	return structToBytes(mnd);
+}
+
+void Mesh::deserializeAndApply(std::vector<char> bytes)
+{
+	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
+	auto iter = Mesh::meshMap.find(mnd.meshName);
+	assert(iter != Mesh::meshMap.end()); // can only access if cached
+
+	this->name = std::string(mnd.meshName);
+}
+
+void Mesh::setMaterial(Material *mat) 
+{
 	material = mat;
 }
 
@@ -237,15 +288,4 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
     meshData.wireframe = mesh->mPrimitiveTypes == aiPrimitiveType_LINE;
 
 	Mesh::meshMap[name] = meshData;
-}
-
-Mesh* Mesh::fromCachedMeshData(std::string name)
-{
-	auto iter = Mesh::meshMap.find(name);
-	assert(iter != Mesh::meshMap.end()); // can only access if cached
-
-	Mesh *created = new Mesh;
-	created->name = name;
-
-	return created;
 }

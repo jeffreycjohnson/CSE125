@@ -183,10 +183,7 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType, int id)
 
 std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 {
-	int iResult = 0;
 	int totalBytesRecvd = 0;
-	int contentLength = -1;
-	int msgType = -1;
 
 	std::vector<NetworkResponse> msgs;
 	std::vector<char> msg;
@@ -203,11 +200,14 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 	{
 		memcpy(recvbuf, previousServerData.buffer, DEFAULT_BUFLEN);
 		totalBytesRecvd += previousServerData.length;
+
+		memset(previousServerData.buffer, 0, DEFAULT_BUFLEN);
+		previousServerData.length = 0;
 	}
 
 	do
 	{
-		iResult = recv(ConnectSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1, 0);
+		int iResult = recv(ConnectSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1, 0);
 
 		// if there's nothing, just leave
 		int nError = WSAGetLastError();
@@ -217,7 +217,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 		{
 			totalBytesRecvd += iResult;
 			int msgLength = 0;
-			unsigned int totalBytesProcd = 0;
+			int totalBytesProcd = 0;
 
 			do
 			{
@@ -247,6 +247,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 				// parse the whole message
 				int msgType = -1;
 				int msgId = -1;
+				int contentLength = -1;
 				msg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
 				totalBytesProcd += contentLength;
 
@@ -276,7 +277,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 			return msgs;
 		}
 	}
-	while (iResult > 0);
+	while (1);
 
 	return msgs;
 }

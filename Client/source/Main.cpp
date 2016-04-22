@@ -1,3 +1,5 @@
+// CLIENT MAIN
+
 #include "GameObject.h"
 #include "Camera.h"
 #include "Renderer.h"
@@ -37,15 +39,22 @@ int main(int argc, char** argv)
 	}
 	
 	// cache all meshes
-	auto artsy = loadScene("assets/artsy.dae");
-	auto ball = loadScene("assets/ball.dae");
-	artsy->destroy();
-	ball->destroy();
-	delete artsy;
-	delete ball;
+	GameObject *scene = loadScene("assets/artsy.dae");
+	scene->transform.setPosition(0, -1, 0);
+	GameObject::SceneRoot.addChild(scene);
 
-	std::cout << GameObject::SceneRoot.getID() << std::endl;
+	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
+	for (auto clientID : clientIDs)
+	{
+		GameObject *player = loadScene("assets/ball.dae");
+		if (clientID == clientIDs[0])
+		{
 
-	GameObject::SceneRoot.addComponent (Renderer::mainCamera);
+			player->addComponent(Renderer::mainCamera);
+		}
+
+		GameObject::SceneRoot.addChild(player);
+	}
+
     RunEngine(0); // running engine as client
 }

@@ -10,7 +10,7 @@
 #define DEFAULT_BUFLEN 2048
 #define DEBUG 0
 
-std::vector<char> encodeMessage(std::vector<char> message, int messageType, int id)
+std::vector<char> encodeMessage(const std::vector<char> &message, int messageType, int id)
 {
 	std::vector<char> encodedMsg;
 	encodedMsg.resize(METADATA_LEN + message.size() * sizeof(char));
@@ -19,11 +19,10 @@ std::vector<char> encodeMessage(std::vector<char> message, int messageType, int 
 	int rawByteLen = htonl(METADATA_LEN + message.size() * sizeof(char));
 	int encodedType = htonl(messageType);
 	int encodedId = htonl(id);
-
-	//
-	memcpy(encodedMsg.data(), &rawByteLen, sizeof(int));
-	memcpy(encodedMsg.data() + sizeof(int), &encodedType, sizeof(int));
-	memcpy(encodedMsg.data() + sizeof(int) * 2, &encodedId, sizeof(int));
+	
+	*((int*)(encodedMsg.data())) = rawByteLen;
+	*((int*)(encodedMsg.data() + sizeof(int))) = encodedType;
+	*((int*)(encodedMsg.data() + sizeof(int) + sizeof(int))) = encodedId;
 	memcpy(encodedMsg.data() + METADATA_LEN, message.data(), message.size());
 
 	return encodedMsg;
@@ -39,15 +38,19 @@ std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id,
 		return empty;
 	}
 	
-	memcpy(msgLen, buf, sizeof(int));
-	*msgLen = ntohl(*msgLen);
-	memcpy(msgType, buf + sizeof(int), sizeof(int));
-	*msgType = ntohl(*msgType);
-	memcpy(id, buf + sizeof(int) * 2, sizeof(int));
-	*id = ntohl(*id);
+	*msgLen = ntohl(*((int*)(buf)));
+	*msgType = ntohl(*((int*)(buf + sizeof(int))));
+	*id = ntohl(*((int*)(buf + sizeof(int) + sizeof(int))));
+
+	if (*msgType == 0)
+	{
+		std::vector<char> input(buf, buf + *msgLen);
+		buflen += 3;
+		buflen -= 3;
+	}
 
 	inputSize = NetworkStruct::sizeOf(*msgType);
-	std::vector<char> input(buf + METADATA_LEN, buf + METADATA_LEN + inputSize);
+	std::vector<char> input(buf + METADATA_LEN, buf + *msgLen);
 
 	return input;
 }

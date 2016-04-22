@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
+#include "NetworkUtility.h"
 #include "ObjectLoader.h"
 #include <algorithm>
 #include <iterator>
@@ -17,10 +18,10 @@ std::vector<void(*)(void)> GameObject::postFixedCallbacks;
 std::vector<void(*)(void)> GameObject::preVarCallbacks;
 std::vector<void(*)(void)> GameObject::postVarCallbacks;
 
-GameObject GameObject::SceneRoot;
+int GameObject::objectIDCounter;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
 std::multimap<int, GameObject*> GameObject::idMap;
-int GameObject::objectIDCounter;
+GameObject GameObject::SceneRoot;
 
 GameObject * GameObject::FindByName(const std::string& name)
 {
@@ -356,6 +357,7 @@ int GameObject::getID() const
 void GameObject::removeID()
 {
 	this->ID = -1;
+	if (idMap.size() <= 0) return;
 
 	auto range = idMap.equal_range(this->ID);
 	while (range.first != range.second)
@@ -368,48 +370,10 @@ void GameObject::removeID()
 	}
 }
 
-int GameObject::createObject() 
-{
-	GameObject *g = new GameObject;
-	return g->getID();
-}
-
-int GameObject::createObject(std::string meshName)
-{
-	GameObject *g = new GameObject;
-
-	if (!meshName.empty())
-	{
-		Mesh *relevant = Mesh::fromCachedMeshData(meshName);
-		g->addComponent(relevant);
-	}
-
-	return g->getID();
-}
-
-int GameObject::createObject(int id) {
-	GameObject *g = new GameObject;
-	g->setID(id);
-
-	return g->getID();
-}
-
-int GameObject::createObject(int id, std::string meshName) {
-	GameObject *g = new GameObject;
-	g->setID(id);
-
-	if (!meshName.empty())
-	{
-		Mesh *relevant = Mesh::fromCachedMeshData(meshName);
-		g->addComponent(relevant);
-	}
-
-	return g->getID();
-}
-
-void GameObject::destroyObjectByID(int objectID) {
+void GameObject::DestroyObjectByID(int objectID) {
 	GameObject * obj = SceneRoot.FindByID(objectID);
-	if (obj != NULL) {
+	if (obj != NULL) 
+	{
 		obj->destroy();
 		std::cout << "Destroyed object " << obj->getID() << std::endl;
 	}
@@ -419,18 +383,26 @@ void GameObject::destroyObjectByID(int objectID) {
 	}
 }
 
+void GameObject::Dispatch(const std::vector<char> &bytes, int messageType, int messageID)
+{
+	if (messageType == CREATE_OBJECT_NETWORK_DATA)
+	{
+		assert(GameObject::deserializeAndCreate(bytes));
+	}
+	else if (messageType == DESTROY_OBJECT_NETWORK_DATA)
+	{
+		GameObject *toDestroy = GameObject::FindByID(messageID);
+		assert(toDestroy != nullptr);
+
+		toDestroy->destroy();
+	}
+}
+
 std::vector<char> GameObject::serialize()
 {
 	int myID = getID();
-	std::string meshName;
 
-	Mesh* possibleMesh = this->getComponent<Mesh>();
-	if (possibleMesh != nullptr)
-	{
-		meshName = possibleMesh->name;
-	}
-
-	CreateObjectNetworkData cond(myID, meshName);
+	CreateObjectNetworkData cond(myID);
 
 	std::vector<char> myCreation;
 	myCreation.resize(sizeof(cond), 0);
@@ -448,6 +420,6 @@ bool GameObject::deserializeAndCreate(std::vector<char> bytes)
 		return false;
 	}
 
-	GameObject::createObject(cond.objectID, cond.meshName);
+	new GameObject(cond.objectID);
 	return true;
 }

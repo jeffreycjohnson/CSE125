@@ -66,10 +66,7 @@ void ServerNetwork::closeConnection()
 
 std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket) 
 {
-	// Receive until the peer shuts down the connection
-	int iResult;
 	int totalBytesRecvd = 0;
-	int contentLength = -1;
 
 	std::vector<NetworkResponse> msgs;
 	std::vector<char> msg;
@@ -85,10 +82,13 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 	{
 		memcpy(recvbuf, prevData.buffer, DEFAULT_BUFLEN);
 		totalBytesRecvd += prevData.length;
+
+		memset(prevData.buffer, 0, DEFAULT_BUFLEN);
+		prevData.length = 0;
 	}
 
 	do {
-		iResult = recv(clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
+		int iResult = recv(clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
 
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) {
@@ -98,7 +98,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 		if (iResult > 0) {
 			totalBytesRecvd += iResult;
 			int msgLength = 0;
-			unsigned int totalBytesProcd = 0;
+			int totalBytesProcd = 0;
 
 		// only read a message once we've gotten enough bytes tbh
 		do
@@ -129,6 +129,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 			// parse the whole message
 			int msgType = -1;
 			int msgId = -1;
+			int contentLength = -1;
 			msg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
 			totalBytesProcd += contentLength;
 
@@ -158,7 +159,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 			return msgs;
 		}
 
-	} while (iResult > 0);
+	} while (1);
 
 	return msgs;
 }
@@ -236,7 +237,7 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 	return responses;
 }
 
-void ServerNetwork::broadcastBytes(std::vector<char> bytes, int msgType, int id)
+void ServerNetwork::broadcastBytes(const std::vector<char> &bytes, int msgType, int id)
 {
 	for (int clientID = 0; clientID < clients.size(); clientID++)
 	{
@@ -244,12 +245,13 @@ void ServerNetwork::broadcastBytes(std::vector<char> bytes, int msgType, int id)
 	}
 }
 
-void ServerNetwork::sendBytes(int clientID, std::vector<char> bytes, int msgType, int id)
+void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int msgType, int id)
 {
 	int clientSock = ServerNetwork::clients[clientID];
 
 	// insert encoded type
 	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
+	std::cout << encodedMsg.size() << std::endl;
 
 	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {

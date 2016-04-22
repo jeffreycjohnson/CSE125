@@ -31,11 +31,9 @@ public:
 	static void AddPreUpdateCallback(void(*callback)(void));
 	static void AddPostUpdateCallback(void(*callback)(void));
 
-	static int createObject();
-	static int createObject(std::string meshName);
-	static int createObject(int id);
-	static int createObject(int id, std::string meshName);
-	static void destroyObjectByID(int objectID);
+	static void DestroyObjectByID(int objectID);
+
+	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageID);
 
 	GameObject();
 	GameObject(int id);

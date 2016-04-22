@@ -29,6 +29,8 @@ class Transform : public Component
         Transform* oldParent = nullptr;
 
 	public:
+		static void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
+
 		//parent Transform
 		Transform* parent = nullptr;
 
@@ -76,8 +78,6 @@ class Transform : public Component
 
 		std::vector<char> serialize() override;
 		void deserializeAndApply(std::vector<char> tnd) override;
-
-		TransformNetworkData serializeAsStruct();
 };
 
 #endif

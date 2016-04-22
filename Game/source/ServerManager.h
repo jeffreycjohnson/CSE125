@@ -7,6 +7,7 @@ class ServerManager
 {
 private:
 	static std::vector<int> clientIDs;
+	static bool isInitialized;
 
 public:
 	ServerManager() {};

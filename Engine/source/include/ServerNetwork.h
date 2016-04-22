@@ -43,7 +43,7 @@ public:
 	// returns a mapping between client IDs and the messages received from them in the last tick
 	static std::vector<std::vector<NetworkResponse>> selectClients();
 
-	static void broadcastBytes(std::vector<char> bytes, int msgType, int id);
-	static void sendBytes(int clientID, std::vector<char> bytes, int msgType, int id);
+	static void broadcastBytes(const std::vector<char> &bytes, int msgType, int id);
+	static void sendBytes(int clientID, const std::vector<char> &bytes, int msgType, int id);
 };
 

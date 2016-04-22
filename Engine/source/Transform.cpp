@@ -2,6 +2,17 @@
 #include <gtc/matrix_transform.hpp>
 
 #include "GameObject.h"
+#include "NetworkUtility.h"
+
+void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
+{
+	TransformNetworkData tnd = structFromBytes<TransformNetworkData>(bytes);
+
+	GameObject *go = GameObject::FindByID(messageId);
+	assert(go != nullptr);
+
+	go->transform.deserializeAndApply(bytes);
+}
 
 void Transform::setDirty()
 {
@@ -123,18 +134,19 @@ float Transform::getWorldScale() {
 // serialization
 std::vector<char> Transform::serialize()
 {
-	TransformNetworkData tnd = serializeAsStruct();
-	
-	std::vector<char> bytes;
-	bytes.resize(sizeof(tnd));
-	memcpy(bytes.data(), &tnd, sizeof(tnd));
+	TransformNetworkData tnd = TransformNetworkData(
+		gameObject->getID(),
+		parent != nullptr ? parent->gameObject->getID() : -1,
+		position,
+		rotation,
+		scaleFactor);
 
-	return bytes;
+	return structToBytes(tnd);
 }
 
 void Transform::deserializeAndApply(std::vector<char> bytes)
 {
-	TransformNetworkData tnd = *((TransformNetworkData*)bytes.data());
+	TransformNetworkData tnd = structFromBytes<TransformNetworkData>(bytes);
 
 	setPosition(tnd.px, tnd.py, tnd.pz);
 	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
@@ -158,27 +170,4 @@ void Transform::deserializeAndApply(std::vector<char> bytes)
 			parentGO->addChild(this->gameObject);
 		}
 	}
-}
-
-TransformNetworkData Transform::serializeAsStruct()
-{
-	TransformNetworkData tnd;
-
-	tnd.objectID = gameObject->getID();
-	tnd.parentID = parent != nullptr ? parent->gameObject->getID() : -1;
-
-	tnd.px = position.x;
-	tnd.py = position.y;
-	tnd.pz = position.z;
-
-	tnd.qw = rotation.w;
-	tnd.qx = rotation.x;
-	tnd.qy = rotation.y;
-	tnd.qz = rotation.z;
-
-	tnd.sx = scaleFactor.x;
-	tnd.sy = scaleFactor.y;
-	tnd.sz = scaleFactor.z;
-
-	return tnd;
 }

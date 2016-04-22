@@ -5,6 +5,7 @@
 
 #include "ClientNetwork.h"
 #include "GameObject.h"
+#include "Mesh.h"
 #include "Input.h"
 #include "NetworkStruct.h"
 #include "NetworkUtility.h"
@@ -66,7 +67,7 @@ void ClientManager::sendMessages()
 
 	std::vector<char> bytes = Input::serialize(ClientManager::myClientID);
 
-	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA);
+	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA, ClientManager::myClientID);
 }
 
 void ClientManager::receiveMessages()
@@ -76,28 +77,25 @@ void ClientManager::receiveMessages()
 	for (auto& received : receivedMessages)
 	{
 		int& msgType = received.messageType;
-		if (msgType == CLIENTS_CONN_NETWORK_DATA) 
+
+		switch (msgType)
 		{
+		case CLIENTS_CONN_NETWORK_DATA:
+			ClientsConnNetworkData cond = structFromBytes<ClientsConnNetworkData>(received.body);
 			std::cerr << "RECEIVED ALL CLEAR MESSAGE AFTER SERVER INITIALIZATION" << std::endl;
-		}
-		else if (msgType == TRANSFORM_NETWORK_DATA)
-		{
-			TransformNetworkData *tnd = (TransformNetworkData*)received.body.data();
-
-			GameObject *target = GameObject::FindByID(tnd->objectID);
-			assert(target != nullptr);
-
-			target->transform.deserializeAndApply(received.body);
-		}
-		else if (msgType == CREATE_OBJECT_NETWORK_DATA) 
-		{
-			CreateObjectNetworkData * c = (CreateObjectNetworkData*)received.body.data();
-			GameObject::deserializeAndCreate(received.body);
-		}
-		else if (msgType == DESTROY_OBJECT_NETWORK_DATA) 
-		{
-			DestroyObjectNetworkData *d = (DestroyObjectNetworkData*)received.body.data();
-			GameObject::destroyObjectByID(d->objectID);
+			break;
+		case TRANSFORM_NETWORK_DATA:
+			Transform::Dispatch(received.body, received.messageType, received.id);
+			break;
+		case MESH_NETWORK_DATA:
+			Mesh::Dispatch(received.body, received.messageType, received.id);
+			break;
+		case CREATE_OBJECT_NETWORK_DATA:
+		case DESTROY_OBJECT_NETWORK_DATA:
+			GameObject::Dispatch(received.body, received.messageType, received.id);
+			break;
+		default:
+			std::cerr << "Client received message of type " << msgType << ", don't know what to do with it..." << std::endl;
 		}
 	}
 }

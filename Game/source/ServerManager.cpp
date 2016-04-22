@@ -7,8 +7,10 @@
 #include "ServerInput.h"
 #include "ServerNetwork.h"
 #include "NetworkStruct.h"
+#include "NetworkUtility.h"
 
 std::vector<int> ServerManager::clientIDs;
+bool ServerManager::isInitialized = false;
 
 std::vector<int> ServerManager::initialize(std::string port, int numberOfClients)
 {
@@ -30,28 +32,28 @@ std::vector<int> ServerManager::initialize(std::string port, int numberOfClients
 		cnd.numClients = clientIDs.size();
 		cnd.yourClientID = clientID;
 
-		ServerNetwork::sendMessage(clientID, &cnd, CLIENTS_CONN_NETWORK_DATA);
+		std::vector<char> bytes = structToBytes(cnd);
+
+		ServerNetwork::sendBytes(clientID, bytes, CLIENTS_CONN_NETWORK_DATA, clientID);
 	}
 
+	ServerManager::isInitialized = true;
 	return ServerManager::clientIDs;
 }
 
 void ServerManager::sendMessages()
 {
-	// TODO FOUR PLAYERS
+	if (!isInitialized) return;
 
 	for (auto clientID : ServerManager::clientIDs)
 	{
 		std::string playerName = std::string("player_") + std::to_string(clientID);
-		std::vector<char> bytes = GameObject::FindByName(playerName)->transform.serialize();
+		GameObject *correctPlayer = GameObject::FindByName(playerName);
+		std::vector<char> bytes = correctPlayer->transform.serialize();
+		int playerID = correctPlayer->getID();
 
-		ServerNetwork::broadcastBytes(bytes, TRANSFORM_NETWORK_DATA);
+		ServerNetwork::broadcastBytes(bytes, TRANSFORM_NETWORK_DATA, playerID);
 	}
-
-	/*
-	std::vector<char> bytes = GameObject::FindByName("player")->transform.serialize();
-	ServerNetwork::broadcastMessage(bytes.data(), TRANSFORM_NETWORK_DATA);
-	*/
 }
 
 void ServerManager::receiveMessages()
@@ -71,20 +73,6 @@ void ServerManager::receiveMessages()
 			msg = (InputNetworkData*)final.body.data();
 
 			ServerInput::deserializeAndApply(final.body, msg->playerID);
-		}
-		else if (final.messageType == CREATE_OBJECT_NETWORK_DATA) {
-			CreateObjectNetworkData * c = (CreateObjectNetworkData*)final.body.data();
-			int id = GameObject::createObject();
-			c->objectID = id;
-			std::cout << "Server created object with ID " << id << std::endl;
-			ServerNetwork::broadcastBytes(final.body, CREATE_OBJECT_NETWORK_DATA);
-		}
-		else if (final.messageType == DESTROY_OBJECT_NETWORK_DATA) {
-			DestroyObjectNetworkData * d = (DestroyObjectNetworkData*)final.body.data();
-			GameObject::destroyObjectByID(d->objectID);
-			std::cout << "Server destroyed object with ID " << d->objectID << std::endl;
-
-			ServerNetwork::broadcastBytes(final.body, DESTROY_OBJECT_NETWORK_DATA);
 		}
 	}
 }
