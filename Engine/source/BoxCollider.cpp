@@ -160,11 +160,25 @@ bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 }
 
 bool BoxCollider::intersects(const BoxCollider& other) const {
-	return (
+/*	return (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
 		this->ymin <= other.ymax && other.ymin <= this->ymax &&
 		this->zmin <= other.zmax && other.zmin <= this->zmax
-	);
+	);*/
+
+	bool collideX = false, collideY = false, collideZ = false;
+
+	if (this->xmin <= other.xmax && other.xmin <= this->xmax)
+		collideX = true;
+	if (this->ymin <= other.ymax && other.ymin <= this->ymax)
+		collideY = true;
+	if (this->zmin <= other.zmax && other.zmin <= this->zmax)
+		collideZ = true;
+
+	if (collideX && collideY && collideZ)
+		return true;
+	else
+		return false;
 }
 
 bool BoxCollider::intersects(const CapsuleCollider & other) const

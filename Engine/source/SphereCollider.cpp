@@ -49,7 +49,7 @@ void SphereCollider::debugDraw()
 		else {
 			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
-		Renderer::drawSphere(center, radius, color);
+		Renderer::drawSphere(centerWorld, radiusWorld, color);
 	}
 }
 
@@ -61,8 +61,9 @@ void SphereCollider::onCollisionEnter(GameObject * other)
 
 bool SphereCollider::insideOrIntersects(const glm::vec3 & point) const
 {
-	glm::vec3 dist = point - center;
-	return (dist.length() <= radius);
+	// Assumes point is provided in worldSpace
+	glm::vec3 dist = point - centerWorld;
+	return (dist.length() <= radiusWorld);
 }
 
 bool SphereCollider::intersects(const BoxCollider & other) const
