@@ -118,6 +118,7 @@ private:
 	glm::vec3 min, max;
 	Octree* tree;
 	OctreeNode* parent;
+	BoxCollider* myAABB;
 	NodeId nodeId;
 	int depth;
 

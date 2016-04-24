@@ -14,6 +14,15 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 	this->nodeId = ++tree->nodeCounter; // the pre-increment is important here
 	this->depth = depth;
 	tree->addNode(this->nodeId, this);
+
+	// Precompute axis-aligned bounding box for this Octree node
+	float xDiameter = std::abs(max.x - min.x);
+	float yDiameter = std::abs(max.y - min.y);
+	float zDiameter = std::abs(max.z - min.z);
+	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
+	glm::vec3 dims(xDiameter / 2, yDiameter / 2, zDiameter / 2);
+	myAABB = new BoxCollider(center, dims);
+
 }
 
 OctreeNode::~OctreeNode() {
@@ -23,6 +32,7 @@ OctreeNode::~OctreeNode() {
 			delete child;
 		}
 	}
+	delete myAABB;
 	tree->removeNode(this->nodeId);
 }
 
@@ -192,14 +202,9 @@ CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider) {
 };
 
 bool OctreeNode::intersects(const BoxCollider& box) {
-	float xDiameter = std::abs(max.x - min.x);
-	float yDiameter = std::abs(max.y - min.y);
-	float zDiameter = std::abs(max.z - min.z);
-	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
-	//glm::vec3 dims(xDiameter / 2, yDiameter / 2, zDiameter / 2);
-	glm::vec3 dims(xDiameter, yDiameter, zDiameter);
-	BoxCollider bounds(center, dims);
-	return bounds.intersects(box);
+
+	return myAABB->intersects(box);
+
 }
 
 bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& colliderAABB) {
@@ -275,16 +280,21 @@ void OctreeNode::subdivide() {
 		float zDist = std::abs(max.z - min.z) / 2;
 
 		// We need to generate 6 new "min" points, and 6 new "max" points & the center
-		glm::vec3 center = glm::vec3(max.x - (xDist * 1), max.y - (yDist * 1), max.z - (zDist * 1));
 		glm::vec3 dist(xDist, yDist, zDist);
+		glm::vec3 center( (max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2);
+	
+		// Generate the first 2 (trivial) children
+		children.push_back(new OctreeNode(this->min, center, tree, this, depth + 1));
+		children.push_back(new OctreeNode(center, this->max, tree, this, depth + 1));
 
-		glm::vec3 min1(min.x, min.y + yDist, min.z); // I know the names are bad, but I drew a diagram.
+		// [min points]
+		glm::vec3 min1(min.x,         min.y + yDist, min.z); // I know the names are bad, but I drew a diagram.
 		glm::vec3 min2(min.x + xDist, min.y + yDist, min.z);
-		glm::vec3 min3(min.x + xDist, min.y, min.z);
+		glm::vec3 min3(min.x + xDist, min.y,         min.z);
 
-		glm::vec3 min4(min.x, min.y, min.z + zDist);
-		glm::vec3 min5(min.x, min.y + yDist, min.z + zDist);
-		glm::vec3 min6(min.x + xDist, min.y, min.z + zDist);
+		glm::vec3 min4(min.x,         min.y,         min.z + zDist);
+		glm::vec3 min5(min.x,         min.y + yDist, min.z + zDist);
+		glm::vec3 min6(min.x + xDist, min.y,         min.z + zDist);
 
 		// [max points]   (should map 1-to-1 with min points.)
 		glm::vec3 max1 = min1 + dist;
@@ -295,15 +305,14 @@ void OctreeNode::subdivide() {
 		glm::vec3 max6 = min6 + dist;
 
 		// Create children...
-		children.push_back(new OctreeNode(min, center, tree, this, depth + 1));
-		children.push_back(new OctreeNode(center, max, tree, this, depth + 1));
 
-		/*children.push_back(new OctreeNode(min1, max1, tree, this, depth + 1));
+
+		children.push_back(new OctreeNode(min1, max1, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min2, max2, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min3, max3, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min4, max4, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min5, max5, tree, this, depth + 1));
-		children.push_back(new OctreeNode(min6, max6, tree, this, depth + 1));*/
+		children.push_back(new OctreeNode(min6, max6, tree, this, depth + 1));
 
 		// Insert all of our colliders into each of those children, and let recursion deal with it
 		std::vector<Collider*> stragglers;
@@ -355,13 +364,25 @@ void OctreeNode::debugDraw() {
 	float yDiameter = std::abs(max.y - min.y);
 	float zDiameter = std::abs(max.z - min.z);
 	glm::vec3 center = glm::vec3(min.x + (xDiameter / 2), min.y + (yDiameter / 2), min.z + (zDiameter / 2));
-	//glm::vec3 scale(xDiameter / 2, yDiameter / 2, zDiameter / 2);
-	glm::vec3 scale(xDiameter, yDiameter, zDiameter);
+	glm::vec3 scale(xDiameter / 2, yDiameter / 2, zDiameter / 2);
 	glm::vec4 color = glm::vec4(DebugPass::octreeColor, 1);
 
+	//--- Verifying boxes are drawing properly ---
+	//BoxCollider bounds(center, scale);
+	//bounds.debugDraw();   // Sanity check
+	//myAABB->debugDraw();  // Sanity check
+	//--------------------------------------------
+
+	// Draw spheres @ min & max corners
+	Renderer::drawSphere(min, 0.25f, glm::vec4(1, 0, 0, 1)); // min points RED
+	Renderer::drawSphere(max, 0.35f, glm::vec4(0, 1, 0, 1)); // max points GREEN
+
+
 	// Only render nodes with colliders in them and/or the root
-	//if (colliders.size() > 0 || this == tree->root)
-		Renderer::drawBox(center, scale, color); 
+	//if (colliders.size() > 0 || this == tree->root) {
+	if ( this != tree->root )
+		Renderer::drawBox(center, scale, color);
+	//}
 	for (auto child : children) {
 		child->debugDraw();
 	}
