@@ -14,7 +14,6 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 	this->nodeId = ++tree->nodeCounter; // the pre-increment is important here
 	this->depth = depth;
 	tree->addNode(this->nodeId, this);
-	//LOG(this->toString());
 }
 
 OctreeNode::~OctreeNode() {
@@ -58,43 +57,45 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 	info.collider = (Collider*)&box;
 
 	// Check object against all of the objects in our colliders list
-	//if (intersects(box)) {
+	if (intersects(box)) {
 		for (auto colliderPtr : colliders) {
 			if (colliderPtr == &box) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
 
-			case ColliderType::AABB:
-			{
-				BoxCollider* myBox = (BoxCollider*)colliderPtr;
-				if (myBox->intersects(box)) {
-					info.add(myBox);
+				case ColliderType::AABB:
+				{
+					BoxCollider* myBox = (BoxCollider*)colliderPtr;
+					if (myBox->intersects(box)) {
+						info.add(myBox);
+					}
+					break;
 				}
-				break;
-			}
-			case ColliderType::SPHERE:
-			{
-				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-				if (mySphere->intersects(box)) {
-					info.add(mySphere);
+				case ColliderType::SPHERE:
+				{
+					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+					if (mySphere->intersects(box)) {
+						info.add(mySphere);
+					}
+					break;
 				}
-				break;
-			}
-			case ColliderType::CAPSULE:
-			{
-				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-				if (myCapsule->intersects(box)) {
-					info.add(myCapsule);
+				case ColliderType::CAPSULE:
+				{
+					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+					if (myCapsule->intersects(box)) {
+						info.add(myCapsule);
+					}
+					break;
 				}
-				break;
+			
 			}
+		
+			// If we have children, check them afterwards
+			for (auto child : children) {
+				info.merge(child->collidesWith(box));
 			}
+		
 		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			info.merge(child->collidesWith(box));
-		}
-	//}
+	}
 
 	return info;
 
@@ -195,7 +196,8 @@ bool OctreeNode::intersects(const BoxCollider& box) {
 	float yDiameter = std::abs(max.y - min.y);
 	float zDiameter = std::abs(max.z - min.z);
 	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
-	glm::vec3 dims(xDiameter / 2, yDiameter / 2, zDiameter / 2);
+	//glm::vec3 dims(xDiameter / 2, yDiameter / 2, zDiameter / 2);
+	glm::vec3 dims(xDiameter, yDiameter, zDiameter);
 	BoxCollider bounds(center, dims);
 	return bounds.intersects(box);
 }
@@ -268,14 +270,13 @@ void OctreeNode::remove(Collider * colliderBeingRemoved)
 void OctreeNode::subdivide() {
 	if (children.empty() && depth < Octree::MAX_DEPTH) {
 		// Figure out the dimensions of each child
-		glm::vec3 dims = max - min;
-		float xDist = dims.x / 2;
-		float yDist = dims.y / 2;
-		float zDist = dims.z / 2;
+		float xDist = std::abs(max.x - min.x) / 2;
+		float yDist = std::abs(max.y - min.y) / 2;
+		float zDist = std::abs(max.z - min.z) / 2;
 
 		// We need to generate 6 new "min" points, and 6 new "max" points & the center
-		glm::vec3 dist = glm::vec3(xDist, yDist, zDist);
-		glm::vec3 center = min + dist;
+		glm::vec3 center = glm::vec3(max.x - (xDist * 1), max.y - (yDist * 1), max.z - (zDist * 1));
+		glm::vec3 dist(xDist, yDist, zDist);
 
 		glm::vec3 min1(min.x, min.y + yDist, min.z); // I know the names are bad, but I drew a diagram.
 		glm::vec3 min2(min.x + xDist, min.y + yDist, min.z);
@@ -297,12 +298,12 @@ void OctreeNode::subdivide() {
 		children.push_back(new OctreeNode(min, center, tree, this, depth + 1));
 		children.push_back(new OctreeNode(center, max, tree, this, depth + 1));
 
-		children.push_back(new OctreeNode(min1, max1, tree, this, depth + 1));
+		/*children.push_back(new OctreeNode(min1, max1, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min2, max2, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min3, max3, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min4, max4, tree, this, depth + 1));
 		children.push_back(new OctreeNode(min5, max5, tree, this, depth + 1));
-		children.push_back(new OctreeNode(min6, max6, tree, this, depth + 1));
+		children.push_back(new OctreeNode(min6, max6, tree, this, depth + 1));*/
 
 		// Insert all of our colliders into each of those children, and let recursion deal with it
 		std::vector<Collider*> stragglers;
@@ -320,7 +321,7 @@ void OctreeNode::subdivide() {
 		colliders.clear();
 		colliders = stragglers;
 
-		LOG(this->toString());
+		//LOG(this->toString());
 	
 	}
 	//else // TODO: Will I need to do anything in the else case should a subdivide() call fail?
@@ -353,12 +354,13 @@ void OctreeNode::debugDraw() {
 	float xDiameter = std::abs(max.x - min.x);
 	float yDiameter = std::abs(max.y - min.y);
 	float zDiameter = std::abs(max.z - min.z);
-	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
-	glm::vec3 scale(xDiameter / 2, yDiameter / 2, zDiameter / 2);
+	glm::vec3 center = glm::vec3(min.x + (xDiameter / 2), min.y + (yDiameter / 2), min.z + (zDiameter / 2));
+	//glm::vec3 scale(xDiameter / 2, yDiameter / 2, zDiameter / 2);
+	glm::vec3 scale(xDiameter, yDiameter, zDiameter);
 	glm::vec4 color = glm::vec4(DebugPass::octreeColor, 1);
-	
+
 	// Only render nodes with colliders in them and/or the root
-	if (colliders.size() > 0 || this == tree->root)
+	//if (colliders.size() > 0 || this == tree->root)
 		Renderer::drawBox(center, scale, color); 
 	for (auto child : children) {
 		child->debugDraw();
