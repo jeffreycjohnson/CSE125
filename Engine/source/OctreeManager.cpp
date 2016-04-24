@@ -110,13 +110,12 @@ void OctreeManager::probeForStaticCollisions() {
 
 	if (staticObjects != nullptr && dynamicObjects != nullptr) {
 		for (auto nodeIter = dynamicObjects->begin(); nodeIter != dynamicObjects->end(); ++nodeIter) {
-			OctreeNode* node = (*nodeIter).second;
+			OctreeNode* node = nodeIter->second;
 			if (node != nullptr) {
 				
 				for (auto colliderIter = node->begin(); colliderIter != node->end(); ++colliderIter) {
 		
 					CollisionInfo colInfo = staticObjects->collidesWith(*colliderIter);
-					staticCollisions.push_back(colInfo);
 					if (colInfo.numCollisions > 0) {
 						staticCollisions.push_back(colInfo); // [static] Enter or Stay
 					}
@@ -271,7 +270,7 @@ void OctreeManager::afterFixedUpdate() {
 	staticCollisions.clear();
 
 	// TODO: This will probably be waaaaaay too slow
-	dynamicObjects->rebuild();
+	//dynamicObjects->rebuild(); // TODO: in VS15 causes "vector not incrementable debug failure"
 };
 
 void OctreeManager::debugDraw() {

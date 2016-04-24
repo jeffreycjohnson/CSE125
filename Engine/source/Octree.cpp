@@ -16,6 +16,7 @@ static const float RAY_STEP = 0.01f;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
 	root = new OctreeNode(min, max, this);
+	objects = 0;
 };
 
 Octree::~Octree() {
@@ -43,9 +44,11 @@ void Octree::insert(Collider* obj) {
 	if (root && obj != nullptr) {
 		if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
 			root->insert(obj, obj->getAABB());
+			objects++;
 		}
 		else if (!obj->passive && (restriction == DYNAMIC_ONLY || restriction == BOTH)) {
 			root->insert(obj, obj->getAABB());
+			objects++;
 		}
 	}
 }
@@ -54,6 +57,7 @@ void Octree::remove(Collider* obj) {
 	if (root && obj != nullptr) {
 		OctreeNode* node = nodeMap[obj->nodeId];
 		node->remove(obj); // Skip having to search through the whole entire tree!
+		--objects;
 	}
 }
 
@@ -163,7 +167,7 @@ CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	}
 };
 
-CollisionInfo Octree::collidesWith(Collider* ptr) {
+CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
 	if (root) {
 		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
 		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);

@@ -74,6 +74,7 @@ private:
 	OctreeNode* root;
 	NodeId nodeCounter = UNKNOWN_NODE;
 	std::unordered_map<NodeId, OctreeNode*> nodeMap;
+	int objects;
 
 	// Every time we call build() we reset this. It essentially short-circuits collider
 	// insertion based on the Collider's passive bool.
