@@ -9,8 +9,6 @@ private:
 	Octree* staticObjects;
 	Octree* dynamicObjects;
 
-	//std::vector<std::pair<GameObject*, CollisionInfo>> staticCollisions;
-	//std::vector<std::pair<GameObject*, CollisionInfo>> dynamicCollisions;
 	std::vector<CollisionInfo> staticCollisions;
 	std::vector<CollisionInfo> dynamicCollisions;
 
@@ -21,6 +19,11 @@ private:
 public:
 	OctreeManager();
 	~OctreeManager();
+
+	// Adds or removes gameobjects (and all their colliders) to the
+	// apropriate octree. Will recursively add children as well.
+	void insertGameObject(GameObject*);
+	void removeGameObject(GameObject*);
 
 	void buildStaticOctree(const glm::vec3&, const glm::vec3&);
 	void buildDynamicOctree(const glm::vec3&, const glm::vec3&);

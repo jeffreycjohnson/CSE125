@@ -27,6 +27,9 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	colliding = false;
 	passive = true;
 	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
+
+	// Force computation of xmin/xmax etc.
+	update(0.0f);
 }
 
 BoxCollider::~BoxCollider()
@@ -43,10 +46,18 @@ BoxCollider::~BoxCollider()
 
 void BoxCollider::update(float)
 {
-	glm::mat4 matrix = gameObject->transform.getTransformMatrix();
-	for (int i = 0; i < 8; i++)
-	{
-		transformPoints[i] = glm::vec3(matrix * glm::vec4(points[i], 1));
+	if (gameObject != nullptr) {
+		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
+		for (int i = 0; i < 8; i++)
+		{
+			transformPoints[i] = glm::vec3(matrix * glm::vec4(points[i], 1));
+		}
+	}
+	else {
+		// If no gameObject (and therefore, no transform) is specified, assume world coords already
+		for (int i = 0; i < 8; ++i) {
+			transformPoints[i] = points[i];
+		}
 	}
 
 	// Calculate axis aligned bounding box
