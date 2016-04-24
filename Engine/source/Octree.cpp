@@ -40,8 +40,14 @@ void Octree::removeNode(NodeId node) {
 };
 
 void Octree::insert(Collider* obj) {
-	if (root && obj != nullptr)
-		root->insert(obj, obj->getAABB());
+	if (root && obj != nullptr) {
+		if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
+			root->insert(obj, obj->getAABB());
+		}
+		else if (!obj->passive && (restriction == DYNAMIC_ONLY || restriction == BOTH)) {
+			root->insert(obj, obj->getAABB());
+		}
+	}
 }
 
 void Octree::remove(Collider* obj) {
@@ -59,6 +65,7 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 	long objCounter = 0;
 	std::stack<Transform> stack;
 	stack.push(root.transform);
+	restriction = mode;
 
 	// Traverse through the transform hierarchy (DFS)
 	while (!stack.empty()) {
@@ -118,6 +125,23 @@ std::unordered_map<NodeId, OctreeNode*>::iterator Octree::begin() {
 
 std::unordered_map<NodeId, OctreeNode*>::iterator Octree::end() {
 	return nodeMap.end();
+}
+
+void Octree::rebuild()
+{
+	if (root != nullptr) {
+		std::list<Collider*> colliders; // TODO: maybe vector would be faster, not sure
+		for (auto pair : nodeMap) {
+			auto node = pair.second;
+			for (auto colliderPtr : node->colliders) {
+				colliders.push_back(colliderPtr);
+				node->remove(colliderPtr);
+			}
+		}
+		for (auto collider : colliders) {
+			root->insert(collider, collider->getAABB());
+		}
+	}
 }
 
 CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {

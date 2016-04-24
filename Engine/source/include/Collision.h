@@ -45,7 +45,7 @@ public:
 		BOTH          // Errythand. (DO NOT DO THIS, YOU WILL HAVE REGRETS!)
 	};
 
-	// Member Functions
+	// --- Member Functions ---
 
 	// Inserts a collider into the octree, and updating data in the collider
 	void insert(Collider*);
@@ -55,6 +55,10 @@ public:
 
 	// Creates an octree, starting at the given root
 	void build(BuildMode mode = BOTH, const GameObject& root = GameObject::SceneRoot);
+
+	// Removes all colliders from the octree & reinserts them at the root (no nodes are destroyed)
+	// Preserves the min/max and BuildMode restrictions from build
+	void rebuild();
 
 	CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
 	CollisionInfo collidesWith(Collider*);
@@ -70,6 +74,10 @@ private:
 	OctreeNode* root;
 	NodeId nodeCounter = UNKNOWN_NODE;
 	std::unordered_map<NodeId, OctreeNode*> nodeMap;
+
+	// Every time we call build() we reset this. It essentially short-circuits collider
+	// insertion based on the Collider's passive bool.
+	BuildMode restriction;
 
 	// OctreeNode(s) notify the Octree whenever they are created/destroyed
 	void removeNode(NodeId node);
@@ -98,6 +106,7 @@ public:
 	~OctreeNode();
 
 	bool isLeaf() const;
+	std::string toString() const;
 
 	// Returns an iterator into the colliders list
 	std::vector<Collider*>::iterator begin();

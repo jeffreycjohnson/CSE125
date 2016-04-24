@@ -4,6 +4,7 @@
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
+#include <sstream>
 
 OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth) {
 	this->min = min;
@@ -13,6 +14,7 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 	this->nodeId = ++tree->nodeCounter; // the pre-increment is important here
 	this->depth = depth;
 	tree->addNode(this->nodeId, this);
+	//LOG(this->toString());
 }
 
 OctreeNode::~OctreeNode() {
@@ -187,47 +189,44 @@ CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider) {
 };
 
 bool OctreeNode::intersects(const BoxCollider& box) {
-	float width = std::abs(max.x - min.x);
-	float height = std::abs(max.y - min.y);
-	float depth = std::abs(max.z - min.z);
-	glm::vec3 center(width / 2 + min.x, height / 2 + min.y, depth / 2 + min.z);
-	glm::vec3 dims(width, height, depth);
+	float xDiameter = std::abs(max.x - min.x);
+	float yDiameter = std::abs(max.y - min.y);
+	float zDiameter = std::abs(max.z - min.z);
+	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
+	glm::vec3 dims(xDiameter / 2, yDiameter / 2, zDiameter / 2);
 	BoxCollider bounds(center, dims);
 	return bounds.intersects(box);
 }
 
-bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& box) {
+bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& colliderAABB) {
 	
 	// Keeps track of the number of intersections the box has with our children
 	int collisions = 0;
 	unsigned int index = 0;
 	
-	// If this node already has children, recurse
 	if (!isLeaf()) {
 	
-		// <indicies> saves which children have registered collisions with the box
-		// e.g.             |1|1|1|0|0|0|1|0|  -> child 1, 5, 6, 7 have collisions
-		unsigned char indices = 0;
-		unsigned char mask = 0x00;
-		
+		// If this is an internal node, attempt to place the desired object into
+		// the child nodes. If there are multiple collisions between the object
+		// we are inserting & our immediate children, the object is too large,
+		// or in an awkward position, and must rest inside of this internal node.
+
+		int lastCollision = 0;
+
 		for (auto child : children) {	
 			// Despite what kind of collider we are inserting, we always want
 			// to do intersection testing with axis-aligned bounding boxes, b/c they are cheap
-			if (child->intersects(box)) {
-				mask &= index;
+			if (collisions > 1) break; // optimization
+			if (child->intersects(colliderAABB)) {
+				lastCollision = index;
+				++collisions;
 			}
 			++index;
 		}
 		
-		if (collisions == 0) {
-			// If for some reason this box does not collide with any of our children,
-			// it therefore cannot collide with this node. So if we get, here... wtf!?
-			colliderBeingInserted->nodeId = Octree::UNKNOWN_NODE;
-			return false;
-		}
-		else if (collisions == 1) {
+		if (collisions == 1) {
 			// Insert our box into the chosen child.
-			return children[mask]->insert(colliderBeingInserted, box);
+			return children[lastCollision]->insert(colliderBeingInserted, colliderAABB);
 		}
 		else {
 			// Node successfully inserted into this node
@@ -239,6 +238,16 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& box)
 				subdivide();
 			}
 			return true;
+		}
+	}
+	else {
+		// If we are a leaf node
+		if (depth < Octree::MAX_DEPTH) {
+			subdivide(); // The subdivide *may* fail, so for now we recurse
+			insert(colliderBeingInserted, colliderAABB);
+		}
+		else {
+			colliders.push_back(colliderBeingInserted);
 		}
 	}
 }
@@ -307,6 +316,8 @@ void OctreeNode::subdivide() {
 		// Clear the colliders vector and insert remaining stragglers
 		colliders.clear();
 		colliders = stragglers;
+
+		LOG(this->toString());
 	
 	}
 	//else // TODO: Will I need to do anything in the else case should a subdivide() call fail?
@@ -315,6 +326,16 @@ void OctreeNode::subdivide() {
 bool OctreeNode::isLeaf() const {
 	// An octree node with no children must be a leaf
 	return children.empty();
+}
+
+std::string OctreeNode::toString() const
+{
+	std::stringstream str;
+	str << "Min: [" << min.x << "," << min.y << "," << min.z << "]" << std::endl;
+	str << "Max: [" << max.x << "," << max.y << "," << max.z << "]" << std::endl;
+	str << "Colliders: " << colliders.size() << std::endl;
+	str << "Children: " << children.size();
+	return str.str();
 }
 
 std::vector<Collider*>::iterator OctreeNode::begin() {
@@ -326,11 +347,17 @@ std::vector<Collider*>::iterator OctreeNode::end() {
 
 void OctreeNode::debugDraw() {
 	// Only draw octree leaves that have objects
-	if (true){//children.empty() && !colliders.empty()) {
-		glm::vec3 center = (max - min); // TODO: Our debug drawing should probably be more descriptive & configurable
-		center /= 2;
-		glm::vec3 scale(max.x - min.x, max.y - min.y, max.z - min.z);
-		glm::vec4 color = glm::vec4(DebugPass::octreeColor, 1);
-		Renderer::drawBox(center, scale, color);
+	float xDiameter = std::abs(max.x - min.x);
+	float yDiameter = std::abs(max.y - min.y);
+	float zDiameter = std::abs(max.z - min.z);
+	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
+	glm::vec3 scale(xDiameter / 2, yDiameter / 2, zDiameter / 2);
+	glm::vec4 color = glm::vec4(DebugPass::octreeColor, 1);
+	
+	// Only render nodes with colliders in them and/or the root
+	if (colliders.size() > 0 || this == tree->root)
+		Renderer::drawBox(center, scale, color); 
+	for (auto child : children) {
+		child->debugDraw();
 	}
 }

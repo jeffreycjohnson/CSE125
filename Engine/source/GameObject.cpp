@@ -8,6 +8,7 @@
 #include "Material.h"
 #include "ServerManager.h"
 #include "ClientManager.h"
+#include "OctreeManager.h"
 #include <iostream>
 #include <functional>
 
@@ -79,6 +80,12 @@ GameObject::~GameObject() {
 void GameObject::addChild(GameObject* go) {
     transform.children.push_back(&go->transform);
     go->transform.parent = &transform;
+
+	// Add gameobject to octree
+	OctreeManager* ptr = GameObject::SceneRoot.getComponent<OctreeManager>();
+	if (ptr != nullptr) {
+		ptr->insertGameObject(go);
+	}
 }
 
 void GameObject::destroy() {
@@ -171,7 +178,7 @@ void GameObject::update(float deltaTime)
     }
 }
 
-void GameObject::beforeFixedUpdate()
+void GameObject::beforeFixedUpdate() // TODO: remove this when merging with Jason's branch
 {
 	for (auto component : componentList)
 	{
@@ -217,7 +224,7 @@ void GameObject::fixedUpdate()
     }
 }
 
-void GameObject::afterFixedUpdate()
+void GameObject::afterFixedUpdate() // TODO: remove this when merging with Jason's branch
 {
 	for (auto component : componentList)
 	{
@@ -335,7 +342,7 @@ void GameObject::removeName()
 {
 	this->name = "";
 
-    auto range = nameMap.equal_range(name);
+    auto range = nameMap.equal_range(name); // TODO: ModelViewer crashes here if you close model window & not console window
     while (range.first != range.second)
     {
         if (range.first->second == this) {

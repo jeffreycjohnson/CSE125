@@ -1,6 +1,10 @@
 #include "OctreeManager.h"
 #include "Collision.h"
 #include "Collider.h"
+#include "BoxCollider.h"
+#include "SphereCollider.h"
+#include "CapsuleCollider.h"
+#include "Renderer.h"
 
 OctreeManager::OctreeManager()
 {
@@ -16,6 +20,64 @@ OctreeManager::~OctreeManager()
 
 	if (dynamicObjects != nullptr)
 		delete dynamicObjects;
+}
+
+void OctreeManager::insertGameObject(GameObject *gameObject)
+{
+	if (gameObject != nullptr && dynamicObjects != nullptr && staticObjects != nullptr) {
+		Collider *a, *b, *c;
+		a = (Collider*)gameObject->getComponent<BoxCollider>();
+		b = (Collider*)gameObject->getComponent<SphereCollider>();
+		c = (Collider*)gameObject->getComponent<CapsuleCollider>();
+
+		if (a != nullptr) {
+			dynamicObjects->insert(a);
+			staticObjects->insert(a);
+		}
+		if (b != nullptr) {
+			dynamicObjects->insert(b);
+			staticObjects->insert(b);
+		}
+		if (c != nullptr) {
+			dynamicObjects->insert(c);
+			staticObjects->insert(c);
+		}
+
+		// Recurse!
+		for (auto child : gameObject->transform.children) {
+			insertGameObject(child->gameObject);
+		}
+
+	}
+}
+
+void OctreeManager::removeGameObject(GameObject *gameObject)
+{
+	if (gameObject != nullptr && dynamicObjects != nullptr && staticObjects != nullptr) {
+		Collider *a, *b, *c;
+		a = (Collider*)gameObject->getComponent<BoxCollider>();
+		b = (Collider*)gameObject->getComponent<SphereCollider>();
+		c = (Collider*)gameObject->getComponent<CapsuleCollider>();
+
+		if (a != nullptr) {
+			dynamicObjects->remove(a);
+			staticObjects->remove(a);
+		}
+		if (b != nullptr) {
+			dynamicObjects->remove(b);
+			staticObjects->remove(b);
+		}
+		if (c != nullptr) {
+			dynamicObjects->remove(c);
+			staticObjects->remove(c);
+		}
+
+		// Recurse!
+		for (auto child : gameObject->transform.children) {
+			removeGameObject(child->gameObject);
+		}
+
+	}
 }
 
 void OctreeManager::buildStaticOctree(const glm::vec3& min, const glm::vec3& max) {
@@ -207,6 +269,9 @@ void OctreeManager::afterFixedUpdate() {
 	// Flush the collisions buffer
 	dynamicCollisions.clear();
 	staticCollisions.clear();
+
+	// TODO: This will probably be waaaaaay too slow
+	dynamicObjects->rebuild();
 };
 
 void OctreeManager::debugDraw() {
@@ -216,4 +281,5 @@ void OctreeManager::debugDraw() {
 	if (dynamicObjects != nullptr) {
 		dynamicObjects->debugDraw();
 	}
+	Renderer::drawSphere(glm::vec3(0), 1.0f, glm::vec4(1));
 }
