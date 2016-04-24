@@ -23,7 +23,7 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	points[5] = offset + glm::vec3(-halfW, halfH, -halfD);
 	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
-	colliders.push_back(this); // TODO: Remove naive implementation once octree is working
+	//colliders.push_back(this); // TODO: Remove naive implementation once octree is working
 	colliding = false;
 	passive = true;
 	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
@@ -154,16 +154,16 @@ void BoxCollider::updateColliders()
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 	return (
 		this->xmin <= point.x && point.x <= this->xmax &&
-		this->xmin <= point.y && point.y <= this->ymax &&
-		this->xmin <= point.z && point.z <= this->zmax
+		this->ymin <= point.y && point.y <= this->ymax &&
+		this->zmin <= point.z && point.z <= this->zmax
 	);
 }
 
 bool BoxCollider::intersects(const BoxCollider& other) const {
 	return (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
-		this->xmin <= other.ymax && other.ymin <= this->ymax &&
-		this->xmin <= other.zmax && other.zmin <= this->zmax
+		this->ymin <= other.ymax && other.ymin <= this->ymax &&
+		this->zmin <= other.zmax && other.zmin <= this->zmax
 	);
 }
 

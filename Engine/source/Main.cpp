@@ -123,6 +123,7 @@ void RunEngine(int caller)
 	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
     auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);
+	bool debugToggle = Renderer::drawDebug;
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
@@ -135,7 +136,9 @@ void RunEngine(int caller)
 		 */
 
 		workerPool->createJob(Sound::updateFMOD)->queue();
-        Renderer::drawDebug = Input::getKey("escape");
+		if (Input::getKeyDown("escape")) {
+			Renderer::drawDebug = !Renderer::drawDebug;
+		}
 		Renderer::loop(caller);
 	}
 

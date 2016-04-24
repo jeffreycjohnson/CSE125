@@ -177,7 +177,7 @@ CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a b
 			return root->collidesWith(*box);
 		}
 		else if (sphere != nullptr) {
-			return root->collidesWith(*sphere);
+			return root->collidesWith(*sphere); // TODO: remember to update sphere & capsule coolideswith() with changes to Box version
 		}
 		else if (capsule != nullptr) {
 			return root->collidesWith(*capsule);
