@@ -28,7 +28,7 @@ static std::string getPath(const std::string& name)
     return name.substr(0, index + 1);
 }
 
-static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode) {
+static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, bool isStatic = false) {
 	GameObject* nodeObject = new GameObject();
 
 	aiVector3D pos;
@@ -45,13 +45,19 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode) 
 
 	std::string name = currentNode->mName.C_Str();
 	if (name.find("BoxCollider") == 0) {
-		nodeObject->addComponent(new BoxCollider(glm::vec3(0), glm::vec3(1)));
+		auto box = new BoxCollider(glm::vec3(0), glm::vec3(1));
+		box->setStatic(isStatic);
+		nodeObject->addComponent(box);
 	}
 	else if (name.find("SphereCollider") == 0) {
-		nodeObject->addComponent(new SphereCollider(glm::vec3(0), 1.f));
+		auto sphere = new SphereCollider(glm::vec3(0), 1.f);
+		sphere->setStatic(isStatic);
+		nodeObject->addComponent(sphere);
 	}
 	else if (name.find("CapsuleCollider") == 0) {
-		nodeObject->addComponent(new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f));
+		auto capsule = new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f);
+		capsule->setStatic(isStatic);
+		nodeObject->addComponent(capsule);
 	}
 
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
@@ -107,8 +113,11 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 
     //load child objects
     for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-		if (std::string(currentNode->mChildren[c]->mName.C_Str()) == "Colliders") {
-			nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c]));
+		std::string childName(currentNode->mChildren[c]->mName.C_Str());
+		if (childName.find("Colliders") != std::string::npos) {
+			// StaticColliders   vs.    Colliders
+			bool isStatic = childName.find("Static") == 0;
+			nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
 		}
 		else {
 			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));

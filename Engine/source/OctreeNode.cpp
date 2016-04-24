@@ -58,17 +58,18 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 	info.collider = (Collider*)&box;
 
 	// Check object against all of the objects in our colliders list
-	for (auto colliderPtr : colliders) {
-		if (colliderPtr == &box) continue; // Don't check colliders against themselves
-		switch (colliderPtr->getColliderType()) {
+	//if (intersects(box)) {
+		for (auto colliderPtr : colliders) {
+			if (colliderPtr == &box) continue; // Don't check colliders against themselves
+			switch (colliderPtr->getColliderType()) {
 
 			case ColliderType::AABB:
 			{
-			   BoxCollider* myBox = (BoxCollider*)colliderPtr;
-			   if (myBox->intersects(box)) {
-				   info.add(myBox);
-			   }
-			   break;
+				BoxCollider* myBox = (BoxCollider*)colliderPtr;
+				if (myBox->intersects(box)) {
+					info.add(myBox);
+				}
+				break;
 			}
 			case ColliderType::SPHERE:
 			{
@@ -86,13 +87,14 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box) {
 				}
 				break;
 			}
+			}
 		}
-	}
 
-	// If we have children, check them afterwards
-	for (auto child : children) {
-		info.merge(child->collidesWith(box));
-	}
+		// If we have children, check them afterwards
+		for (auto child : children) {
+			info.merge(child->collidesWith(box));
+		}
+	//}
 
 	return info;
 
@@ -254,10 +256,11 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 
 void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
-	for (auto iter = colliders.begin(); iter != colliders.end(); ++iter) {
+	for (auto iter = colliders.begin(); iter != colliders.end(); iter++) {
 		// TODO: Double check that this will function properly
 		if (*iter == colliderBeingRemoved) {
 			colliders.erase(iter, iter + 1);
+			break;
 		}
 	}
 }
