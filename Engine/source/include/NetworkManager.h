@@ -37,6 +37,7 @@ private:
 
 	static void ReceiveClientMessages();
 	static void SendClientMessages();
+	static std::vector<char> lastBytesSent;
 public:
 	NetworkManager();
 	~NetworkManager();

@@ -29,6 +29,7 @@ std::vector<ClientID> NetworkManager::clientIDs;
 ClientID NetworkManager::myClientID;
 
 std::map<std::pair<int, int>, NetworkResponse> NetworkManager::postbox;
+std::vector<char> NetworkManager::lastBytesSent;
 
 NetworkState NetworkManager::getState()
 {
@@ -215,7 +216,12 @@ void NetworkManager::SendClientMessages()
 	}
 
 	std::vector<char> bytes = Input::serialize(NetworkManager::myClientID);
-	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA, NetworkManager::myClientID);
+
+	if (!std::equal(bytes.begin(), bytes.end(), NetworkManager::lastBytesSent.begin(), NetworkManager::lastBytesSent.end())) {
+		NetworkManager::lastBytesSent.resize(bytes.size());
+		std::copy(bytes.begin(), bytes.end(), NetworkManager::lastBytesSent.begin());
+		ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA, NetworkManager::myClientID);
+	}
 }
 
 // --- OFFLINE FUNC -- //
