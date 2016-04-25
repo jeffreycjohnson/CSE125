@@ -85,6 +85,7 @@ void InitializeEngine() { InitializeEngine("CSE 125"); }
 // lots more to this section, so I split it off from the main function.
 void LoadDebugOptions(ConfigFile& file) {
 
+	Renderer::drawDebug = file.getBool("DebugOptions", "debugEnabledOnStart");
 	DebugPass::drawColliders = file.getBool("DebugOptions", "drawColliders");
 	DebugPass::drawLights = file.getBool("DebugOptions", "drawLights");
 	DebugPass::drawDynamicOctree = file.getBool("DebugOptions", "drawDynamicOctree");

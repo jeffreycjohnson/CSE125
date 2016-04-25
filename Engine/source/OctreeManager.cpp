@@ -5,6 +5,8 @@
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
 #include "Renderer.h"
+#include "RenderPass.h"
+#include <iostream>
 
 OctreeManager::OctreeManager()
 {
@@ -117,13 +119,14 @@ void OctreeManager::probeForStaticCollisions() {
 		
 					CollisionInfo colInfo = staticObjects->collidesWith(*colliderIter);
 					if (colInfo.numCollisions > 0) {
+						colInfo.collider->colliding = true;
 						staticCollisions.push_back(colInfo); // [static] Enter or Stay
 					}
 					else {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// staticCollisionExit() event should be fired here
-							staticCollisions.push_back(colInfo);
+							//staticCollisions.push_back(colInfo); // TODO: ignore collision exit for now
 						}
 					}
 				
@@ -148,13 +151,14 @@ void OctreeManager::probeForDynamicCollisions() {
 
 					CollisionInfo colInfo = dynamicObjects->collidesWith(*colliderIter);
 					if (colInfo.numCollisions > 0) {
+						colInfo.collider->colliding = true;
 						dynamicCollisions.push_back(colInfo); // Enter or Stay
 					}
 					else {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// CollisionExit() event should be fired here
-							dynamicCollisions.push_back(colInfo);
+							//dynamicCollisions.push_back(colInfo); // TODO: Ignore collision exit for now
 						}
 					}
 
@@ -193,7 +197,7 @@ void OctreeManager::beforeFixedUpdate() {
 		GameObject* caller = collisionData.collider->gameObject;
 
 		// state @ N - 1
-		bool colliding = collisionData.collider->colliding = true;
+		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
 		
 		// state @ N - 2
 		bool previouslyColliding = collisionData.collider->previouslyColliding; 
@@ -209,11 +213,12 @@ void OctreeManager::beforeFixedUpdate() {
 				// Static Collision Enter
 				caller->collisionCallback(other, &Component::staticCollisionEnter);
 			}
-			else if (!colliding && previouslyColliding) {
-				// Static Collision Exit
-				caller->collisionCallback(other, &Component::staticCollisionExit);
-			}
 		}
+
+		/*if (!colliding && previouslyColliding) {
+			// Static Collision Exit
+			caller->collisionCallback(other, &Component::staticCollisionExit);
+		}*/ // TODO: Collision Exit is special
 
 		// *** end of black magic ***
 	}
@@ -227,7 +232,7 @@ void OctreeManager::beforeFixedUpdate() {
 		GameObject* caller = collisionData.collider->gameObject;
 
 		// state @ N - 1
-		bool colliding = collisionData.collider->colliding = true;
+		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
 
 		// state @ N - 2
 		bool previouslyColliding = collisionData.collider->previouslyColliding;
@@ -241,11 +246,12 @@ void OctreeManager::beforeFixedUpdate() {
 				// Collision Enter
 				caller->collisionCallback(other, &Component::collisionEnter);
 			}
-			else if (!colliding && previouslyColliding) {
-				// Collision Exit
-				caller->collisionCallback(other, &Component::collisionExit);
-			}
 		}
+
+		/*if (!colliding && previouslyColliding) {
+			// Collision Exit
+			caller->collisionCallback(other, &Component::collisionExit);
+		}*/ // TODO: Collision Exit is special, deal with it later
 	}
 
 };
@@ -265,6 +271,10 @@ void OctreeManager::afterFixedUpdate() {
 		collision.collider->previouslyColliding = collision.collider->colliding;
 	}
 
+	// Print out collision data
+	/*std::cerr << "Dynamic Collisions this frame: " << dynamicCollisions.size() << std::endl;
+	std::cerr << "Static Collisions this frame:  " << staticCollisions.size() << std::endl;*/
+
 	// Flush the collisions buffer
 	dynamicCollisions.clear();
 	staticCollisions.clear();
@@ -274,10 +284,10 @@ void OctreeManager::afterFixedUpdate() {
 };
 
 void OctreeManager::debugDraw() {
-	if (staticObjects != nullptr) {
+	if (staticObjects != nullptr && DebugPass::drawStaticOctree) {
 		staticObjects->debugDraw();
 	}
-	if (dynamicObjects != nullptr) {
+	if (dynamicObjects != nullptr && DebugPass::drawDynamicOctree) {
 		dynamicObjects->debugDraw();
 	}
 	Renderer::drawSphere(glm::vec3(0), 1.0f, glm::vec4(1));

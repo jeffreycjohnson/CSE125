@@ -17,34 +17,26 @@ void Component::destroy()
 
 void Component::collisionEnter(GameObject* other)
 {
-	LOG("Collision Enter!!!1");
 }
 
 void Component::collisionExit(GameObject* other)
 {
-	LOG("Collision Exit!!!1");
 }
 
 void Component::collisionStay(GameObject* other)
 {
-	LOG("Collision Stay!!!1");
 }
 
 void Component::staticCollisionEnter(GameObject* other)
 {
-	LOG("Collision Static ENTER!!!1");
 }
 
 void Component::staticCollisionStay(GameObject* other)
 {
-	LOG("Collision Static STAY!!!1");
-
 }
 
 void Component::staticCollisionExit(GameObject* other)
 {
-	LOG("Collision Static EXIt!!!1");
-
 }
 
 /*

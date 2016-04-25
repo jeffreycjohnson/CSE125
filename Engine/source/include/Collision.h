@@ -128,9 +128,9 @@ private:
 	/* Member Functions */
 
 	CollisionInfo raycast(const Ray&);
-	CollisionInfo collidesWith(const BoxCollider&);
-	CollisionInfo collidesWith(const CapsuleCollider&);
-	CollisionInfo collidesWith(const SphereCollider&);
+	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
+	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
+	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
 	
 	// Add or remove nodes to the data structure
 	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted

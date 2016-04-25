@@ -18,6 +18,7 @@ protected:
 	friend Octree;
 	friend OctreeNode;
 	friend OctreeManager;
+
 	NodeId nodeId = Octree::UNKNOWN_NODE;
 	Octree* octree;
 
