@@ -95,14 +95,12 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 					}
 					break;
 				}
-			
 			}
+		}
 		
-			// If we have children, check them afterwards
-			for (auto child : children) {
-				child->collidesWith(box, info);
-			}
-		
+		// If we have children, check them afterwards
+		for (auto child : children) {
+			child->collidesWith(box, info);
 		}
 	}
 

@@ -83,7 +83,7 @@ bool SphereCollider::intersects(const CapsuleCollider & other) const
 bool SphereCollider::intersects(const SphereCollider & other) const
 {
 	float distance = (other.centerWorld - centerWorld).length();
-	return (distance <= radiusWorld);
+	return (distance <= radiusWorld + other.radiusWorld);
 }
 
 BoxCollider SphereCollider::getAABB() const
