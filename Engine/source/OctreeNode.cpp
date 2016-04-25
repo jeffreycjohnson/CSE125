@@ -255,13 +255,14 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
 	colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
-	for (auto iter = colliders.begin(); iter != colliders.end(); iter++) {
+	/*for (auto iter = colliders.begin(); iter != colliders.end(); iter++) {
 		// TODO: Double check that this will function properly
 		if (*iter == colliderBeingRemoved) {
 			colliders.erase(iter, iter + 1);
 			break;
 		}
-	}
+	}*/
+	colliders.remove(colliderBeingRemoved);
 }
 
 void OctreeNode::subdivide() {
@@ -305,7 +306,7 @@ void OctreeNode::subdivide() {
 		children.push_back(new OctreeNode(min6, max6, tree, this, depth + 1));
 
 		// Insert all of our colliders into each of those children, and let recursion deal with it
-		std::vector<Collider*> stragglers;
+		std::list<Collider*> stragglers;
 		for (auto collider : colliders) {
 			BoxCollider aabb = collider->getAABB();
 			for (auto child : children) {
@@ -340,10 +341,10 @@ std::string OctreeNode::toString() const
 	return str.str();
 }
 
-std::vector<Collider*>::iterator OctreeNode::begin() {
+std::list<Collider*>::iterator OctreeNode::begin() {
 	return colliders.begin();
 };
-std::vector<Collider*>::iterator OctreeNode::end() {
+std::list<Collider*>::iterator OctreeNode::end() {
 	return colliders.end();
 };
 

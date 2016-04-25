@@ -141,8 +141,10 @@ void Octree::rebuild()
 			auto node = pair.second;
 			for (auto colliderPtr : node->colliders) {
 				colliders.push_back(colliderPtr);
-				node->remove(colliderPtr);
 			}
+		}
+		for (auto collider : colliders) {
+			remove(collider);
 		}
 		for (auto collider : colliders) {
 			root->insert(collider, collider->getAABB());
