@@ -48,16 +48,19 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 		auto box = new BoxCollider(glm::vec3(0), glm::vec3(1));
 		box->setStatic(isStatic);
 		nodeObject->addComponent(box);
+		box->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
 	}
 	else if (name.find("SphereCollider") == 0) {
 		auto sphere = new SphereCollider(glm::vec3(0), 1.f);
 		sphere->setStatic(isStatic);
 		nodeObject->addComponent(sphere);
+		sphere->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
 	}
 	else if (name.find("CapsuleCollider") == 0) {
 		auto capsule = new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f);
 		capsule->setStatic(isStatic);
 		nodeObject->addComponent(capsule);
+		capsule->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
 	}
 
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
