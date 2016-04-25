@@ -17,7 +17,8 @@ extern void InitializeEngine(std::string windowName);
 
 int main(int argc, char** argv)
 {
-    InitializeEngine("SERVER");
+	InitializeEngine("SERVER");
+	auto clientIDs = NetworkManager::InitializeServer("9876", 1);
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -42,7 +43,6 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-	auto clientIDs = NetworkManager::InitializeServer("9876", 2);
 	for (auto clientID : clientIDs)
 	{
 		GameObject *player = loadScene("assets/ball.dae");
@@ -51,5 +51,12 @@ int main(int argc, char** argv)
 		GameObject::SceneRoot.addChild(player);
 	}
 		
-    RunEngine(1); // Run engine as server
+	try
+	{
+		RunEngine(1); // running engine as server
+	}
+	catch (...)
+	{
+		const auto& eptr = std::current_exception();
+	}
 }

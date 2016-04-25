@@ -10,6 +10,7 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
+#include <stdexcept>
 #include "NetworkManager.h"
 
 extern void RunEngine(int caller);
@@ -40,7 +41,6 @@ int main(int argc, char** argv)
 	
 	// cache all meshes
 	GameObject *scene = loadScene("assets/artsy.dae");
-	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	auto pair = NetworkManager::InitializeClient("127.0.0.1", "9876");
@@ -56,5 +56,13 @@ int main(int argc, char** argv)
 		GameObject::SceneRoot.addChild(player);
 	}
 
-    RunEngine(0); // running engine as client
+	try
+	{
+		RunEngine(0); // running engine as client
+	}
+	catch (...)
+	{
+		const auto& eptr = std::current_exception();
+		eptr._RethrowException();
+	}
 }

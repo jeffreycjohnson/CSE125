@@ -5,6 +5,8 @@
 #include "NetworkUtility.h"
 #include "NetworkStruct.h"
 
+#include <map>
+#include <utility>
 #include <vector>
 #include <tuple>
 
@@ -28,7 +30,7 @@ private:
 	static std::vector<ClientID> clientIDs;
 	static ClientID myClientID;
 
-	static std::vector<NetworkResponse> postbox;
+	static std::map<std::pair<int, int>, NetworkResponse> postbox;
 
 	static void ReceiveServerMessages();
 	static void SendServerMessages();
@@ -44,6 +46,8 @@ public:
 	static void InitializeOffline();
 
 	static void PostMessage(const std::vector<char>& bytes, int messageType, int messageID);
+
+	static NetworkState getState();
 };
 
 #endif // NETWORK_MANAGER_H

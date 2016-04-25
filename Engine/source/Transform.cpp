@@ -202,10 +202,22 @@ void Transform::deserializeAndApply(std::vector<char> bytes)
 
 void Transform::postToNetwork()
 {
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
 	GameObject *my = gameObject;
 	if (my == nullptr)
 	{
 		std::cerr << "Transform with no attached game object modified??" << std::endl;
+		return;
+	}
+
+	// is this a correct assumption to make??
+	if (parent == nullptr && my->getID() != 0)
+	{
+		// if we don't have a parent
+		// and we're not the root
+		// then who cares about our data
+
 		return;
 	}
 

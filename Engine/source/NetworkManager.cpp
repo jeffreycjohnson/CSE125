@@ -28,7 +28,12 @@ NetworkState NetworkManager::state;
 std::vector<ClientID> NetworkManager::clientIDs;
 ClientID NetworkManager::myClientID;
 
-std::vector<NetworkResponse> NetworkManager::postbox;
+std::map<std::pair<int, int>, NetworkResponse> NetworkManager::postbox;
+
+NetworkState NetworkManager::getState()
+{
+	return NetworkManager::state;
+}
 
 // --- SERVER FUNC --- //
 
@@ -93,21 +98,19 @@ void NetworkManager::SendServerMessages()
 
 	for (auto& response : NetworkManager::postbox)
 	{
-		ServerNetwork::broadcastBytes(response.body, response.messageType, response.id);
+		ServerNetwork::broadcastBytes(response.second.body, response.second.messageType, response.second.id);
 	}
 
 	NetworkManager::postbox.clear();
 }
 
+// TODO allow the sender to force all messages to be resolved, not just the latest one
 void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType, int messageID)
 {
-	assert(NetworkManager::state != UNINITIALIZED &&
-		NetworkManager::state != INITIALIZING &&
-		NetworkManager::state != SHUTDOWN);
-
 	if (NetworkManager::state != SERVER_MODE) return;
 
-	NetworkManager::postbox.push_back(NetworkResponse(messageType, messageID, bytes));
+	auto key = std::make_pair(messageType, messageID);
+	postbox[key] = NetworkResponse(messageType, messageID, bytes);
 }
 
 // --- CLIENT FUNC --- //
@@ -145,7 +148,7 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 			}
 			else if (response.body.size() != 0)
 			{
-				throw std::runtime_error("Wrong message received before all clear...");
+				std::cerr << "Wrong message received before all clear..." << std::endl;
 			}
 		}
 	}

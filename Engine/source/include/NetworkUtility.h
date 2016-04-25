@@ -11,7 +11,8 @@ struct NetworkResponse
 	int messageType;
 	int id;
 	std::vector<char> body;
-
+	
+	NetworkResponse(){}
 	NetworkResponse(int messageType, int msgId, const std::vector<char>& body) :
 		messageType(messageType), id(msgId), body(body)
 	{}
