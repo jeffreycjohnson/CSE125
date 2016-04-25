@@ -28,8 +28,6 @@ void InitializeEngine(std::string windowName)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	glfwSwapInterval(1);
-
     int width = 1024;
     int height = 768;
 
@@ -50,8 +48,8 @@ void InitializeEngine(std::string windowName)
     mainWindow = window;
 
     glewExperimental = GL_TRUE;
-    glewInit();
-    // glfwSwapInterval(0);
+	glewInit();
+	glfwSwapInterval(0);
 	Sound::init();
 	Renderer::init(width, height);
     Input::init(window);

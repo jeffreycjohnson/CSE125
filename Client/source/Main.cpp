@@ -10,7 +10,7 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
-#include "ClientManager.h"
+#include "NetworkManager.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -43,13 +43,13 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
 
-	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
-	for (auto clientID : clientIDs)
+	auto pair = NetworkManager::InitializeClient("127.0.0.1", "9876");
+
+	for (auto clientID : std::get<0>(pair))
 	{
 		GameObject *player = loadScene("assets/ball.dae");
-		if (clientID == clientIDs[0])
+		if (clientID == std::get<1>(pair))
 		{
-
 			player->addComponent(Renderer::mainCamera);
 		}
 

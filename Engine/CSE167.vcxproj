@@ -194,6 +194,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\NetworkManager.cpp" />
     <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
@@ -230,6 +231,7 @@
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\NetworkManager.h" />
     <ClInclude Include="source\include\NetworkStruct.h" />
     <ClInclude Include="source\include\ServerInput.h" />
     <ClInclude Include="source\include\ClientNetwork.h" />

@@ -251,7 +251,6 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int 
 
 	// insert encoded type
 	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
-	std::cout << encodedMsg.size() << std::endl;
 
 	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
