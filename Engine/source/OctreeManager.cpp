@@ -12,7 +12,6 @@ OctreeManager::OctreeManager()
 {
 	staticObjects = nullptr;
 	dynamicObjects = nullptr;
-	useNaive = false; //false;
 }
 
 
@@ -37,23 +36,14 @@ void OctreeManager::insertGameObject(GameObject *gameObject)
 		if (a != nullptr) {
 			dynamicObjects->insert(a);
 			staticObjects->insert(a);
-			if (useNaive) {
-				objects.push_back(a);
-			}
 		}
 		if (b != nullptr) {
 			dynamicObjects->insert(b);
 			staticObjects->insert(b);
-			if (useNaive) {
-				objects.push_back(b);
-			}
 		}
 		if (c != nullptr) {
 			dynamicObjects->insert(c);
 			staticObjects->insert(c);
-			if (useNaive) {
-				objects.push_back(c);
-			}
 		}
 
 		// Recurse!
@@ -185,51 +175,6 @@ void OctreeManager::probeForDynamicCollisions() {
 void OctreeManager::updateDynamicObjectsInOctree() {
 
 }
-void OctreeManager::naiveCollisionDetection()
-{
-	int collisions = 0;
-	for (int i = 0; i < objects.size(); ++i) {
-		for (int j = 0; j < objects.size(); ++j) {
-			if (i != j) {
-				Collider* me = objects[i];
-				Collider* other = objects[j];
-				bool isStatic = me->passive || other->passive;
-				bool result = false;
-				
-				BoxCollider* myBox = dynamic_cast<BoxCollider*>(me);
-				BoxCollider* otherBox = dynamic_cast<BoxCollider*>(other);
-				SphereCollider* mySphere = dynamic_cast<SphereCollider*>(me);
-				SphereCollider* otherSphere = dynamic_cast<SphereCollider*>(other);
-
-				if (myBox != nullptr && otherBox != nullptr) {
-					result = myBox->intersects(*otherBox);
-				}
-				else if (myBox && otherSphere) {
-					result = myBox->intersects(*otherSphere);
-				}
-				else if (mySphere && otherBox) {
-					result = mySphere->intersects(*otherBox);
-				}
-				else if (mySphere && otherSphere) {
-					result = mySphere->intersects(*otherSphere);
-				}
-
-				if (result) {
-					// Fire the collision
-					me->gameObject->collisionEnter(other->gameObject);
-					me->colliding = true;
-					other->colliding = true;
-					collisions++;
-				}
-				else {
-					me->colliding = me->colliding || false;
-					other->colliding = other->colliding || false;
-				}
-			}
-		}
-	}
-	collisions = collisions;
-};
 
 void OctreeManager::beforeFixedUpdate() {
 
@@ -243,94 +188,85 @@ void OctreeManager::beforeFixedUpdate() {
 	// 1. Since octrees are in state N - 1, look for all the collisions that occurred
 	//    during frame N - 1
 	
-	if (useNaive) {
-		naiveCollisionDetection();
-	}
-	else {
-		dynamicCollisionsThisFrame = 0;
-		staticCollisionsThisFrame = 0;
-		probeForStaticCollisions();
-		probeForDynamicCollisions();
-	}
+
+	dynamicCollisionsThisFrame = 0;
+	staticCollisionsThisFrame = 0;
+	probeForStaticCollisions();
+	probeForDynamicCollisions();
 
 	// 2. Call appropriate collision methods (based on the booleans in Collider.h) so that
 	//    they are processed before the next fixedUpdate()
 
-	if (!useNaive) {
-		for (auto collisionData : staticCollisions) {
-			// Since the colliders we have access to here are DYNAMIC objects, we want
-			// to make sure that we update their position in the dynamic octree AFTER
-			// we call the staticCollisionXXXX() method.
-			GameObject* caller = collisionData.collider->gameObject;
+	for (auto collisionData : staticCollisions) {
+		// Since the colliders we have access to here are DYNAMIC objects, we want
+		// to make sure that we update their position in the dynamic octree AFTER
+		// we call the staticCollisionXXXX() method.
+		GameObject* caller = collisionData.collider->gameObject;
 
-			// state @ N - 1
-			bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
+		// state @ N - 1
+		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
 
-			// state @ N - 2
-			bool previouslyColliding = collisionData.collider->previouslyColliding;
+		// state @ N - 2
+		bool previouslyColliding = collisionData.collider->previouslyColliding;
 
-			// /!\ Warning: the following code is black magic. Exercise caution.
+		// /!\ Warning: the following code is black magic. Exercise caution.
 
-			for (auto other : collisionData.collidees) {
-				if (colliding && previouslyColliding) {
-					// Static Collision Stay
-					caller->collisionCallback(other, &Component::staticCollisionStay);
-				}
-				else if (colliding && !previouslyColliding) {
-					// Static Collision Enter
-					caller->collisionCallback(other, &Component::staticCollisionEnter);
-				}
+		for (auto other : collisionData.collidees) {
+			if (colliding && previouslyColliding) {
+				// Static Collision Stay
+				caller->collisionCallback(other, &Component::staticCollisionStay);
 			}
-
-			/*if (!colliding && previouslyColliding) {
-				// Static Collision Exit
-				caller->collisionCallback(other, &Component::staticCollisionExit);
-			}*/ // TODO: Collision Exit is special
-
-			// *** end of black magic ***
+			else if (colliding && !previouslyColliding) {
+				// Static Collision Enter
+				caller->collisionCallback(other, &Component::staticCollisionEnter);
+			}
 		}
 
-		// For now we're doing static & dynamic at the same time. It seems like this
-		// *could* be bad, but otherwise we'd need to rebuild the octree twice per frame
-		// as opposed to once, and honestly, doing them at the same time might not matter
-		// as much as one would think
+		/*if (!colliding && previouslyColliding) {
+			// Static Collision Exit
+			caller->collisionCallback(other, &Component::staticCollisionExit);
+		}*/ // TODO: Collision Exit is special
 
-		for (auto collisionData : dynamicCollisions) {
-			GameObject* caller = collisionData.collider->gameObject;
+		// *** end of black magic ***
+	}
 
-			// state @ N - 1
-			bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
+	// For now we're doing static & dynamic at the same time. It seems like this
+	// *could* be bad, but otherwise we'd need to rebuild the octree twice per frame
+	// as opposed to once, and honestly, doing them at the same time might not matter
+	// as much as one would think
 
-			// state @ N - 2
-			bool previouslyColliding = collisionData.collider->previouslyColliding;
+	for (auto collisionData : dynamicCollisions) {
+		GameObject* caller = collisionData.collider->gameObject;
 
-			for (auto other : collisionData.collidees) {
-				if (colliding && previouslyColliding) {
-					// Collision Stay
-					caller->collisionCallback(other, &Component::collisionStay);
-				}
-				else if (colliding && !previouslyColliding) {
-					// Collision Enter
-					caller->collisionCallback(other, &Component::collisionEnter);
-				}
+		// state @ N - 1
+		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
+
+		// state @ N - 2
+		bool previouslyColliding = collisionData.collider->previouslyColliding;
+
+		for (auto other : collisionData.collidees) {
+			if (colliding && previouslyColliding) {
+				// Collision Stay
+				caller->collisionCallback(other, &Component::collisionStay);
 			}
-
-			/*if (!colliding && previouslyColliding) {
-				// Collision Exit
-				caller->collisionCallback(other, &Component::collisionExit);
-			}*/ // TODO: Collision Exit is special, deal with it later
+			else if (colliding && !previouslyColliding) {
+				// Collision Enter
+				caller->collisionCallback(other, &Component::collisionEnter);
+			}
 		}
+
+		/*if (!colliding && previouslyColliding) {
+			// Collision Exit
+			caller->collisionCallback(other, &Component::collisionExit);
+		}*/ // TODO: Collision Exit is special, deal with it later
 	}
 
 };
 
 void OctreeManager::fixedUpdate() {
-	// Not sure if we'll need to do stuff here
 };
 
 void OctreeManager::afterFixedUpdate() {
-
-	if (useNaive) return;
 
 	// Before the fixed update, we did all the collision detection for N - 1,
 	// but the previouslyCollding boolean reflected the colliding state of N - 2,
@@ -350,8 +286,8 @@ void OctreeManager::afterFixedUpdate() {
 	dynamicCollisions.clear();
 	staticCollisions.clear();
 
-	// TODO: This will probably be waaaaaay too slow
-	dynamicObjects->rebuild(); // TODO: in VS15 causes "vector not incrementable debug failure"
+	// TODO: Profile this for a complex, actually dynamic scene
+	dynamicObjects->rebuild();
 };
 
 void OctreeManager::debugDraw() {
