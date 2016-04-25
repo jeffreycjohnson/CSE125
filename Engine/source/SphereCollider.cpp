@@ -55,8 +55,8 @@ void SphereCollider::debugDraw()
 
 void SphereCollider::onCollisionEnter(GameObject * other)
 {
-	if (!passive)
-		colliding = true; // TODO: Revisit this once OctreeManager is written
+	/*if (!passive)
+		colliding = true; */// TODO: Revisit this once OctreeManager is written
 }
 
 bool SphereCollider::insideOrIntersects(const glm::vec3 & point) const

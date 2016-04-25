@@ -102,8 +102,37 @@ void BoxCollider::debugDraw()
 
 void BoxCollider::onCollisionEnter(GameObject* other)
 {
-	if (!passive)
-		colliding = true;  // TODO: Revisit this once OctreeManager is written
+	/*if (!passive)
+		colliding = true;*/  // TODO: Revisit this once OctreeManager is written
+}
+
+void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
+{
+	xmin = min.x;
+	ymin = min.y;
+	zmin = min.z;
+	xmax = max.x;
+	ymax = max.y;
+	zmax = max.z;
+
+	float halfW = std::abs(xmax - xmin);
+	float halfH = std::abs(ymax - ymin);
+	float halfD = std::abs(zmax - zmin);
+
+	glm::vec3 offset = (min + max);
+	offset /= 2;
+
+	// To prevent update() from fucking it up
+	points[0] = offset + glm::vec3(halfW, halfH, halfD);
+	points[1] = offset + glm::vec3(halfW, halfH, -halfD);
+	points[2] = offset + glm::vec3(halfW, -halfH, halfD);
+	points[3] = offset + glm::vec3(halfW, -halfH, -halfD);
+	points[4] = offset + glm::vec3(-halfW, halfH, halfD);
+	points[5] = offset + glm::vec3(-halfW, halfH, -halfD);
+	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
+	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
+
+	update(0.0f); // Recalculate points, etc.
 }
 
 void BoxCollider::destroy()

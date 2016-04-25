@@ -168,24 +168,26 @@ CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 };
 
 CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
+	CollisionInfo colInfo;
+	colInfo.collider = ptr;
 	if (root) {
 		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
 		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
 		CapsuleCollider* capsule = dynamic_cast<CapsuleCollider*>(ptr);
 
 		if (box != nullptr) {
-			return root->collidesWith(*box);
+			return root->collidesWith(*box, colInfo);
 		}
 		else if (sphere != nullptr) {
-			return root->collidesWith(*sphere); // TODO: remember to update sphere & capsule coolideswith() with changes to Box version
+			return root->collidesWith(*sphere, colInfo); // TODO: remember to update sphere & capsule coolideswith() with changes to Box version
 		}
 		else if (capsule != nullptr) {
-			return root->collidesWith(*capsule);
+			return root->collidesWith(*capsule, colInfo);
 		}
 
 	}
 	else {
-		return CollisionInfo();
+		return colInfo;
 	}
 };
 

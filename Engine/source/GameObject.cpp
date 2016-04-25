@@ -303,28 +303,6 @@ void GameObject::collisionCallback(GameObject* other, void(Component::*callback)
 	}
 }
 
-/*
-void GameObject::collisionStay(GameObject* other)
-{
-    if (!active || dead) return;
-    for (auto component : componentList)
-    {
-        if (!component->active) continue;
-        component->collisionStay(other);
-    }
-}
-
-void GameObject::collisionExit(GameObject* other)
-{
-    if (!active || dead) return;
-    for (auto component : componentList)
-    {
-        if (!component->active) continue;
-        component->collisionExit(other);
-    }
-}
-*/
-
 void GameObject::setName(const std::string& name)
 {
     removeName();
