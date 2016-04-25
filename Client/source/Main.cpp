@@ -18,7 +18,8 @@ extern void InitializeEngine(std::string windowName);
 
 int main(int argc, char** argv)
 {
-    InitializeEngine("CLIENT");
+	InitializeEngine("CLIENT");
+	auto pair = NetworkManager::InitializeClient("127.0.0.1", "9876");
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -43,8 +44,6 @@ int main(int argc, char** argv)
 	GameObject *scene = loadScene("assets/artsy.dae");
 	GameObject::SceneRoot.addChild(scene);
 
-	auto pair = NetworkManager::InitializeClient("127.0.0.1", "9876");
-
 	for (auto clientID : std::get<0>(pair))
 	{
 		GameObject *player = loadScene("assets/ball.dae");
@@ -63,6 +62,5 @@ int main(int argc, char** argv)
 	catch (...)
 	{
 		const auto& eptr = std::current_exception();
-		eptr._RethrowException();
 	}
 }
