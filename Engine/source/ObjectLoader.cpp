@@ -45,13 +45,13 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 
 	std::string name = currentNode->mName.C_Str();
 	if (name.find("BoxCollider") == 0) {
-		auto box = new BoxCollider(glm::vec3(0), glm::vec3(1));
+		auto box = new BoxCollider(glm::vec3(0), glm::vec3(2));
 		box->setStatic(isStatic);
 		nodeObject->addComponent(box);
 		box->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
 	}
 	else if (name.find("SphereCollider") == 0) {
-		auto sphere = new SphereCollider(glm::vec3(0), 1.f);
+		auto sphere = new SphereCollider(glm::vec3(0), 2.0f);
 		sphere->setStatic(isStatic);
 		nodeObject->addComponent(sphere);
 		sphere->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion

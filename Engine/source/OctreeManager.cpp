@@ -12,7 +12,7 @@ OctreeManager::OctreeManager()
 {
 	staticObjects = nullptr;
 	dynamicObjects = nullptr;
-	useNaive = true; //false;
+	useNaive = false; //false;
 }
 
 
