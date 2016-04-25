@@ -8,7 +8,8 @@ class OctreeManager :
 private:
 	Octree* staticObjects;
 	Octree* dynamicObjects;
-	bool useNaive;
+	bool useNaive; // TODO: make this configurable
+	int dynamicCollisionsThisFrame, staticCollisionsThisFrame;
 
 	std::vector<CollisionInfo> staticCollisions;
 	std::vector<CollisionInfo> dynamicCollisions;

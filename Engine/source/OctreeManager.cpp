@@ -132,6 +132,7 @@ void OctreeManager::probeForStaticCollisions() {
 					if (colInfo.numCollisions > 0) {
 						colInfo.collider->colliding = true;
 						staticCollisions.push_back(colInfo); // [static] Enter or Stay
+						staticCollisionsThisFrame += colInfo.numCollisions;
 					}
 					else {
 						colInfo.collider->colliding = false;
@@ -164,6 +165,7 @@ void OctreeManager::probeForDynamicCollisions() {
 					if (colInfo.numCollisions > 0) {
 						colInfo.collider->colliding = true;
 						dynamicCollisions.push_back(colInfo); // Enter or Stay
+						dynamicCollisionsThisFrame += colInfo.numCollisions;
 					}
 					else {
 						colInfo.collider->colliding = false;
@@ -245,6 +247,8 @@ void OctreeManager::beforeFixedUpdate() {
 		naiveCollisionDetection();
 	}
 	else {
+		dynamicCollisionsThisFrame = 0;
+		staticCollisionsThisFrame = 0;
 		probeForStaticCollisions();
 		probeForDynamicCollisions();
 	}
@@ -347,7 +351,7 @@ void OctreeManager::afterFixedUpdate() {
 	staticCollisions.clear();
 
 	// TODO: This will probably be waaaaaay too slow
-	//dynamicObjects->rebuild(); // TODO: in VS15 causes "vector not incrementable debug failure"
+	dynamicObjects->rebuild(); // TODO: in VS15 causes "vector not incrementable debug failure"
 };
 
 void OctreeManager::debugDraw() {

@@ -110,8 +110,8 @@ public:
 	std::string toString() const;
 
 	// Returns an iterator into the colliders list
-	std::vector<Collider*>::iterator begin();
-	std::vector<Collider*>::iterator end();
+	std::list<Collider*>::iterator begin();
+	std::list<Collider*>::iterator end();
 
 private:
 	std::vector<OctreeNode*> children;
@@ -123,7 +123,7 @@ private:
 	int depth;
 
 	/* Only leaf nodes should contain colliders */
-	std::vector<Collider*> colliders;
+	std::list<Collider*> colliders;
 
 	/* Member Functions */
 
