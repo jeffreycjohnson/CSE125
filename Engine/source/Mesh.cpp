@@ -32,7 +32,10 @@ std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
 Mesh* Mesh::fromCachedMeshData(std::string name)
 {
 	auto iter = Mesh::meshMap.find(name);
-	assert(iter != Mesh::meshMap.end()); // can only access if cached
+	if (iter == Mesh::meshMap.end())
+	{
+		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+	}
 
 	Mesh *created = new Mesh;
 	created->name = name;
@@ -45,7 +48,10 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
 
 	GameObject *go = GameObject::FindByID(messageId);
-	assert(go != nullptr);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("Cannot set mesh of nonexistant gameobject");
+	}
 
 	Mesh *goMesh = go->getComponent<Mesh>();
 	if (goMesh != nullptr)
@@ -121,7 +127,10 @@ void Mesh::deserializeAndApply(std::vector<char> bytes)
 {
 	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
 	auto iter = Mesh::meshMap.find(mnd.meshName);
-	assert(iter != Mesh::meshMap.end()); // can only access if cached
+	if (iter == Mesh::meshMap.end())
+	{
+		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+	}
 
 	this->name = std::string(mnd.meshName);
 }

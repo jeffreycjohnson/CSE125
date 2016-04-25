@@ -39,7 +39,11 @@ NetworkState NetworkManager::getState()
 
 std::vector<ClientID> NetworkManager::InitializeServer(std::string port, int numberOfClients)
 {
-	assert(NetworkManager::state == UNINITIALIZED);
+	if (NetworkManager::state != UNINITIALIZED)
+	{
+		throw std::runtime_error("Cannot initialize initialized networking.");
+	}
+
 	NetworkManager::state = INITIALIZING;
 
 	// setup the server for listening
@@ -71,7 +75,10 @@ std::vector<ClientID> NetworkManager::InitializeServer(std::string port, int num
 
 void NetworkManager::ReceiveServerMessages()
 {
-	assert(NetworkManager::state == SERVER_MODE);
+	if (NetworkManager::state != SERVER_MODE)
+	{
+		throw std::runtime_error("Cannot receive messages on unitialized network");
+	}
 
 	// for now, all received messages are client-side input
 	std::vector<std::vector<NetworkResponse>> multiResponses = ServerNetwork::selectClients();
@@ -94,7 +101,10 @@ void NetworkManager::ReceiveServerMessages()
 
 void NetworkManager::SendServerMessages()
 {
-	assert(NetworkManager::state == SERVER_MODE);
+	if (NetworkManager::state != SERVER_MODE)
+	{
+		throw std::runtime_error("Cannot send messages on unitialized network");
+	}
 
 	for (auto& response : NetworkManager::postbox)
 	{
@@ -117,7 +127,10 @@ void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType
 
 std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std::string serverIP, std::string port)
 {
-	assert(NetworkManager::state == UNINITIALIZED);
+	if (NetworkManager::state != UNINITIALIZED)
+	{
+		throw std::runtime_error("Cannot initialize initialized server");
+	}
 	NetworkManager::state = INITIALIZING;
 
 	// setup the connection
@@ -163,7 +176,10 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 
 void NetworkManager::ReceiveClientMessages()
 {
-	assert(NetworkManager::state == CLIENT_MODE);
+	if (NetworkManager::state != CLIENT_MODE)
+	{
+		throw std::runtime_error("Cannot receive messages on unitialized network");
+	}
 
 	std::vector<NetworkResponse> receivedMessages = ClientNetwork::receiveMessages();
 	for (auto& received : receivedMessages)
@@ -193,7 +209,10 @@ void NetworkManager::ReceiveClientMessages()
 
 void NetworkManager::SendClientMessages()
 {
-	assert(NetworkManager::state == CLIENT_MODE);
+	if (NetworkManager::state != CLIENT_MODE)
+	{
+		throw std::runtime_error("Cannot send messages on unitialized network");
+	}
 
 	std::vector<char> bytes = Input::serialize(NetworkManager::myClientID);
 	ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA, NetworkManager::myClientID);
@@ -203,6 +222,10 @@ void NetworkManager::SendClientMessages()
 
 void NetworkManager::InitializeOffline()
 {
-	assert(NetworkManager::state == UNINITIALIZED);
+	if (NetworkManager::state != UNINITIALIZED)
+	{
+		throw std::runtime_error("Cannot initialize intialized server");
+	}
+
 	NetworkManager::state = OFFLINE;
 }

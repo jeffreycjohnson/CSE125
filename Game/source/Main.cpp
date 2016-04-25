@@ -18,7 +18,7 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
 	InitializeEngine("SERVER");
-	auto clientIDs = NetworkManager::InitializeServer("9876", 1);
+	auto clientIDs = NetworkManager::InitializeServer("9876", 2);
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{

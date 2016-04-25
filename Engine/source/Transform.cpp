@@ -10,7 +10,10 @@ void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int me
 	TransformNetworkData tnd = structFromBytes<TransformNetworkData>(bytes);
 
 	GameObject *go = GameObject::FindByID(messageId);
-	assert(go != nullptr);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("Can't set transform of nonexistant gameobject");
+	}
 
 	go->transform.deserializeAndApply(bytes);
 }
@@ -193,7 +196,10 @@ void Transform::deserializeAndApply(std::vector<char> bytes)
 		if (tnd.parentID != -1)
 		{
 			GameObject *parentGO = GameObject::FindByID(tnd.parentID);
-			assert(parentGO != nullptr);
+			if (parentGO == nullptr)
+			{
+				throw std::runtime_error("tried to set a parent ID that does not exist");
+			}
 
 			parentGO->addChild(this->gameObject);
 		}

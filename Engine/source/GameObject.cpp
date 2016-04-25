@@ -129,7 +129,10 @@ void GameObject::addChild(GameObject* go) {
 void GameObject::removeChild(GameObject * go)
 {
 	auto child = std::find(transform.children.begin(), transform.children.end(), &go->transform);
-	assert(child != transform.children.end());
+	if (child != transform.children.end())
+	{
+		throw std::runtime_error("Cannot remove child from gameobject parent if child is not child");
+	}
 
 	transform.children.erase(child);
 	go->transform.parent = nullptr;
@@ -387,12 +390,15 @@ void GameObject::Dispatch(const std::vector<char> &bytes, int messageType, int m
 {
 	if (messageType == CREATE_OBJECT_NETWORK_DATA)
 	{
-		assert(GameObject::deserializeAndCreate(bytes));
+		GameObject::deserializeAndCreate(bytes);
 	}
 	else if (messageType == DESTROY_OBJECT_NETWORK_DATA)
 	{
 		GameObject *toDestroy = GameObject::FindByID(messageID);
-		assert(toDestroy != nullptr);
+		if (toDestroy == nullptr)
+		{
+			throw std::runtime_error("Cannot destroy gameobject that does not exist");
+		}
 
 		toDestroy->destroy();
 	}
