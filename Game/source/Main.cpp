@@ -18,7 +18,7 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
 	InitializeEngine("SERVER");
-	auto clientIDs = NetworkManager::InitializeServer("9876", 2);
+	auto clientIDs = NetworkManager::InitializeServer("9876", 1);
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -40,8 +40,10 @@ int main(int argc, char** argv)
 	}
 	
 	GameObject *scene = loadScene("assets/artsy.dae");
-	scene->transform.setPosition(0, -1, 0);
+
 	GameObject::SceneRoot.addChild(scene);
+	scene->transform.setPosition(0, -1, 0);
+
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 	for (auto clientID : clientIDs)
 	{

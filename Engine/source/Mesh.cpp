@@ -2,11 +2,14 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "NetworkManager.h"
 #include "NetworkUtility.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>		// Post processing flags
+
+#include <iostream>	
 
 #include "Animation.h"
 
@@ -78,7 +81,6 @@ Mesh::~Mesh() {
 
 }
 
-
 void Mesh::draw() {
 	MeshData& currentEntry = meshMap.at(name);
 	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
@@ -117,6 +119,13 @@ void Mesh::draw() {
     }
 }
 
+void Mesh::setGameObject(GameObject* object)
+{
+	Component::setGameObject(object);
+	
+	postToNetwork();
+}
+
 std::vector<char> Mesh::serialize()
 {
 	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name);
@@ -135,10 +144,25 @@ void Mesh::deserializeAndApply(std::vector<char> bytes)
 	this->name = std::string(mnd.meshName);
 }
 
+void Mesh::postToNetwork()
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		std::cerr << "Transform with no attached game object modified??" << std::endl;
+		return;
+	}
+
+	NetworkManager::PostMessage(serialize(), MESH_NETWORK_DATA, my->getID());
+}
+
 void Mesh::setMaterial(Material *mat) 
 {
 	material = mat;
 }
+
 
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {

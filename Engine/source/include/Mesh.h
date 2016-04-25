@@ -23,6 +23,8 @@ class Mesh : public Component
 private:
 	Mesh();
 
+	void postToNetwork();
+
 public:
 	static std::unordered_map<std::string, MeshData> meshMap;
 	static std::unordered_map<std::string, BoneData> boneIdMap;
@@ -40,6 +42,7 @@ public:
 	~Mesh();
 
 	void setMaterial(Material *mat);
+	void setGameObject(GameObject* object) override;
 	void draw() override;
 
 	std::vector<char> serialize() override;

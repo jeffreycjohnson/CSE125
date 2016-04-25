@@ -26,6 +26,12 @@ void Transform::setDirty()
     for (auto child : children) child->setDirty();
 }
 
+void Transform::setGameObject(GameObject* object)
+{
+	Component::setGameObject(object);
+	postToNetwork();
+}
+
 /**
 * Translate
 * -Transform Dirty
@@ -226,6 +232,5 @@ void Transform::postToNetwork()
 
 		return;
 	}
-
 	NetworkManager::PostMessage(serialize(), TRANSFORM_NETWORK_DATA, my->getID());
 }

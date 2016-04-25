@@ -196,6 +196,7 @@ void NetworkManager::ReceiveClientMessages()
 			Transform::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case MESH_NETWORK_DATA:
+			std::cerr << "RECEIVED MESH DATA WHAT DO" << std::endl;
 			Mesh::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:

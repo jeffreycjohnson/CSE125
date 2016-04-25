@@ -201,6 +201,13 @@ void GameObject::debugDraw() {
 
 void GameObject::update(float deltaTime)
 {
+	// don't fraget transform!!
+	if (newlyCreated || transform.newlyCreated)
+	{
+		transform.create();
+		transform.newlyCreated = false;
+	}
+
     for (auto component : componentList)
     {
 		if (newlyCreated || component->newlyCreated) 

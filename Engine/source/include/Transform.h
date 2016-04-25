@@ -78,6 +78,8 @@ public:
 	glm::vec3 getScale() const;
 	float getWorldScale();
 
+	void setGameObject(GameObject* object) override;
+
 	std::vector<char> serialize() override;
 	void deserializeAndApply(std::vector<char> tnd) override;
 };
