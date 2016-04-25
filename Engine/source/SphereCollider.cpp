@@ -7,6 +7,7 @@
 SphereCollider::SphereCollider(glm::vec3 c, float r) {
 	center = c;
 	radius = r;
+	colliding = previouslyColliding = false;
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
 		centerWorld = glm::vec3(matrix * glm::vec4(c, 1));

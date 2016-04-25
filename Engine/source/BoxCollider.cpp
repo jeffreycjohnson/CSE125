@@ -25,6 +25,7 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
 	//colliders.push_back(this); // TODO: Remove naive implementation once octree is working
 	colliding = false;
+	previouslyColliding = false;
 	passive = true;
 	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
 

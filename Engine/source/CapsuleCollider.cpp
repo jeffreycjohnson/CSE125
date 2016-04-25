@@ -7,6 +7,7 @@ CapsuleCollider::CapsuleCollider(glm::vec3 a, glm::vec3 b, float dist) {
 	this->a = a;
 	this->b = b;
 	this->dist = dist;
+	colliding = previouslyColliding = false;
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
 		this->a_world = glm::vec3(matrix * glm::vec4(a,1));

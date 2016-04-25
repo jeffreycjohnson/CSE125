@@ -239,11 +239,6 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 			// Node successfully inserted into this node
 			colliderBeingInserted->nodeId = nodeId;
 			colliders.push_back(colliderBeingInserted);
-
-			// If we have too many
-			if (colliders.size() > Octree::LEAF_THRESHOLD && depth < Octree::MAX_DEPTH) {
-				subdivide();
-			}
 			return true;
 		}
 	}
@@ -261,6 +256,7 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 
 void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
+	colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
 	for (auto iter = colliders.begin(); iter != colliders.end(); iter++) {
 		// TODO: Double check that this will function properly
 		if (*iter == colliderBeingRemoved) {
