@@ -17,8 +17,6 @@
 class BoxCollider : public Collider
 {
 private:
-	static std::vector<BoxCollider*> colliders; // TODO: Remove naive algorithm once everything is good
-
 	// Object space points
 	glm::vec3 points[8];
 
@@ -50,10 +48,6 @@ public:
 	ColliderType getColliderType() override {
 		return ColliderType::AABB;
 	};
-
-	// Part of Michael's original naive algo impl.
-	static void updateColliders();
-	static bool checkCollision(int a, int b);
 };
 
 #endif

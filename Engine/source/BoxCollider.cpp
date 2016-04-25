@@ -6,8 +6,6 @@
 #include "Renderer.h"
 #include "RenderPass.h"
 
-std::vector<BoxCollider*> BoxCollider::colliders;
-
 BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset), dimensions(dimensions)
 {
 	float halfW = dimensions.x / 2;
@@ -35,14 +33,6 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 
 BoxCollider::~BoxCollider()
 {
-	// TODO: Remove code that erases this collider from the static list (in box destructor) (naive impl)
-	for (unsigned int i = 0; i < colliders.size(); i++)
-	{
-		if (colliders[i] == this)
-		{
-			colliders.erase(colliders.begin() + i);
-		}
-	}
 }
 
 void BoxCollider::update(float)
@@ -138,48 +128,8 @@ void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
 
 void BoxCollider::destroy()
 {
-	for (unsigned int i = 0; i < colliders.size(); i++)
-	{
-		if (colliders[i] == this)
-			colliders.erase(colliders.begin() + i);
-	}
 	Collider::destroy();
 }
-
-// STATIC METHOD (Part of original naive implementation)
-void BoxCollider::updateColliders()
-{
-	// TODO: Remove this method, part of naive impl
-	// Optimize with sweep and prune eventually, for now use brute force
-	for (unsigned int i = 0; i < colliders.size(); i++)
-	{
-		// Optimize erasing colliders? How often will this really happen?
-		while (i < colliders.size() && (colliders[i] == nullptr || colliders[i]->gameObject == nullptr))
-		{
-			colliders.erase(colliders.begin() + i);
-		}
-		if (i < colliders.size() && !colliders[i]->passive)
-		{
-			for (unsigned int e = 0; e < colliders.size(); e++)
-			{
-				while (e < colliders.size() && (colliders[e] == nullptr || colliders[e]->gameObject == nullptr))
-				{
-					if (i > e)
-						i--;
-
-					colliders.erase(colliders.begin() + e);
-				}
-				if (e < colliders.size() && i != e && checkCollision(i, e))
-				{
-					// Check for precise collision?
-					colliders[i]->gameObject->collisionEnter(colliders[e]->gameObject);
-					colliders[e]->gameObject->collisionEnter(colliders[i]->gameObject);
-				}
-			}
-		}
-	}
-}
-// ^ naive implementation
 
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 	return (
@@ -190,25 +140,11 @@ bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 }
 
 bool BoxCollider::intersects(const BoxCollider& other) const {
-/*	return (
+	return (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
 		this->ymin <= other.ymax && other.ymin <= this->ymax &&
 		this->zmin <= other.zmax && other.zmin <= this->zmax
-	);*/
-
-	bool collideX = false, collideY = false, collideZ = false;
-
-	if (this->xmin <= other.xmax && other.xmin <= this->xmax)
-		collideX = true;
-	if (this->ymin <= other.ymax && other.ymin <= this->ymax)
-		collideY = true;
-	if (this->zmin <= other.zmax && other.zmin <= this->zmax)
-		collideZ = true;
-
-	if (collideX && collideY && collideZ)
-		return true;
-	else
-		return false;
+	);
 }
 
 bool BoxCollider::intersects(const CapsuleCollider & other) const
@@ -219,6 +155,8 @@ bool BoxCollider::intersects(const CapsuleCollider & other) const
 
 bool BoxCollider::intersects(const SphereCollider & other) const 
 {
+	// TODO: this is wrong, or maybe spheres are broken, idk
+
 	// Using algorithm from this paper: http://www.mrtc.mdh.se/projects/3Dgraphics/paperF.pdf
 	// From section (3) {branch elimination & vectorization}, and no, I don't understand it
 
@@ -248,26 +186,3 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 	}
 
 };
-
-bool BoxCollider::checkCollision(int aIndex, int bIndex)
-{
-	// TODO: Also part of the naive impl
-	BoxCollider* a = colliders[aIndex];
-	BoxCollider* b = colliders[bIndex];
-
-	if (a != nullptr && b != nullptr)
-	{
-		bool collideX = false, collideY = false, collideZ = false;
-
-		if (a->xmin <= b->xmax && b->xmin <= a->xmax)
-			collideX = true;
-		if (a->ymin <= b->ymax && b->ymin <= a->ymax)
-			collideY = true;
-		if (a->zmin <= b->zmax && b->zmin <= a->zmax)
-			collideZ = true;
-
-		if (collideX && collideY && collideZ)
-			return true;
-	}
-	return false;
-}

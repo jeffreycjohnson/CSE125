@@ -108,6 +108,8 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 	max.y = file.getFloat("OctreeOptions", "ymax");
 	min.z = file.getFloat("OctreeOptions", "zmin");
 	max.z = file.getFloat("OctreeOptions", "zmax");
+
+	//OctreeManager::useNaive = file.getBool("OctreeOptions", "useNaive");
 	
 	// Build the octrees; although no objects have been loaded yet
 	manager->buildStaticOctree(min, max);
