@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -1, 0);
 	GameObject::SceneRoot.addChild(scene);
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-	auto clientIDs = NetworkManager::InitializeServer("9876", 1);
+	auto clientIDs = NetworkManager::InitializeServer("9876", 2);
 	for (auto clientID : clientIDs)
 	{
 		GameObject *player = loadScene("assets/ball.dae");

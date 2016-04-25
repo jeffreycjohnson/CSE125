@@ -19,11 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\ServerLoop.cpp" />
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\FPSMovement.cpp" />
-    <ClCompile Include="source\ServerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\CSE167.vcxproj">
@@ -31,10 +29,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\ServerLoop.h" />
     <ClInclude Include="source\ActivatorRegistrator.h" />
     <ClInclude Include="source\FPSMovement.h" />
-    <ClInclude Include="source\ServerManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1A66FBD-7F91-412A-B6ED-FB645555F316}</ProjectGuid>

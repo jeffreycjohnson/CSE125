@@ -2,6 +2,7 @@
 #include <gtc/matrix_transform.hpp>
 
 #include "GameObject.h"
+#include "NetworkManager.h"
 #include "NetworkUtility.h"
 
 void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
@@ -26,24 +27,36 @@ void Transform::setDirty()
 * Translate
 * -Transform Dirty
 */
-void Transform::translate(float x, float y, float z) {
+void Transform::translate(float x, float y, float z) 
+{
     setDirty();
     position += glm::vec3(x, y, z);
+
+	postToNetwork();
 }
 
-void Transform::translate(const glm::vec3& diff) {
+void Transform::translate(const glm::vec3& diff) 
+{
     setDirty();
     position += diff;
+
+	postToNetwork();
 }
 
-void Transform::setPosition(float x, float y, float z) {
+void Transform::setPosition(float x, float y, float z) 
+{
     setDirty();
 	position = glm::vec3(x, y, z);
+
+	postToNetwork();
 }
 
-void Transform::setPosition(const glm::vec3& pos) {
+void Transform::setPosition(const glm::vec3& pos) 
+{
     setDirty();
 	position = pos;
+
+	postToNetwork();
 }
 
 
@@ -52,27 +65,39 @@ void Transform::setPosition(const glm::vec3& pos) {
 * -Transform Dirty
 * -Normals Dirty
 */
-void Transform::rotate(const glm::quat& diff) {
+void Transform::rotate(const glm::quat& diff) 
+{
     setDirty();
     rotation *= diff;
+
+	postToNetwork();
 }
 
-void Transform::setRotate(const glm::quat& diff) {
+void Transform::setRotate(const glm::quat& diff) 
+{
     setDirty();
 	rotation = glm::quat(diff);
+
+	postToNetwork();
 }
 
 /**
 * Scale
 */
-void Transform::setScale(const glm::vec3& scale) {
+void Transform::setScale(const glm::vec3& scale) 
+{
     setDirty();
 	scaleFactor = scale;
+
+	postToNetwork();
 }
 
-void Transform::scale(float s) {
+void Transform::scale(float s) 
+{
     setDirty();
     scaleFactor *= s;
+
+	postToNetwork();
 }
 
 
@@ -80,7 +105,8 @@ void Transform::scale(float s) {
 * Get Transform Matrix
 * -uses parent's matrix as well
 */
-glm::mat4 Transform::getTransformMatrix() {
+glm::mat4 Transform::getTransformMatrix() 
+{
     if (transformMatrixDirty || parent != oldParent) {
         transformMatrix = glm::mat4(1.0f);
         transformMatrix = glm::translate(transformMatrix, position);
@@ -106,7 +132,8 @@ glm::vec3 Transform::getPosition() const
 
 glm::vec4 originPoint(0, 0, 0, 1);
 
-glm::vec3 Transform::getWorldPosition() {
+glm::vec3 Transform::getWorldPosition() 
+{
     if(worldPosDirty)
     {
         cachedWorldPos = glm::vec3(getTransformMatrix() * originPoint);
@@ -120,7 +147,8 @@ glm::vec3 Transform::getScale() const
     return scaleFactor;
 }
 
-float Transform::getWorldScale() {
+float Transform::getWorldScale() 
+{
     if(worldScaleDirty)
     {
         cachedWorldScale = glm::length(glm::vec3(getTransformMatrix()[0]));
@@ -170,4 +198,16 @@ void Transform::deserializeAndApply(std::vector<char> bytes)
 			parentGO->addChild(this->gameObject);
 		}
 	}
+}
+
+void Transform::postToNetwork()
+{
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		std::cerr << "Transform with no attached game object modified??" << std::endl;
+		return;
+	}
+
+	NetworkManager::PostMessage(serialize(), TRANSFORM_NETWORK_DATA, my->getID());
 }

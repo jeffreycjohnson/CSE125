@@ -12,7 +12,7 @@ struct NetworkResponse
 	int id;
 	std::vector<char> body;
 
-	NetworkResponse(int messageType, int msgId, std::vector<char> body) :
+	NetworkResponse(int messageType, int msgId, const std::vector<char>& body) :
 		messageType(messageType), id(msgId), body(body)
 	{}
 

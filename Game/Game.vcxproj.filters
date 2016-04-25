@@ -24,24 +24,12 @@
     <ClCompile Include="source\ActivatorRegistrator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ServerLoop.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ServerManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\FPSMovement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\ActivatorRegistrator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ServerLoop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ServerManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

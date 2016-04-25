@@ -2,6 +2,8 @@
 #define NETWORK_MANAGER_H
 
 #include "ForwardDecs.h"
+#include "NetworkUtility.h"
+#include "NetworkStruct.h"
 
 #include <vector>
 #include <tuple>
@@ -41,7 +43,7 @@ public:
 	static std::tuple<std::vector<ClientID>, ClientID> InitializeClient(std::string serverIP, std::string port);
 	static void InitializeOffline();
 
-	static void postMessage(std::vector<char> bytes, int messageType, int messageID);
+	static void PostMessage(const std::vector<char>& bytes, int messageType, int messageID);
 };
 
 #endif // NETWORK_MANAGER_H

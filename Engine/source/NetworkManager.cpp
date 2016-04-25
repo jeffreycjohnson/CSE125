@@ -91,28 +91,23 @@ void NetworkManager::SendServerMessages()
 {
 	assert(NetworkManager::state == SERVER_MODE);
 
-	// TODO: replace with like good polling, because this is just terrible
-	for (ClientID clientID : NetworkManager::clientIDs)
+	for (auto& response : NetworkManager::postbox)
 	{
-		std::string playerName = std::string("player_") + std::to_string(clientID);
-		GameObject *correctPlayer = GameObject::FindByName(playerName);
-		std::vector<char> bytes = correctPlayer->transform.serialize();
-		int playerID = correctPlayer->getID();
-
-		ServerNetwork::broadcastBytes(bytes, TRANSFORM_NETWORK_DATA, playerID);
+		ServerNetwork::broadcastBytes(response.body, response.messageType, response.id);
 	}
+
+	NetworkManager::postbox.clear();
 }
 
-void NetworkManager::postMessage(std::vector<char> bytes, int messageType, int messageID)
+void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType, int messageID)
 {
 	assert(NetworkManager::state != UNINITIALIZED &&
 		NetworkManager::state != INITIALIZING &&
 		NetworkManager::state != SHUTDOWN);
 
-	if (NetworkManager::state != SERVER_MODE)
-	{
-		return;
-	}
+	if (NetworkManager::state != SERVER_MODE) return;
+
+	NetworkManager::postbox.push_back(NetworkResponse(messageType, messageID, bytes));
 }
 
 // --- CLIENT FUNC --- //

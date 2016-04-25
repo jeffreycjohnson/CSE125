@@ -49,7 +49,7 @@ void InitializeEngine(std::string windowName)
 
     glewExperimental = GL_TRUE;
 	glewInit();
-	glfwSwapInterval(0);
+	glfwSwapInterval(1);
 	Sound::init();
 	Renderer::init(width, height);
     Input::init(window);
