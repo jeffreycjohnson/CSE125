@@ -42,13 +42,15 @@ void Octree::removeNode(NodeId node) {
 
 void Octree::insert(Collider* obj) {
 	if (root && obj != nullptr) {
-		if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
-			root->insert(obj, obj->getAABB());
-			objects++;
-		}
-		else if (!obj->passive && (restriction == DYNAMIC_ONLY || restriction == BOTH)) {
-			root->insert(obj, obj->getAABB());
-			objects++;
+		if (obj->nodeId == UNKNOWN_NODE) {
+			if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
+				root->insert(obj, obj->getAABB());
+				objects++;
+			}
+			else if (!obj->passive && (restriction == DYNAMIC_ONLY || restriction == BOTH)) {
+				root->insert(obj, obj->getAABB());
+				objects++;
+			}
 		}
 	}
 }
