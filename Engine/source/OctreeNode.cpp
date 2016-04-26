@@ -360,7 +360,7 @@ void OctreeNode::debugDraw() {
 	//--- Verifying boxes are drawing properly ---
 	//BoxCollider bounds(center, scale);
 	//bounds.debugDraw();   // Sanity check
-	//myAABB->debugDraw();  // Sanity check
+	myAABB->debugDraw();  // Sanity check
 	//--------------------------------------------
 
 	// Draw spheres @ min & max corners
