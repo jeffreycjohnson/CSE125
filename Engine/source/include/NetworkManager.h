@@ -46,7 +46,9 @@ public:
 	static std::tuple<std::vector<ClientID>, ClientID> InitializeClient(std::string serverIP, std::string port);
 	static void InitializeOffline();
 
-	static void PostMessage(const std::vector<char>& bytes, int messageType, int messageID);
+	void attachCameraTo(ClientID client, int gameObjectID);
+
+	static void PostMessage(const std::vector<char>& bytes, int messageType, int messageID, int forClient = -1);
 
 	static NetworkState getState();
 };

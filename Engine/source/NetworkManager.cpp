@@ -6,6 +6,7 @@
 #include "Component.h"
 #include "GameObject.h"
 #include "Mesh.h"
+#include "Camera.h"
 #include "Transform.h"
 
 #include "ClientNetwork.h"
@@ -109,19 +110,22 @@ void NetworkManager::SendServerMessages()
 
 	for (auto& response : NetworkManager::postbox)
 	{
-		ServerNetwork::broadcastBytes(response.second.body, response.second.messageType, response.second.id);
+		if (response.second.forClient == -1)
+			ServerNetwork::broadcastBytes(response.second.body, response.second.messageType, response.second.id);
+		else
+			ServerNetwork::sendBytes(response.second.forClient, response.second.body, response.second.messageType, response.second.id);
 	}
 
 	NetworkManager::postbox.clear();
 }
 
 // TODO allow the sender to force all messages to be resolved, not just the latest one
-void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType, int messageID)
+void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType, int messageID, int forClient)
 {
 	if (NetworkManager::state != SERVER_MODE) return;
 
 	auto key = std::make_pair(messageType, messageID);
-	postbox[key] = NetworkResponse(messageType, messageID, bytes);
+	postbox[key] = NetworkResponse(messageType, messageID, bytes, forClient);
 }
 
 // --- CLIENT FUNC --- //
@@ -199,6 +203,10 @@ void NetworkManager::ReceiveClientMessages()
 			std::cerr << "RECEIVED MESH DATA WHAT DO" << std::endl;
 			Mesh::Dispatch(received.body, received.messageType, received.id);
 			break;
+		case CAMERA_NETWORK_DATA:
+			std::cerr << "RECEIVED CAMERA DATA PLZ ATTACH" << std::endl;
+			Camera::Dispatch(received.body, received.messageType, received.id);
+			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
 			GameObject::Dispatch(received.body, received.messageType, received.id);
@@ -235,4 +243,9 @@ void NetworkManager::InitializeOffline()
 	}
 
 	NetworkManager::state = OFFLINE;
+}
+
+// TODO: Implement this lol.
+void NetworkManager::attachCameraTo(ClientID client, int gameObjectID) {
+
 }

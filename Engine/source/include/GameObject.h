@@ -47,7 +47,7 @@ public:
         componentList.push_back(c);
     }
     template<typename T>
-    bool removeComponent()
+    bool removeComponent(bool deleteComponent = true)
     {
         for (auto component = componentList.begin(); component != componentList.end(); ++component)
         {
@@ -55,13 +55,15 @@ public:
             if (test)
             {
                 test->setGameObject(nullptr);
-                delete test;
+				if (deleteComponent)
+					delete test;
                 componentList.erase(component);
                 return true;
             }
         }
         return false;
     }
+
     template<typename T>
     T* getComponent()
     {

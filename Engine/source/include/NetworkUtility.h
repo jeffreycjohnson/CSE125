@@ -11,11 +11,13 @@ struct NetworkResponse
 	int messageType;
 	int id;
 	std::vector<char> body;
-	
+	int forClient;
+
 	NetworkResponse(){}
-	NetworkResponse(int messageType, int msgId, const std::vector<char>& body) :
-		messageType(messageType), id(msgId), body(body)
-	{}
+	NetworkResponse(int messageType, int msgId, const std::vector<char>& body, int forClient = -1) :
+		messageType(messageType), id(msgId), body(body), forClient(forClient)
+	{
+	}
 
 	~NetworkResponse() {}
 };

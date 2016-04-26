@@ -18,7 +18,7 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
 	InitializeEngine("SERVER");
-	auto clientIDs = NetworkManager::InitializeServer("9876", 1);
+	auto clientIDs = NetworkManager::InitializeServer("9876", 2);
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -45,8 +45,15 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -1, 0);
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-	Renderer::mainCamera->fov = glm::radians(90.0f);
-		
+	//Renderer::mainCamera->fov = glm::radians(90.0f);
+
+	for (auto& client : clientIDs) {
+		GameObject *player = loadScene("assets/ball.dae");
+		player->addComponent(new FPSMovement(client, 1.5f, .25f, glm::vec3(client, .25f, client), glm::vec3(0, 1, 0)));
+		Renderer::mainCamera->setGameObject(player, client);
+		GameObject::SceneRoot.addChild(player);
+	}
+
 	try
 	{
 		RunEngine(1); // running engine as server

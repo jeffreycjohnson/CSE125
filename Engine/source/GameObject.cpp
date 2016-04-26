@@ -439,6 +439,7 @@ std::vector<char> GameObject::serialize()
 bool GameObject::deserializeAndCreate(std::vector<char> bytes)
 {
 	CreateObjectNetworkData cond = structFromBytes<CreateObjectNetworkData>(bytes);
+	std::cout << "Creating object with id " << cond.objectID << std::endl;
 	if (GameObject::FindByID(cond.objectID) != nullptr)
 	{
 		std::cerr << "Cannot create object with ID " << cond.objectID << ", object with ID already exists" << std::endl;

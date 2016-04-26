@@ -122,7 +122,7 @@ struct MeshNetworkData
 struct CameraNetworkData
 {
 	int objectID;
-
+	int clientID;
 	CameraNetworkData(int objectID) : objectID(objectID) {}
 };
 #pragma pack(pop)

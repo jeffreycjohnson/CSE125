@@ -34,9 +34,16 @@ class Camera : public Component
 		glm::vec3 getVelocity() const;
 		float getFOV() const;
 
+		void setGameObject(GameObject * go, int clientID);
+
 		void setGameObject(GameObject* go) override;
 
-		void postToNetwork();
+		std::vector<char> serialize();
+
+		void deserializeAndApply(std::vector<char> bytes);
+
+		void postToNetwork(int clientID);
+		static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
 };
 
 #endif

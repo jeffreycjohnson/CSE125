@@ -47,6 +47,10 @@ int main(int argc, char** argv)
 
 	delete artsy;
 
+	auto go = loadScene("assets/ball.dae");
+	go->destroy();
+	delete go;
+
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
 	try
