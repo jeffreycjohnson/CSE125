@@ -4,6 +4,7 @@
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
+#include "Camera.h"
 #include "Renderer.h"
 #include "RenderPass.h"
 #include <iostream>
@@ -263,7 +264,20 @@ void OctreeManager::beforeFixedUpdate() {
 
 };
 
+#include "Timer.h"
+
 void OctreeManager::fixedUpdate() {
+
+	/*Ray ray = Renderer::mainCamera->getEyeRay();
+	CollisionInfo colInfo = dynamicObjects->raycast(ray, Octree::RAY_MIN, 5, 0.1f);
+	if (colInfo.collisionOccurred) {
+		int x = 0;
+		++x; // nop
+		if (Timer::nextFixedStep()) {
+			std::cerr << "lel" << std::endl;
+		}
+	}*/
+
 };
 
 void OctreeManager::afterFixedUpdate() {
