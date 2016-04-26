@@ -37,7 +37,9 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 
 	currentNode->mTransformation.Decompose(scale, rotate, pos);
 
-	nodeObject->transform.scale(scale.x);
+	glm::vec3 glmScale(scale.x, scale.y, scale.z);
+
+	nodeObject->transform.setScale(glmScale);
 	nodeObject->transform.translate(pos.x, pos.y, pos.z);
 	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
 
@@ -52,6 +54,9 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 	}
 	else if (name.find("SphereCollider") == 0) {
 		auto sphere = new SphereCollider(glm::vec3(0), 2.0f);
+		if (glmScale.x != glmScale.y || glmScale.x != glmScale.z || glmScale.y != glmScale.z) {
+			LOG("Warning! Loading sphere collider with non-uniform scale!\nTHIS COLLIDER WILL NOT FUNCTION PROPERLY!");
+		}
 		sphere->setStatic(isStatic);
 		nodeObject->addComponent(sphere);
 		sphere->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
