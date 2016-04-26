@@ -97,17 +97,22 @@ struct TransformNetworkData
 
 #define MESH_NETWORK_DATA 5
 #define MAX_MESH_NAME 64
+#define MAX_MATERIAL_NAME 64
 #pragma pack(push, 1)
 struct MeshNetworkData
 {
 	int objectID;
 	char meshName[MAX_MESH_NAME];
+	char materialName[MAX_MATERIAL_NAME];
+	bool hasAnimations;
 
-	MeshNetworkData(int objectID, std::string meshName)
-		: objectID(objectID)
+	MeshNetworkData(int objectID, std::string meshName, std::string materialName, bool hasAnimations)
+		: objectID(objectID), hasAnimations(hasAnimations)
 	{
 		memset(this->meshName, 0, sizeof(char) * MAX_MESH_NAME);
 		strncpy_s(this->meshName, meshName.c_str(), MAX_MESH_NAME - 1);
+		memset(this->materialName, 0, sizeof(char) * MAX_MATERIAL_NAME);
+		strncpy_s(this->materialName, materialName.c_str(), MAX_MATERIAL_NAME - 1);
 	}
 };
 #pragma pack(pop)

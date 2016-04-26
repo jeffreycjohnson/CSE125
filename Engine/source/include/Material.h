@@ -56,6 +56,8 @@ public:
     UniformSetter operator[](const std::string& name);
     void bind();
     const bool autoReload = false;
+	std::string getWatcherFileName() const;
+
 };
 
 template<>

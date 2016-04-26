@@ -44,8 +44,6 @@ Mesh* Mesh::fromCachedMeshData(std::string name)
 	Mesh *created = new Mesh;
 	created->name = name;
 
-	created->setMaterial(new Material("assets/DefaultMaterial.mat.ini", false));
-
 	return created;
 }
 
@@ -70,8 +68,9 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 	{
 		// it doesn't have a mesh
 		// assign it the correct one
-		go->addComponent(Mesh::fromCachedMeshData(std::string(mnd.meshName)));
-		std::cout << mnd.meshName << std::endl;
+		Mesh * cachedMesh = Mesh::fromCachedMeshData(std::string(mnd.meshName));
+		cachedMesh->setMaterial(new Material(mnd.materialName, mnd.hasAnimations));
+		go->addComponent(cachedMesh);
 	}
 }
 
@@ -131,7 +130,7 @@ void Mesh::setGameObject(GameObject* object)
 
 std::vector<char> Mesh::serialize()
 {
-	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name);
+	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name, material->getWatcherFileName(), false);
 	return structToBytes(mnd);
 }
 
