@@ -26,7 +26,12 @@ private:
 	// *min, *max stored in world space
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	bool isAxisAligned;
+
+	// These are provided in local space
     glm::vec3 offset, dimensions;
+
+	// Recomputed in update for global space
+	glm::vec3 offsetWorld, dimensionsWorld;
 
 public:
 

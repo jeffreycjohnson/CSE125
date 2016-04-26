@@ -81,12 +81,22 @@ BoxCollider BoxCollider::getAABB() const {
 void BoxCollider::debugDraw()
 {
 	if (DebugPass::drawColliders) {
+		glm::vec4 color;
 		if (colliding) {
-			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::collidingColor, 1.0), &gameObject->transform);
+			color = glm::vec4(DebugPass::collidingColor, 1.0);
 		}
 		else {
-			Renderer::drawBox(offset, dimensions, glm::vec4(DebugPass::colliderColor, 1), &gameObject->transform);
+			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
+
+		// Draw all 8 points of the box
+		for (int i = 0; i < 8; ++i) {
+			Renderer::drawSphere(transformPoints[i], 0.2f, color); // Global
+		}
+
+		glm::vec3 dims = dimensions;
+		dims /= 2;
+		Renderer::drawBox(offset, dims, color, &gameObject->transform);
 	}
 }
 
