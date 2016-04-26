@@ -18,6 +18,17 @@ void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int me
 	go->transform.deserializeAndApply(bytes);
 }
 
+void Transform::setParent(Transform * newParent)
+{
+	parent = newParent;
+	postToNetwork();
+}
+
+Transform * Transform::getParent() const
+{
+	return parent;
+}
+
 void Transform::setDirty()
 {
     transformMatrixDirty = true;

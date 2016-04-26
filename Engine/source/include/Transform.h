@@ -28,6 +28,7 @@ private:
 	bool worldScaleDirty = true;
 
 	Transform* oldParent = nullptr;
+	Transform* parent = nullptr;
 
 	void postToNetwork();
 
@@ -35,7 +36,8 @@ public:
 	static void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
 
 	//parent Transform
-	Transform* parent = nullptr;
+	void setParent(Transform * newParent);
+	Transform * getParent() const;
 
 	void setDirty();
 

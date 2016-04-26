@@ -123,7 +123,7 @@ GameObject::~GameObject() {
 
 void GameObject::addChild(GameObject* go) {
     transform.children.push_back(&go->transform);
-    go->transform.parent = &transform;
+	go->transform.setParent(&transform);
 }
 
 void GameObject::removeChild(GameObject * go)
@@ -135,7 +135,7 @@ void GameObject::removeChild(GameObject * go)
 	}
 
 	transform.children.erase(child);
-	go->transform.parent = nullptr;
+	go->transform.setParent(nullptr);
 }
 
 void GameObject::destroy() {
@@ -169,11 +169,11 @@ void GameObject::hideAll()
 
 bool GameObject::isChildOf(GameObject* go) const
 {
-    auto parent = transform.parent;
+    auto parent = transform.getParent();
     while(parent)
     {
         if (parent->gameObject == go) return true;
-        parent = parent->parent;
+        parent = parent->getParent();
     }
     return false;
 }
