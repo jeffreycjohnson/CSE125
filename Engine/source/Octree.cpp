@@ -7,9 +7,9 @@
 #include <stack>
 
 // Raycasting constants
-static const float RAY_MIN = FLT_EPSILON;
-static const float RAY_MAX = FLT_MAX;
-static const float RAY_STEP = 0.01f;
+const float Octree::RAY_MIN = FLT_EPSILON;
+const float Octree::RAY_MAX = FLT_MAX;
+const float Octree::RAY_STEP = 0.01f;
 
 //Octree* Octree::STATIC_TREE  = nullptr; // Globals are bad.
 //Octree* Octree::DYNAMIC_TREE = nullptr;
