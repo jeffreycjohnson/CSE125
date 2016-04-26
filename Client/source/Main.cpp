@@ -41,19 +41,13 @@ int main(int argc, char** argv)
 	}
 	
 	// cache all meshes
-	GameObject *scene = loadScene("assets/artsy.dae");
-	GameObject::SceneRoot.addChild(scene);
+	auto artsy = loadScene("assets/artsy.dae");
 
-	for (auto clientID : std::get<0>(pair))
-	{
-		GameObject *player = loadScene("assets/ball.dae");
-		if (clientID == std::get<1>(pair))
-		{
-			player->addComponent(Renderer::mainCamera);
-		}
+	artsy->destroy();
 
-		GameObject::SceneRoot.addChild(player);
-	}
+	delete artsy;
+
+	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
 	try
 	{

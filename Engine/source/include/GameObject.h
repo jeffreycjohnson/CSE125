@@ -102,9 +102,11 @@ protected:
     std::string name;
 	int ID;
 	static std::multimap<std::string, GameObject*> nameMap;
-	static std::multimap<int, GameObject*> idMap;
+	static std::map<int, GameObject*> idMap;
 	void removeName();
 	void removeID();
+
+	void postToNetwork();
 };
 
 #endif

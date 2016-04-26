@@ -7,6 +7,7 @@
 #include "Component.h"
 #include "NetworkStruct.h"
 
+
 class Transform : public Component
 {
 private:

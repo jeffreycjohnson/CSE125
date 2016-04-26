@@ -12,6 +12,7 @@
 #include <iostream>	
 
 #include "Animation.h"
+#include "Material.h"
 
 #define POSITION_COUNT 3
 #define NORMAL_COUNT 3
@@ -43,6 +44,8 @@ Mesh* Mesh::fromCachedMeshData(std::string name)
 	Mesh *created = new Mesh;
 	created->name = name;
 
+	created->setMaterial(new Material("assets/DefaultMaterial.mat.ini", false));
+
 	return created;
 }
 
@@ -68,6 +71,7 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 		// it doesn't have a mesh
 		// assign it the correct one
 		go->addComponent(Mesh::fromCachedMeshData(std::string(mnd.meshName)));
+		std::cout << mnd.meshName << std::endl;
 	}
 }
 
@@ -122,7 +126,6 @@ void Mesh::draw() {
 void Mesh::setGameObject(GameObject* object)
 {
 	Component::setGameObject(object);
-	
 	postToNetwork();
 }
 
@@ -155,6 +158,7 @@ void Mesh::postToNetwork()
 		return;
 	}
 
+	std::cout << "sent " << this->name << std::endl;
 	NetworkManager::PostMessage(serialize(), MESH_NETWORK_DATA, my->getID());
 }
 
@@ -162,8 +166,6 @@ void Mesh::setMaterial(Material *mat)
 {
 	material = mat;
 }
-
-
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {
 	return bone1.second > bone2.second;

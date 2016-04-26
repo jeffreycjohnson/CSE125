@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
+#include "Networkmanager.h"
 #include "NetworkUtility.h"
 #include "ObjectLoader.h"
 #include <algorithm>
@@ -20,7 +21,7 @@ std::vector<void(*)(void)> GameObject::postVarCallbacks;
 
 int GameObject::objectIDCounter;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
-std::multimap<int, GameObject*> GameObject::idMap;
+std::map<int, GameObject*> GameObject::idMap;
 GameObject GameObject::SceneRoot;
 
 GameObject * GameObject::FindByName(const std::string& name)
@@ -29,13 +30,11 @@ GameObject * GameObject::FindByName(const std::string& name)
     return iter == nameMap.end() ? nullptr : iter->second;
 }
 
-
 GameObject * GameObject::FindByID(const int& id)
 {
 	auto iter = idMap.find(id);
 	return iter == idMap.end() ? nullptr : iter->second;
 }
-
 
 std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
 {
@@ -124,6 +123,8 @@ GameObject::~GameObject() {
 void GameObject::addChild(GameObject* go) {
     transform.children.push_back(&go->transform);
 	go->transform.setParent(&transform);
+
+	go->postToNetwork();
 }
 
 void GameObject::removeChild(GameObject * go)
@@ -366,18 +367,29 @@ int GameObject::getID() const
 
 void GameObject::removeID()
 {
+	int oldID = this->ID;
+
 	this->ID = -1;
 	if (idMap.size() <= 0) return;
 
-	auto range = idMap.equal_range(this->ID);
-	while (range.first != range.second)
+	idMap.erase(oldID);
+}
+
+void GameObject::postToNetwork()
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	// is this a correct assumption to make??
+	if (transform.getParent() == nullptr && getID() != 0)
 	{
-		if (range.first->second == this) {
-			idMap.erase(range.first);
-			return;
-		}
-		++range.first;
+		// if we don't have a parent
+		// and we're not the root
+		// then who cares about our data
+
+		return;
 	}
+
+	NetworkManager::PostMessage(serialize(), CREATE_OBJECT_NETWORK_DATA, getID());
 }
 
 void GameObject::DestroyObjectByID(int objectID) {
@@ -426,7 +438,7 @@ std::vector<char> GameObject::serialize()
 
 bool GameObject::deserializeAndCreate(std::vector<char> bytes)
 {
-	CreateObjectNetworkData cond = *((CreateObjectNetworkData*)bytes.data());
+	CreateObjectNetworkData cond = structFromBytes<CreateObjectNetworkData>(bytes);
 	if (GameObject::FindByID(cond.objectID) != nullptr)
 	{
 		std::cerr << "Cannot create object with ID " << cond.objectID << ", object with ID already exists" << std::endl;

@@ -114,3 +114,13 @@ float Camera::getFOV() const
 {
 	return currentFOV;
 }
+
+void Camera::setGameObject(GameObject * go)
+{
+	Component::setGameObject(go);
+	postToNetwork();
+}
+
+void Camera::postToNetwork()
+{
+}

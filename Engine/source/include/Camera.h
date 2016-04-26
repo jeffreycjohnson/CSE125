@@ -33,6 +33,10 @@ class Camera : public Component
 		glm::vec3 getForward() const;
 		glm::vec3 getVelocity() const;
 		float getFOV() const;
+
+		void setGameObject(GameObject* go) override;
+
+		void postToNetwork();
 };
 
 #endif

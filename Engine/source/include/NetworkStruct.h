@@ -112,4 +112,14 @@ struct MeshNetworkData
 };
 #pragma pack(pop)
 
+#define CAMERA_NETWORK_DATA 6
+#pragma pack(push, 1)
+struct CameraNetworkData
+{
+	int objectID;
+
+	CameraNetworkData(int objectID) : objectID(objectID) {}
+};
+#pragma pack(pop)
+
 #endif // NETWORK_STRUCT_H
