@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include "ClientManager.h"
+#include "GodSummoner.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -36,22 +37,24 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	GameObject *scene = loadScene("assets/artsy.dae");
-	scene->transform.setPosition(0, -1, 0);
+	GameObject *scene = loadScene("assets/pressure.dae");
+	scene->transform.setPosition(0, -0.5f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	// setup network
-	auto clientIDs = ClientManager::initialize("127.0.0.1", "9876");
-	for (auto clientID : clientIDs)
+	GameObject *player = loadScene("assets/cubeman.dae");
+	player->addComponent(new FPSMovement(1.5f, 0.5f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+	player->addComponent(Renderer::mainCamera);
+	GameObject::SceneRoot.addChild(player);
+
+	// find the collider
+	GameObject *box = player->transform.children[1]->children[0]->children[0]->gameObject;
+	GameObject *monkey = GameObject::FindByName("Suzanne");
+	if (box != nullptr && monkey != nullptr)
 	{
-		GameObject *player = loadScene("assets/ball.dae");
-		player->setName(std::string("player_") + std::to_string(clientID));
-
-		if (clientID == ClientManager::myClientID)
-			player->addComponent(Renderer::mainCamera);
-
-		GameObject::SceneRoot.addChild(player);
+		std::cout << "Hey I found the boxCollider!!" << std::endl;
+		box->addComponent(new GodSummoner(monkey));
 	}
 
-    RunEngine(0); // running engine as client
+    RunEngine(2); // running engine as client
 }

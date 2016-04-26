@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\GodSummoner.cpp" />
     <ClCompile Include="source\ClientLoop.cpp" />
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
     <ClCompile Include="source\Main.cpp" />
@@ -30,6 +31,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\GodSummoner.h" />
     <ClInclude Include="source\ClientLoop.h" />
     <ClInclude Include="source\ActivatorRegistrator.h" />
     <ClInclude Include="source\FPSMovement.h" />
