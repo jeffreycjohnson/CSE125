@@ -1,3 +1,5 @@
+// SERVER MAIN
+
 #include "GameObject.h"
 #include "Camera.h"
 #include "Renderer.h"
@@ -10,7 +12,7 @@
 #include "Config.h"
 
 #include <iostream>
-#include "ServerManager.h"
+#include "NetworkManager.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -21,6 +23,8 @@ int main(int argc, char** argv)
 	ConfigFile file("config/options.ini");
 	std::string port = file.getString("NetworkOptions", "port");
 	int numberOfClients = file.getInt("NetworkOptions", "numclients");
+
+	auto clientIDs = NetworkManager::InitializeServer(port, numberOfClients);
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -42,19 +46,25 @@ int main(int argc, char** argv)
 	}
 	
 	GameObject *scene = loadScene("assets/artsy.dae");
-	scene->transform.setPosition(0, -1, 0);
+
 	GameObject::SceneRoot.addChild(scene);
+	scene->transform.setPosition(0, -1, 0);
+
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
-	auto clientIDs = ServerManager::initialize(port, numberOfClients);
-	for (auto clientID : clientIDs)
-	{
+	for (auto client : clientIDs) {
 		GameObject *player = loadScene("assets/ball.dae");
-		player->addComponent(new FPSMovement(clientID, 1.5f, .25f, glm::vec3(clientID, .25f, clientID), glm::vec3(0, 1, 0)));
-
-		player->setName(std::string("player_") + std::to_string(clientID));
+		player->addComponent(new FPSMovement(client, 1.5f, .25f, glm::vec3(client, .25f, client), glm::vec3(0, 1, 0)));
+		NetworkManager::attachCameraTo(client, player->getID());
 		GameObject::SceneRoot.addChild(player);
 	}
-		
-    RunEngine(1); // Run engine as server
+
+	try
+	{
+		RunEngine(1); // running engine as server
+	}
+	catch (...)
+	{
+		const auto& eptr = std::current_exception();
+	}
 }

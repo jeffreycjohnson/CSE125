@@ -9,16 +9,35 @@
 
 class GameObject
 {
+private:
+	static std::vector<void (*)(void)> preFixedCallbacks;
+	static std::vector<void (*)(void)> postFixedCallbacks;
+	static std::vector<void (*)(void)> preVarCallbacks;
+	static std::vector<void (*)(void)> postVarCallbacks;
+
 public:
 	Transform transform;
 	bool visible, active;
-
+	static int objectIDCounter;
     static GameObject SceneRoot;
-    static GameObject* FindByName(const std::string& name);
-    static std::vector<GameObject*> FindAllByName(const std::string& name);
+	static GameObject* FindByName(const std::string& name);
+	static GameObject* FindByID(const int& id);
+	static std::vector<GameObject*> FindAllByName(const std::string& name);
 	static void UpdateScene(int caller);
 
+	// registering callbacks for updates
+	static void AddPreFixedUpdateCallback(void(*callback)(void));
+	static void AddPostFixedUpdateCallback(void(*callback)(void));
+	static void AddPreUpdateCallback(void(*callback)(void));
+	static void AddPostUpdateCallback(void(*callback)(void));
+
+	static void DestroyObjectByID(int objectID);
+
+	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageID);
+
 	GameObject();
+	GameObject(int id);
+
 	~GameObject();
 
     template<typename T>
@@ -28,7 +47,7 @@ public:
         componentList.push_back(c);
     }
     template<typename T>
-    bool removeComponent()
+    bool removeComponent(bool deleteComponent = true)
     {
         for (auto component = componentList.begin(); component != componentList.end(); ++component)
         {
@@ -36,13 +55,15 @@ public:
             if (test)
             {
                 test->setGameObject(nullptr);
-                delete test;
+				if (deleteComponent)
+					delete test;
                 componentList.erase(component);
                 return true;
             }
         }
         return false;
     }
+
     template<typename T>
     T* getComponent()
     {
@@ -54,13 +75,16 @@ public:
         return nullptr;
     }
 
-    void addChild(GameObject* go);
+	void addChild(GameObject* go);
+	void removeChild(GameObject* go);
 	void destroy();
 	void hideAll();
     bool isChildOf(GameObject* go) const;
     GameObject* findChildByName(const std::string& name);
     void setName(const std::string& name);
     std::string getName() const;
+	void setID(const int ID);
+	int getID() const;
 
 	void debugDraw();
     
@@ -80,12 +104,20 @@ public:
 
 	void extract();
 
+	std::vector<char> serialize();
+	static bool deserializeAndCreate(std::vector<char> bytes);
+
 protected:
     bool dead, newlyCreated;
     std::vector<Component*> componentList;
     std::string name;
-    static std::multimap<std::string, GameObject*> nameMap;
-    void removeName();
+	int ID;
+	static std::multimap<std::string, GameObject*> nameMap;
+	static std::map<int, GameObject*> idMap;
+	void removeName();
+	void removeID();
+
+	void postToNetwork();
 };
 
 #endif

@@ -1,56 +1,34 @@
 #include "NetworkUtility.h"
-#ifdef __LINUX
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
-#else
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
-#endif
+
 #include <iostream>
 #include "NetworkStruct.h"
 
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 2048
 #define DEBUG 0
 
-std::vector<char> encodeMessage(std::vector<char> message, int messageType)
+std::vector<char> encodeMessage(const std::vector<char> &message, int messageType, int id)
 {
 	std::vector<char> encodedMsg;
-	encodedMsg.resize(METADATA_LEN + message.size());
+	encodedMsg.resize(METADATA_LEN + message.size() * sizeof(char));
 
 	// get extra params
-	int rawByteLen = htonl(METADATA_LEN + message.size());
+	int rawByteLen = htonl(METADATA_LEN + message.size() * sizeof(char));
 	int encodedType = htonl(messageType);
-
-	//
-	memcpy(encodedMsg.data(), &rawByteLen, sizeof(int));
-	memcpy(encodedMsg.data() + sizeof(int), &encodedType, sizeof(int));
+	int encodedId = htonl(id);
+	
+	*((int*)(encodedMsg.data())) = rawByteLen;
+	*((int*)(encodedMsg.data() + sizeof(int))) = encodedType;
+	*((int*)(encodedMsg.data() + sizeof(int) + sizeof(int))) = encodedId;
 	memcpy(encodedMsg.data() + METADATA_LEN, message.data(), message.size());
 
 	return encodedMsg;
 }
 
-int encodeStruct(void * input, int inputSize, int type, char * buf, int buflen) {
-	memset(buf, 0, buflen);
-	int rawByteLen = htonl(inputSize + METADATA_LEN);
-	if (inputSize + METADATA_LEN > buflen) {
-		if (DEBUG) std::cerr << "Error encoding struct!" << std::endl;
-		return 0;
-	}	
-	
-	int encodedType = htonl(type);
-	memcpy(buf, &rawByteLen, sizeof(int));
-	memcpy(buf + sizeof(int), &encodedType, sizeof(int));
-	memcpy(buf + METADATA_LEN, input, inputSize);
-	return inputSize + METADATA_LEN;
-}
-
-std::vector<char> decodeStruct(char * buf, int buflen, int * msgType, int * msgLen) {
+std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id, int * msgLen) {
 	int inputSize = 0;
 
 	std::vector<char> empty;
@@ -60,13 +38,19 @@ std::vector<char> decodeStruct(char * buf, int buflen, int * msgType, int * msgL
 		return empty;
 	}
 	
-	memcpy(msgLen, buf, sizeof(int));
-	*msgLen = ntohl(*msgLen);
-	memcpy(msgType, buf + sizeof(int), sizeof(int));
-	*msgType = ntohl(*msgType);
+	*msgLen = ntohl(*((int*)(buf)));
+	*msgType = ntohl(*((int*)(buf + sizeof(int))));
+	*id = ntohl(*((int*)(buf + sizeof(int) + sizeof(int))));
+
+	if (*msgType == 0)
+	{
+		std::vector<char> input(buf, buf + *msgLen);
+		buflen += 3;
+		buflen -= 3;
+	}
 
 	inputSize = NetworkStruct::sizeOf(*msgType);
-	std::vector<char> input(buf + METADATA_LEN, buf + METADATA_LEN + inputSize);
+	std::vector<char> input(buf + METADATA_LEN, buf + *msgLen);
 
 	return input;
 }

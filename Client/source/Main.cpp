@@ -1,3 +1,5 @@
+// CLIENT MAIN
+
 #include "GameObject.h"
 #include "Camera.h"
 #include "Renderer.h"
@@ -9,7 +11,8 @@
 #include "Config.h"
 
 #include <iostream>
-#include "ClientManager.h"
+#include <stdexcept>
+#include "NetworkManager.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -21,6 +24,7 @@ int main(int argc, char** argv)
 
 	std::string serverip = file.getString("NetworkOptions", "serverip");
 	std::string port = file.getString("NetworkOptions", "port");
+	auto pair = NetworkManager::InitializeClient(serverip, port);
 
 	for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -41,22 +45,23 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	GameObject *scene = loadScene("assets/artsy.dae");
-	scene->transform.setPosition(0, -1, 0);
-	GameObject::SceneRoot.addChild(scene);
+	// cache all meshes
+	auto artsy = loadScene("assets/artsy.dae");
+	artsy->destroy();
+	delete artsy;
 
-	// setup network
-	auto clientIDs = ClientManager::initialize(serverip, port);
-	for (auto clientID : clientIDs)
+	auto go = loadScene("assets/ball.dae");
+	go->destroy();
+	delete go;
+
+	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
+
+	try
 	{
-		GameObject *player = loadScene("assets/ball.dae");
-		player->setName(std::string("player_") + std::to_string(clientID));
-
-		if (clientID == ClientManager::myClientID)
-			player->addComponent(Renderer::mainCamera);
-
-		GameObject::SceneRoot.addChild(player);
+		RunEngine(0); // running engine as client
 	}
-
-    RunEngine(0); // running engine as client
+	catch (...)
+	{
+		const auto& eptr = std::current_exception();
+	}
 }

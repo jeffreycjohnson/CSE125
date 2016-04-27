@@ -52,9 +52,6 @@
     <ClCompile Include="source\SphereCollider.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>
-    <ClCompile Include="source\ClientManager.cpp">
-      <Filter>Source\Network</Filter>
-    </ClCompile>
     <ClCompile Include="source\ClientNetwork.cpp">
       <Filter>Source\Network</Filter>
     </ClCompile>
@@ -65,9 +62,6 @@
       <Filter>Source\Network</Filter>
     </ClCompile>
     <ClCompile Include="source\ServerInput.cpp">
-      <Filter>Source\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="source\ServerManager.cpp">
       <Filter>Source\Network</Filter>
     </ClCompile>
     <ClCompile Include="source\ServerNetwork.cpp">
@@ -130,8 +124,14 @@
     <ClCompile Include="source\Ray.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="source\ServerInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\OctreeManager.cpp">
       <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\NetworkManager.cpp">
+      <Filter>Source\Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,9 +177,6 @@
     <ClInclude Include="source\include\Texture.h">
       <Filter>Headers\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="source\include\ClientManager.h">
-      <Filter>Headers\Network</Filter>
-    </ClInclude>
     <ClInclude Include="source\include\ClientNetwork.h">
       <Filter>Headers\Network</Filter>
     </ClInclude>
@@ -190,9 +187,6 @@
       <Filter>Headers\Network</Filter>
     </ClInclude>
     <ClInclude Include="source\include\ServerInput.h">
-      <Filter>Headers\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="source\include\ServerManager.h">
       <Filter>Headers\Network</Filter>
     </ClInclude>
     <ClInclude Include="source\include\ServerNetwork.h">
@@ -243,11 +237,17 @@
     <ClInclude Include="source\include\SphereCollider.h">
       <Filter>Headers\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="source\include\ServerInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="source\include\Plane.h">
       <Filter>Headers\Collision</Filter>
     </ClInclude>
     <ClInclude Include="source\include\OctreeManager.h">
       <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\NetworkManager.h">
+      <Filter>Headers\Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

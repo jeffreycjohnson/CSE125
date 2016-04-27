@@ -6,7 +6,6 @@
 
 #include "NetworkUtility.h"
 
-#define DEFAULT_BUFLEN 2048
 #define DEFAULT_PORT "27015"
 
 typedef int clientID;
@@ -44,10 +43,7 @@ public:
 	// returns a mapping between client IDs and the messages received from them in the last tick
 	static std::vector<std::vector<NetworkResponse>> selectClients();
 
-	static void broadcastMessage(void *message, int msgType);
-	static void sendMessage(int clientID, void *message, int msgType);
-
-	static void broadcastBytes(std::vector<char> bytes, int msgType);
-	static void sendBytes(int clientID, std::vector<char> bytes, int msgType);
+	static void broadcastBytes(const std::vector<char> &bytes, int msgType, int id);
+	static void sendBytes(int clientID, const std::vector<char> &bytes, int msgType, int id);
 };
 

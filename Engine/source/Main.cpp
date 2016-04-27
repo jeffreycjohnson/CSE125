@@ -9,10 +9,9 @@
 #include "ObjectLoader.h"
 #include "ThreadPool.h"
 #include "Camera.h"
-#include "ClientManager.h"
-#include "ServerManager.h"
 #include "OctreeManager.h"
 #include "Config.h"
+
 #include <chrono>
 
 GLFWwindow * mainWindow;
@@ -35,8 +34,6 @@ void InitializeEngine(std::string windowName)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-	glfwSwapInterval(1);
 
     int width = 1024;
     int height = 768;
@@ -65,8 +62,8 @@ void InitializeEngine(std::string windowName)
     mainWindow = window;
 
     glewExperimental = GL_TRUE;
-    glewInit();
-    // glfwSwapInterval(0);
+	glewInit();
+	glfwSwapInterval(1);
 	Sound::init();
 	Renderer::init(width, height);
     Input::init(window);

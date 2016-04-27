@@ -7,75 +7,84 @@
 #include "Component.h"
 #include "NetworkStruct.h"
 
+
 class Transform : public Component
 {
-        //Position - vector
-        glm::vec3 position;
-        //Rotation - quaternion
-        glm::quat rotation;
-        //Scale - vector
-        glm::vec3 scaleFactor = glm::vec3(1, 1, 1);
+private:
+	//Position - vector
+	glm::vec3 position;
+	//Rotation - quaternion
+	glm::quat rotation;
+	//Scale - vector
+	glm::vec3 scaleFactor = glm::vec3(1, 1, 1);
 
-        //dirty flag for Transform Matrix
-        bool transformMatrixDirty = true;
-        //Cached Transform Matrix
-        glm::mat4 transformMatrix;
-        //Cached other stuff
-        glm::vec3 cachedWorldPos;
-        bool worldPosDirty = true;
-        float cachedWorldScale;
-        bool worldScaleDirty = true;
+	//dirty flag for Transform Matrix
+	bool transformMatrixDirty = true;
+	//Cached Transform Matrix
+	glm::mat4 transformMatrix;
+	//Cached other stuff
+	glm::vec3 cachedWorldPos;
+	bool worldPosDirty = true;
+	float cachedWorldScale;
+	bool worldScaleDirty = true;
 
-        Transform* oldParent = nullptr;
+	Transform* oldParent = nullptr;
+	Transform* parent = nullptr;
 
-	public:
-		//parent Transform
-		Transform* parent = nullptr;
+	void postToNetwork();
 
-        void setDirty();
+public:
+	static void Transform::Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
 
-		//child Transforms
-		std::vector<Transform*> children;
+	//parent Transform
+	void setParent(Transform * newParent);
+	Transform * getParent() const;
 
+	void setDirty();
 
-		/**
-		 * Translate
-		 * -Transform Dirty
-		 */
-        void translate(float x, float y, float z);
-        void translate(const glm::vec3& diff);
-		void setPosition(float x, float y, float z);
-		void setPosition(const glm::vec3& pos);
+	//child Transforms
+	std::vector<Transform*> children;
 
-
-		/**
-		 * Rotate
-		 * -Transform Dirty
-		 * -Normals Dirty
-		 */
-		void setRotate(const glm::quat& rotation);
-        void rotate(const glm::quat& diff);
-
-		/**
-		 * Scale
-		 */
-		void setScale(const glm::vec3& scale);
-        void scale(float s);
+	/**
+		* Translate
+		* -Transform Dirty
+		*/
+	void translate(float x, float y, float z);
+	void translate(const glm::vec3& diff);
+	void setPosition(float x, float y, float z);
+	void setPosition(const glm::vec3& pos);
 
 
-		/**
-		 * Get Transform Matrix
-		 * -uses parent's matrix as well
-		 */
-        glm::mat4 getTransformMatrix();
-        glm::quat getRotation() const;
-        glm::vec3 getPosition() const;
-		glm::vec3 getWorldPosition();
-        glm::vec3 getScale() const;
-		float getWorldScale();
+	/**
+		* Rotate
+		* -Transform Dirty
+		* -Normals Dirty
+		*/
+	void setRotate(const glm::quat& rotation);
+	void rotate(const glm::quat& diff);
 
-		std::vector<char> serialize() override;
-		void deserializeAndApply(std::vector<char> tnd) override;
+	/**
+		* Scale
+		*/
+	void setScale(const glm::vec3& scale);
+	void scale(float s);
+
+
+	/**
+		* Get Transform Matrix
+		* -uses parent's matrix as well
+		*/
+	glm::mat4 getTransformMatrix();
+	glm::quat getRotation() const;
+	glm::vec3 getPosition() const;
+	glm::vec3 getWorldPosition();
+	glm::vec3 getScale() const;
+	float getWorldScale();
+
+	void setGameObject(GameObject* object) override;
+
+	std::vector<char> serialize() override;
+	void deserializeAndApply(std::vector<char> tnd) override;
 };
 
 #endif

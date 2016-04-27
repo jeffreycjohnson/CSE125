@@ -2,12 +2,17 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "NetworkManager.h"
+#include "NetworkUtility.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>		// Post processing flags
 
+#include <iostream>	
+
 #include "Animation.h"
+#include "Material.h"
 
 #define POSITION_COUNT 3
 #define NORMAL_COUNT 3
@@ -28,6 +33,49 @@ std::unordered_map<std::string, MeshData> Mesh::meshMap;
 std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
 
 
+Mesh* Mesh::fromCachedMeshData(std::string name)
+{
+	auto iter = Mesh::meshMap.find(name);
+	if (iter == Mesh::meshMap.end())
+	{
+		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+	}
+
+	Mesh *created = new Mesh;
+	created->name = name;
+
+	return created;
+}
+
+void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
+{
+	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
+
+	GameObject *go = GameObject::FindByID(messageId);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("Cannot set mesh of nonexistant gameobject");
+	}
+
+	Mesh *goMesh = go->getComponent<Mesh>();
+	if (goMesh != nullptr)
+	{
+		// it already has a mesh
+		// change what it points to
+		goMesh->deserializeAndApply(bytes);
+	}
+	else
+	{
+		// it doesn't have a mesh
+		// assign it the correct one
+		Mesh * cachedMesh = Mesh::fromCachedMeshData(std::string(mnd.meshName));
+		cachedMesh->setMaterial(new Material(mnd.materialName, mnd.hasAnimations));
+		go->addComponent(cachedMesh);
+	}
+}
+
+Mesh::Mesh() {}
+
 Mesh::Mesh(std::string name) : name(name) {
     if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) throw;
 }
@@ -35,7 +83,6 @@ Mesh::Mesh(std::string name) : name(name) {
 Mesh::~Mesh() {
 
 }
-
 
 void Mesh::draw() {
 	MeshData& currentEntry = meshMap.at(name);
@@ -75,10 +122,49 @@ void Mesh::draw() {
     }
 }
 
-void Mesh::setMaterial(Material *mat) {
-	material = mat;
+void Mesh::setGameObject(GameObject* object)
+{
+	Component::setGameObject(object);
+	postToNetwork();
 }
 
+std::vector<char> Mesh::serialize()
+{
+	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name, material->getWatcherFileName(), false);
+	return structToBytes(mnd);
+}
+
+void Mesh::deserializeAndApply(std::vector<char> bytes)
+{
+	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
+	auto iter = Mesh::meshMap.find(mnd.meshName);
+	if (iter == Mesh::meshMap.end())
+	{
+		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+	}
+
+	this->name = std::string(mnd.meshName);
+}
+
+void Mesh::postToNetwork()
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		std::cerr << "Transform with no attached game object modified??" << std::endl;
+		return;
+	}
+
+	std::cout << "sent " << this->name << std::endl;
+	NetworkManager::PostMessage(serialize(), MESH_NETWORK_DATA, my->getID());
+}
+
+void Mesh::setMaterial(Material *mat) 
+{
+	material = mat;
+}
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {
 	return bone1.second > bone2.second;
@@ -253,3 +339,4 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	Mesh::meshMap[name] = meshData;
 
 }
+

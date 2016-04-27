@@ -140,3 +140,8 @@ void Material::bind()
         i++;
     }
 }
+
+std::string Material::getWatcherFileName() const
+{
+	return watcher->file;
+}

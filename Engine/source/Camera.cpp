@@ -6,11 +6,13 @@
 #include <gtx/compatibility.hpp>
 #include <glm.hpp>
 #include <time.h>
+#include <iostream>
 #include "GameObject.h"
 #include "Sound.h"
 #include "Framebuffer.h"
 #include "RenderPass.h"
 #include "Collision.h"
+#include "NetworkManager.h"
 
 Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats) : width(w), height(h)
 {
@@ -112,4 +114,56 @@ float Camera::getFOV() const
 Ray Camera::getEyeRay() const
 {
 	return Ray(position, forward);
+}
+
+void Camera::setGameObject(GameObject * go)
+{
+	Component::setGameObject(go);
+}
+
+std::vector<char> Camera::serialize()
+{
+	CameraNetworkData cnd = CameraNetworkData(gameObject->getID());
+	return structToBytes(cnd);
+}
+
+void Camera::deserializeAndApply(std::vector<char> bytes)
+{
+	CameraNetworkData cnd = structFromBytes<CameraNetworkData>(bytes);
+	GameObject * player = GameObject::FindByID(cnd.objectID);
+	std::cout << "received camera. Attaching to object " << cnd.objectID << std::endl;
+	Renderer::mainCamera->setGameObject(player);
+}
+
+void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
+{
+	CameraNetworkData cnd = structFromBytes<CameraNetworkData>(bytes);
+	GameObject *go = GameObject::FindByID(messageId);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("Cannot attach camera to nonexistant gameobject");
+	}
+
+	// Remove Camera from SceneRoot if already there.
+	// Can remove this if we prevent game from crashing on startup due to lack of camera.
+	Camera * mainCam = GameObject::SceneRoot.getComponent<Camera>();
+	if (mainCam != nullptr) {
+		GameObject::SceneRoot.removeComponent<Camera>(false);
+	}
+
+	Camera *goCamera = go->getComponent<Camera>();
+	if (goCamera != nullptr)
+	{
+		// player already has a camera
+		// change what it points to
+		std::cout << "changing camera..." << std::endl;
+		goCamera->deserializeAndApply(bytes);
+	}
+	else
+	{
+		// player doesn't have a camera
+		// assign it the correct one
+		std::cout << "goCamera is null. Adding MainCamera to object " << go->getID() << std::endl;
+		go->addComponent(Renderer::mainCamera);
+	}
 }

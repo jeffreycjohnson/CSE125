@@ -6,8 +6,6 @@
 #include <unordered_map>
 #include <assimp/scene.h>           // Output data structure
 
-
-
 struct MeshData {
 	GLuint vaoHandle;
     GLsizei indexSize;
@@ -23,21 +21,33 @@ struct BoneData {
 
 class Mesh : public Component
 {
-	public:
-		static std::unordered_map<std::string, MeshData> meshMap;
-		static std::unordered_map<std::string, BoneData> boneIdMap;
+private:
+	Mesh();
 
-		static void loadMesh(std::string name, const aiMesh* mesh);
+	void postToNetwork();
 
-        std::string name;
-		Material* material = nullptr;
-		Animation* animationRoot;
+public:
+	static std::unordered_map<std::string, MeshData> meshMap;
+	static std::unordered_map<std::string, BoneData> boneIdMap;
+
+	static void loadMesh(std::string name, const aiMesh* mesh);
+	static Mesh* fromCachedMeshData(std::string name);
+
+	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
+
+    std::string name;
+	Material* material = nullptr;
+	Animation* animationRoot;
     
-        Mesh(std::string);
-		~Mesh();
+    Mesh(std::string);
+	~Mesh();
 
-		void setMaterial(Material *mat);
-		void draw() override;
+	void setMaterial(Material *mat);
+	void setGameObject(GameObject* object) override;
+	void draw() override;
+
+	std::vector<char> serialize() override;
+	void deserializeAndApply(std::vector<char> bytes) override;
 };
 
 #endif

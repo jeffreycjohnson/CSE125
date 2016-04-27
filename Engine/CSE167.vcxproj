@@ -196,10 +196,9 @@
   <ItemGroup>
     <ClCompile Include="source\OctreeManager.cpp" />
     <ClCompile Include="source\Ray.cpp" />
+    <ClCompile Include="source\NetworkManager.cpp" />
     <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />
-    <ClCompile Include="source\ServerManager.cpp" />
-    <ClCompile Include="source\ClientManager.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
     <ClCompile Include="source\CapsuleCollider.cpp" />
     <ClCompile Include="source\CollisionInfo.cpp" />
@@ -240,11 +239,10 @@
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\NetworkManager.h" />
     <ClInclude Include="source\include\NetworkStruct.h" />
     <ClInclude Include="source\include\OctreeManager.h" />
     <ClInclude Include="source\include\ServerInput.h" />
-    <ClInclude Include="source\include\ServerManager.h" />
-    <ClInclude Include="source\include\ClientManager.h" />
     <ClInclude Include="source\include\ClientNetwork.h" />
     <ClInclude Include="source\include\CapsuleCollider.h" />
     <ClInclude Include="source\include\Collider.h" />
