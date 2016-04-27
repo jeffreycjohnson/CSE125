@@ -39,6 +39,8 @@ void BoxCollider::update(float)
 {
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
+		offsetWorld = glm::vec3(matrix * glm::vec4(offset, 1));
+		dimensionsWorld = glm::vec3(matrix * glm::vec4(dimensions, 1));
 		for (int i = 0; i < 8; i++)
 		{
 			transformPoints[i] = glm::vec3(matrix * glm::vec4(points[i], 1));
@@ -89,14 +91,33 @@ void BoxCollider::debugDraw()
 			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
 
-		// Draw all 8 points of the box
-		for (int i = 0; i < 8; ++i) {
-			Renderer::drawSphere(transformPoints[i], 0.2f, color); // Global
-		}
-
 		glm::vec3 dims = dimensions;
-		dims /= 2;
-		Renderer::drawBox(offset, dims, color, &gameObject->transform);
+
+		// Spheres around each point
+		float sphereRadii = 0.05 * std::max(std::abs(xmax - xmin), std::max(std::abs(ymax - ymin), std::abs(zmin - zmax)));
+		
+		if (isAxisAligned) {
+			// Draw axis-aligned bounding box
+			dims = glm::vec3(std::abs(xmax - xmin), std::abs(ymax - ymin), std::abs(zmax - zmin));
+			dims /= 2;
+			Renderer::drawBox(offsetWorld, dims, color);
+			Renderer::drawSphere(glm::vec3(xmin, ymin, zmin), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmin, ymax, zmin), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmin, ymin, zmax), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmin, ymax, zmax), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmax, ymin, zmin), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmax, ymax, zmin), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmax, ymin, zmax), sphereRadii, color);
+			Renderer::drawSphere(glm::vec3(xmax, ymax, zmax), sphereRadii, color);
+		}
+		else {
+			// Draws oriented bounding box
+			dims /= 2;
+			Renderer::drawBox(offset, dims, color, &gameObject->transform);
+			for (int i = 0; i < 8; ++i) {
+				Renderer::drawSphere(transformPoints[i], sphereRadii, color); // Global
+			}
+		}
 	}
 }
 
