@@ -36,8 +36,8 @@ public:
 	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
-	static Octree* STATIC_TREE;
-	static Octree* DYNAMIC_TREE;
+	//static Octree* STATIC_TREE;
+	//static Octree* DYNAMIC_TREE;
 
 	enum BuildMode {
 		STATIC_ONLY,  // Only includes colliders with passive = TRUE
@@ -45,7 +45,7 @@ public:
 		BOTH          // Errythand. (DO NOT DO THIS, YOU WILL HAVE REGRETS!)
 	};
 
-	// Member Functions
+	// --- Member Functions ---
 
 	// Inserts a collider into the octree, and updating data in the collider
 	void insert(Collider*);
@@ -56,16 +56,29 @@ public:
 	// Creates an octree, starting at the given root
 	void build(BuildMode mode = BOTH, const GameObject& root = GameObject::SceneRoot);
 
+	// Removes all colliders from the octree & reinserts them at the root (no nodes are destroyed)
+	// Preserves the min/max and BuildMode restrictions from build
+	void rebuild();
+
 	CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
-	CollisionInfo collidesWith(const BoxCollider&);
+	CollisionInfo collidesWith(Collider*);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
 	OctreeNode* getNodeById(NodeId id);
+
+	/* Allow iterating through all of the nodes */
+	std::unordered_map<NodeId, OctreeNode*>::iterator begin();
+	std::unordered_map<NodeId, OctreeNode*>::iterator end();
 
 private:
 	OctreeNode* root;
 	NodeId nodeCounter = UNKNOWN_NODE;
 	std::unordered_map<NodeId, OctreeNode*> nodeMap;
+	int objects;
+
+	// Every time we call build() we reset this. It essentially short-circuits collider
+	// insertion based on the Collider's passive bool.
+	BuildMode restriction;
 
 	// OctreeNode(s) notify the Octree whenever they are created/destroyed
 	void removeNode(NodeId node);
@@ -94,23 +107,31 @@ public:
 	~OctreeNode();
 
 	bool isLeaf() const;
+	std::string toString() const;
+
+	// Returns an iterator into the colliders list
+	std::list<Collider*>::iterator begin();
+	std::list<Collider*>::iterator end();
 
 private:
 	std::vector<OctreeNode*> children;
 	glm::vec3 min, max;
 	Octree* tree;
 	OctreeNode* parent;
+	BoxCollider* myAABB;
 	NodeId nodeId;
 	int depth;
 
 	/* Only leaf nodes should contain colliders */
-	std::vector<Collider*> colliders;
+	std::list<Collider*> colliders;
 
 	/* Member Functions */
 
 	CollisionInfo raycast(const Ray&);
-	CollisionInfo collidesWith(const BoxCollider&);
-
+	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
+	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
+	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
+	
 	// Add or remove nodes to the data structure
 	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted
 	void remove(Collider* colliderBeingRemoved);
@@ -138,10 +159,9 @@ public:
 	bool collisionOccurred;
 	int numCollisions;
 
-
-private:
+//private:
+	Collider* collider; // The collider upon which collisionXXXX() will be called
 	std::set<GameObject*> collidees;
-
 	void add(Collider*);
 	void merge(const CollisionInfo&);
 };
@@ -154,16 +174,9 @@ public:
 	glm::vec3 origin, direction;
 	float t;
 
-	Ray(glm::vec3 o, glm::vec3 d) : origin(o), direction(d) {
-		direction = glm::normalize(direction);
-		t = 0.0f;
-	}
+	Ray(glm::vec3 o, glm::vec3 d);
 
 	// Returns a discrete point along the ray at the timestep t
-	glm::vec3 getCurrentPosition() const {
-		return origin + t * direction;
-	}
-	glm::vec3 getPos(float tt) const {
-		return origin + tt * direction;
-	}
+	glm::vec3 getCurrentPosition() const;
+	glm::vec3 getPos(float tt) const;
 };

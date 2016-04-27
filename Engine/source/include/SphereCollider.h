@@ -1,19 +1,24 @@
 /*
   Implements collision routines against a sphere.
  */
-
+#pragma once
 #include "ForwardDecs.h"
 #include "Collider.h"
 
 class SphereCollider : public Collider
 {
 private:
+	// Local (Object) Space
 	glm::vec3 center;
 	float radius;
 
+	// World Space
+	glm::vec3 centerWorld;
+	float radiusWorld;
+
 public:
 	
-	SphereCollider(glm::vec3 c, float r) : center(c), radius(r) {};
+	SphereCollider(glm::vec3 c, float r);
 	~SphereCollider();
 	void destroy() override;
 	void update(float) override;
@@ -29,4 +34,9 @@ public:
 	ColliderType getColliderType() override {
 		return ColliderType::SPHERE;
 	};
+
+	// Sphere-specific functions
+	glm::vec3 getCenterWorld() const;
+	float getRadiusWorld() const;
+
 };

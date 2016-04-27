@@ -127,6 +127,12 @@
     <ClCompile Include="source\Util.cpp">
       <Filter>Source\General</Filter>
     </ClCompile>
+    <ClCompile Include="source\Ray.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="source\OctreeManager.cpp">
+      <Filter>Source\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\ForwardDecs.h">
@@ -238,6 +244,9 @@
       <Filter>Headers\Collision</Filter>
     </ClInclude>
     <ClInclude Include="source\include\Plane.h">
+      <Filter>Headers\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\OctreeManager.h">
       <Filter>Headers\Collision</Filter>
     </ClInclude>
   </ItemGroup>

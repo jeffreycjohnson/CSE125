@@ -12,6 +12,9 @@
 
 #include "Animation.h"
 #include "Light.h"
+#include "BoxCollider.h"
+#include "SphereCollider.h"
+#include "CapsuleCollider.h"
 
 std::unordered_multimap<std::string, std::function<void(GameObject*)>> componentMap;
 
@@ -25,7 +28,54 @@ static std::string getPath(const std::string& name)
     return name.substr(0, index + 1);
 }
 
-GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
+static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, bool isStatic = false) {
+	GameObject* nodeObject = new GameObject();
+
+	aiVector3D pos;
+	aiVector3D scale;
+	aiQuaternion rotate;
+
+	currentNode->mTransformation.Decompose(scale, rotate, pos);
+
+	glm::vec3 glmScale(scale.x, scale.y, scale.z);
+
+	nodeObject->transform.setScale(glmScale);
+	nodeObject->transform.translate(pos.x, pos.y, pos.z);
+	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
+
+	// TODO: Add these colliders when they are created to the OctreeManager component that should be added to root
+
+	std::string name = currentNode->mName.C_Str();
+	if (name.find("BoxCollider") == 0) {
+		auto box = new BoxCollider(glm::vec3(0), glm::vec3(2));
+		box->setStatic(isStatic);
+		nodeObject->addComponent(box);
+		box->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
+	}
+	else if (name.find("SphereCollider") == 0) {
+		auto sphere = new SphereCollider(glm::vec3(0), 2.0f);
+		if (glmScale.x != glmScale.y || glmScale.x != glmScale.z || glmScale.y != glmScale.z) {
+			LOG("Warning! Loading sphere collider with non-uniform scale!\nTHIS COLLIDER WILL NOT FUNCTION PROPERLY!");
+		}
+		sphere->setStatic(isStatic);
+		nodeObject->addComponent(sphere);
+		sphere->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
+	}
+	else if (name.find("CapsuleCollider") == 0) {
+		auto capsule = new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f);
+		capsule->setStatic(isStatic);
+		nodeObject->addComponent(capsule);
+		capsule->update(0.0f); // Force update on collider to ensure world coords computed before Octree insertion
+	}
+
+	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
+		nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c]));
+	}
+
+	return nodeObject;
+}
+
+static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
     GameObject* nodeObject = new GameObject();
 
     //add mesh to this object
@@ -71,7 +121,15 @@ GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string fil
 
     //load child objects
     for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-        nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+		std::string childName(currentNode->mChildren[c]->mName.C_Str());
+		if (childName.find("Colliders") != std::string::npos) {
+			// StaticColliders   vs.    Colliders
+			bool isStatic = childName.find("Static") == 0;
+			nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
+		}
+		else {
+			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+		}
     }
 
 	//To auto load components, use name before period

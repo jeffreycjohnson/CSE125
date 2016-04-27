@@ -11,10 +11,14 @@
 #include "Camera.h"
 #include "ClientManager.h"
 #include "ServerManager.h"
+#include "OctreeManager.h"
 #include "Config.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
+
+void LoadDebugOptions(ConfigFile&);
+void LoadOctreeOptionsAndInitialize(ConfigFile&);
 
 void InitializeEngine(std::string windowName)
 {
@@ -42,17 +46,14 @@ void InitializeEngine(std::string windowName)
 	width  = file.getInt("GraphicsOptions", "width");
 	height = file.getInt("GraphicsOptions", "height");
 
-	DebugPass::drawColliders = file.getBool("DebugOptions", "drawColliders");
-	DebugPass::drawLights    = file.getBool("DebugOptions", "drawLights");
-	DebugPass::colliderColor = file.getColor("DebugOptions", "colliderColor");
-	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
+	LoadDebugOptions(file);
+	LoadOctreeOptionsAndInitialize(file);
 
     //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
 
     //set callbacks
-    //glfwSetWindowFocusCallback(window, window_focus_callback);
-    //void window_focus_callback(GLFWwindow* window, int focused)
+    glfwSetWindowFocusCallback(window, Renderer::focus);
 
     if (!window)
     {
@@ -80,12 +81,52 @@ void InitializeEngine(std::string windowName)
 
 void InitializeEngine() { InitializeEngine("CSE 125"); }
 
+// ConfigFile is a local variable in InitializeEngine, but we will likely be adding
+// lots more to this section, so I split it off from the main function.
+void LoadDebugOptions(ConfigFile& file) {
+
+	Renderer::drawDebug = file.getBool("DebugOptions", "debugEnabledOnStart");
+	DebugPass::drawColliders = file.getBool("DebugOptions", "drawColliders");
+	DebugPass::drawLights = file.getBool("DebugOptions", "drawLights");
+	DebugPass::drawDynamicOctree = file.getBool("DebugOptions", "drawDynamicOctree");
+	DebugPass::drawStaticOctree = file.getBool("DebugOptions", "drawStaticOctree");
+	DebugPass::colliderColor = file.getColor("DebugOptions", "colliderColor");
+	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
+	DebugPass::octreeColor = file.getColor("DebugOptions", "octreeColor");
+
+}
+
+void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
+
+	OctreeManager* manager = new OctreeManager();
+	GameObject::SceneRoot.addComponent(manager);
+
+	glm::vec3 min, max;
+	min.x = file.getFloat("OctreeOptions", "xmin");
+	max.x = file.getFloat("OctreeOptions", "xmax");
+	min.y = file.getFloat("OctreeOptions", "ymin");
+	max.y = file.getFloat("OctreeOptions", "ymax");
+	min.z = file.getFloat("OctreeOptions", "zmin");
+	max.z = file.getFloat("OctreeOptions", "zmax");
+
+	//OctreeManager::useNaive = file.getBool("OctreeOptions", "useNaive");
+	
+	// Build the octrees; although no objects have been loaded yet
+	manager->buildStaticOctree(min, max);
+	manager->buildDynamicOctree(min, max);
+
+	// TODO: When this is merged into develop, register the before 
+	// and after callbacks on the OctreeManager.
+
+}
+
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.
 void RunEngine(int caller)
 {
 	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
     auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);
+	bool debugToggle = Renderer::drawDebug;
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
@@ -98,7 +139,9 @@ void RunEngine(int caller)
 		 */
 
 		workerPool->createJob(Sound::updateFMOD)->queue();
-        Renderer::drawDebug = Input::getKey("escape");
+		if (Input::getKeyDown("escape")) {
+			Renderer::drawDebug = !Renderer::drawDebug;
+		}
 		Renderer::loop(caller);
 	}
 

@@ -17,13 +17,21 @@
 class BoxCollider : public Collider
 {
 private:
-	static std::vector<BoxCollider*> colliders; // TODO: Remove naive algorithm once everything is good
-
+	// Object space points
 	glm::vec3 points[8];
+
+	// World space points
 	glm::vec3 transformPoints[8];
+
+	// *min, *max stored in world space
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	bool isAxisAligned;
+
+	// These are provided in local space
     glm::vec3 offset, dimensions;
+
+	// Recomputed in update for global space
+	glm::vec3 offsetWorld, dimensionsWorld;
 
 public:
 
@@ -33,6 +41,7 @@ public:
 	void update(float) override;
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other) override;
+	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
 
@@ -44,10 +53,6 @@ public:
 	ColliderType getColliderType() override {
 		return ColliderType::AABB;
 	};
-
-	// Part of Michael's original naive algo impl.
-	static void updateColliders();
-	static bool checkCollision(int a, int b);
 };
 
 #endif

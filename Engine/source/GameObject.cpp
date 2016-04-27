@@ -8,7 +8,9 @@
 #include "Material.h"
 #include "ServerManager.h"
 #include "ClientManager.h"
+#include "OctreeManager.h"
 #include <iostream>
+#include <functional>
 
 GameObject GameObject::SceneRoot;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
@@ -38,7 +40,9 @@ void GameObject::UpdateScene(int caller)
 			if (caller == 1) ServerManager::receiveMessages();
 
 			// server or offline
+			SceneRoot.beforeFixedUpdate();
 			SceneRoot.fixedUpdate();
+			SceneRoot.afterFixedUpdate();
 
 			if (caller == 1) ServerManager::sendMessages();
 		}
@@ -76,6 +80,12 @@ GameObject::~GameObject() {
 void GameObject::addChild(GameObject* go) {
     transform.children.push_back(&go->transform);
     go->transform.parent = &transform;
+
+	// Add gameobject to octree
+	OctreeManager* ptr = GameObject::SceneRoot.getComponent<OctreeManager>();
+	if (ptr != nullptr) {
+		ptr->insertGameObject(go);
+	}
 }
 
 void GameObject::destroy() {
@@ -168,6 +178,29 @@ void GameObject::update(float deltaTime)
     }
 }
 
+void GameObject::beforeFixedUpdate() // TODO: remove this when merging with Jason's branch
+{
+	for (auto component : componentList)
+	{
+		if (newlyCreated || component->newlyCreated)
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
+	}
+	newlyCreated = false;
+
+	if (dead || !active) return;
+	for (unsigned int i = 0; i < transform.children.size(); i++)
+	{
+		transform.children[i]->gameObject->beforeFixedUpdate();
+	}
+	for (auto component : componentList)
+	{
+		if (component->active) component->beforeFixedUpdate();
+	}
+}
+
 void GameObject::fixedUpdate()
 {
 	for (auto component : componentList)
@@ -189,6 +222,29 @@ void GameObject::fixedUpdate()
     {
         if (component->active) component->fixedUpdate();
     }
+}
+
+void GameObject::afterFixedUpdate() // TODO: remove this when merging with Jason's branch
+{
+	for (auto component : componentList)
+	{
+		if (newlyCreated || component->newlyCreated)
+		{
+			component->create();
+			component->newlyCreated = false;
+		}
+	}
+	newlyCreated = false;
+
+	if (dead || !active) return;
+	for (unsigned int i = 0; i < transform.children.size(); i++)
+	{
+		transform.children[i]->gameObject->beforeFixedUpdate();
+	}
+	for (auto component : componentList)
+	{
+		if (component->active) component->afterFixedUpdate();
+	}
 }
 
 void GameObject::extract()
@@ -233,27 +289,19 @@ void GameObject::collisionEnter(GameObject* other)
 	}
 }
 
-/*
-void GameObject::collisionStay(GameObject* other)
-{
-    if (!active || dead) return;
-    for (auto component : componentList)
-    {
-        if (!component->active) continue;
-        component->collisionStay(other);
-    }
+// Okay, I think the Component::* is called the "member function" pointer
+// And I totally, 100% take the blame for this black magic
+//  -- Dexter
+void GameObject::collisionCallback(GameObject* other, void(Component::*callback)(GameObject*)) {
+	if (!active || dead) return;
+	for (auto component : componentList)
+	{
+		if (!component->active) continue;
+		// Bind the arguments to an std::function, which is a callable object
+		auto func = std::bind(callback, component, other);
+		func(); // gah, this is so freaking cool, but so... sooo bad
+	}
 }
-
-void GameObject::collisionExit(GameObject* other)
-{
-    if (!active || dead) return;
-    for (auto component : componentList)
-    {
-        if (!component->active) continue;
-        component->collisionExit(other);
-    }
-}
-*/
 
 void GameObject::setName(const std::string& name)
 {
@@ -272,7 +320,7 @@ void GameObject::removeName()
 {
 	this->name = "";
 
-    auto range = nameMap.equal_range(name);
+    auto range = nameMap.equal_range(name); // TODO: ModelViewer crashes here if you close model window & not console window
     while (range.first != range.second)
     {
         if (range.first->second == this) {

@@ -7,22 +7,26 @@
 #include <stack>
 
 // Raycasting constants
-static const float RAY_MIN = FLT_EPSILON;
-static const float RAY_MAX = FLT_MAX;
-static const float RAY_STEP = 0.01f;
+const float Octree::RAY_MIN = FLT_EPSILON;
+const float Octree::RAY_MAX = FLT_MAX;
+const float Octree::RAY_STEP = 0.01f;
 
-Octree* Octree::STATIC_TREE  = nullptr;
-Octree* Octree::DYNAMIC_TREE = nullptr;
+//Octree* Octree::STATIC_TREE  = nullptr; // Globals are bad.
+//Octree* Octree::DYNAMIC_TREE = nullptr;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
 	root = new OctreeNode(min, max, this);
+	objects = 0;
 };
 
 Octree::~Octree() {
-
+	delete root;
 };
 
 void Octree::addNode(NodeId node, OctreeNode* self) {
+	if (self == nullptr) {
+		LOG("Trying to add null OctreeNode, with nodeID: " + std::to_string(node));
+	}
 	nodeMap[node] = self;
 };
 
@@ -31,27 +35,43 @@ void Octree::removeNode(NodeId node) {
 	if (iter != nodeMap.end()) {
 		nodeMap.erase(iter); // Remove the node
 	}
+	else {
+		LOG("Tried to remove nonexisting OctreeNode, with nodeID: " + std::to_string(node));
+	}
 };
 
 void Octree::insert(Collider* obj) {
-	if (root)
-		root->insert(obj, obj->getAABB());
+	if (root && obj != nullptr) {
+		if (obj->nodeId == UNKNOWN_NODE) {
+			if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
+				root->insert(obj, obj->getAABB());
+				objects++;
+			}
+			else if (!obj->passive && (restriction == DYNAMIC_ONLY || restriction == BOTH)) {
+				root->insert(obj, obj->getAABB());
+				objects++;
+			}
+		}
+	}
 }
 
 void Octree::remove(Collider* obj) {
-	if (root) {
+	if (root && obj != nullptr) {
 		OctreeNode* node = nodeMap[obj->nodeId];
 		node->remove(obj); // Skip having to search through the whole entire tree!
+		--objects;
 	}
 }
 
 void Octree::build(BuildMode mode, const GameObject& root) {
 
 	// THIS IS EXPENSIVE, DON'T DO THIS A LOT!!!!
+	// TODO: Implement some kind of clear method for the octree
 	
 	long objCounter = 0;
 	std::stack<Transform> stack;
 	stack.push(root.transform);
+	restriction = mode;
 
 	// Traverse through the transform hierarchy (DFS)
 	while (!stack.empty()) {
@@ -91,7 +111,7 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 		}
 	}
 
-	LOG(objCounter); // TODO: remove debug log later
+	LOG("Created Octree with { " + std::to_string(objCounter) + " } colliders.");
 
 }
 
@@ -105,9 +125,37 @@ OctreeNode* Octree::getNodeById(NodeId node) {
 	}
 }
 
+std::unordered_map<NodeId, OctreeNode*>::iterator Octree::begin() {
+	return nodeMap.begin();
+}
+
+std::unordered_map<NodeId, OctreeNode*>::iterator Octree::end() {
+	return nodeMap.end();
+}
+
+void Octree::rebuild()
+{
+	if (root != nullptr) {
+		std::list<Collider*> colliders; // TODO: maybe vector would be faster, not sure
+		for (auto pair : nodeMap) {
+			auto node = pair.second;
+			for (auto colliderPtr : node->colliders) {
+				colliders.push_back(colliderPtr);
+			}
+		}
+		for (auto collider : colliders) {
+			remove(collider);
+		}
+		for (auto collider : colliders) {
+			root->insert(collider, collider->getAABB());
+		}
+	}
+}
+
 CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	if (root && min < max) {
 		CollisionInfo colInfo;
+		colInfo.collider = nullptr; // TODO: Handle gameobject ptr for raycasts
 		int steps = std::ceil((max - min) / step);
 		for (int i = 0; i < steps; ++i) {
 			ray.t = i * step + min;
@@ -123,12 +171,27 @@ CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	}
 };
 
-CollisionInfo Octree::collidesWith(const BoxCollider& box) {
+CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
+	CollisionInfo colInfo;
+	colInfo.collider = ptr;
 	if (root) {
-		return root->collidesWith(box);
+		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
+		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
+		CapsuleCollider* capsule = dynamic_cast<CapsuleCollider*>(ptr);
+
+		if (box != nullptr) {
+			return root->collidesWith(*box, colInfo);
+		}
+		else if (sphere != nullptr) {
+			return root->collidesWith(*sphere, colInfo); // TODO: remember to update sphere & capsule coolideswith() with changes to Box version
+		}
+		else if (capsule != nullptr) {
+			return root->collidesWith(*capsule, colInfo);
+		}
+
 	}
 	else {
-		return CollisionInfo();
+		return colInfo;
 	}
 };
 

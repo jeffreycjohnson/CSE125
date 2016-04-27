@@ -194,6 +194,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\OctreeManager.cpp" />
+    <ClCompile Include="source\Ray.cpp" />
     <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />
     <ClCompile Include="source\ServerManager.cpp" />
@@ -239,6 +241,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\NetworkStruct.h" />
+    <ClInclude Include="source\include\OctreeManager.h" />
     <ClInclude Include="source\include\ServerInput.h" />
     <ClInclude Include="source\include\ServerManager.h" />
     <ClInclude Include="source\include\ClientManager.h" />

@@ -55,9 +55,12 @@ class DebugPass : public RenderPass
 public:
 	static bool drawLights;
 	static bool drawColliders;
-	
+	static bool drawDynamicOctree;
+	static bool drawStaticOctree;
+
 	static glm::vec3 colliderColor;  // Draw colliders with this color by default
 	static glm::vec3 collidingColor; // Draw colliders that are colliding in this color
+	static glm::vec3 octreeColor;    // Draw octree nodes in this color
 
     void render(Camera* camera) override;
 };

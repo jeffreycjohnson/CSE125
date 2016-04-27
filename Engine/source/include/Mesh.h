@@ -12,6 +12,7 @@ struct MeshData {
 	GLuint vaoHandle;
     GLsizei indexSize;
     bool wireframe;
+	glm::vec3 min, max; // Local min & max
 	//BoundingBox boundingBox;
 };
 
