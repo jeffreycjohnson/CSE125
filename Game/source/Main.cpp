@@ -45,12 +45,11 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -1, 0);
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-	//Renderer::mainCamera->fov = glm::radians(90.0f);
 
 	for (auto& client : clientIDs) {
 		GameObject *player = loadScene("assets/ball.dae");
 		player->addComponent(new FPSMovement(client, 1.5f, .25f, glm::vec3(client, .25f, client), glm::vec3(0, 1, 0)));
-		Renderer::mainCamera->setGameObject(player, client);
+		NetworkManager::attachCameraTo(client, player->getID());
 		GameObject::SceneRoot.addChild(player);
 	}
 

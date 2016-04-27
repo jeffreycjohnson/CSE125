@@ -245,7 +245,7 @@ void NetworkManager::InitializeOffline()
 	NetworkManager::state = OFFLINE;
 }
 
-// TODO: Implement this lol.
 void NetworkManager::attachCameraTo(ClientID client, int gameObjectID) {
-
+	std::cout << "Sending request to client " << client << " to attach mainCamera to object " << gameObjectID << std::endl;
+	NetworkManager::PostMessage(Renderer::mainCamera->serialize(), CAMERA_NETWORK_DATA, gameObjectID, client);
 }

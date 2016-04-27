@@ -117,15 +117,9 @@ float Camera::getFOV() const
 	return currentFOV;
 }
 
-void Camera::setGameObject(GameObject * go, int clientID)
-{
-	Component::setGameObject(go);
-	postToNetwork(clientID);
-}
-
 void Camera::setGameObject(GameObject * go)
 {
-	Camera::setGameObject(go, -1);
+	Component::setGameObject(go);
 }
 
 std::vector<char> Camera::serialize()
@@ -140,21 +134,6 @@ void Camera::deserializeAndApply(std::vector<char> bytes)
 	GameObject * player = GameObject::FindByID(cnd.objectID);
 	std::cout << "received camera. Attaching to object " << cnd.objectID << std::endl;
 	Renderer::mainCamera->setGameObject(player);
-}
-
-void Camera::postToNetwork(int clientID = -1)
-{
-	if (NetworkManager::getState() != SERVER_MODE) return;
-
-	GameObject *my = gameObject;
-	if (my == nullptr)
-	{
-		std::cerr << "Camera with no attached game object modified??" << std::endl;
-		return;
-	}
-
-	std::cout << "sent camera. attach to object " << my->getID() << std::endl;
-	NetworkManager::PostMessage(serialize(), CAMERA_NETWORK_DATA, my->getID(), clientID);
 }
 
 void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
