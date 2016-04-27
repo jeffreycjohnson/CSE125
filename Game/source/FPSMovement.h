@@ -6,6 +6,8 @@
 class FPSMovement : public Component
 {
 private:
+	GameObject* verticality;
+
 	int clientId;
 	float moveSpeed, mouseSensitivity;
 
@@ -16,9 +18,10 @@ private:
 
 	void recalculate();
 public:
-	FPSMovement( int clientId,
+	FPSMovement(
 		float moveSpeed, float mouseSensitivity,
-		glm::vec3 position, glm::vec3 up);
+		glm::vec3 position, glm::vec3 up,
+		GameObject* verticality = nullptr);
 	~FPSMovement() {};
 
 	void create() override;
