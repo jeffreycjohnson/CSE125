@@ -50,12 +50,16 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -0.5f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
-	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-
+	bool didSetCamera = false;
 	for (auto client : clientIDs) {
 		GameObject *player = loadScene("assets/cubeman.dae");
 		GameObject *verticality = new GameObject;
 		player->addComponent(new FPSMovement(client, 1.5f, 0.5f, glm::vec3(client, 0, -client), glm::vec3(0, 1, 0), verticality));
+		if (!didSetCamera)
+		{
+			didSetCamera = true;
+			verticality->addComponent(Renderer::mainCamera);
+		}
 		NetworkManager::attachCameraTo(client, verticality->getID());
 		GameObject::SceneRoot.addChild(player);
 
@@ -71,7 +75,7 @@ int main(int argc, char** argv)
 
 	try
 	{
-		RunEngine(1); // running engine as server
+		RunEngine(0); // running engine as server
 	}
 	catch (...)
 	{

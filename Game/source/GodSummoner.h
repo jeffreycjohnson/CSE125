@@ -12,7 +12,7 @@ public:
 	GodSummoner(GameObject *toRotate);
 	~GodSummoner();
 
-	void update(float deltaTime) override;
+	void fixedUpdate() override;
 	void collisionEnter(GameObject *other) override;
 	void collisionStay(GameObject *other) override;
 	void collisionExit(GameObject *other) override;

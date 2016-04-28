@@ -14,6 +14,7 @@ private:
 	glm::vec3 position, front, up, right, worldUp;
 	GLfloat yaw, pitch;
 
+	bool pastFirstTick;
 	glm::vec2 lastMousePosition;
 
 	void recalculate();

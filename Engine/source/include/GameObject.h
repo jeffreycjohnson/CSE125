@@ -23,6 +23,7 @@ public:
 	static GameObject* FindByName(const std::string& name);
 	static GameObject* FindByID(const int& id);
 	static std::vector<GameObject*> FindAllByName(const std::string& name);
+	static std::vector<GameObject*> FindAllByPrefix(const std::string& name);
 	static void UpdateScene(int caller);
 
 	// registering callbacks for updates

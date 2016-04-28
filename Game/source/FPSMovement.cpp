@@ -16,8 +16,10 @@ FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, 
 {
 	this->front = glm::vec3(0, 0, -1);
 
-	this->yaw = -90.0f;
+	this->yaw = 0.0f;
 	this->pitch = 0.0f;
+
+	pastFirstTick = false;
 }
 
 void FPSMovement::create()
@@ -31,6 +33,15 @@ void FPSMovement::fixedUpdate()
 {
 	auto dt = Timer::fixedTimestep;
 	
+	if (!pastFirstTick)
+	{
+		pastFirstTick = true;
+
+		glm::vec2 currMousePosition = ServerInput::mousePosition(clientId);
+		lastMousePosition = currMousePosition;
+		return;
+	}
+
 	// act on mouse
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientId);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
