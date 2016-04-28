@@ -139,10 +139,11 @@ GameObject* loadScene(const std::string& filename) {
         {
             light = new SpotLight();
         }
-        light->color = glm::vec3(l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b);
-        light->constantFalloff = l->mAttenuationConstant;
-        light->linearFalloff = l->mAttenuationLinear;
-        light->exponentialFalloff = l->mAttenuationQuadratic;
+		light->setcolor(glm::vec3(l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b));
+		light->setconstantFalloff(l->mAttenuationConstant);
+        light->setlinearFalloff(l->mAttenuationLinear);
+		light->setexponentialFalloff(l->mAttenuationQuadratic);
+
         lights[l->mName.C_Str()] = light;
     }
 

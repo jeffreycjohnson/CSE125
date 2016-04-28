@@ -71,7 +71,7 @@ void LightingPass::render(Camera* camera)
         else
         {
             glCullFace(GL_BACK);
-            if(d->shadowCaster && d->shadowMap->fbo)
+            if(d->getshadowCaster() && d->shadowMap->fbo)
             {
                 d->shadowMap->fbo->bindDepthTexture(3);
                 shader["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(d->gameObject->transform.getTransformMatrix());
