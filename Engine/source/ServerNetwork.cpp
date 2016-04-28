@@ -2,6 +2,7 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 #include "NetworkStruct.h"
+#include "NetworkStats.h"
 #include "ServerNetwork.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -184,6 +185,7 @@ std::vector<int> ServerNetwork::startMultiple(int numClients)
 
 	// broadcast message saying all client connections have been accepted.
 	std::cout << "All clients connected!" << std::endl;
+	NetworkStats::registerClients(clientIDs);
 
 	return clientIDs;
 }
@@ -251,7 +253,6 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int 
 
 	// insert encoded type
 	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
-
 	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
 		int wsaLastError = WSAGetLastError();
@@ -269,6 +270,8 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int 
 		}
 		return;
 	}
+	NetworkStats::registerBytesSent(clientID, encodedMsg.size());
+
 	return;
 }
 

@@ -133,6 +133,9 @@
     <ClCompile Include="source\NetworkManager.cpp">
       <Filter>Source\Network</Filter>
     </ClCompile>
+    <ClCompile Include="source\NetworkStats.cpp">
+      <Filter>Source\Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\ForwardDecs.h">
@@ -247,6 +250,9 @@
       <Filter>Headers\Collision</Filter>
     </ClInclude>
     <ClInclude Include="source\include\NetworkManager.h">
+      <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\NetworkStats.h">
       <Filter>Headers\Network</Filter>
     </ClInclude>
   </ItemGroup>

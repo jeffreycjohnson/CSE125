@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "Light.h"
 
+#include "NetworkStats.h"
 #include "ClientNetwork.h"
 #include "ServerNetwork.h"
 #include "ServerInput.h"
