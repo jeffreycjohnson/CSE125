@@ -120,11 +120,18 @@ static bool compile(const std::string& file, GLuint shader)
     return false;
 }
 
-Shader::Shader(const std::string& vertex, const std::string& fragment, bool autoReload)
-    : autoReload(autoReload)
+Shader::Shader(const std::string& vertex, const std::string& fragment)
 {
-    vertWatcher = new FileWatcher(vertex, 30);
-    fragWatcher = new FileWatcher(fragment, 30);
+    vertWatcher = std::make_unique<FileWatcher>(vertex, 60);
+    fragWatcher = std::make_unique<FileWatcher>(fragment, 60);
+    reload();
+}
+
+Shader::Shader(const std::string& vertex, const std::string& geom, const std::string& fragment)
+{
+    vertWatcher = std::make_unique<FileWatcher>(vertex, 60);
+    fragWatcher = std::make_unique<FileWatcher>(fragment, 60);
+    geomWatcher = std::make_unique<FileWatcher>(geom, 60);
     reload();
 }
 
@@ -148,7 +155,7 @@ Shader::Uniform Shader::operator[](const std::string& name)
 void Shader::use()
 {
     if (this == Renderer::currentShader) return;
-    if(autoReload && (vertWatcher->changed() || fragWatcher->changed())) reload();
+    if(autoReload && (vertWatcher->changed() || fragWatcher->changed() || (geomWatcher && geomWatcher->changed()))) reload();
     glUseProgram(id);
 	Renderer::setCurrentShader(this);
 }
@@ -160,16 +167,23 @@ void Shader::reload()
     id = glCreateProgram();
     auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
     auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    auto geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
     CHECK_ERROR();
 
     if (compile(vertWatcher->file, vertexShader)) throw vertWatcher->file;
     glAttachShader(id, vertexShader);
     if (compile(fragWatcher->file, fragmentShader)) throw fragWatcher->file;
     glAttachShader(id, fragmentShader);
+    if(geomWatcher)
+    {
+        if (compile(geomWatcher->file, geometryShader)) throw geomWatcher->file;
+        glAttachShader(id, geometryShader);
+    }
 
     glLinkProgram(id);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    glDeleteShader(geometryShader);
     CHECK_ERROR();
 
     GLint status;

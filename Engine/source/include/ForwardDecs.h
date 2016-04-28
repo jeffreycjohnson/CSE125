@@ -77,17 +77,9 @@ void _logHelper<glm::mat4>(const char * file, int line, const char * func, glm::
 #define LOG(X) _logHelper(__FILE__, __LINE__, __func__, X)
 #endif
 
+bool _checkError(const char * file, int line, const char * func);
 #ifndef CHECK_ERROR
-#define CHECK_ERROR() \
-do { \
-	GLenum error; \
-	while ((error = glGetError()) != GL_NO_ERROR) \
-	{ \
-		char * str = (char*)gluErrorString(error); \
-		_log(__FILE__, __LINE__, __func__, \
-                std::string("OpenGL Error: ") + (str?str:"")); \
-    } \
-} while((void)0,0)
+#define CHECK_ERROR() _checkError(__FILE__, __LINE__, __func__)
 #endif
 
 #endif

@@ -62,3 +62,17 @@ void _log(const char * file, int line, const char * func, const std::string& s)
     std::cerr << s << " in" << std::endl;
     std::cerr << file << " in function " << func << " on line " << line << std::endl;
 }
+
+
+bool _checkError(const char * file, int line, const char * func) {
+    GLenum error;
+    bool hadError = false;
+    while ((error = glGetError()) != GL_NO_ERROR)
+    {
+        hadError = true;
+        char * str = (char*)gluErrorString(error);
+        _log(file, line, func,
+            std::string("OpenGL Error: ") + (str ? str : ""));
+    }
+    return hadError;
+}

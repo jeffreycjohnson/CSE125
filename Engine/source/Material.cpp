@@ -119,7 +119,7 @@ Material::Material(Shader* shader, bool transparent) : shader(shader), transpare
 Material::Material(const std::string& file, bool hasAnimations) : hasAnimations(hasAnimations), autoReload(true)
 {
     loadFromFile(file);
-    watcher = std::make_unique<FileWatcher>(file, 30);
+    watcher = std::make_unique<FileWatcher>(file, 60);
 }
 
 Material::UniformSetter Material::operator[](const std::string& name)

@@ -44,7 +44,13 @@ public:
 	Skybox* skybox;
 };
 
-class ShadowPass : public RenderPass
+class DirectionalShadowPass : public RenderPass
+{
+public:
+    void render(Camera* camera) override;
+};
+
+class PointShadowPass : public RenderPass
 {
 public:
     void render(Camera* camera) override;

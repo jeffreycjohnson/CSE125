@@ -3,6 +3,7 @@
 
 #include "ForwardDecs.h"
 #include "Component.h"
+#include "Camera.h"
 #include <glm.hpp>
 #include <string>
 
@@ -16,10 +17,6 @@ enum {
 class Light : public Component
 {
 public:
-	/*Light(glm::vec3 color, bool shadowCaster, float radius, float constantFalloff,
-		float linearFalloff, float exponentialFalloff) :
-		color(color), shadowCaster(shadowCaster), radius(radius), constantFalloff(constantFalloff),
-		linearFalloff(linearFalloff), exponentialFalloff(exponentialFalloff) {};*/
 	void setColor(glm::vec3 color);
 	void setShadowCaster(bool shadowCaster);
 	void setRadius(float radius);
@@ -40,6 +37,7 @@ public:
 
     virtual void forwardPass(int index) = 0;
     virtual void deferredPass() = 0;
+    virtual void bindShadowMap() = 0;
 
 	void deserializeAndApply(std::vector<char> bytes) override;
 
@@ -55,14 +53,21 @@ protected:
     void deferredHelper(const std::string& meshName);
 	void postToNetwork();
 
+    std::unique_ptr<Camera> shadowMap;
 };
 
 class PointLight : public Light
 {
 public:
+    explicit PointLight(bool shadow = false);
     void forwardPass(int index) override;
     void deferredPass() override;
     void debugDraw() override;
+    void setGameObject(GameObject* object) override;
+    void bindShadowMap() override;
+
+    Texture * gradient = nullptr;
+    static glm::mat4 shadowMatrix;
 };
 
 class DirectionalLight : public Light
@@ -71,15 +76,14 @@ public:
     explicit DirectionalLight(bool shadow = false);
     void forwardPass(int index) override;
     void deferredPass() override;
-    void bindShadowMap();
     void update(float) override;
     void setGameObject(GameObject* object) override;
+    void bindShadowMap() override;
 
-    std::unique_ptr<Camera> shadowMap;
     static glm::mat4 shadowMatrix;
 };
 
-class SpotLight : public Light
+/*class SpotLight : public Light
 {
 public:
 	//TODO: Robustnesssss, Angle, Exponent is vehemently not supported
@@ -89,6 +93,6 @@ public:
     void deferredPass() override;
 
 	//void deserializeAndApply(std::vector<char> bytes) override;
-};
+};*/
 
 #endif

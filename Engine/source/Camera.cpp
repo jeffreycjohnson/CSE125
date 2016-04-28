@@ -1,4 +1,4 @@
- #include "Camera.h"
+#include "Camera.h"
 #include "Timer.h"
 #include "Renderer.h"
 #include <gtc/matrix_inverse.hpp>
@@ -13,6 +13,15 @@
 #include "RenderPass.h"
 #include "Collision.h"
 #include "NetworkManager.h"
+
+Camera::Camera()
+{
+    currentFOV = prevFOV = fov = atan(1.f) * 4.0f / 3.0f;
+    fovDuration = 1;
+    offset.setPosition(0, 0, 0);
+    up = { 0, 1, 0 };
+    srand(time(NULL));
+}
 
 Camera::Camera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats) : width(w), height(h)
 {
@@ -83,7 +92,7 @@ void Camera::update(float deltaTime)
 	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
 	FMOD_VECTOR fwd = { forward.x, forward.y, forward.z };
 	FMOD_VECTOR upv = { up.x, up.y, up.z };
-	Sound::system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv);
+	if(this == Renderer::mainCamera) Sound::system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv);
 }
 
 void Camera::screenShake(float amount, float duration)
@@ -167,4 +176,19 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 		go->addComponent(Renderer::mainCamera);
 	}
 
+}
+
+SpericalCamera::SpericalCamera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats)
+{
+    fbo = std::make_unique<Framebuffer>(w, h, colorFormats, true, true);
+    if (defaultPasses)
+    {
+        passes.push_back(std::make_unique<GBufferPass>());
+        passes.push_back(std::make_unique<LightingPass>());
+        passes.push_back(std::make_unique<SkyboxPass>(nullptr));
+        passes.push_back(std::make_unique<ForwardPass>());
+        passes.push_back(std::make_unique<ParticlePass>());
+        passes.push_back(std::make_unique<BloomPass>());
+    }
+    Renderer::cameras.push_back(this);
 }

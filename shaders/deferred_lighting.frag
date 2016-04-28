@@ -10,6 +10,8 @@ uniform sampler2D colorTex; //color texture - rgb: color | a: metalness
 uniform sampler2D normalTex; //normal texture - rgb: normal | a: height
 uniform sampler2D posTex; //position texture - rgb: position | a: roughness
 uniform sampler2DShadow shadowTex;
+uniform sampler2D lightGradientTex;
+uniform samplerCubeShadow pointShadowTex;
 
 //world space camera position, to get view vector
 uniform vec3 cameraPos;
@@ -40,7 +42,7 @@ void main () {
 
 
   roughness += 0.0001; //there seem to be issues with roughness = 0 due to visibility
-  float a = sqrt(roughness);// squaring it makes everything shiny, sqrting it looks like linear roughness
+  float a = roughness;// squaring it makes everything shiny, sqrting it looks like linear roughness
 
   vec3 F0 = MetalToF0(metalness, albedo.rgb);
 
@@ -54,6 +56,9 @@ void main () {
 	  if(uLightType == 0) {
 		  lightDir = uLightPosition - pos.xyz;
 		  lightDist = length(lightDir);
+
+		  shadow = texture(lightGradientTex, vec2(acos(dot(normalize(lightDir), normalize(uLightDirection))) / (3.14159), 0)).r;
+		  shadow *= texture(pointShadowTex, vec4(-normalize(lightDir), lightDist/25.0));
 
 		  //Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 		  float sphereRadius = uLightSize;

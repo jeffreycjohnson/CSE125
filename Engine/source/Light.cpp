@@ -10,8 +10,16 @@
 #include "NetworkManager.h"
 #include "NetworkUtility.h"
 #include <iostream>
+#include "Texture.h"
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
+glm::mat4 PointLight::shadowMatrix = glm::perspective<float>(glm::radians(90.0f), 1.f, 0.2f, 25.f);
+
+const static glm::mat4 bias(
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 0.5, 0.0,
+    0.5, 0.5, 0.5, 1.0);
 
 void Light::setColor(glm::vec3 color)
 {
@@ -96,7 +104,7 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 	LightNetworkData lnd = structFromBytes<LightNetworkData>(bytes);
 	PointLight *gopointlight;
 	DirectionalLight *godirectionallight;
-	SpotLight *gospotlight;
+	//SpotLight *gospotlight;
 
 	GameObject *go = GameObject::FindByID(messageId);
 	if (go == nullptr)
@@ -129,7 +137,7 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 			godirectionallight->deserializeAndApply(bytes);
 		}
 		break;
-	case is_spotlight:
+	/*case is_spotlight:
 		throw std::runtime_error("From Light.cpp/Dispatch: SpotlightNotImplementd");
 		gospotlight = go->getComponent<SpotLight>();
 		if (gospotlight != nullptr) {
@@ -140,7 +148,7 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 			go->addComponent(gospotlight);
 			gospotlight->deserializeAndApply(bytes);
 		}
-		break;
+		break;*/
 	default:
 		throw std::runtime_error("From Light.cpp/Dispatch: out of enum? Impossible");
 		break;
@@ -168,17 +176,28 @@ void Light::deferredHelper(const std::string& meshName)
 
 void Light::postToNetwork()
 {
-	if (NetworkManager::getState() != SERVER_MODE) return;
+    if (NetworkManager::getState() != SERVER_MODE) return;
 
-	GameObject *my = gameObject;
-	if (my == nullptr)
-	{
-		std::cerr << "Light ain't got no attached game object modified??" << std::endl;
-		return;
-	}
+    GameObject *my = gameObject;
+    if (my == nullptr)
+    {
+        std::cerr << "Light ain't got no attached game object modified??" << std::endl;
+        return;
+    }
 
-	std::cout << "Sending light..." << std::endl;
-	NetworkManager::PostMessage(serialize(), LIGHT_NETWORK_DATA, my->getID());
+    std::cout << "Sending light..." << std::endl;
+    NetworkManager::PostMessage(serialize(), LIGHT_NETWORK_DATA, my->getID());
+}
+
+PointLight::PointLight(bool shadow)
+{
+    shadowCaster = shadow;
+    if (shadow)
+    {
+        shadowMap = std::make_unique<SpericalCamera>(512, 512, false, std::vector<GLenum>({}));
+        shadowMap->passes.push_back(std::make_unique<PointShadowPass>());
+        shadowMap->setGameObject(gameObject);
+    }
 }
 
 void PointLight::forwardPass(int index)
@@ -192,12 +211,20 @@ void PointLight::forwardPass(int index)
 
 void PointLight::deferredPass()
 {
+    if (shadowCaster && shadowMap->fbo)
+    {
+        shadowMap->fbo->bindDepthTexture(4);
+    }
     (*Renderer::currentShader)["uLightType"] = 0;
     auto max = std::max(std::max(color.r, color.g), color.b);
     float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
         / (2.0f * exponentialFalloff);
     (*Renderer::currentShader)["uScale"] = scale;
+    gradient->bindTexture(5);
+    CHECK_ERROR();
     deferredHelper("assets/Primatives.obj/Sphere");
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void PointLight::debugDraw()
@@ -225,37 +252,43 @@ void Light::deserializeAndApply(std::vector<char> bytes)
 
 std::vector<char> Light::serialize()
 {
-	int lightType;
-	Light * light_t;
-	PointLight * pointlight_t;
-	DirectionalLight * directionallight_t;
-	SpotLight * spotlight_t;
+    int lightType;
+    Light * light_t;
+    PointLight * pointlight_t;
+    DirectionalLight * directionallight_t;
+    //SpotLight * spotlight_t;
 
-	if (pointlight_t = dynamic_cast<PointLight*>(this)) {
-		lightType = is_pointlight;
-	}
-	else if (directionallight_t = dynamic_cast<DirectionalLight*>(this)) {
-		lightType = is_directionallight;
-	}
-	else if (spotlight_t = dynamic_cast<SpotLight*>(this)) {
-		lightType = is_spotlight;
-	}
-	else if (light_t = dynamic_cast<Light*>(this)) {
-		lightType = is_light;
-		std::cerr << "This should not happen" << std::endl;
-	}
+    if (pointlight_t = dynamic_cast<PointLight*>(this)) {
+        lightType = is_pointlight;
+    }
+    else if (directionallight_t = dynamic_cast<DirectionalLight*>(this)) {
+        lightType = is_directionallight;
+    }
+    /*else if (spotlight_t = dynamic_cast<SpotLight*>(this)) {
+        lightType = is_spotlight;
+    }*/
+    else if (light_t = dynamic_cast<Light*>(this)) {
+        lightType = is_light;
+        std::cerr << "This should not happen" << std::endl;
+    }
 
-	LightNetworkData lnd = LightNetworkData(
-		gameObject->getID(),
-		lightType,
-		getColor(),
-		getShadowCaster(),
-		getRadius(),
-		getConstantFalloff(),
-		getLinearFalloff(),
-		getExponentialFalloff());
-	std::cout << "My Lighttype... " << lightType << std::endl;
-	return structToBytes(lnd);
+    LightNetworkData lnd = LightNetworkData(
+        gameObject->getID(),
+        lightType,
+        getColor(),
+        getShadowCaster(),
+        getRadius(),
+        getConstantFalloff(),
+        getLinearFalloff(),
+        getExponentialFalloff());
+    std::cout << "My Lighttype... " << lightType << std::endl;
+    return structToBytes(lnd);
+}
+
+void PointLight::setGameObject(GameObject * object)
+{
+    Component::setGameObject(object);
+    if (shadowCaster && shadowMap) shadowMap->setGameObject(object);
 }
 
 DirectionalLight::DirectionalLight(bool shadow)
@@ -264,7 +297,7 @@ DirectionalLight::DirectionalLight(bool shadow)
     {
         shadowCaster = shadow;
 		shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLenum>({}));
-        shadowMap->passes.push_back(std::make_unique<ShadowPass>());
+        shadowMap->passes.push_back(std::make_unique<DirectionalShadowPass>());
         shadowMap->setGameObject(gameObject);
     }
 }
@@ -279,6 +312,11 @@ void DirectionalLight::forwardPass(int index)
 
 void DirectionalLight::deferredPass()
 {
+    if (shadowCaster && shadowMap->fbo)
+    {
+        shadowMap->fbo->bindDepthTexture(3);
+        (*Renderer::currentShader)["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(gameObject->transform.getTransformMatrix());
+    }
     glDisable(GL_STENCIL_TEST);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -303,6 +341,23 @@ void DirectionalLight::bindShadowMap()
     }
 }
 
+void PointLight::bindShadowMap()
+{
+    if (shadowMap->fbo && shadowCaster)
+    {
+        shadowMap->fbo->bind(0, nullptr);
+        auto& shader = Renderer::getShader(SHADOW_CUBE_SHADER);
+        auto pos = gameObject->transform.getWorldPosition();
+        shader["uVP_Matrices[0]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
+        shader["uVP_Matrices[1]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
+        shader["uVP_Matrices[2]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+        shader["uVP_Matrices[3]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0));
+        shader["uVP_Matrices[4]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0));
+        shader["uVP_Matrices[5]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0));
+        shader["uLightPos"] = pos;
+    }
+}
+
 void DirectionalLight::update(float)
 {
     gameObject->transform.translate(Renderer::mainCamera->gameObject->transform.getWorldPosition() - gameObject->transform.getWorldPosition());
@@ -311,13 +366,13 @@ void DirectionalLight::update(float)
 void DirectionalLight::setGameObject(GameObject* object)
 {
     Component::setGameObject(object);
-    if (shadowCaster) shadowMap->setGameObject(object);
+    if (shadowCaster && shadowMap) shadowMap->setGameObject(object);
 }
 
-void SpotLight::forwardPass(int index)
+/*void SpotLight::forwardPass(int index)
 {
 }
 
 void SpotLight::deferredPass()
 {
-}
+}*/

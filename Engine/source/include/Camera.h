@@ -9,12 +9,14 @@ const std::vector<GLenum> defaultFormats{ GL_RGBA8, GL_RGBA16, GL_RGBA16F, GL_RG
 
 class Camera : public Component
 {
-	private:
+	protected:
 		float shakeAmount = 0.f, startShakeAmount = 0.f, shakeDuration = 0.f, startShakeDuration = 0.f;
 		bool isShaking = false;
 		float currentFOV, prevFOV, fovStartTime;
 		glm::vec3 forward, up, position, prevPosition, velocity;
 		glm::mat4 matrix;
+
+        Camera();
 
 	public:
         std::unique_ptr<Framebuffer> fbo;
@@ -24,9 +26,9 @@ class Camera : public Component
         float width, height;
         Texture* renderResult;
 
-		explicit Camera(int w = Renderer::getWindowWidth(), int h = Renderer::getWindowHeight(), bool defaultPasses = true,
+		explicit Camera(int w, int h, bool defaultPasses = true,
 			const std::vector<GLenum>& colorFormats = defaultFormats);
-        ~Camera();
+        virtual ~Camera();
 		glm::mat4 getCameraMatrix();
 		void update(float deltaTime) override;
 		void screenShake(float amount, float duration);
@@ -42,6 +44,13 @@ class Camera : public Component
 		void deserializeAndApply(std::vector<char> bytes);
 
 		static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
+};
+
+class SpericalCamera : public Camera
+{
+public:
+    SpericalCamera(int w, int h, bool defaultPasses = true,
+        const std::vector<GLenum>& colorFormats = defaultFormats);
 };
 
 #endif

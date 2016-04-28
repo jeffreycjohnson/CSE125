@@ -107,6 +107,10 @@ void Renderer::init(int window_width, int window_height) {
         "shaders/forward_pbr_skeletal.vert", "shaders/shadow.frag"
         );
 
+    shaderList[SHADOW_CUBE_SHADER] = new Shader(
+        "shaders/cube_map.vert", "shaders/cube_map.geom", "shaders/linear_depth.frag"
+    );
+
     (*shaderList[SHADOW_SHADER])["uP_Matrix"] = DirectionalLight::shadowMatrix;
     (*shaderList[SHADOW_SHADER_ANIM])["uP_Matrix"] = DirectionalLight::shadowMatrix;
 

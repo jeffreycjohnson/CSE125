@@ -43,7 +43,7 @@ void DebugPass::render(Camera* camera) {
 	}
 }
 
-void ShadowPass::render(Camera* camera)
+void DirectionalShadowPass::render(Camera* camera)
 {
     auto l = camera->gameObject->getComponent<DirectionalLight>();
     if (!l || !l->getShadowCaster()) return;
@@ -68,4 +68,26 @@ void ShadowPass::render(Camera* camera)
         s->use();
         mesh->draw();
     }
+}
+
+void PointShadowPass::render(Camera* camera)
+{
+    auto l = camera->gameObject->getComponent<PointLight>();
+    if (!l || !l->getShadowCaster()) return;
+    l->bindShadowMap();
+    Renderer::getShader(SHADOW_CUBE_SHADER).use();
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glDisable(GL_STENCIL_TEST);
+    glDrawBuffer(GL_NONE);
+    CHECK_ERROR();
+
+    for (auto mesh : Renderer::renderBuffer.deferred) {
+        mesh->draw();
+    }
+    CHECK_ERROR();
 }

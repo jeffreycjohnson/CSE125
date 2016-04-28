@@ -4,8 +4,8 @@
 #include <gtc/matrix_transform.hpp>
 
 
-Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled)
-        : accessibleDepth(accessibleDepth), numColorTex(numColorTextures), hdrEnabled(hdrEnabled), width(w), height(h) {
+Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDepth, bool hdrEnabled, bool cube)
+        : accessibleDepth(accessibleDepth), numColorTex(numColorTextures), cubeMap(cube), hdrEnabled(hdrEnabled), width(w), height(h) {
     colorFormats.resize(numColorTextures);
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
@@ -23,11 +23,15 @@ Framebuffer::Framebuffer(int w, int h, int numColorTextures, bool accessibleDept
 		addDepthBuffer();
 	}
 
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOG("Framebuffer not complete!");
+    }
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Framebuffer::Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, bool accessibleDepth)
-        : accessibleDepth(accessibleDepth), numColorTex(colorFormats.size()), colorFormats(colorFormats), width(w), height(h) {
+Framebuffer::Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, bool accessibleDepth, bool cube)
+        : accessibleDepth(accessibleDepth), numColorTex(colorFormats.size()), cubeMap(cube), colorFormats(colorFormats), width(w), height(h) {
     glGenFramebuffers(1, &id);
     glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -44,10 +48,21 @@ Framebuffer::Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, 
         addDepthBuffer();
     }
 
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOG("Framebuffer not complete!");
+        throw;
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::addColorTexture(int index) {
+    if(cubeMap)
+    {
+        LOG("Non Shadow Cubemap Framebuffers Not Implemented.");
+        throw;
+    }
+
 	glGenTextures(1, &(colorTex[index]) );
 	glBindTexture(GL_TEXTURE_2D, colorTex[index]);
 
@@ -60,26 +75,46 @@ void Framebuffer::addColorTexture(int index) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, colorTex[index], 0);
+    CHECK_ERROR();
 }
 
 void Framebuffer::addDepthTexture() {
 	glGenTextures(1, &depthTex);
-	glBindTexture(GL_TEXTURE_2D, depthTex);
+    if (!cubeMap) {
+        glBindTexture(GL_TEXTURE_2D, depthTex);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	// For Hardware PCF
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL); 
+        // For Hardware PCF
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    else
+    {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthTex);
+        for (int i = 0; i < 6; i++) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, nullptr);
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTex, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTex, 0);
+    CHECK_ERROR();
 }
 
 void Framebuffer::addDepthBuffer() {
@@ -87,6 +122,7 @@ void Framebuffer::addDepthBuffer() {
 	glBindRenderbuffer(GL_RENDERBUFFER, depthTex);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTex);
+    CHECK_ERROR();
 }
 
 Framebuffer::~Framebuffer() {
@@ -128,13 +164,17 @@ void Framebuffer::unbind() {
 void Framebuffer::bindTexture(int slot, int colorIndex) {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	GLuint tex = colorTex[colorIndex];
-	glBindTexture(GL_TEXTURE_2D, tex);
+    if (!cubeMap) glBindTexture(GL_TEXTURE_2D, tex);
+    else glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
+    CHECK_ERROR();
 }
 
 void Framebuffer::bindDepthTexture(int slot) {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	GLuint tex = depthTex;
-	glBindTexture(GL_TEXTURE_2D, tex);
+	if(!cubeMap) glBindTexture(GL_TEXTURE_2D, tex);
+    else glBindTexture(GL_TEXTURE_CUBE_MAP, depthTex);
+    CHECK_ERROR();
 }
 
 void Framebuffer::blitFramebuffer(int index, int x, int y, int destW, int destH) {

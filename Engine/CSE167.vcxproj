@@ -286,6 +286,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="..\shaders\cube_map.vert" />
+    <None Include="..\shaders\cube_map.geom" />
     <None Include="..\shaders\deferred_gbuffer.frag" />
     <None Include="..\shaders\deferred_lighting.frag" />
     <None Include="..\shaders\deferred_lighting.vert" />
@@ -303,6 +305,7 @@
     <None Include="..\shaders\gpu_particle.vert" />
     <None Include="..\shaders\gpu_particle_burst.vert" />
     <None Include="..\shaders\lighting.glsl" />
+    <None Include="..\shaders\linear_depth.frag" />
     <None Include="..\shaders\particle_trail.frag" />
     <None Include="..\shaders\particle_trail.vert" />
     <None Include="..\shaders\shadow.frag" />

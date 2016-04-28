@@ -344,6 +344,15 @@
     <None Include="..\config\buttons.ini">
       <Filter>Configuration</Filter>
     </None>
+    <None Include="..\shaders\cube_map.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\cube_map.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\shaders\linear_depth.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">

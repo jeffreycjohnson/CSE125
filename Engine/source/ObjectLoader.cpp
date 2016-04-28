@@ -187,7 +187,9 @@ GameObject* loadScene(const std::string& filename) {
         Light * light;
         if (l->mType == aiLightSource_POINT)
         {
-            light = new PointLight();
+            auto pointLight = new PointLight(true);
+            pointLight->gradient = new Texture("assets/gradient.png");
+            light = pointLight;
         }
         else if (l->mType == aiLightSource_DIRECTIONAL)
         {
@@ -196,7 +198,7 @@ GameObject* loadScene(const std::string& filename) {
         //TODO spotlights
         else
         {
-            light = new SpotLight();
+            //light = new SpotLight();
         }
 		light->setColor(glm::vec3(l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b));
 		light->setConstantFalloff(l->mAttenuationConstant);
