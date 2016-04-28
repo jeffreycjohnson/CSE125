@@ -3,9 +3,8 @@
 #include <fstream>
 #include <sstream>
 
-ConfigFile::ConfigFile(const std::string& configFilePath)
+ConfigFile::ConfigFile(const std::string& configFilePath) : configFilePath(configFilePath)
 {
-	this->configFilePath = configFilePath;
 	load();
 }
 

@@ -21,7 +21,7 @@ std::unordered_multimap<std::string, std::function<void(GameObject*)>> component
 
 int counter = 0;
 
-static std::string getPath(const std::string& name)
+std::string getPath(const std::string& name)
 {
     auto index = name.find_last_of("\\/");
     if (index == std::string::npos) return name;
@@ -99,14 +99,15 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
     }
 
     if (currentNode->mNumMeshes > 0) {
-        if (!Mesh::meshMap.count(name)) {
-            int meshIndex = *currentNode->mMeshes;
-            Mesh::loadMesh(name, scene->mMeshes[meshIndex]);
+		int meshIndex = *currentNode->mMeshes;
+		std::string meshName = scene->mMeshes[meshIndex]->mName.C_Str();
+        if (!Mesh::meshMap.count(meshName)) {
+            Mesh::loadMesh(meshName, scene->mMeshes[meshIndex]);
         }
 
-        auto mesh = new Mesh(name);
+        auto mesh = new Mesh(meshName);
 
-        auto aMat = scene->mMaterials[scene->mMeshes[*currentNode->mMeshes]->mMaterialIndex];
+        auto aMat = scene->mMaterials[scene->mMeshes[meshIndex]->mMaterialIndex];
         aiString matName;
         if (AI_SUCCESS == aMat->Get(AI_MATKEY_NAME, matName))
         {

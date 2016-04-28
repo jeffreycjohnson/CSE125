@@ -3,6 +3,8 @@
 #include "Renderer.h"
 #include "FileWatcher.h"
 
+extern std::string getPath(const std::string& name);
+
 Material::UniformSetter::UniformSetter(Material* mat, const std::string& name) : name(name), mat(mat)
 {
 }
@@ -15,11 +17,12 @@ static GLenum parseWrapMode(const std::string& str)
 
 static void loadTexture(const ConfigFile& config, Material& mat, const std::string& section, const std::string& name, const std::string& uniform, bool srgb)
 {
+	std::string path = getPath(config.configFilePath);
     auto tmp = config.getColor(section, name);
     mat[uniform] = std::make_unique<Texture>(glm::vec4(tmp, 1));
     auto tex = config.getString(section, name + "Texture");
     auto wrapMode = config.getString(section, name + "TextureWrapping");
-    if (tex != "") mat[uniform] = std::make_unique<Texture>(tex, srgb, parseWrapMode(wrapMode));
+    if (tex != "") mat[uniform] = std::make_unique<Texture>(path + tex, srgb, parseWrapMode(wrapMode));
 }
 
 void Material::loadFromFile(const std::string& file)

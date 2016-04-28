@@ -52,6 +52,9 @@ public:
     bool hasKey(const std::string& section, const std::string& key) const;
     bool hasSection(const std::string& section) const;
 
+
+	const std::string configFilePath;
+
 private:
 
 	enum TokenizedStringType {
@@ -74,7 +77,6 @@ private:
 	};
 
 	// Member variables
-	std::string configFilePath;
 	std::map<std::string, ConfigSection> sections;
 
 	// Member functions
