@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Transform.h"
+#include "Light.h"
 
 #include "ClientNetwork.h"
 #include "ServerNetwork.h"
@@ -206,6 +207,10 @@ void NetworkManager::ReceiveClientMessages()
 		case CAMERA_NETWORK_DATA:
 			std::cerr << "RECEIVED CAMERA DATA PLZ ATTACH" << std::endl;
 			Camera::Dispatch(received.body, received.messageType, received.id);
+			break;
+		case LIGHT_NETWORK_DATA:
+			std::cerr << "Light it up" << std::endl;
+			Light::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:

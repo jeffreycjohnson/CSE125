@@ -8,6 +8,17 @@
 #include <unordered_map>
 #include <stdio.h>
 
+enum {
+	CLIENTS_CONN_NETWORK_DATA,
+	CREATE_OBJECT_NETWORK_DATA,
+	DESTROY_OBJECT_NETWORK_DATA,
+	INPUT_NETWORK_DATA,
+	TRANSFORM_NETWORK_DATA,
+	MESH_NETWORK_DATA,
+	CAMERA_NETWORK_DATA,
+	LIGHT_NETWORK_DATA
+};
+
 class NetworkStruct
 {
 private:
@@ -19,7 +30,6 @@ public:
 	static size_t sizeOf(int structType);
 };
 
-#define CLIENTS_CONN_NETWORK_DATA 0
 #pragma pack(push, 1)
 struct ClientsConnNetworkData
 {
@@ -29,7 +39,6 @@ struct ClientsConnNetworkData
 };
 #pragma pack(pop)
 
-#define CREATE_OBJECT_NETWORK_DATA 1
 #pragma pack(push, 1)
 struct CreateObjectNetworkData
 {
@@ -42,7 +51,6 @@ struct CreateObjectNetworkData
 };
 #pragma pack(pop)
 
-#define DESTROY_OBJECT_NETWORK_DATA 2
 #pragma pack(push, 1)
 struct DestroyObjectNetworkData
 {
@@ -50,7 +58,6 @@ struct DestroyObjectNetworkData
 };
 #pragma pack(pop)
 
-#define INPUT_NETWORK_DATA 3
 #pragma pack(push, 1)
 struct InputNetworkData
 {
@@ -61,7 +68,6 @@ struct InputNetworkData
 };
 #pragma pack(pop)
 
-#define TRANSFORM_NETWORK_DATA 4
 #pragma pack(push, 1)
 struct TransformNetworkData
 {
@@ -95,7 +101,6 @@ struct TransformNetworkData
 };
 #pragma pack(pop)
 
-#define MESH_NETWORK_DATA 5
 #define MAX_MESH_NAME 64
 #define MAX_MATERIAL_NAME 64
 #pragma pack(push, 1)
@@ -117,13 +122,36 @@ struct MeshNetworkData
 };
 #pragma pack(pop)
 
-#define CAMERA_NETWORK_DATA 6
 #pragma pack(push, 1)
 struct CameraNetworkData
 {
 	int objectID;
 	int clientID;
 	CameraNetworkData(int objectID) : objectID(objectID) {}
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct LightNetworkData
+{
+	int objectID;
+
+	int lightType;
+	float colorr, colorg, colorb;
+	bool shadowCaster;
+	float radius;
+	float constantFalloff, linearFalloff, exponentialFalloff;
+
+	LightNetworkData(
+		int objectID, int lightType, glm::vec3 color, bool shadowCaster, float radius,
+		float constantFalloff, float linearFalloff, float exponentialFalloff) : 
+		objectID(objectID), lightType(lightType), shadowCaster(shadowCaster), radius(radius),
+		constantFalloff(constantFalloff), linearFalloff(linearFalloff), exponentialFalloff(exponentialFalloff)
+		{
+			this->colorr = color.r;
+			this->colorg = color.g;
+			this->colorb = color.b;
+	}
 };
 #pragma pack(pop)
 

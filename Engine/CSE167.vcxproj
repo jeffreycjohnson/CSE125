@@ -280,6 +280,7 @@
   <ItemGroup>
     <None Include="..\config\buttons.ini">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="..\shaders\deferred_gbuffer.frag" />
     <None Include="..\shaders\deferred_lighting.frag" />
