@@ -2,6 +2,7 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 #include "ClientNetwork.h"
+#include "Config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -94,39 +95,45 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 		WSACleanup();
 		return -1;
 	}
-
+	ConfigFile file("config/options.ini");
+	int numRetries = file.getInt("NetworkOptions", "numConnectRetries");
+	bool connected;
 	// Attempt to connect to an address until one succeeds TODO: Handle Timeouts?
-	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+	while (numRetries > 0) {
+		for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
 
-		// Create a SOCKET for connecting to server
-		ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
-			ptr->ai_protocol);
-		if (ConnectSocket == INVALID_SOCKET) {
-			printf("socket failed with error: %ld\n", WSAGetLastError());
-# ifdef _EXCEPTIONAL
-			std::string message = "socket failed with error: ";
-			message += WSAGetLastError();
-			throw new std::runtime_error(message);
-# endif
+			// Create a SOCKET for connecting to server
+			try {
+				ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
+					ptr->ai_protocol);
+			}
+			catch (...) {
+				continue;
+			}
 
-			WSACleanup();
-			return -1;
+			const char shouldNoDelay = 1;
+			setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &shouldNoDelay, sizeof(shouldNoDelay));
+
+			// Connect to server.
+
+
+			iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+			if (iResult == SOCKET_ERROR) {
+				closesocket(ConnectSocket);
+				ConnectSocket = INVALID_SOCKET;
+				continue;
+			}
+			connected = true;
+			goto doneConnecting;
 		}
-
-		const char shouldNoDelay = 1;
-		setsockopt(ConnectSocket, IPPROTO_TCP, TCP_NODELAY, &shouldNoDelay, sizeof(shouldNoDelay));
-
-		// Connect to server.
-		iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
-		if (iResult == SOCKET_ERROR) {
-			closesocket(ConnectSocket);
-			ConnectSocket = INVALID_SOCKET;
-			continue;
-		}
-		break;
+		Sleep(5000);
+		numRetries--;
+		std::cout << "Retrying connection " << numRetries << " more times..." << std::endl;
 	}
 	freeaddrinfo(result);
-	if (ConnectSocket == INVALID_SOCKET) {
+
+	doneConnecting:
+	if (ConnectSocket == INVALID_SOCKET || !connected) {
 		printf("Unable to connect to server!\n");
 # ifdef _EXCEPTIONAL
 		std::string message = "Unable to connect to server!";
