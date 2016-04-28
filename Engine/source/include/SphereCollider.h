@@ -23,7 +23,6 @@ public:
 	void destroy() override;
 	void update(float) override;
 	void debugDraw() override;
-	void onCollisionEnter(GameObject* other) override;
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
 	bool intersects(const BoxCollider& other) const override;

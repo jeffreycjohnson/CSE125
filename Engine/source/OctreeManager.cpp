@@ -122,6 +122,7 @@ void OctreeManager::probeForStaticCollisions() {
 					CollisionInfo colInfo = staticObjects->collidesWith(*colliderIter);
 					if (colInfo.numCollisions > 0) {
 						colInfo.collider->colliding = true;
+						colInfo.collider->addPreviousColliders(colInfo);
 						staticCollisions.push_back(colInfo); // [static] Enter or Stay
 						staticCollisionsThisFrame += colInfo.numCollisions;
 					}
@@ -129,7 +130,8 @@ void OctreeManager::probeForStaticCollisions() {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// staticCollisionExit() event should be fired here
-							//staticCollisions.push_back(colInfo); // TODO: ignore collision exit for now
+							colInfo.collider->removePreviousColliders(colInfo);
+							staticCollisions.push_back(colInfo); // TODO: ignore collision exit for now
 						}
 					}
 				
@@ -155,6 +157,7 @@ void OctreeManager::probeForDynamicCollisions() {
 					CollisionInfo colInfo = dynamicObjects->collidesWith(*colliderIter);
 					if (colInfo.numCollisions > 0) {
 						colInfo.collider->colliding = true;
+						colInfo.collider->addPreviousColliders(colInfo);
 						dynamicCollisions.push_back(colInfo); // Enter or Stay
 						dynamicCollisionsThisFrame += colInfo.numCollisions;
 					}
@@ -162,7 +165,8 @@ void OctreeManager::probeForDynamicCollisions() {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// CollisionExit() event should be fired here
-							//dynamicCollisions.push_back(colInfo); // TODO: Ignore collision exit for now
+							colInfo.collider->removePreviousColliders(colInfo);
+							dynamicCollisions.push_back(colInfo); // TODO: Ignore collision exit for now
 						}
 					}
 
@@ -205,7 +209,7 @@ void OctreeManager::beforeFixedUpdate() {
 		GameObject* caller = collisionData.collider->gameObject;
 
 		// state @ N - 1
-		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
+		bool colliding = collisionData.collider->colliding;
 
 		// state @ N - 2
 		bool previouslyColliding = collisionData.collider->previouslyColliding;
@@ -223,10 +227,13 @@ void OctreeManager::beforeFixedUpdate() {
 			}
 		}
 
-		/*if (!colliding && previouslyColliding) {
+		if (!colliding && previouslyColliding) {
 			// Static Collision Exit
-			caller->collisionCallback(other, &Component::staticCollisionExit);
-		}*/ // TODO: Collision Exit is special
+			auto previouslyColliding = collisionData.collider->getCollisionExitEvents(collisionData);
+			for (auto other : previouslyColliding) {
+				caller->collisionCallback(other, &Component::staticCollisionExit);
+			}
+		}
 
 		// *** end of black magic ***
 	}
@@ -240,7 +247,7 @@ void OctreeManager::beforeFixedUpdate() {
 		GameObject* caller = collisionData.collider->gameObject;
 
 		// state @ N - 1
-		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
+		bool colliding = collisionData.collider->colliding;
 
 		// state @ N - 2
 		bool previouslyColliding = collisionData.collider->previouslyColliding;
@@ -256,15 +263,16 @@ void OctreeManager::beforeFixedUpdate() {
 			}
 		}
 
-		/*if (!colliding && previouslyColliding) {
+		if (!colliding && previouslyColliding) {
 			// Collision Exit
-			caller->collisionCallback(other, &Component::collisionExit);
-		}*/ // TODO: Collision Exit is special, deal with it later
+			auto previouslyColliding = collisionData.collider->getCollisionExitEvents(collisionData);
+			for (auto other : previouslyColliding) {
+				caller->collisionCallback(other, &Component::collisionExit);
+			}
+		}
 	}
 
 };
-
-#include "Timer.h"
 
 void OctreeManager::fixedUpdate() {
 

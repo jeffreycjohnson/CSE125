@@ -121,10 +121,6 @@ void BoxCollider::debugDraw()
 	}
 }
 
-void BoxCollider::onCollisionEnter(GameObject* other)
-{
-}
-
 void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
 {
 	xmin = min.x;

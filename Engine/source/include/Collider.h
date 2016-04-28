@@ -24,6 +24,34 @@ protected:
 
 	bool previouslyColliding; // Colliding during frame N
 	bool colliding;           // Colliding during frame N + 1
+	std::set<GameObject*> previousColliders; // Ptrs to gameObjects we collided with last frame
+
+	// Given the collisions we have found at frame N, we will want to add these
+	// to be in the set of "previousColliders" for N + 1
+	void addPreviousColliders(const CollisionInfo& colInfo) {
+		for (auto collidee : colInfo.collidees ) {
+			previousColliders.insert(collidee);
+		}
+	};
+
+	// Removes GameObject from the previous set
+	void removePreviousColliders(const CollisionInfo& colInfo) {
+		for (auto collidee : colInfo.collidees) {
+			previousColliders.erase(collidee);
+		}
+	}
+
+	std::vector<GameObject*> getCollisionExitEvents(const CollisionInfo& collisionsThisFrame) {
+		std::vector<GameObject*> triggerExitOnThese;
+		for (auto gameObject : collisionsThisFrame.collidees) {
+			if (previousColliders.find(gameObject) == previousColliders.end()) {
+				// If we have find a game object in our previous colliders list that is not
+				// colliding with us this frame, we need to fire an exit event on that game object.
+				triggerExitOnThese.push_back(gameObject);
+			}
+		}
+		return triggerExitOnThese;
+	}
 
 public:
 	bool passive; // Should be set to TRUE if the object is static; false otherwise
@@ -44,7 +72,6 @@ public:
 
 	virtual void update(float) = 0;
 	virtual void debugDraw() = 0;
-	virtual void onCollisionEnter(GameObject* other) = 0; // TODO: Probably will not need this
 
 	virtual bool insideOrIntersects(const glm::vec3& point) const = 0;
 	virtual bool intersects(const BoxCollider& other) const = 0; 

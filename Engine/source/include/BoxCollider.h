@@ -40,7 +40,6 @@ public:
 	void destroy() override;
 	void update(float) override;
 	void debugDraw() override;
-	void onCollisionEnter(GameObject* other) override;
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
