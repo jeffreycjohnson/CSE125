@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Transform.h"
 
+#include "NetworkStats.h"
 #include "ClientNetwork.h"
 #include "ServerNetwork.h"
 #include "ServerInput.h"
