@@ -10,6 +10,7 @@
 #include "ActivatorRegistrator.h"
 #include "BoxCollider.h"
 #include "Config.h"
+#include "GodSummoner.h"
 
 #include <iostream>
 #include "NetworkManager.h"
@@ -45,18 +46,27 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	GameObject *scene = loadScene("assets/artsy.dae");
-
+	GameObject *scene = loadScene("assets/pressure.dae");
+	scene->transform.setPosition(0, -0.5f, 0);
 	GameObject::SceneRoot.addChild(scene);
-	scene->transform.setPosition(0, -1, 0);
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
 	for (auto client : clientIDs) {
-		GameObject *player = loadScene("assets/ball.dae");
-		player->addComponent(new FPSMovement(client, 1.5f, .25f, glm::vec3(client, .25f, client), glm::vec3(0, 1, 0)));
-		NetworkManager::attachCameraTo(client, player->getID());
+		GameObject *player = loadScene("assets/cubeman.dae");
+		GameObject *verticality = new GameObject;
+		player->addComponent(new FPSMovement(client, 1.5f, 0.5f, glm::vec3(client, 0, -client), glm::vec3(0, 1, 0), verticality));
+		NetworkManager::attachCameraTo(client, verticality->getID());
 		GameObject::SceneRoot.addChild(player);
+
+		// find the collider
+		GameObject *box = player->transform.children[1]->children[0]->children[0]->gameObject;
+		GameObject *monkey = GameObject::FindByName("Suzanne");
+		if (box != nullptr && monkey != nullptr)
+		{
+			std::cout << "Hey I found the boxCollider!!" << std::endl;
+			box->addComponent(new GodSummoner(monkey));
+		}
 	}
 
 	try

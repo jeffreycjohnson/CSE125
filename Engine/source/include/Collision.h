@@ -1,15 +1,15 @@
 /*
- The entire collision detection system goes here.
+The entire collision detection system goes here.
 
- - Implements an octree collision/culling detection system
- - Implements a high-level interface for accessing the result of intersection
-   tests (CollisionInfo)
- - (WILL) implement Raycasting
+- Implements an octree collision/culling detection system
+- Implements a high-level interface for accessing the result of intersection
+tests (CollisionInfo)
+- (WILL) implement Raycasting
 
- \/ Inspiration for handling octree edge cases
- https://geidav.wordpress.com/2014/11/18/advanced-octrees-3-non-static-octrees/
- 
- */
+\/ Inspiration for handling octree edge cases
+https://geidav.wordpress.com/2014/11/18/advanced-octrees-3-non-static-octrees/
+
+*/
 #pragma once
 #include "ForwardDecs.h"
 #include "GameObject.h"
@@ -36,8 +36,8 @@ public:
 	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
-	//static Octree* STATIC_TREE;
-	//static Octree* DYNAMIC_TREE;
+										  //static Octree* STATIC_TREE;
+										  //static Octree* DYNAMIC_TREE;
 
 	enum BuildMode {
 		STATIC_ONLY,  // Only includes colliders with passive = TRUE
@@ -87,18 +87,18 @@ private:
 };
 
 /*
- A node in the Octree. OctreeNodes each have a given NodeId, so they can quickly be
- looked up from the Octree. This also avoids storing pointers in BoxColliders, and then
- having to notify BoxColliders when those pointers are freed.
+A node in the Octree. OctreeNodes each have a given NodeId, so they can quickly be
+looked up from the Octree. This also avoids storing pointers in BoxColliders, and then
+having to notify BoxColliders when those pointers are freed.
 
- PROPERTIES
+PROPERTIES
 
- - Every octree node that is not a leaf, has 8 octree children.
- - Every object
- - Leaf nodes cannot have more than LEAF_THRESHOLD # of colliders, UNLESS
-   the maximum recursion depth has been exceeded.
- 
- */
+- Every octree node that is not a leaf, has 8 octree children.
+- Every object
+- Leaf nodes cannot have more than LEAF_THRESHOLD # of colliders, UNLESS
+the maximum recursion depth has been exceeded.
+
+*/
 class OctreeNode {
 public:
 	friend Octree;
@@ -131,7 +131,7 @@ private:
 	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
 	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
 	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
-	
+
 	// Add or remove nodes to the data structure
 	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted
 	void remove(Collider* colliderBeingRemoved);
@@ -146,9 +146,9 @@ private:
 };
 
 /*
-  We will likely run into scenarios where one collider will collide
-  with multiple objects. This class will be used to store potentially
-  relevant information when collisions occur.
+We will likely run into scenarios where one collider will collide
+with multiple objects. This class will be used to store potentially
+relevant information when collisions occur.
 */
 class CollisionInfo {
 	friend OctreeNode;
@@ -159,7 +159,7 @@ public:
 	bool collisionOccurred;
 	int numCollisions;
 
-//private:
+	//private:
 	Collider* collider; // The collider upon which collisionXXXX() will be called
 	std::set<GameObject*> collidees;
 	void add(Collider*);
@@ -167,8 +167,8 @@ public:
 };
 
 /*
- A simple ray class, for all your raycasting needs.
- */
+A simple ray class, for all your raycasting needs.
+*/
 class Ray {
 public:
 	glm::vec3 origin, direction;

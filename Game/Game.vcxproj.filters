@@ -24,12 +24,18 @@
     <ClCompile Include="source\ActivatorRegistrator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\GodSummoner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\FPSMovement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\ActivatorRegistrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\GodSummoner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

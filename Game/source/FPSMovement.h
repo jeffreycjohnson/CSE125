@@ -19,7 +19,7 @@ private:
 	void recalculate();
 public:
 	FPSMovement(
-		float moveSpeed, float mouseSensitivity,
+		int clientId, float moveSpeed, float mouseSensitivity,
 		glm::vec3 position, glm::vec3 up,
 		GameObject* verticality = nullptr);
 	~FPSMovement() {};
