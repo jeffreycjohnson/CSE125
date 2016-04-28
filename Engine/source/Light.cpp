@@ -13,14 +13,14 @@
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 
-void Light::setcolor(glm::vec3 color)
+void Light::setColor(glm::vec3 color)
 {
 	this->color = color;
 
 	postToNetwork();
 }
 
-void Light::setshadowCaster(bool shadowCaster)
+void Light::setShadowCaster(bool shadowCaster)
 {
 	this->shadowCaster = shadowCaster;
 
@@ -28,60 +28,60 @@ void Light::setshadowCaster(bool shadowCaster)
 
 }
 
-void Light::setradius(float radius)
+void Light::setRadius(float radius)
 {
 	this->radius = radius;
 
 	postToNetwork();
 }
 
-void Light::setconstantFalloff(float constantFalloff)
+void Light::setConstantFalloff(float constantFalloff)
 {
 	this->constantFalloff = constantFalloff;
 
 	postToNetwork();
 }
 
-void Light::setlinearFalloff(float linearFalloff)
+void Light::setLinearFalloff(float linearFalloff)
 {
 	this->linearFalloff = linearFalloff;
 
 	postToNetwork();
 }
 
-void Light::setexponentialFalloff(float exponentialFalloff)
+void Light::setExponentialFalloff(float exponentialFalloff)
 {
 	this->exponentialFalloff = exponentialFalloff;
 
 	postToNetwork();
 }
 
-glm::vec3 Light::getcolor()
+glm::vec3 Light::getColor()
 {
 	return this->color;
 }
 
-bool Light::getshadowCaster()
+bool Light::getShadowCaster()
 {
 	return this->shadowCaster;
 }
 
-float Light::getradius()
+float Light::getRadius()
 {
 	return this->radius;
 }
 
-float Light::getconstantFalloff()
+float Light::getConstantFalloff()
 {
 	return this->constantFalloff;
 }
 
-float Light::getlinearFalloff()
+float Light::getLinearFalloff()
 {
 	return this->linearFalloff;
 }
 
-float Light::getexponentialFalloff()
+float Light::getExponentialFalloff()
 {
 	return this->exponentialFalloff;
 }
@@ -212,25 +212,46 @@ void Light::deserializeAndApply(std::vector<char> bytes)
 {
 	LightNetworkData lnd = structFromBytes<LightNetworkData>(bytes);
 
-	setcolor(glm::vec3(lnd.colorr, lnd.colorg, lnd.colorb));
-	setshadowCaster(lnd.shadowCaster);
-	setradius(lnd.radius);
-	setconstantFalloff(lnd.constantFalloff);
-	setlinearFalloff(lnd.linearFalloff);
-	setexponentialFalloff(lnd.exponentialFalloff);
+	setColor(glm::vec3(lnd.colorr, lnd.colorg, lnd.colorb));
+	setShadowCaster(lnd.shadowCaster);
+	setRadius(lnd.radius);
+	setConstantFalloff(lnd.constantFalloff);
+	setLinearFalloff(lnd.linearFalloff);
+	setExponentialFalloff(lnd.exponentialFalloff);
 }
 
 std::vector<char> Light::serialize()
 {
+	int lightType;
+	Light * light_t;
+	PointLight * pointlight_t;
+	DirectionalLight * directionallight_t;
+	SpotLight * spotlight_t;
+
+	if (pointlight_t = dynamic_cast<PointLight*>(this)) {
+		lightType = is_pointlight;
+	}
+	else if (directionallight_t = dynamic_cast<DirectionalLight*>(this)) {
+		lightType = is_directionallight;
+	}
+	else if (spotlight_t = dynamic_cast<SpotLight*>(this)) {
+		lightType = is_spotlight;
+	}
+	else if (light_t = dynamic_cast<Light*>(this)) {
+		lightType = is_light;
+		std::cerr << "This should not happen" << std::endl;
+	}
+
 	LightNetworkData lnd = LightNetworkData(
 		gameObject->getID(),
 		lightType,
-		getcolor(),
-		getshadowCaster(),
-		getradius(),
-		getconstantFalloff(),
-		getlinearFalloff(),
-		getexponentialFalloff());
+		getColor(),
+		getShadowCaster(),
+		getRadius(),
+		getConstantFalloff(),
+		getLinearFalloff(),
+		getExponentialFalloff());
+	std::cout << "My Lighttype... " << lightType << std::endl;
 	return structToBytes(lnd);
 }
 

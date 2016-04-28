@@ -20,20 +20,19 @@ public:
 		float linearFalloff, float exponentialFalloff) :
 		color(color), shadowCaster(shadowCaster), radius(radius), constantFalloff(constantFalloff),
 		linearFalloff(linearFalloff), exponentialFalloff(exponentialFalloff) {};*/
+	void setColor(glm::vec3 color);
+	void setShadowCaster(bool shadowCaster);
+	void setRadius(float radius);
+	void setConstantFalloff(float constantFalloff);
+	void setLinearFalloff(float linearFalloff);
+	void setExponentialFalloff(float exponentialFalloff);
 
-	void setcolor(glm::vec3 color);
-	void setshadowCaster(bool shadowCaster);
-	void setradius(float radius);
-	void setconstantFalloff(float constantFalloff);
-	void setlinearFalloff(float linearFalloff);
-	void setexponentialFalloff(float exponentialFalloff);
-
-	glm::vec3 getcolor();
-	bool getshadowCaster();
-	float getradius();
-	float getconstantFalloff();
-	float getlinearFalloff();
-	float getexponentialFalloff();
+	glm::vec3 getColor();
+	bool getShadowCaster();
+	float getRadius();
+	float getConstantFalloff();
+	float getLinearFalloff();
+	float getExponentialFalloff();
 
 	void setGameObject(GameObject* object) override;
 
@@ -43,8 +42,6 @@ public:
     virtual void deferredPass() = 0;
 
 	void deserializeAndApply(std::vector<char> bytes) override;
-
-	int lightType = is_light;
 
 	std::vector<char> serialize() override;
 
@@ -66,8 +63,6 @@ public:
     void forwardPass(int index) override;
     void deferredPass() override;
     void debugDraw() override;
-
-	int lightType = is_pointlight;
 };
 
 class DirectionalLight : public Light
@@ -82,8 +77,6 @@ public:
 
     std::unique_ptr<Camera> shadowMap;
     static glm::mat4 shadowMatrix;
-
-	int lightType = is_directionallight;
 };
 
 class SpotLight : public Light
@@ -96,7 +89,6 @@ public:
     void deferredPass() override;
 
 	//void deserializeAndApply(std::vector<char> bytes) override;
-	int lightType = is_spotlight;
 };
 
 #endif
