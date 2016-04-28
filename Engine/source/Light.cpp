@@ -7,8 +7,145 @@
 #include <gtc/matrix_inverse.hpp>
 #include "Camera.h"
 #include "RenderPass.h"
+#include "NetworkManager.h"
+#include "NetworkUtility.h"
+#include <iostream>
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
+
+void Light::setColor(glm::vec3 color)
+{
+	this->color = color;
+
+	postToNetwork();
+}
+
+void Light::setShadowCaster(bool shadowCaster)
+{
+	this->shadowCaster = shadowCaster;
+
+	postToNetwork();
+
+}
+
+void Light::setRadius(float radius)
+{
+	this->radius = radius;
+
+	postToNetwork();
+}
+
+void Light::setConstantFalloff(float constantFalloff)
+{
+	this->constantFalloff = constantFalloff;
+
+	postToNetwork();
+}
+
+void Light::setLinearFalloff(float linearFalloff)
+{
+	this->linearFalloff = linearFalloff;
+
+	postToNetwork();
+}
+
+void Light::setExponentialFalloff(float exponentialFalloff)
+{
+	this->exponentialFalloff = exponentialFalloff;
+
+	postToNetwork();
+}
+
+glm::vec3 Light::getColor()
+{
+	return this->color;
+}
+
+bool Light::getShadowCaster()
+{
+	return this->shadowCaster;
+}
+
+float Light::getRadius()
+{
+	return this->radius;
+}
+
+float Light::getConstantFalloff()
+{
+	return this->constantFalloff;
+}
+
+float Light::getLinearFalloff()
+{
+	return this->linearFalloff;
+}
+
+float Light::getExponentialFalloff()
+{
+	return this->exponentialFalloff;
+}
+
+void Light::setGameObject(GameObject * object)
+{
+	Component::setGameObject(object);
+	postToNetwork();
+}
+
+void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messageId) {
+	LightNetworkData lnd = structFromBytes<LightNetworkData>(bytes);
+	PointLight *gopointlight;
+	DirectionalLight *godirectionallight;
+	SpotLight *gospotlight;
+
+	GameObject *go = GameObject::FindByID(messageId);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("From Light.cpp/Dispatch: Nonexistant gameobject");
+	}
+	switch (lnd.lightType) {
+	case is_light:
+		throw std::runtime_error("From Light.cpp/Dispatch: This should not happen!\n Lights need to be specified...");
+		break;
+	case is_pointlight:
+		gopointlight = go->getComponent<PointLight>();
+		if (gopointlight != nullptr) {
+			gopointlight->deserializeAndApply(bytes);
+		}
+		else {
+			gopointlight = new PointLight();
+			go->addComponent(gopointlight);
+			gopointlight->deserializeAndApply(bytes);
+		}
+		break;
+	case is_directionallight:
+		godirectionallight = go->getComponent<DirectionalLight>();
+		if (godirectionallight != nullptr) {
+			godirectionallight->deserializeAndApply(bytes);
+		}
+		else {
+			godirectionallight = new DirectionalLight();
+			go->addComponent(godirectionallight);
+			godirectionallight->deserializeAndApply(bytes);
+		}
+		break;
+	case is_spotlight:
+		throw std::runtime_error("From Light.cpp/Dispatch: SpotlightNotImplementd");
+		gospotlight = go->getComponent<SpotLight>();
+		if (gospotlight != nullptr) {
+			gospotlight->deserializeAndApply(bytes);
+		}
+		else {
+			gospotlight = new SpotLight();
+			go->addComponent(gospotlight);
+			gospotlight->deserializeAndApply(bytes);
+		}
+		break;
+	default:
+		throw std::runtime_error("From Light.cpp/Dispatch: out of enum? Impossible");
+		break;
+	}
+}
 
 void Light::deferredHelper(const std::string& meshName)
 {
@@ -27,6 +164,21 @@ void Light::deferredHelper(const std::string& meshName)
 
     glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
     CHECK_ERROR();
+}
+
+void Light::postToNetwork()
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		std::cerr << "Light ain't got no attached game object modified??" << std::endl;
+		return;
+	}
+
+	std::cout << "Sending light..." << std::endl;
+	NetworkManager::PostMessage(serialize(), LIGHT_NETWORK_DATA, my->getID());
 }
 
 void PointLight::forwardPass(int index)
@@ -57,6 +209,53 @@ void PointLight::debugDraw()
 			/ (2.0f * exponentialFalloff);
 		Renderer::drawSphere(glm::vec3(0), scale, glm::vec4(color, 1), &gameObject->transform);
 	}
+}
+
+void Light::deserializeAndApply(std::vector<char> bytes)
+{
+	LightNetworkData lnd = structFromBytes<LightNetworkData>(bytes);
+
+	setColor(glm::vec3(lnd.colorr, lnd.colorg, lnd.colorb));
+	setShadowCaster(lnd.shadowCaster);
+	setRadius(lnd.radius);
+	setConstantFalloff(lnd.constantFalloff);
+	setLinearFalloff(lnd.linearFalloff);
+	setExponentialFalloff(lnd.exponentialFalloff);
+}
+
+std::vector<char> Light::serialize()
+{
+	int lightType;
+	Light * light_t;
+	PointLight * pointlight_t;
+	DirectionalLight * directionallight_t;
+	SpotLight * spotlight_t;
+
+	if (pointlight_t = dynamic_cast<PointLight*>(this)) {
+		lightType = is_pointlight;
+	}
+	else if (directionallight_t = dynamic_cast<DirectionalLight*>(this)) {
+		lightType = is_directionallight;
+	}
+	else if (spotlight_t = dynamic_cast<SpotLight*>(this)) {
+		lightType = is_spotlight;
+	}
+	else if (light_t = dynamic_cast<Light*>(this)) {
+		lightType = is_light;
+		std::cerr << "This should not happen" << std::endl;
+	}
+
+	LightNetworkData lnd = LightNetworkData(
+		gameObject->getID(),
+		lightType,
+		getColor(),
+		getShadowCaster(),
+		getRadius(),
+		getConstantFalloff(),
+		getLinearFalloff(),
+		getExponentialFalloff());
+	std::cout << "My Lighttype... " << lightType << std::endl;
+	return structToBytes(lnd);
 }
 
 DirectionalLight::DirectionalLight(bool shadow)

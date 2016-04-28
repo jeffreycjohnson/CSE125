@@ -53,7 +53,7 @@ void DebugPass::render(Camera* camera) {
 void ShadowPass::render(Camera* camera)
 {
     auto l = camera->gameObject->getComponent<DirectionalLight>();
-    if (!l || !l->shadowCaster) return;
+    if (!l || !l->getShadowCaster()) return;
     l->bindShadowMap();
 
     Renderer::getShader(SHADOW_SHADER)["uP_Matrix"] = DirectionalLight::shadowMatrix;
