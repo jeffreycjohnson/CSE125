@@ -31,7 +31,7 @@ void CapsuleCollider::destroy() {
 	Collider::destroy();
 };
 
-void CapsuleCollider::update(float) {
+void CapsuleCollider::fixedUpdate() {
 	// Make sure our positional information is updated
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();

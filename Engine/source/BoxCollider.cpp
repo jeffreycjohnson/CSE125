@@ -35,7 +35,7 @@ BoxCollider::~BoxCollider()
 {
 }
 
-void BoxCollider::update(float)
+void BoxCollider::fixedUpdate()
 {
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();

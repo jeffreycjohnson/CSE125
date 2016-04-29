@@ -42,7 +42,7 @@ public:
 		passive = isStatic;
 	};
 
-	virtual void update(float) = 0;
+	virtual void fixedUpdate() = 0;
 	virtual void debugDraw() = 0;
 	virtual void onCollisionEnter(GameObject* other) = 0; // TODO: Probably will not need this
 

@@ -38,7 +38,7 @@ public:
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
 	void destroy() override;
-	void update(float) override;
+	void fixedUpdate() override;
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other) override;
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);

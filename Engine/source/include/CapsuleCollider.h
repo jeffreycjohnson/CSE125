@@ -22,7 +22,7 @@ public:
 	CapsuleCollider(glm::vec3 a, glm::vec3 b, float dist);
 	~CapsuleCollider();
 	void destroy() override;
-	void update(float) override;
+	void fixedUpdate() override;
 	void debugDraw() override;
 	void onCollisionEnter(GameObject* other) override;
 
