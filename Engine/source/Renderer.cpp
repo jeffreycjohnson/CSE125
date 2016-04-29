@@ -263,28 +263,32 @@ void Renderer::focus(GLFWwindow* window, int focused) {
 	}
 }
 
+static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scale, const glm::vec4& color, Transform* transform)
+{
+    Renderer::switchShader(DEBUG_SHADER);
+    (*Renderer::currentShader)["uColor"] = color;
+    (*Renderer::currentShader)["uPosition"] = glm::vec4(pos, 1);
+    (*Renderer::currentShader)["uScale"] = glm::vec4(scale, 1);
+    if (transform) Renderer::setModelMatrix(transform->getTransformMatrix());
+    else Renderer::setModelMatrix(glm::mat4());
+
+    MeshData& currentEntry = Mesh::meshMap.at(name);
+    if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+        glBindVertexArray(currentEntry.vaoHandle);
+        Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+    }
+
+    glDrawElements(GL_LINES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+}
+
 void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)
 {
-    Mesh m("Sphere_Outline");
-    switchShader(DEBUG_SHADER);
-    glm::vec4 position(pos, 1);
-    if (transform) m.setGameObject(transform->gameObject);
-    (*currentShader)["uPosition"] = position;
-    (*currentShader)["uScale"] = glm::vec4(radius);
-    (*currentShader)["uColor"] = color;
-    m.draw();
+    drawWireframe("assets/Primatives.obj/Sphere_Outline", pos, glm::vec3(radius), color, transform);
 }
 
 void Renderer::drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform)
 {
-    Mesh m("Box_Outline");
-    switchShader(DEBUG_SHADER);
-    glm::vec4 position(pos, 1);
-    if (transform) m.setGameObject(transform->gameObject);
-    (*currentShader)["uPosition"] = position;
-    (*currentShader)["uScale"] = glm::vec4(scale, 1);
-    (*currentShader)["uColor"] = color;
-    m.draw();
+    drawWireframe("assets/Primatives.obj/Box_Outline", pos, scale, color, transform);
 }
 
 void Renderer::drawCapsule(glm::vec3 pointA, glm::vec3 pointB, float radius, const glm::vec4& color) {

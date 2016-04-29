@@ -100,7 +100,7 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 
     if (currentNode->mNumMeshes > 0) {
 		int meshIndex = *currentNode->mMeshes;
-		std::string meshName = scene->mMeshes[meshIndex]->mName.C_Str();
+		std::string meshName = filename + "/" + scene->mMeshes[meshIndex]->mName.C_Str();
         if (!Mesh::meshMap.count(meshName)) {
             Mesh::loadMesh(meshName, scene->mMeshes[meshIndex]);
         }

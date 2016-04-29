@@ -39,7 +39,7 @@ public:
 	Material* material = nullptr;
 	Animation* animationRoot;
     
-    Mesh(std::string);
+    explicit Mesh(std::string);
 	~Mesh();
 
 	void setMaterial(Material *mat);

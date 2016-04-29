@@ -93,7 +93,7 @@ void LightingPass::render(Camera* camera)
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    auto& currentEntry = Mesh::meshMap["Plane"];
+    auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
 
     if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
         glBindVertexArray(currentEntry.vaoHandle);

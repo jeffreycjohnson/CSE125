@@ -197,7 +197,7 @@ void PointLight::deferredPass()
     float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
         / (2.0f * exponentialFalloff);
     (*Renderer::currentShader)["uScale"] = scale;
-    deferredHelper("Sphere");
+    deferredHelper("assets/Primatives.obj/Sphere");
 }
 
 void PointLight::debugDraw()
@@ -287,7 +287,7 @@ void DirectionalLight::deferredPass()
     (*Renderer::currentShader)["uLightPosition"] = glm::vec3(0);
     (*Renderer::currentShader)["uV_Matrix"] = glm::mat4();
     (*Renderer::currentShader)["uP_Matrix"] = glm::mat4();
-    deferredHelper("Plane");
+    deferredHelper("assets/Primatives.obj/Plane");
     (*Renderer::currentShader)["uV_Matrix"] = Renderer::view;
     (*Renderer::currentShader)["uP_Matrix"] = Renderer::perspective;
 }
