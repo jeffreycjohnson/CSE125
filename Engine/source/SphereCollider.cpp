@@ -30,7 +30,7 @@ void SphereCollider::destroy()
 	Collider::destroy();
 }
 
-void SphereCollider::update(float)
+void SphereCollider::fixedUpdate()
 {
 	// Make sure our world coordinates are properly updated
 	if (gameObject != nullptr) {

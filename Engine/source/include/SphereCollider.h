@@ -21,7 +21,7 @@ public:
 	SphereCollider(glm::vec3 c, float r);
 	~SphereCollider();
 	void destroy() override;
-	void update(float) override;
+	void fixedUpdate() override;
 	void debugDraw() override;
 
 	bool insideOrIntersects(const glm::vec3& point) const override;

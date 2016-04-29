@@ -70,7 +70,7 @@ public:
 		passive = isStatic;
 	};
 
-	virtual void update(float) = 0;
+	virtual void fixedUpdate() = 0;
 	virtual void debugDraw() = 0;
 
 	virtual bool insideOrIntersects(const glm::vec3& point) const = 0;
