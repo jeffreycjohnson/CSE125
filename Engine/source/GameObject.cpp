@@ -105,13 +105,14 @@ GameObject::GameObject() {
 	this->setID(GameObject::objectIDCounter++);
 }
 
-GameObject::GameObject(int id) {
+GameObject::GameObject(int id, std::string name) {
 	transform.setGameObject(this);
 	dead = false;
 	active = true;
 	visible = true;
 	newlyCreated = true;
 	this->setID(id);
+	this->name = name;
 }
 
 GameObject::~GameObject() {
@@ -476,8 +477,7 @@ std::vector<char> GameObject::serialize()
 {
 	int myID = getID();
 
-	CreateObjectNetworkData cond(myID);
-
+	CreateObjectNetworkData cond(myID, name, visible, active);
 	std::vector<char> myCreation;
 	myCreation.resize(sizeof(cond), 0);
 	memcpy(myCreation.data(), &cond, sizeof(cond));
@@ -488,13 +488,39 @@ std::vector<char> GameObject::serialize()
 bool GameObject::deserializeAndCreate(std::vector<char> bytes)
 {
 	CreateObjectNetworkData cond = structFromBytes<CreateObjectNetworkData>(bytes);
-	std::cout << "Creating object with id " << cond.objectID << std::endl;
+
 	if (GameObject::FindByID(cond.objectID) != nullptr)
 	{
-		std::cerr << "Cannot create object with ID " << cond.objectID << ", object with ID already exists" << std::endl;
-		return false;
-	}
+		GameObject * go = GameObject::FindByID(cond.objectID);
+		std::cout << "Updating object with id " << go->getID() << " and name " << go->getName() << std::endl;
 
-	new GameObject(cond.objectID);
+		go->active = cond.active;
+		go->visible = cond.visible;
+	}
+	else {
+		std::cout << "Creating object with id " << cond.objectID << " and name " << cond.name << std::endl;
+		new GameObject(cond.objectID, cond.name);
+	}
 	return true;
+}
+
+void GameObject::setVisible(bool visible)
+{
+	this->visible = visible;
+	postToNetwork();
+}
+
+void GameObject::setActive(bool active) {
+	this->active = active;
+	postToNetwork();
+}
+
+bool GameObject::getVisible()
+{
+	return visible;
+}
+
+bool GameObject::getActive()
+{
+	return active;
 }

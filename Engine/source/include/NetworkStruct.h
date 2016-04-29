@@ -39,14 +39,19 @@ struct ClientsConnNetworkData
 };
 #pragma pack(pop)
 
+#define MAX_GAMEOBJ_NAME 64
 #pragma pack(push, 1)
-struct CreateObjectNetworkData
+struct CreateObjectNetworkData // Updates Object if already exists
 {
 	int objectID;
+	bool visible, active;
+	char name[MAX_GAMEOBJ_NAME];
 
-	CreateObjectNetworkData(int objectID)
-		: objectID(objectID)
+	CreateObjectNetworkData(int objectID, std::string name, bool visible, bool active)
+		: objectID(objectID), visible(visible), active(active)
 	{
+		strncpy_s(this->name, name.c_str(), MAX_GAMEOBJ_NAME - 1);
+
 	}
 };
 #pragma pack(pop)
