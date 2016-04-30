@@ -342,5 +342,5 @@ void OctreeManager::debugDraw() {
 	if (dynamicObjects != nullptr && DebugPass::drawDynamicOctree) {
 		dynamicObjects->debugDraw();
 	}
-	Renderer::drawSphere(glm::vec3(0), 1.0f, glm::vec4(1));
+	//Renderer::drawSphere(glm::vec3(0), 1.0f, glm::vec4(1)); // draw sphere @ origin
 }

@@ -6,6 +6,8 @@
 #include "Renderer.h"
 #include "RenderPass.h"
 
+bool BoxCollider::drawBoxPoints = false;
+
 BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset), dimensions(dimensions)
 {
 	float halfW = dimensions.x / 2;
@@ -101,21 +103,25 @@ void BoxCollider::debugDraw()
 			dims = glm::vec3(std::abs(xmax - xmin), std::abs(ymax - ymin), std::abs(zmax - zmin));
 			dims /= 2;
 			Renderer::drawBox(offsetWorld, dims, color);
-			Renderer::drawSphere(glm::vec3(xmin, ymin, zmin), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmin, ymax, zmin), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmin, ymin, zmax), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmin, ymax, zmax), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmax, ymin, zmin), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmax, ymax, zmin), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmax, ymin, zmax), sphereRadii, color);
-			Renderer::drawSphere(glm::vec3(xmax, ymax, zmax), sphereRadii, color);
+			if (drawBoxPoints) {
+				Renderer::drawSphere(glm::vec3(xmin, ymin, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmin, ymax, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmin, ymin, zmax), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmin, ymax, zmax), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymin, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymax, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymin, zmax), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymax, zmax), sphereRadii, color);
+			}
 		}
 		else {
 			// Draws oriented bounding box
 			dims /= 2;
 			Renderer::drawBox(offset, dims, color, &gameObject->transform);
-			for (int i = 0; i < 8; ++i) {
-				Renderer::drawSphere(transformPoints[i], sphereRadii, color); // Global
+			if (drawBoxPoints) {
+				for (int i = 0; i < 8; ++i) {
+					Renderer::drawSphere(transformPoints[i], sphereRadii, color); // Global
+				}
 			}
 		}
 	}
@@ -266,7 +272,18 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	if (tzmax < tmax)
 		tmax = tzmax;
 
-	hit.hitTime = tmin;
+	// Return the tmin/tmax that is closest to the ray's origin
+	glm::vec3 min = ray.getPos(tmin);
+	glm::vec3 max = ray.getPos(tmax);
+
+	if (glm::distance(min, ray.origin) < glm::distance(max, ray.origin)) {
+		hit.hitTime = tmin;
+	}
+	else {
+		hit.hitTime = tmax;
+	}
+
+	//hit.hitTime = tmax; // tmin;
 	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	return hit;

@@ -13,6 +13,10 @@ private:
 
 	glm::vec2 lastMousePosition;
 
+	// ray cast debugging
+	glm::vec3 lastRayPoint;
+	bool raycastHit;
+
 	void recalculate();
 public:
 	FPSMovement(
@@ -23,6 +27,8 @@ public:
 	void create() override;
 	void fixedUpdate() override;
 	void update(float dt) override;
+	void debugDraw() override;
+
 };
 
 #endif // PLAYER_MOVEMENT_H

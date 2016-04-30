@@ -8,6 +8,8 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "Timer.h"
+#include "OctreeManager.h"
+#include "Camera.h"
 
 const float SPEED = 3.0f;
 
@@ -18,6 +20,8 @@ FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 posi
 
 	this->yaw = -90.0f;
 	this->pitch = 0.0f;
+
+	raycastHit = false;
 }
 
 void FPSMovement::create()
@@ -38,6 +42,19 @@ void FPSMovement::fixedUpdate()
 	4. game logic
 	5. send msg
 	*/
+
+	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
+	if (oct != nullptr) {
+		Ray ray = Renderer::mainCamera->getEyeRay();
+		auto hit = oct->raycast(ray, Octree::DYNAMIC_ONLY);
+		if (hit.intersects) {
+			raycastHit = hit.intersects;
+			lastRayPoint = ray.getPos(hit.hitTime);
+		}
+		else {
+			raycastHit = hit.intersects;
+		}
+	}
 
 }
 
@@ -64,6 +81,15 @@ void FPSMovement::update(float dt)
 	position += Input::getAxis("pitch") * normRight * speed;
 
 	recalculate();
+}
+
+void FPSMovement::debugDraw()
+{
+	if (raycastHit) {
+		Renderer::drawSphere(lastRayPoint, 0.02f, glm::vec4(0, 0, 1, 1));
+	}
+
+	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
 }
 
 void FPSMovement::recalculate()

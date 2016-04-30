@@ -13,6 +13,7 @@
 #include "ServerManager.h"
 #include "OctreeManager.h"
 #include "Config.h"
+#include "BoxCollider.h"
 #include <chrono>
 
 GLFWwindow * mainWindow;
@@ -117,6 +118,8 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 
 	// TODO: When this is merged into develop, register the before 
 	// and after callbacks on the OctreeManager.
+	
+	BoxCollider::drawBoxPoints = file.getBool("OctreeOptions","drawBoxPoints");
 
 }
 

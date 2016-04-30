@@ -35,6 +35,8 @@ private:
 
 public:
 
+	static bool drawBoxPoints;
+
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
 	void destroy() override;
