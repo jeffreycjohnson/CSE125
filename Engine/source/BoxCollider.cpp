@@ -209,4 +209,66 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 		return false;
 	}
 
+}
+
+RayHitInfo BoxCollider::intersects(const Ray & ray) const
+{
+	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+	RayHitInfo hit;
+	float tmin = (xmin - ray.origin.x) / ray.direction.x;
+	float tmax = (xmax - ray.origin.x) / ray.direction.x;
+	float temp = 0.0;
+
+	if (tmin > tmax) {
+		temp = tmin;
+		tmin = tmax;
+		tmax = temp;
+	}
+
+	float tymin = (ymin - ray.origin.y) / ray.direction.y;
+	float tymax = (ymax - ray.origin.y) / ray.direction.y;
+
+	if (tymin > tymax) {
+		temp = tymin;
+		tymin = tymax;
+		tymax = temp;
+	}
+
+	// Fast exit
+	if ((tmin > tymax) || (tymin > tmax)) {
+		hit.intersects = false;
+		return hit;
+	}
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax > tmax)
+		tmax = tymax;
+
+	float tzmin = (zmin - ray.origin.z) / ray.direction.z;
+	float tzmax = (zmax - ray.origin.z) / ray.direction.z;
+
+	if (tzmin > tzmax) {
+		temp = tzmin;
+		tzmin = tzmax;
+		tzmax = tzmin;
+	}
+
+	if ((tmin > tzmax) || (tzmin > tmax)) {
+		hit.intersects = false;
+		return hit;
+	}
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	hit.hitTime = tmin;
+	hit.collider = (Collider*)this;
+	hit.intersects = true;
+	return hit;
+
 };

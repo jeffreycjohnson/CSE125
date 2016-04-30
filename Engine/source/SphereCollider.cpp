@@ -80,6 +80,11 @@ bool SphereCollider::intersects(const SphereCollider & other) const
 	return (distance <= radiusWorld + other.radiusWorld);
 }
 
+RayHitInfo SphereCollider::intersects(const Ray & ray) const
+{
+	return RayHitInfo(); // TODO: Implement ray::sphere intersection
+}
+
 BoxCollider SphereCollider::getAABB() const
 {
 	// Remember to pass in the world coordinates

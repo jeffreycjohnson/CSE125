@@ -30,6 +30,7 @@ class Octree;
 class OctreeNode;
 class Plane;
 class Ray;
+class RayHitInfo;
 class Renderer;
 class RenderPass;
 class Shader;

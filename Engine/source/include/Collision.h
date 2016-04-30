@@ -60,7 +60,10 @@ public:
 	// Preserves the min/max and BuildMode restrictions from build
 	void rebuild();
 
-	CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
+	RayHitInfo raycast(const Ray&);
+
+	// Don't use this \/
+	//CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
 	CollisionInfo collidesWith(Collider*);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
@@ -127,7 +130,7 @@ private:
 
 	/* Member Functions */
 
-	CollisionInfo raycast(const Ray&);
+	void raycast(const Ray&, RayHitInfo&);
 	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
 	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
 	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
@@ -179,4 +182,17 @@ public:
 	// Returns a discrete point along the ray at the timestep t
 	glm::vec3 getCurrentPosition() const;
 	glm::vec3 getPos(float tt) const;
+};
+
+/*
+ RayHitInfo
+ */
+class RayHitInfo {
+public:
+	float hitTime;
+	glm::vec3 point;
+	Collider* collider;
+	bool intersects;
+
+	RayHitInfo();
 };

@@ -152,7 +152,16 @@ void Octree::rebuild()
 	}
 }
 
-CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
+RayHitInfo Octree::raycast(const Ray & ray)
+{
+	RayHitInfo hitInfo;
+	if (root) {
+		root->raycast(ray, hitInfo);
+	}
+	return hitInfo;
+}
+
+/*CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	if (root && min < max) {
 		CollisionInfo colInfo;
 		colInfo.collider = nullptr; // TODO: Handle gameobject ptr for raycasts
@@ -169,7 +178,7 @@ CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
 	else {
 		return CollisionInfo();
 	}
-};
+};*/
 
 CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
 	CollisionInfo colInfo;

@@ -70,6 +70,10 @@ bool CapsuleCollider::intersects(const CapsuleCollider& other) const {
 bool CapsuleCollider::intersects(const SphereCollider& other) const {
 	// TODO: Capsule -> Sphere intersection
 	return false;
+}
+RayHitInfo CapsuleCollider::intersects(const Ray & ray) const
+{
+	return RayHitInfo(); // TODO: CapsuleCollider implement ray
 };
 
 BoxCollider CapsuleCollider::getAABB() const {

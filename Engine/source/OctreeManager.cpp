@@ -25,6 +25,19 @@ OctreeManager::~OctreeManager()
 		delete dynamicObjects;
 }
 
+RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree)
+{
+	if (whichTree == Octree::DYNAMIC_ONLY) {
+		return dynamicObjects->raycast(ray);
+	}
+	else if (whichTree == Octree::STATIC_ONLY) {
+		return staticObjects->raycast(ray);
+	}
+	else {
+		throw "This doens't work";
+	}
+}
+
 void OctreeManager::insertGameObject(GameObject *gameObject)
 {
 
@@ -130,7 +143,7 @@ void OctreeManager::probeForStaticCollisions() {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// staticCollisionExit() event should be fired here
-							colInfo.collider->removePreviousColliders(colInfo);
+							//colInfo.collider->removePreviousColliders(colInfo);
 							staticCollisions.push_back(colInfo); // TODO: ignore collision exit for now
 						}
 					}
@@ -165,7 +178,7 @@ void OctreeManager::probeForDynamicCollisions() {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// CollisionExit() event should be fired here
-							colInfo.collider->removePreviousColliders(colInfo);
+							//colInfo.collider->removePreviousColliders(colInfo);
 							dynamicCollisions.push_back(colInfo); // TODO: Ignore collision exit for now
 						}
 					}
@@ -208,6 +221,14 @@ void OctreeManager::beforeFixedUpdate() {
 		// we call the staticCollisionXXXX() method.
 		GameObject* caller = collisionData.collider->gameObject;
 
+		// Since we load each node in blender as a single gameobject, we actually want
+		// to trigger the collision up two levels
+		// --> obj_Player
+		// -----> Colliders
+		// ---------> BoxCollider
+
+		caller = caller->transform.parent->parent->gameObject;
+
 		// state @ N - 1
 		bool colliding = collisionData.collider->colliding;
 
@@ -246,6 +267,14 @@ void OctreeManager::beforeFixedUpdate() {
 	for (auto collisionData : dynamicCollisions) {
 		GameObject* caller = collisionData.collider->gameObject;
 
+		// Since we load each node in blender as a single gameobject, we actually want
+		// to trigger the collision up two levels
+		// --> obj_Player
+		// -----> Colliders
+		// ---------> BoxCollider
+
+		caller = caller->transform.parent->parent->gameObject;
+
 		// state @ N - 1
 		bool colliding = collisionData.collider->colliding;
 
@@ -276,16 +305,6 @@ void OctreeManager::beforeFixedUpdate() {
 
 void OctreeManager::fixedUpdate() {
 
-	/*Ray ray = Renderer::mainCamera->getEyeRay();
-	CollisionInfo colInfo = dynamicObjects->raycast(ray, Octree::RAY_MIN, 5, 0.1f);
-	if (colInfo.collisionOccurred) {
-		int x = 0;
-		++x; // nop
-		if (Timer::nextFixedStep()) {
-			std::cerr << "lel" << std::endl;
-		}
-	}*/
-
 };
 
 void OctreeManager::afterFixedUpdate() {
@@ -295,9 +314,13 @@ void OctreeManager::afterFixedUpdate() {
 	// so we need to update it to whatever happened *this* frame.
 	for (auto collision : staticCollisions) {
 		collision.collider->previouslyColliding = collision.collider->colliding;
+		collision.collider->removePreviousColliders(collision);
+		collision.collider->addPreviousColliders(collision);
 	}
 	for (auto collision : dynamicCollisions) {
 		collision.collider->previouslyColliding = collision.collider->colliding;
+		collision.collider->removePreviousColliders(collision);
+		collision.collider->addPreviousColliders(collision);
 	}
 
 	// Print out collision data

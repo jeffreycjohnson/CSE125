@@ -38,28 +38,29 @@ OctreeNode::~OctreeNode() {
 	tree->removeNode(this->nodeId);
 }
 
-CollisionInfo OctreeNode::raycast(const Ray& ray) {
-	CollisionInfo colInfo;
-	glm::vec3 point = ray.getCurrentPosition();
+void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
+
+	RayHitInfo againstMe = myAABB->intersects(ray);
+	if (againstMe.hitTime > hitInfo.hitTime) {
+		return; // Nothing inside of us will collide with this
+	}
 
 	for (auto obj : colliders) {
-		if (obj->insideOrIntersects(point)) {
-			colInfo.add(obj);
+		auto temphit = obj->intersects(ray);
+		if (temphit.intersects) {
+			hitInfo.intersects = true;
+			if (temphit.hitTime < hitInfo.hitTime) {
+				hitInfo = temphit;
+			}
+		}
+	}
+	
+	for (auto child : children) {
+		if (child != nullptr) {
+			child->raycast(ray, hitInfo);
 		}
 	}
 
-	if (isLeaf()) {
-		return colInfo;
-	}
-	
-	// TODO: Figure out which octant the point is in & recurse only there (optimization)
-
-	for (auto child : children) {
-		if (child != nullptr)
-			colInfo.merge(child->raycast(ray));
-	}
-
-	return colInfo;
 };
 
 // TODO: Condense the "collidesWith" methods into one method, since there's a lot of repetition

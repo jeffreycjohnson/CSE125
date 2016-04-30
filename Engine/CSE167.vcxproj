@@ -194,6 +194,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="RayHitInfo.cpp" />
+    <ClCompile Include="source\include\Collision.cpp" />
     <ClCompile Include="source\OctreeManager.cpp" />
     <ClCompile Include="source\Ray.cpp" />
     <ClCompile Include="source\NetworkStruct.cpp" />

@@ -34,6 +34,11 @@ protected:
 		}
 	};
 
+	bool isAPreviousCollider(GameObject* go) {
+		auto found = previousColliders.find(go);
+		return (found != previousColliders.end());
+	}
+
 	// Removes GameObject from the previous set
 	void removePreviousColliders(const CollisionInfo& colInfo) {
 		for (auto collidee : colInfo.collidees) {
@@ -44,12 +49,13 @@ protected:
 	std::vector<GameObject*> getCollisionExitEvents(const CollisionInfo& collisionsThisFrame) {
 		std::vector<GameObject*> triggerExitOnThese;
 		for (auto gameObject : collisionsThisFrame.collidees) {
-			if (previousColliders.find(gameObject) == previousColliders.end()) {
+			if (previousColliders.find(gameObject) != previousColliders.end()) {
 				// If we have find a game object in our previous colliders list that is not
 				// colliding with us this frame, we need to fire an exit event on that game object.
 				triggerExitOnThese.push_back(gameObject);
 			}
 		}
+		removePreviousColliders(collisionsThisFrame);
 		return triggerExitOnThese;
 	}
 
@@ -77,6 +83,7 @@ public:
 	virtual bool intersects(const BoxCollider& other) const = 0; 
 	virtual bool intersects(const CapsuleCollider& other) const = 0;
 	virtual bool intersects(const SphereCollider& other) const = 0;
+	virtual RayHitInfo intersects(const Ray& ray) const = 0;
 
 	// Returns an axis-aligned bounding box defined for WORLD coordinates
 	virtual BoxCollider getAABB() const = 0;

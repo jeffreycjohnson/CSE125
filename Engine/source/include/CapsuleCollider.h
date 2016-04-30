@@ -29,6 +29,7 @@ public:
 	bool intersects(const BoxCollider& other) const override;
 	bool intersects(const CapsuleCollider& other) const override;
 	bool intersects(const SphereCollider& other) const override;
+	RayHitInfo intersects(const Ray& ray) const override;
 
 	BoxCollider getAABB() const override;
 	ColliderType getColliderType() override {

@@ -23,6 +23,8 @@ public:
 	OctreeManager();
 	~OctreeManager();
 
+	RayHitInfo raycast(const Ray& ray, Octree::BuildMode whichTree);
+
 	// Adds or removes gameobjects (and all their colliders) to the
 	// apropriate octree. Will recursively add children as well.
 	void insertGameObject(GameObject*);
