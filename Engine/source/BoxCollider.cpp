@@ -264,7 +264,7 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	if (tzmin > tzmax) {
 		temp = tzmin;
 		tzmin = tzmax;
-		tzmax = tzmin;
+		tzmax = temp;
 	}
 
 	if ((tmin > tzmax) || (tzmin > tmax)) {
@@ -282,6 +282,7 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	glm::vec3 min = ray.getPos(tmin);
 	glm::vec3 max = ray.getPos(tmax);
 
+	// Tbh, this logic is slower than it probably needs to be, but it keeps the result sane 100% of the time
 	if (glm::distance(min, ray.origin) < glm::distance(max, ray.origin)) {
 		hit.hitTime = tmin;
 	}
@@ -289,7 +290,6 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 		hit.hitTime = tmax;
 	}
 
-	//hit.hitTime = tmax; // tmin;
 	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	return hit;
