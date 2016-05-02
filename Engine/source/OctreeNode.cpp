@@ -21,7 +21,7 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 	float zDiameter = std::abs(max.z - min.z);
 	glm::vec3 center = glm::vec3(max.x - xDiameter / 2, max.y - yDiameter / 2, max.z - zDiameter / 2);
 	glm::vec3 dims(xDiameter / 2, yDiameter / 2, zDiameter / 2); // min points didn't match
-	//glm::vec3 dims(xDiameter, yDiameter, zDiameter);
+																 //glm::vec3 dims(xDiameter, yDiameter, zDiameter);
 	myAABB = new BoxCollider(center, dims);
 	myAABB->setMinAndMax(min, max);
 
@@ -51,7 +51,7 @@ CollisionInfo OctreeNode::raycast(const Ray& ray) {
 	if (isLeaf()) {
 		return colInfo;
 	}
-	
+
 	// TODO: Figure out which octant the point is in & recurse only there (optimization)
 
 	for (auto child : children) {
@@ -71,33 +71,33 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 			if (colliderPtr == &box) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
 
-				case ColliderType::AABB:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(box)) {
-						info.add(myBox);
-					}
-					break;
+			case ColliderType::AABB:
+			{
+				BoxCollider* myBox = (BoxCollider*)colliderPtr;
+				if (myBox->intersects(box)) {
+					info.add(myBox);
 				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(box)) {
-						info.add(mySphere);
-					}
-					break;
+				break;
+			}
+			case ColliderType::SPHERE:
+			{
+				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+				if (mySphere->intersects(box)) {
+					info.add(mySphere);
 				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(box)) {
-						info.add(myCapsule);
-					}
-					break;
+				break;
+			}
+			case ColliderType::CAPSULE:
+			{
+				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+				if (myCapsule->intersects(box)) {
+					info.add(myCapsule);
 				}
+				break;
+			}
 			}
 		}
-		
+
 		// If we have children, check them afterwards
 		for (auto child : children) {
 			child->collidesWith(box, info);
@@ -109,36 +109,36 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 };
 
 CollisionInfo OctreeNode::collidesWith(const SphereCollider& collider, CollisionInfo& info) {
-	
+
 	// Check object against all of the objects in our colliders list
 	if (intersects(collider.getAABB())) { // TODO: avoid recomputing this
 		for (auto colliderPtr : colliders) {
 			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
-				case ColliderType::AABB:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(collider)) {
-						info.add(myBox);
-					}
-					break;
+			case ColliderType::AABB:
+			{
+				BoxCollider* myBox = (BoxCollider*)colliderPtr;
+				if (myBox->intersects(collider)) {
+					info.add(myBox);
 				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(collider)) {
-						info.add(mySphere);
-					}
-					break;
+				break;
+			}
+			case ColliderType::SPHERE:
+			{
+				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+				if (mySphere->intersects(collider)) {
+					info.add(mySphere);
 				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(collider)) {
-						info.add(myCapsule);
-					}
-					break;
+				break;
+			}
+			case ColliderType::CAPSULE:
+			{
+				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+				if (myCapsule->intersects(collider)) {
+					info.add(myCapsule);
 				}
+				break;
+			}
 			}
 		}
 
@@ -159,30 +159,30 @@ CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider, Collisio
 		for (auto colliderPtr : colliders) {
 			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
-				case ColliderType::AABB:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(collider)) {
-						info.add(myBox);
-					}
-					break;
+			case ColliderType::AABB:
+			{
+				BoxCollider* myBox = (BoxCollider*)colliderPtr;
+				if (myBox->intersects(collider)) {
+					info.add(myBox);
 				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(collider)) {
-						info.add(mySphere);
-					}
-					break;
+				break;
+			}
+			case ColliderType::SPHERE:
+			{
+				SphereCollider* mySphere = (SphereCollider*)colliderPtr;
+				if (mySphere->intersects(collider)) {
+					info.add(mySphere);
 				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(collider)) {
-						info.add(myCapsule);
-					}
-					break;
+				break;
+			}
+			case ColliderType::CAPSULE:
+			{
+				CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
+				if (myCapsule->intersects(collider)) {
+					info.add(myCapsule);
 				}
+				break;
+			}
 			}
 		}
 
@@ -204,13 +204,13 @@ bool OctreeNode::intersects(const BoxCollider& box) {
 }
 
 bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& colliderAABB) {
-	
+
 	// Keeps track of the number of intersections the box has with our children
 	int collisions = 0;
 	unsigned int index = 0;
-	
+
 	if (!isLeaf()) {
-	
+
 		// If this is an internal node, attempt to place the desired object into
 		// the child nodes. If there are multiple collisions between the object
 		// we are inserting & our immediate children, the object is too large,
@@ -218,7 +218,7 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 
 		int lastCollision = 0;
 
-		for (auto child : children) {	
+		for (auto child : children) {
 			// Despite what kind of collider we are inserting, we always want
 			// to do intersection testing with axis-aligned bounding boxes, b/c they are cheap
 			if (collisions > 1) break; // optimization
@@ -228,7 +228,7 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 			}
 			++index;
 		}
-		
+
 		if (collisions == 1) {
 			// Insert our box into the chosen child.
 			return children[lastCollision]->insert(colliderBeingInserted, colliderAABB);
@@ -256,11 +256,11 @@ void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
 	colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
 	/*for (auto iter = colliders.begin(); iter != colliders.end(); iter++) {
-		// TODO: Double check that this will function properly
-		if (*iter == colliderBeingRemoved) {
-			colliders.erase(iter, iter + 1);
-			break;
-		}
+	// TODO: Double check that this will function properly
+	if (*iter == colliderBeingRemoved) {
+	colliders.erase(iter, iter + 1);
+	break;
+	}
 	}*/
 	colliders.remove(colliderBeingRemoved);
 }
@@ -274,20 +274,20 @@ void OctreeNode::subdivide() {
 
 		// We need to generate 6 new "min" points, and 6 new "max" points & the center
 		glm::vec3 dist(xDist, yDist, zDist);
-		glm::vec3 center( (max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2);
-	
+		glm::vec3 center((max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2);
+
 		// Generate the first 2 (trivial) children
 		children.push_back(new OctreeNode(this->min, center, tree, this, depth + 1));
 		children.push_back(new OctreeNode(center, this->max, tree, this, depth + 1));
 
 		// [min points]
-		glm::vec3 min1(min.x,         min.y + yDist, min.z); // I know the names are bad, but I drew a diagram.
+		glm::vec3 min1(min.x, min.y + yDist, min.z); // I know the names are bad, but I drew a diagram.
 		glm::vec3 min2(min.x + xDist, min.y + yDist, min.z);
-		glm::vec3 min3(min.x + xDist, min.y,         min.z);
+		glm::vec3 min3(min.x + xDist, min.y, min.z);
 
-		glm::vec3 min4(min.x,         min.y,         min.z + zDist);
-		glm::vec3 min5(min.x,         min.y + yDist, min.z + zDist);
-		glm::vec3 min6(min.x + xDist, min.y,         min.z + zDist);
+		glm::vec3 min4(min.x, min.y, min.z + zDist);
+		glm::vec3 min5(min.x, min.y + yDist, min.z + zDist);
+		glm::vec3 min6(min.x + xDist, min.y, min.z + zDist);
 
 		// [max points]   (should map 1-to-1 with min points.)
 		glm::vec3 max1 = min1 + dist;
@@ -321,7 +321,7 @@ void OctreeNode::subdivide() {
 		// Clear the colliders vector and insert remaining stragglers
 		colliders.clear();
 		colliders = stragglers;
-	
+
 	}
 	//else // TODO: Will I need to do anything in the else case should a subdivide() call fail?
 }
@@ -361,14 +361,14 @@ void OctreeNode::debugDraw() {
 	//BoxCollider bounds(center, scale);
 	//bounds.debugDraw();   // Sanity check
 	myAABB->debugDraw();  // Sanity check
-	//--------------------------------------------
+						  //--------------------------------------------
 
-	// Draw spheres @ min & max corners
+						  // Draw spheres @ min & max corners
 	Renderer::drawSphere(min, 0.25f, glm::vec4(1, 0, 0, 1)); // min points RED
 	Renderer::drawSphere(max, 0.35f, glm::vec4(0, 1, 0, 1)); // max points GREEN
 
 
-	// Only render nodes with colliders in them and/or the root
+															 // Only render nodes with colliders in them and/or the root
 	if (colliders.size() > 0 || this == tree->root) {
 		Renderer::drawBox(center, scale, color);
 	}

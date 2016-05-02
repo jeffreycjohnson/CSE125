@@ -114,7 +114,6 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 
 	// TODO: When this is merged into develop, register the before 
 	// and after callbacks on the OctreeManager.
-
 }
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.

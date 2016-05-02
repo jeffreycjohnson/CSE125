@@ -11,17 +11,21 @@
 
 const float SPEED = 3.0f;
 
-FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up) 
-	: moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up)
+FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
+	: clientId(clientId), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
 	this->front = glm::vec3(0, 0, -1);
-	this->clientId = clientId;
-	this->yaw = -90.0f;
+
+	this->yaw = 0.0f;
 	this->pitch = 0.0f;
+
+	pastFirstTick = false;
 }
 
 void FPSMovement::create()
 {
+	if (verticality) this->gameObject->addChild(verticality);
+	
 	recalculate();
 }
 
@@ -29,6 +33,15 @@ void FPSMovement::fixedUpdate()
 {
 	auto dt = Timer::fixedTimestep;
 	
+	if (!pastFirstTick)
+	{
+		pastFirstTick = true;
+
+		glm::vec2 currMousePosition = ServerInput::mousePosition(clientId);
+		lastMousePosition = currMousePosition;
+		return;
+	}
+
 	// act on mouse
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientId);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
@@ -71,7 +84,16 @@ void FPSMovement::recalculate()
 	// now construct quaternion for mouselook
 	glm::quat x = glm::angleAxis(glm::radians(-yaw), worldUp);
 	glm::quat y = glm::angleAxis(glm::radians(-pitch), glm::vec3(1, 0, 0));
-	gameObject->transform.setRotate(x * y);
+
+	if (verticality != nullptr)
+	{
+		gameObject->transform.setRotate(x);
+		verticality->transform.setRotate(y);
+	}
+	else
+	{
+		gameObject->transform.setRotate(x * y);
+	}
 
 	// and transform me please
 	gameObject->transform.setPosition(position.x, position.y, position.z);

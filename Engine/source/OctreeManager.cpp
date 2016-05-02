@@ -107,7 +107,7 @@ void OctreeManager::buildDynamicOctree(const glm::vec3& min, const glm::vec3& ma
 };
 
 void OctreeManager::probeForStaticCollisions() {
-	
+
 	// Iterates through all the colliders in the dynamic octree, and checks
 	// to see if they collide with any static objects in the static octree.
 	// Collect all of the collision data into the staticCollisions vector
@@ -116,9 +116,9 @@ void OctreeManager::probeForStaticCollisions() {
 		for (auto nodeIter = dynamicObjects->begin(); nodeIter != dynamicObjects->end(); ++nodeIter) {
 			OctreeNode* node = nodeIter->second;
 			if (node != nullptr) {
-				
+
 				for (auto colliderIter = node->begin(); colliderIter != node->end(); ++colliderIter) {
-		
+
 					CollisionInfo colInfo = staticObjects->collidesWith(*colliderIter);
 					if (colInfo.numCollisions > 0) {
 						colInfo.collider->colliding = true;
@@ -132,7 +132,7 @@ void OctreeManager::probeForStaticCollisions() {
 							//staticCollisions.push_back(colInfo); // TODO: ignore collision exit for now
 						}
 					}
-				
+
 				}
 			}
 		}
@@ -188,7 +188,7 @@ void OctreeManager::beforeFixedUpdate() {
 
 	// 1. Since octrees are in state N - 1, look for all the collisions that occurred
 	//    during frame N - 1
-	
+
 
 	dynamicCollisionsThisFrame = 0;
 	staticCollisionsThisFrame = 0;
@@ -207,7 +207,7 @@ void OctreeManager::beforeFixedUpdate() {
 		// state @ N - 1
 		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
 
-		// state @ N - 2
+														   // state @ N - 2
 		bool previouslyColliding = collisionData.collider->previouslyColliding;
 
 		// /!\ Warning: the following code is black magic. Exercise caution.
@@ -224,8 +224,8 @@ void OctreeManager::beforeFixedUpdate() {
 		}
 
 		/*if (!colliding && previouslyColliding) {
-			// Static Collision Exit
-			caller->collisionCallback(other, &Component::staticCollisionExit);
+		// Static Collision Exit
+		caller->collisionCallback(other, &Component::staticCollisionExit);
 		}*/ // TODO: Collision Exit is special
 
 		// *** end of black magic ***
@@ -242,7 +242,7 @@ void OctreeManager::beforeFixedUpdate() {
 		// state @ N - 1
 		bool colliding = collisionData.collider->colliding;// = true; // Don't do this!
 
-		// state @ N - 2
+														   // state @ N - 2
 		bool previouslyColliding = collisionData.collider->previouslyColliding;
 
 		for (auto other : collisionData.collidees) {
@@ -257,8 +257,8 @@ void OctreeManager::beforeFixedUpdate() {
 		}
 
 		/*if (!colliding && previouslyColliding) {
-			// Collision Exit
-			caller->collisionCallback(other, &Component::collisionExit);
+		// Collision Exit
+		caller->collisionCallback(other, &Component::collisionExit);
 		}*/ // TODO: Collision Exit is special, deal with it later
 	}
 
@@ -271,11 +271,11 @@ void OctreeManager::fixedUpdate() {
 	/*Ray ray = Renderer::mainCamera->getEyeRay();
 	CollisionInfo colInfo = dynamicObjects->raycast(ray, Octree::RAY_MIN, 5, 0.1f);
 	if (colInfo.collisionOccurred) {
-		int x = 0;
-		++x; // nop
-		if (Timer::nextFixedStep()) {
-			std::cerr << "lel" << std::endl;
-		}
+	int x = 0;
+	++x; // nop
+	if (Timer::nextFixedStep()) {
+	std::cerr << "lel" << std::endl;
+	}
 	}*/
 
 };

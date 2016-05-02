@@ -9,7 +9,7 @@
 #include "OctreeManager.h"
 #include <iostream>
 #include <functional>
-#include "Networkmanager.h"
+#include "NetworkManager.h"
 #include "NetworkUtility.h"
 #include "ObjectLoader.h"
 #include <algorithm>
@@ -50,6 +50,24 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
     return ret;
 }
 
+std::vector<GameObject*> GameObject::FindAllByPrefix(const std::string & name)
+{
+	std::vector<GameObject*> ret;
+	for (auto& group : nameMap)
+	{
+		if (name.size() > group.first.size()) continue;
+
+		bool isPrefix = std::equal(
+			group.first.begin(),
+			group.first.begin() + name.size(),
+			name.begin()
+		);
+		if (isPrefix) ret.push_back(group.second);
+	}
+
+	return ret;
+}
+
 void GameObject::UpdateScene(int caller)
 {
 	while (Timer::nextFixedStep()) {
@@ -72,7 +90,6 @@ void GameObject::UpdateScene(int caller)
 		SceneRoot.update((float)Timer::deltaTime());
 
 		for (auto& callback : postVarCallbacks) callback();
-
 	}
 }
 

@@ -4,6 +4,7 @@
 
 #include <glm/glm/gtc/matrix_transform.hpp>
 
+#include "Camera.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "Renderer.h"
@@ -11,8 +12,8 @@
 
 const float SPEED = 3.0f;
 
-FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up) 
-	: moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up)
+FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality) 
+	: moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
 	this->front = glm::vec3(0, 0, -1);
 
@@ -22,8 +23,9 @@ FPSMovement::FPSMovement(float moveSpeed, float mouseSensitivity, glm::vec3 posi
 
 void FPSMovement::create()
 {
-	Input::hideCursor();
+	if (verticality) this->gameObject->addChild(verticality);
 
+	Input::hideCursor();
 	recalculate();
 }
 
@@ -38,7 +40,6 @@ void FPSMovement::fixedUpdate()
 	4. game logic
 	5. send msg
 	*/
-
 }
 
 void FPSMovement::update(float dt)
@@ -85,7 +86,16 @@ void FPSMovement::recalculate()
 	// now construct quaternion for mouselook
 	glm::quat x = glm::angleAxis(glm::radians(-yaw), worldUp);
 	glm::quat y = glm::angleAxis(glm::radians(-pitch), glm::vec3(1, 0, 0));
-	gameObject->transform.setRotate(x * y);
+
+	if (verticality != nullptr)
+	{
+		gameObject->transform.setRotate(x);
+		verticality->transform.setRotate(y);
+	}
+	else
+	{
+		gameObject->transform.setRotate(x * y);
+	}
 
 	// and transform me please
 	gameObject->transform.setPosition(position.x, position.y, position.z);

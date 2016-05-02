@@ -19,9 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Rotating.cpp" />
+    <ClCompile Include="source\Plate.cpp" />
+    <ClCompile Include="source\Activator.cpp" />
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
+    <ClCompile Include="source\GodSummoner.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\FPSMovement.cpp" />
+    <ClCompile Include="source\Target.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\CSE167.vcxproj">
@@ -29,8 +34,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Rotating.h" />
+    <ClInclude Include="source\Plate.h" />
+    <ClInclude Include="source\Activator.h" />
     <ClInclude Include="source\ActivatorRegistrator.h" />
     <ClInclude Include="source\FPSMovement.h" />
+    <ClInclude Include="source\GodSummoner.h" />
+    <ClInclude Include="source\Target.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1A66FBD-7F91-412A-B6ED-FB645555F316}</ProjectGuid>
