@@ -95,6 +95,8 @@ void LoadDebugOptions(ConfigFile& file) {
 	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
 	DebugPass::octreeColor = file.getColor("DebugOptions", "octreeColor");
 
+	BoxCollider::drawBoxPoints = file.getBool("DebugOptions", "drawBoxPoints");
+
 }
 
 void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
@@ -118,9 +120,6 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 
 	// TODO: When this is merged into develop, register the before 
 	// and after callbacks on the OctreeManager.
-	
-	BoxCollider::drawBoxPoints = file.getBool("OctreeOptions","drawBoxPoints");
-
 }
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.

@@ -23,7 +23,9 @@ protected:
 	Octree* octree;
 
 	bool previouslyColliding; // Colliding during frame N
+public:
 	bool colliding;           // Colliding during frame N + 1
+protected:
 	std::set<GameObject*> previousColliders; // Ptrs to gameObjects we collided with last frame
 
 	// Given the collisions we have found at frame N, we will want to add these

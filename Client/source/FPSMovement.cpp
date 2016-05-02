@@ -10,6 +10,7 @@
 #include "Timer.h"
 #include "OctreeManager.h"
 #include "Camera.h"
+#include "Collider.h"
 
 const float SPEED = 3.0f;
 
@@ -50,6 +51,9 @@ void FPSMovement::fixedUpdate()
 		if (hit.intersects) {
 			raycastHit = hit.intersects;
 			lastRayPoint = ray.getPos(hit.hitTime);
+			if (hit.collider != nullptr) {
+				hit.collider->colliding = true; // Don't manually set colliding EVER, this is just for debug visualization
+			}
 		}
 		else {
 			raycastHit = hit.intersects;

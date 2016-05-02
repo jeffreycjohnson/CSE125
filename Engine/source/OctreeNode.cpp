@@ -255,15 +255,10 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 
 void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
-	colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
-	/*for (auto iter = colliders.begin(); iter != colliders.end(); iter++) {
-		// TODO: Double check that this will function properly
-		if (*iter == colliderBeingRemoved) {
-			colliders.erase(iter, iter + 1);
-			break;
-		}
-	}*/
-	colliders.remove(colliderBeingRemoved);
+	if (colliderBeingRemoved != nullptr) {
+		colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
+		colliders.remove(colliderBeingRemoved);
+	}
 }
 
 void OctreeNode::subdivide() {
@@ -361,13 +356,12 @@ void OctreeNode::debugDraw() {
 	//--- Verifying boxes are drawing properly ---
 	//BoxCollider bounds(center, scale);
 	//bounds.debugDraw();   // Sanity check
-	myAABB->debugDraw();  // Sanity check
+	//myAABB->debugDraw();  // Sanity check
 	//--------------------------------------------
 
 	// Draw spheres @ min & max corners
 	Renderer::drawSphere(min, 0.25f, glm::vec4(1, 0, 0, 1)); // min points RED
 	Renderer::drawSphere(max, 0.35f, glm::vec4(0, 1, 0, 1)); // max points GREEN
-
 
 	// Only render nodes with colliders in them and/or the root
 	if (colliders.size() > 0 || this == tree->root) {

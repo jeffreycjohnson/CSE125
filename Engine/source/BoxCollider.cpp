@@ -136,12 +136,18 @@ void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
 	ymax = max.y;
 	zmax = max.z;
 
-	float halfW = std::abs(xmax - xmin);
-	float halfH = std::abs(ymax - ymin);
-	float halfD = std::abs(zmax - zmin);
+	float halfW = std::abs(xmax - xmin) / 2;
+	float halfH = std::abs(ymax - ymin) / 2;
+	float halfD = std::abs(zmax - zmin) / 2;
 
 	glm::vec3 offset = (min + max);
 	offset /= 2;
+
+	// If it's axis-aligned better set up those world coords
+	if (isAxisAligned) {
+		offsetWorld = offset;
+		dimensionsWorld = glm::vec3(halfW, halfH, halfD);
+	}
 
 	// To prevent update() from fucking it up
 	points[0] = offset + glm::vec3(halfW, halfH, halfD);

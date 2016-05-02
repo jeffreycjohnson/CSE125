@@ -4,7 +4,9 @@
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
 #include "Renderer.h"
+#include "Timer.h"
 #include <stack>
+#include <iostream>
 
 // Raycasting constants
 const float Octree::RAY_MIN = FLT_EPSILON;
@@ -69,6 +71,7 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 	// TODO: Implement some kind of clear method for the octree
 	
 	long objCounter = 0;
+	double startTime = Timer::time();
 	std::stack<Transform> stack;
 	stack.push(root.transform);
 	restriction = mode;
@@ -111,7 +114,9 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 		}
 	}
 
-	LOG("Created Octree with { " + std::to_string(objCounter) + " } colliders.");
+	//LOG("Created Octree with { " + std::to_string(objCounter) + " } colliders.");
+	std::cerr << "Created Octree with: " << objCounter << " colliders." << std::endl;
+	std::cerr << "(Time taken: " << Timer::time() - startTime << " ms)" << std::endl;
 
 }
 
@@ -160,25 +165,6 @@ RayHitInfo Octree::raycast(const Ray & ray)
 	}
 	return hitInfo;
 }
-
-/*CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
-	if (root && min < max) {
-		CollisionInfo colInfo;
-		colInfo.collider = nullptr; // TODO: Handle gameobject ptr for raycasts
-		int steps = std::ceil((max - min) / step);
-		for (int i = 0; i < steps; ++i) {
-			ray.t = i * step + min;
-			colInfo = root->raycast(ray);
-			if (colInfo.collisionOccurred) {
-				return colInfo; // Return earliest collision
-			}
-		}
-		return colInfo;
-	}
-	else {
-		return CollisionInfo();
-	}
-};*/
 
 CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
 	CollisionInfo colInfo;
