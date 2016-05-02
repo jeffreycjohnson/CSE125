@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	GameObject *scene = loadScene("assets/pressure.dae");
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
 	scene->transform.setPosition(0, -0.5f, 0);
 	GameObject::SceneRoot.addChild(scene);
 

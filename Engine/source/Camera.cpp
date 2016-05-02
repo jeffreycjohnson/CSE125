@@ -118,5 +118,5 @@ float Camera::getFOV() const
 
 Ray Camera::getEyeRay() const
 {
-	return Ray(position, forward);
+	return Ray(position, -forward);
 }

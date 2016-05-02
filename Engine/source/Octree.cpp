@@ -157,12 +157,15 @@ void Octree::rebuild()
 	}
 }
 
-RayHitInfo Octree::raycast(const Ray & ray)
+RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
 {
 	RayHitInfo hitInfo;
 	if (root) {
 		root->raycast(ray, hitInfo);
 	}
+	//if (hitInfo.hitTime < minDist || hitInfo.hitTime > maxDist) {
+	//	hitInfo.intersects = false;
+	//}
 	return hitInfo;
 }
 

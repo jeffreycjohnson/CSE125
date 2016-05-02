@@ -41,14 +41,14 @@ OctreeNode::~OctreeNode() {
 void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
 
 	RayHitInfo againstMe = myAABB->intersects(ray);
-	if (againstMe.hitTime > hitInfo.hitTime) {
+
+	if (againstMe.hitTime > hitInfo.hitTime || hitInfo.hitTime <= 0 ) {
 		return; // Nothing inside of us will collide with this
 	}
 
 	for (auto obj : colliders) {
 		auto temphit = obj->intersects(ray);
 		if (temphit.intersects) {
-			hitInfo.intersects = true;
 			if (temphit.hitTime < hitInfo.hitTime) {
 				hitInfo = temphit;
 			}
@@ -237,6 +237,7 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 		else {
 			// Node successfully inserted into this node
 			colliderBeingInserted->nodeId = nodeId;
+			colliderBeingInserted->octree = this->tree;
 			colliders.push_back(colliderBeingInserted);
 			return true;
 		}
@@ -257,6 +258,7 @@ void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
 	if (colliderBeingRemoved != nullptr) {
 		colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
+		colliderBeingRemoved->octree = nullptr;
 		colliders.remove(colliderBeingRemoved);
 	}
 }

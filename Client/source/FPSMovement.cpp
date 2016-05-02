@@ -52,7 +52,7 @@ void FPSMovement::fixedUpdate()
 			raycastHit = hit.intersects;
 			lastRayPoint = ray.getPos(hit.hitTime);
 			if (hit.collider != nullptr) {
-				hit.collider->colliding = true; // Don't manually set colliding EVER, this is just for debug visualization
+				hit.collider->rayHitDebugdraw = true; // Don't manually set colliding EVER, this is just for debug visualization
 			}
 		}
 		else {

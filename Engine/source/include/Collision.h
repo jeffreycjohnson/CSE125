@@ -60,7 +60,7 @@ public:
 	// Preserves the min/max and BuildMode restrictions from build
 	void rebuild();
 
-	RayHitInfo raycast(const Ray&);
+	RayHitInfo raycast(const Ray&, float minDist = RAY_MIN, float maxDist = RAY_MAX);
 
 	// Don't use this \/
 	//CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);

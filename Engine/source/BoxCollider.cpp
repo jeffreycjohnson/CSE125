@@ -93,6 +93,11 @@ void BoxCollider::debugDraw()
 			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
 
+		if (rayHitDebugdraw) {
+			color = glm::vec4(0.8, 0.8, 0.2, 1);
+			rayHitDebugdraw = false; // Reset every draw call
+		}
+
 		glm::vec3 dims = dimensions;
 
 		// Spheres around each point
@@ -227,26 +232,17 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 {
 	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 	RayHitInfo hit;
+
 	float tmin = (xmin - ray.origin.x) / ray.direction.x;
 	float tmax = (xmax - ray.origin.x) / ray.direction.x;
-	float temp = 0.0;
 
-	if (tmin > tmax) {
-		temp = tmin;
-		tmin = tmax;
-		tmax = temp;
-	}
+	if (tmin > tmax) std::swap(tmin, tmax);
 
 	float tymin = (ymin - ray.origin.y) / ray.direction.y;
 	float tymax = (ymax - ray.origin.y) / ray.direction.y;
 
-	if (tymin > tymax) {
-		temp = tymin;
-		tymin = tymax;
-		tymax = temp;
-	}
+	if (tymin > tymax) std::swap(tymin, tymax);
 
-	// Fast exit
 	if ((tmin > tymax) || (tymin > tmax)) {
 		hit.intersects = false;
 		return hit;
@@ -255,17 +251,13 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	if (tymin > tmin)
 		tmin = tymin;
 
-	if (tymax > tmax)
+	if (tymax < tmax)
 		tmax = tymax;
 
 	float tzmin = (zmin - ray.origin.z) / ray.direction.z;
 	float tzmax = (zmax - ray.origin.z) / ray.direction.z;
 
-	if (tzmin > tzmax) {
-		temp = tzmin;
-		tzmin = tzmax;
-		tzmax = temp;
-	}
+	if (tzmin > tzmax) std::swap(tzmin, tzmax);
 
 	if ((tmin > tzmax) || (tzmin > tmax)) {
 		hit.intersects = false;
@@ -279,17 +271,7 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 		tmax = tzmax;
 
 	// Return the tmin/tmax that is closest to the ray's origin
-	glm::vec3 min = ray.getPos(tmin);
-	glm::vec3 max = ray.getPos(tmax);
-
-	// Tbh, this logic is slower than it probably needs to be, but it keeps the result sane 100% of the time
-	if (glm::distance(min, ray.origin) < glm::distance(max, ray.origin)) {
-		hit.hitTime = tmin;
-	}
-	else {
-		hit.hitTime = tmax;
-	}
-
+	hit.hitTime = std::min(tmin, tmax);
 	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	return hit;
