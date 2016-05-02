@@ -191,7 +191,7 @@ void OctreeManager::probeForDynamicCollisions() {
 };
 
 void OctreeManager::updateDynamicObjectsInOctree() {
-
+	dynamicObjects->rebuild();
 }
 
 void OctreeManager::beforeFixedUpdate() {
@@ -331,8 +331,8 @@ void OctreeManager::afterFixedUpdate() {
 	dynamicCollisions.clear();
 	staticCollisions.clear();
 
-	// TODO: Profile this for a complex, actually dynamic scene
-	dynamicObjects->rebuild();
+	updateDynamicObjectsInOctree();
+
 };
 
 void OctreeManager::debugDraw() {

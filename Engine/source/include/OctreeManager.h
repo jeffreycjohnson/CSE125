@@ -13,8 +13,6 @@ private:
 	std::vector<CollisionInfo> staticCollisions;
 	std::vector<CollisionInfo> dynamicCollisions;
 
-	//std::vector<Collider*> objects; // New naive implementation
-
 	void probeForStaticCollisions();
 	void probeForDynamicCollisions();
 	void updateDynamicObjectsInOctree();
