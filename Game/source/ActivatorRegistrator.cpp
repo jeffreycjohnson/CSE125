@@ -2,8 +2,27 @@
 
 #include <iostream>
 #include <string>
+#include <map>
+#include <vector>
+#include <sstream>
 
 #include "GameObject.h"
+
+#include "Rotating.h"
+#include "Plate.h"
+
+std::vector<std::string> split(const std::string &s, char delim) {
+	std::vector<std::string> elems;
+
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) 
+	{
+		if (!item.empty()) elems.push_back(item);
+	}
+
+	return elems;
+}
 
 ActivatorRegistrator::ActivatorRegistrator()
 {
@@ -18,21 +37,36 @@ void ActivatorRegistrator::create()
 {
 	std::cout << "Registering activators..." << std::endl;
 
-	// scan for activatables
-	for (auto& obj : gameObject->transform.children)
+	/// TODO OBVIOUSLY HANDLE MORE ACTIVATABLES
+
+	std::map<int, Target*> idToTargets;
+	auto rotates = GameObject::FindAllByPrefix("rotate_");
+	for (auto& rotate : rotates)
 	{
-		if (obj->gameObject->getName().find("monkey_") != std::string::npos)
-		{
-			std::cout << "Found monkey: " << obj->gameObject->getName() << std::endl;
-		}
+		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
+		auto tokens = split(rotate->getName(), '_');
+		int targetID = std::stoi(tokens[1]);
+		int threshold = std::stoi(tokens[2]);
+
+		Target *t = new Rotating(threshold);
+		rotate->addComponent(t);
+
+		idToTargets[targetID] = t;
 	}
 
-	// scan for activatables
-	for (auto& obj : gameObject->transform.children)
+	auto plates = GameObject::FindAllByPrefix("plate_");
+	for (auto& plate : plates)
 	{
-		if (obj->gameObject->getName().find("plate_") != std::string::npos)
-		{
-			std::cout << "Found plate: " << obj->gameObject->getName() << std::endl;
-		}
+		auto tokens = split(plate->getName(), '_');
+		int targetID = std::stoi(tokens[1]);
+		TriggerType triggerType = strToTriggerType(tokens[2]);
+
+		Activator* activator = new Plate;
+		activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
+
+		/// TODO THIS ONLY NECESSARY DUE TO LACK OF BUBBLING
+		plate->transform.children[0]->children[0]->gameObject->addComponent(activator);
 	}
+
+	int x = 5;
 }

@@ -62,16 +62,10 @@ int main(int argc, char** argv)
 		}
 		NetworkManager::attachCameraTo(client, verticality->getID());
 		GameObject::SceneRoot.addChild(player);
-
-		// find the collider
-		GameObject *box = player->transform.children[1]->children[0]->children[0]->gameObject;
-		GameObject *monkey = GameObject::FindByName("Suzanne");
-		if (box != nullptr && monkey != nullptr)
-		{
-			std::cout << "Hey I found the boxCollider!!" << std::endl;
-			box->addComponent(new GodSummoner(monkey));
-		}
 	}
+
+	ActivatorRegistrator ar;
+	GameObject::SceneRoot.addComponent(&ar);
 
 	try
 	{

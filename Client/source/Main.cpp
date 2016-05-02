@@ -46,11 +46,11 @@ int main(int argc, char** argv)
 	}
 
 	// cache all meshes
-	auto artsy = loadScene("assets/pressure.dae");
+	auto artsy = loadScene("assets/pressure_nocoll.dae");
 	artsy->destroy();
 	delete artsy;
 
-	auto go = loadScene("assets/cubeman.dae");
+	auto go = loadScene("assets/cubeman_nocoll.dae");
 	go->destroy();
 	delete go;
 
