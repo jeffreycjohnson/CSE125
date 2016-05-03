@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include <gtc/matrix_transform.hpp>
+#include <gtx/quaternion.hpp>
 #include "Skybox.h"
 #include "Timer.h"
 #include "Light.h"
@@ -267,14 +268,13 @@ void Renderer::focus(GLFWwindow* window, int focused) {
 	}
 }
 
-static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scale, const glm::vec4& color, Transform* transform)
+static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scale, const glm::vec4& color, glm::mat4 transform)
 {
     Renderer::switchShader(DEBUG_SHADER);
     (*Renderer::currentShader)["uColor"] = color;
     (*Renderer::currentShader)["uPosition"] = glm::vec4(pos, 1);
     (*Renderer::currentShader)["uScale"] = glm::vec4(scale, 1);
-    if (transform) Renderer::setModelMatrix(transform->getTransformMatrix());
-    else Renderer::setModelMatrix(glm::mat4());
+    Renderer::setModelMatrix(transform);
 
     MeshData& currentEntry = Mesh::meshMap.at(name);
     if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
@@ -287,12 +287,20 @@ static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scal
 
 void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)
 {
-    drawWireframe("assets/Primatives.obj/Sphere_Outline", pos, glm::vec3(radius), color, transform);
+    drawWireframe("assets/Primatives.obj/Sphere_Outline", pos, glm::vec3(radius), color, transform ? transform->getTransformMatrix() : glm::mat4());
 }
 
 void Renderer::drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform)
 {
-    drawWireframe("assets/Primatives.obj/Box_Outline", pos, scale, color, transform);
+    drawWireframe("assets/Primatives.obj/Box_Outline", pos, scale, color, transform ? transform->getTransformMatrix() : glm::mat4());
+}
+
+void Renderer::drawArrow(glm::vec3 pos, glm::vec3 dir, const glm::vec4& color, Transform* transform)
+{
+	auto rot = glm::rotation(glm::vec3(0,1,0), glm::normalize(dir));
+	auto mat = glm::mat4_cast(rot);
+	if(transform) mat = mat * transform->getTransformMatrix();
+	drawWireframe("assets/Primatives.obj/Arrow_Outline", pos, glm::vec3(glm::length(dir) / 10.f), color, mat);
 }
 
 void Renderer::drawCapsule(glm::vec3 pointA, glm::vec3 pointB, float radius, const glm::vec4& color) {
