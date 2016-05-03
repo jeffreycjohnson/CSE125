@@ -10,8 +10,10 @@ private:
 
 	float moveSpeed, mouseSensitivity;
 
-	glm::vec3 position, front, up, right, worldUp;
+	glm::vec3 position, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
+
+	float playerRadius = 1;
 
 	glm::vec2 lastMousePosition;
 

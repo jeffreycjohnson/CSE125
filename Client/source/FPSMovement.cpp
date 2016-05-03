@@ -12,6 +12,7 @@
 #include "OctreeManager.h"
 #include "Camera.h"
 #include "Collider.h"
+#include "Collision.h"
 
 const float SPEED = 3.0f;
 
@@ -46,6 +47,8 @@ void FPSMovement::fixedUpdate()
 	5. send msg
 	*/
 
+	RayHitInfo moveHit;
+
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct != nullptr) {
 		Ray ray = Renderer::mainCamera->getEyeRay();
@@ -59,6 +62,21 @@ void FPSMovement::fixedUpdate()
 		}
 		else {
 			raycastHit = hit.intersects;
+		}
+
+		Ray* moveRay = new Ray(position, moveDir);
+		moveHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
+		if (moveHit.intersects && moveHit.hitTime >= 0) {
+			std::cout << "TEST HIT at: " << moveHit.hitTime << std::endl;
+			std::cout << "Hit Normal = " << moveHit.normal.x << ", " << moveHit.normal.y << ", " << moveHit.normal.z << std::endl;
+			Ray* intersectPointRay = new Ray(position + (-moveHit.normal * playerRadius), moveDir);
+			RayHitInfo intersectHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
+			//std::cout << "moveDirLength = " << length(moveDir) << std::endl;
+			//std::cout << "interesctHitTime = " << intersectHit.hitTime << std::endl;
+			//if (length(moveDir) >= intersectHit.hitTime) {
+			//	std::cout << "JUMPING!" << std::endl;
+			//}
+
 		}
 	}
 
@@ -83,8 +101,14 @@ void FPSMovement::update(float dt)
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	position += Input::getAxis("roll") * worldFront * speed;
-	position += Input::getAxis("pitch") * normRight * speed;
+	glm::vec3 xComp = Input::getAxis("roll") * worldFront * speed;
+	glm::vec3 zComp = Input::getAxis("pitch") * normRight * speed;
+
+	moveDir = xComp + zComp;
+
+	position += xComp + zComp;
+
+	//Ray *ray = new Ray(position, xComp + zComp);
 
 	recalculate();
 }

@@ -188,6 +188,7 @@ class RayHitInfo {
 public:
 	float hitTime;
 	glm::vec3 point;
+	glm::vec3 normal;
 	Collider* collider;
 	bool intersects;
 

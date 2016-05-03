@@ -22,9 +22,10 @@ int main(int argc, char** argv)
     InitializeEngine("CLIENT");
 	ConfigFile file("config/options.ini");
 
-	std::string serverip = file.getString("NetworkOptions", "serverip");
-	std::string port = file.getString("NetworkOptions", "port");
-	auto pair = NetworkManager::InitializeClient(serverip, port);
+	//std::string serverip = file.getString("NetworkOptions", "serverip");
+	//std::string port = file.getString("NetworkOptions", "port");
+	//auto pair = NetworkManager::InitializeClient(serverip, port);
+	NetworkManager::InitializeOffline();
 
 	/*for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -45,20 +46,20 @@ int main(int argc, char** argv)
 		}
 	}*/
 
-	// cache all meshes
-	auto artsy = loadScene("assets/CorridorPuzzle.dae", false);
-	artsy->destroy();
-	delete artsy;
+	GameObject *scene = loadScene("assets/pressure.dae");
+	scene->transform.setPosition(0, -0.5f, 0);
+	GameObject::SceneRoot.addChild(scene);
 
-	auto go = loadScene("assets/cubeman.dae", false);
-	go->destroy();
-	delete go;
+	// setup network
+	GameObject *player = loadScene("assets/cubeman.dae");
+	player->addComponent(new FPSMovement(1.5f, 0.5f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+	player->addComponent(Renderer::mainCamera);
+	GameObject::SceneRoot.addChild(player);
 
-	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 
 	try
 	{
-		RunEngine(0); // running engine as client
+		RunEngine(2); // running engine as client
 	}
 	catch (...)
 	{
