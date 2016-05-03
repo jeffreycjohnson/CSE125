@@ -62,8 +62,14 @@ void Octree::insert(Collider* obj) {
 void Octree::remove(Collider* obj) {
 	if (root && obj != nullptr) {
 		OctreeNode* node = nodeMap[obj->nodeId];
-		node->remove(obj); // Skip having to search through the whole entire tree!
-		--objects;
+		if (node != nullptr) {
+			node->remove(obj); // Skip having to search through the whole entire tree!
+			--objects;
+		}
+		else {
+			auto str = "Error! Trying to remove collider from nonexisting OctreeNode with ID: " + std::to_string(obj->nodeId);
+			LOG(str);
+		}
 	}
 }
 

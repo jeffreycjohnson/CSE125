@@ -264,8 +264,11 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 
 void OctreeNode::remove(Collider * colliderBeingRemoved)
 {
-	colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
-	colliders.remove(colliderBeingRemoved);
+	if (colliderBeingRemoved != nullptr) {
+		colliderBeingRemoved->nodeId = Octree::UNKNOWN_NODE;
+		colliderBeingRemoved->octree = nullptr;
+		colliders.remove(colliderBeingRemoved);
+	}
 }
 
 void OctreeNode::subdivide() {
