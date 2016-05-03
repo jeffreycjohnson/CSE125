@@ -85,7 +85,7 @@ void ActivatorRegistrator::create()
 		}
 
 		/// TODO THIS ONLY NECESSARY DUE TO LACK OF BUBBLING
-		plate->transform.children[0]->children[0]->gameObject->addComponent(activator);
+		plate->addComponent(activator);
 	}
 
 	int x = 5;
