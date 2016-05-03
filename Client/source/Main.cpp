@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	std::string port = file.getString("NetworkOptions", "port");
 	auto pair = NetworkManager::InitializeClient(serverip, port);
 
-	for (auto& skybox : Renderer::mainCamera->passes)
+	/*for (auto& skybox : Renderer::mainCamera->passes)
 	{
 		SkyboxPass* sp = dynamic_cast<SkyboxPass*>(skybox.get());
 		if (sp != nullptr)
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 			break;
 		}
-	}
+	}*/
 
 	// cache all meshes
 	auto artsy = loadScene("assets/CorridorPuzzle.dae", false);

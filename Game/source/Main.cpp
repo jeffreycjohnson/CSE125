@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 
 	auto clientIDs = NetworkManager::InitializeServer(port, numberOfClients);
 
-	for (auto& skybox : Renderer::mainCamera->passes)
+	/*for (auto& skybox : Renderer::mainCamera->passes)
 	{
 		SkyboxPass* sp = dynamic_cast<SkyboxPass*>(skybox.get());
 		if (sp != nullptr)
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 
 			break;
 		}
-	}
+	}*/
 	
 	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
 	scene->transform.setPosition(0, -0.3f, 0);

@@ -188,7 +188,7 @@ GameObject* loadScene(const std::string& filename, bool loadColliders) {
         Light * light;
         if (l->mType == aiLightSource_POINT)
         {
-            auto pointLight = new PointLight(true);
+            auto pointLight = new PointLight();
             //pointLight->gradient = new Texture("assets/gradient.png");
             light = pointLight;
         }
@@ -205,6 +205,7 @@ GameObject* loadScene(const std::string& filename, bool loadColliders) {
 		light->setConstantFalloff(l->mAttenuationConstant);
         light->setLinearFalloff(l->mAttenuationLinear);
 		light->setExponentialFalloff(l->mAttenuationQuadratic);
+        light->setShadowCaster(true);
 
         lights[l->mName.C_Str()] = light;
     }

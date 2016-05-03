@@ -59,7 +59,7 @@ protected:
 class PointLight : public Light
 {
 public:
-    explicit PointLight(bool shadow = false);
+    PointLight();
     void forwardPass(int index) override;
     void deferredPass() override;
     void debugDraw() override;
@@ -73,7 +73,6 @@ public:
 class DirectionalLight : public Light
 {
 public:
-    explicit DirectionalLight(bool shadow = false);
     void forwardPass(int index) override;
     void deferredPass() override;
     void update(float) override;

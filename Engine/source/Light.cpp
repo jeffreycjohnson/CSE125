@@ -189,15 +189,8 @@ void Light::postToNetwork()
     NetworkManager::PostMessage(serialize(), LIGHT_NETWORK_DATA, my->getID());
 }
 
-PointLight::PointLight(bool shadow)
+PointLight::PointLight()
 {
-    shadowCaster = shadow;
-    if (shadow)
-    {
-        shadowMap = std::make_unique<SpericalCamera>(512, 512, false, std::vector<GLenum>({}));
-        shadowMap->passes.push_back(std::make_unique<PointShadowPass>());
-        shadowMap->setGameObject(gameObject);
-    }
     gradient = new Texture("assets/gradient.png");
 }
 
@@ -212,8 +205,14 @@ void PointLight::forwardPass(int index)
 
 void PointLight::deferredPass()
 {
-    if (shadowCaster && shadowMap->fbo)
+    if (shadowCaster)
     {
+        if (!shadowMap)
+        {
+            shadowMap = std::make_unique<SpericalCamera>(512, 512, false, std::vector<GLenum>({}));
+            shadowMap->passes.push_back(std::make_unique<PointShadowPass>());
+            shadowMap->setGameObject(gameObject);
+        }
         shadowMap->fbo->bindDepthTexture(4);
     }
     (*Renderer::currentShader)["uLightType"] = 0;
@@ -290,17 +289,7 @@ void PointLight::setGameObject(GameObject * object)
 {
     Component::setGameObject(object);
     if (shadowCaster && shadowMap) shadowMap->setGameObject(object);
-}
-
-DirectionalLight::DirectionalLight(bool shadow)
-{
-    if(shadow)
-    {
-        shadowCaster = shadow;
-		shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLenum>({}));
-        shadowMap->passes.push_back(std::make_unique<DirectionalShadowPass>());
-        shadowMap->setGameObject(gameObject);
-    }
+    postToNetwork();
 }
 
 void DirectionalLight::forwardPass(int index)
@@ -313,8 +302,14 @@ void DirectionalLight::forwardPass(int index)
 
 void DirectionalLight::deferredPass()
 {
-    if (shadowCaster && shadowMap->fbo)
+    if (shadowCaster)
     {
+        if (!shadowMap)
+        {
+            shadowMap = std::make_unique<Camera>(2048, 2048, false, std::vector<GLenum>({}));
+            shadowMap->passes.push_back(std::make_unique<DirectionalShadowPass>());
+            shadowMap->setGameObject(gameObject);
+        }
         shadowMap->fbo->bindDepthTexture(3);
         (*Renderer::currentShader)["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(gameObject->transform.getTransformMatrix());
     }
@@ -333,7 +328,7 @@ void DirectionalLight::deferredPass()
 
 void DirectionalLight::bindShadowMap()
 {
-    if(shadowMap->fbo && shadowCaster)
+    if(shadowCaster)
     {
         shadowMap->fbo->bind(0, nullptr);
         auto mat = glm::affineInverse(gameObject->transform.getTransformMatrix());
@@ -344,7 +339,7 @@ void DirectionalLight::bindShadowMap()
 
 void PointLight::bindShadowMap()
 {
-    if (shadowMap->fbo && shadowCaster)
+    if (shadowCaster)
     {
         shadowMap->fbo->bind(0, nullptr);
         auto& shader = Renderer::getShader(SHADOW_CUBE_SHADER);
@@ -368,6 +363,7 @@ void DirectionalLight::setGameObject(GameObject* object)
 {
     Component::setGameObject(object);
     if (shadowCaster && shadowMap) shadowMap->setGameObject(object);
+    postToNetwork();
 }
 
 /*void SpotLight::forwardPass(int index)
