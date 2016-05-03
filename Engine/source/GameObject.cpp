@@ -6,12 +6,11 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
-#include "OctreeManager.h"
-#include <iostream>
-#include <functional>
-#include "Networkmanager.h"
+#include "NetworkManager.h"
 #include "NetworkUtility.h"
 #include "ObjectLoader.h"
+#include "OctreeManager.h"
+
 #include <algorithm>
 #include <iterator>
 #include <iostream>
@@ -50,6 +49,24 @@ std::vector<GameObject*> GameObject::FindAllByName(const std::string& name)
     return ret;
 }
 
+std::vector<GameObject*> GameObject::FindAllByPrefix(const std::string & name)
+{
+	std::vector<GameObject*> ret;
+	for (auto& group : nameMap)
+	{
+		if (name.size() > group.first.size()) continue;
+
+		bool isPrefix = std::equal(
+			group.first.begin(),
+			group.first.begin() + name.size(),
+			name.begin()
+		);
+		if (isPrefix) ret.push_back(group.second);
+	}
+
+	return ret;
+}
+
 void GameObject::UpdateScene(int caller)
 {
 	while (Timer::nextFixedStep()) {
@@ -72,7 +89,6 @@ void GameObject::UpdateScene(int caller)
 		SceneRoot.update((float)Timer::deltaTime());
 
 		for (auto& callback : postVarCallbacks) callback();
-
 	}
 }
 
@@ -105,13 +121,14 @@ GameObject::GameObject() {
 	this->setID(GameObject::objectIDCounter++);
 }
 
-GameObject::GameObject(int id) {
+GameObject::GameObject(int id, std::string name) {
 	transform.setGameObject(this);
 	dead = false;
 	active = true;
 	visible = true;
 	newlyCreated = true;
 	this->setID(id);
+	this->name = name;
 }
 
 GameObject::~GameObject() {
@@ -126,6 +143,7 @@ GameObject::~GameObject() {
 }
 
 void GameObject::addChild(GameObject* go) {
+
     transform.children.push_back(&go->transform);
 	go->transform.setParent(&transform);
 
@@ -134,7 +152,7 @@ void GameObject::addChild(GameObject* go) {
 	if (ptr != nullptr) {
 		ptr->insertGameObject(go);
 	}
-
+	
 	go->postToNetwork();
 }
 
@@ -476,8 +494,7 @@ std::vector<char> GameObject::serialize()
 {
 	int myID = getID();
 
-	CreateObjectNetworkData cond(myID);
-
+	CreateObjectNetworkData cond(myID, name, visible, active);
 	std::vector<char> myCreation;
 	myCreation.resize(sizeof(cond), 0);
 	memcpy(myCreation.data(), &cond, sizeof(cond));
@@ -488,13 +505,39 @@ std::vector<char> GameObject::serialize()
 bool GameObject::deserializeAndCreate(std::vector<char> bytes)
 {
 	CreateObjectNetworkData cond = structFromBytes<CreateObjectNetworkData>(bytes);
-	std::cout << "Creating object with id " << cond.objectID << std::endl;
+
 	if (GameObject::FindByID(cond.objectID) != nullptr)
 	{
-		std::cerr << "Cannot create object with ID " << cond.objectID << ", object with ID already exists" << std::endl;
-		return false;
-	}
+		GameObject * go = GameObject::FindByID(cond.objectID);
+		std::cout << "Updating object with id " << go->getID() << " and name " << go->getName() << std::endl;
 
-	new GameObject(cond.objectID);
+		go->active = cond.active;
+		go->visible = cond.visible;
+	}
+	else {
+		std::cout << "Creating object with id " << cond.objectID << " and name " << cond.name << std::endl;
+		new GameObject(cond.objectID, cond.name);
+	}
 	return true;
+}
+
+void GameObject::setVisible(bool visible)
+{
+	this->visible = visible;
+	postToNetwork();
+}
+
+void GameObject::setActive(bool active) {
+	this->active = active;
+	postToNetwork();
+}
+
+bool GameObject::getVisible()
+{
+	return visible;
+}
+
+bool GameObject::getActive()
+{
+	return active;
 }

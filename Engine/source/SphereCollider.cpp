@@ -30,7 +30,7 @@ void SphereCollider::destroy()
 	Collider::destroy();
 }
 
-void SphereCollider::update(float)
+void SphereCollider::fixedUpdate()
 {
 	// Make sure our world coordinates are properly updated
 	if (gameObject != nullptr) {
@@ -52,12 +52,6 @@ void SphereCollider::debugDraw()
 		}
 		Renderer::drawSphere(centerWorld, radiusWorld, color);
 	}
-}
-
-void SphereCollider::onCollisionEnter(GameObject * other)
-{
-	/*if (!passive)
-		colliding = true; */// TODO: Revisit this once OctreeManager is written
 }
 
 bool SphereCollider::insideOrIntersects(const glm::vec3 & point) const
@@ -84,6 +78,11 @@ bool SphereCollider::intersects(const SphereCollider & other) const
 {
 	float distance = (other.centerWorld - centerWorld).length();
 	return (distance <= radiusWorld + other.radiusWorld);
+}
+
+RayHitInfo SphereCollider::intersects(const Ray & ray) const
+{
+	return RayHitInfo(); // TODO: Implement ray::sphere intersection
 }
 
 BoxCollider SphereCollider::getAABB() const

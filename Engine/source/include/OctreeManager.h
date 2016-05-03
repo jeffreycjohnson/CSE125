@@ -13,8 +13,6 @@ private:
 	std::vector<CollisionInfo> staticCollisions;
 	std::vector<CollisionInfo> dynamicCollisions;
 
-	//std::vector<Collider*> objects; // New naive implementation
-
 	void probeForStaticCollisions();
 	void probeForDynamicCollisions();
 	void updateDynamicObjectsInOctree();
@@ -22,6 +20,8 @@ private:
 public:
 	OctreeManager();
 	~OctreeManager();
+
+	RayHitInfo raycast(const Ray& ray, Octree::BuildMode whichTree);
 
 	// Adds or removes gameobjects (and all their colliders) to the
 	// apropriate octree. Will recursively add children as well.

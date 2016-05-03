@@ -4,7 +4,9 @@
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
 #include "Renderer.h"
+#include "Timer.h"
 #include <stack>
+#include <iostream>
 
 // Raycasting constants
 const float Octree::RAY_MIN = FLT_EPSILON;
@@ -41,6 +43,7 @@ void Octree::removeNode(NodeId node) {
 };
 
 void Octree::insert(Collider* obj) {
+
 	if (root && obj != nullptr) {
 		if (obj->nodeId == UNKNOWN_NODE) {
 			if (obj->passive && (restriction == STATIC_ONLY || restriction == BOTH)) {
@@ -53,6 +56,7 @@ void Octree::insert(Collider* obj) {
 			}
 		}
 	}
+
 }
 
 void Octree::remove(Collider* obj) {
@@ -69,6 +73,7 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 	// TODO: Implement some kind of clear method for the octree
 	
 	long objCounter = 0;
+	double startTime = Timer::time();
 	std::stack<Transform> stack;
 	stack.push(root.transform);
 	restriction = mode;
@@ -111,7 +116,9 @@ void Octree::build(BuildMode mode, const GameObject& root) {
 		}
 	}
 
-	LOG("Created Octree with { " + std::to_string(objCounter) + " } colliders.");
+	//LOG("Created Octree with { " + std::to_string(objCounter) + " } colliders.");
+	std::cerr << "Created Octree with: " << objCounter << " colliders." << std::endl;
+	std::cerr << "(Time taken: " << Timer::time() - startTime << " ms)" << std::endl;
 
 }
 
@@ -152,28 +159,23 @@ void Octree::rebuild()
 	}
 }
 
-CollisionInfo Octree::raycast(Ray ray, float min, float max, float step) {
-	if (root && min < max) {
-		CollisionInfo colInfo;
-		colInfo.collider = nullptr; // TODO: Handle gameobject ptr for raycasts
-		int steps = std::ceil((max - min) / step);
-		for (int i = 0; i < steps; ++i) {
-			ray.t = i * step + min;
-			colInfo = root->raycast(ray);
-			if (colInfo.collisionOccurred) {
-				return colInfo; // Return earliest collision
-			}
-		}
-		return colInfo;
+RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
+{
+	RayHitInfo hitInfo;
+	if (root) {
+		root->raycast(ray, hitInfo);
 	}
-	else {
-		return CollisionInfo();
-	}
-};
+	//if (hitInfo.hitTime < minDist || hitInfo.hitTime > maxDist) {
+	//	hitInfo.intersects = false;
+	//}
+	return hitInfo;
+}
 
 CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
+	
 	CollisionInfo colInfo;
 	colInfo.collider = ptr;
+
 	if (root) {
 		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
 		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
@@ -188,11 +190,11 @@ CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a b
 		else if (capsule != nullptr) {
 			return root->collidesWith(*capsule, colInfo);
 		}
-
 	}
 	else {
 		return colInfo;
 	}
+
 };
 
 void Octree::debugDraw() {

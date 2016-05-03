@@ -113,7 +113,7 @@ float Camera::getFOV() const
 
 Ray Camera::getEyeRay() const
 {
-	return Ray(position, forward);
+	return Ray(position, -forward);
 }
 
 void Camera::setGameObject(GameObject * go)
@@ -166,4 +166,5 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 		std::cout << "goCamera is null. Adding MainCamera to object " << go->getID() << std::endl;
 		go->addComponent(Renderer::mainCamera);
 	}
+
 }

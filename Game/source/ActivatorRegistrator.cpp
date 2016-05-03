@@ -2,8 +2,28 @@
 
 #include <iostream>
 #include <string>
+#include <map>
+#include <vector>
+#include <sstream>
 
 #include "GameObject.h"
+
+#include "Laser.h"
+#include "Rotating.h"
+#include "Plate.h"
+
+std::vector<std::string> split(const std::string &s, char delim) {
+	std::vector<std::string> elems;
+
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) 
+	{
+		if (!item.empty()) elems.push_back(item);
+	}
+
+	return elems;
+}
 
 ActivatorRegistrator::ActivatorRegistrator()
 {
@@ -18,21 +38,55 @@ void ActivatorRegistrator::create()
 {
 	std::cout << "Registering activators..." << std::endl;
 
-	// scan for activatables
-	for (auto& obj : gameObject->transform.children)
+	/// TODO OBVIOUSLY HANDLE MORE TARGETS
+	std::map<int, Target*> idToTargets;
+	auto rotates = GameObject::FindAllByPrefix("rotate_");
+	for (auto& rotate : rotates)
 	{
-		if (obj->gameObject->getName().find("monkey_") != std::string::npos)
-		{
-			std::cout << "Found monkey: " << obj->gameObject->getName() << std::endl;
-		}
+		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
+		auto tokens = split(rotate->getName(), '_');
+		int targetID = std::stoi(tokens[1]);
+		int threshold = std::stoi(tokens[2]);
+
+		Target *t = new Rotating(threshold);
+		rotate->addComponent(t);
+
+		idToTargets[targetID] = t;
 	}
 
-	// scan for activatables
-	for (auto& obj : gameObject->transform.children)
+	auto lasers = GameObject::FindAllByPrefix("laser_");
+	for (auto& laser : lasers)
 	{
-		if (obj->gameObject->getName().find("plate_") != std::string::npos)
-		{
-			std::cout << "Found plate: " << obj->gameObject->getName() << std::endl;
-		}
+		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
+		auto tokens = split(laser->getName(), '_');
+		int targetID = std::stoi(tokens[1]);
+		int threshold = std::stoi(tokens[2]);
+
+		Target *t = new FixedLaser(threshold);
+		laser->addComponent(t);
+
+		idToTargets[targetID] = t;
 	}
+
+	// REGISTER ACTIVATORS
+	auto plates = GameObject::FindAllByPrefix("plate_");
+	for (auto& plate : plates)
+	{
+		auto tokens = split(plate->getName(), '_');
+
+		Activator* activator = new Plate;
+		for (int i = 1; i < tokens.size(); i += 3)
+		{
+			int targetID = std::stoi(tokens[i + 0]);
+			TriggerType triggerType = strToTriggerType(tokens[i + 1]);
+			int activatorID = std::stoi(tokens[i + 2]);
+
+			activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
+		}
+
+		/// TODO THIS ONLY NECESSARY DUE TO LACK OF BUBBLING
+		plate->addComponent(activator);
+	}
+
+	int x = 5;
 }

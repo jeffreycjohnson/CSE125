@@ -17,12 +17,12 @@ private:
 
 public:
 	Transform transform;
-	bool visible, active;
 	static int objectIDCounter;
     static GameObject SceneRoot;
 	static GameObject* FindByName(const std::string& name);
 	static GameObject* FindByID(const int& id);
 	static std::vector<GameObject*> FindAllByName(const std::string& name);
+	static std::vector<GameObject*> FindAllByPrefix(const std::string& name);
 	static void UpdateScene(int caller);
 
 	// registering callbacks for updates
@@ -36,7 +36,7 @@ public:
 	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageID);
 
 	GameObject();
-	GameObject(int id);
+	GameObject(int id, std::string name);
 
 	~GameObject();
 
@@ -106,9 +106,15 @@ public:
 
 	std::vector<char> serialize();
 	static bool deserializeAndCreate(std::vector<char> bytes);
+	void setVisible(bool visible);
+	void setActive(bool active);
+	bool getVisible();
+	bool getActive();
 
 protected:
     bool dead, newlyCreated;
+	bool visible, active;
+
     std::vector<Component*> componentList;
     std::string name;
 	int ID;

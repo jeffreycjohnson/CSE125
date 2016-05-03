@@ -5,13 +5,14 @@
 #include "Input.h"
 #include "Timer.h"
 #include "Sound.h"
-#include <glfw3.h>
 #include "ObjectLoader.h"
 #include "ThreadPool.h"
 #include "Camera.h"
 #include "OctreeManager.h"
 #include "Config.h"
+#include "BoxCollider.h"
 
+#include <glfw3.h>
 #include <chrono>
 
 GLFWwindow * mainWindow;
@@ -91,6 +92,8 @@ void LoadDebugOptions(ConfigFile& file) {
 	DebugPass::collidingColor = file.getColor("DebugOptions", "collidingColor");
 	DebugPass::octreeColor = file.getColor("DebugOptions", "octreeColor");
 
+	BoxCollider::drawBoxPoints = file.getBool("DebugOptions", "drawBoxPoints");
+
 }
 
 void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
@@ -114,7 +117,6 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 
 	// TODO: When this is merged into develop, register the before 
 	// and after callbacks on the OctreeManager.
-
 }
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.

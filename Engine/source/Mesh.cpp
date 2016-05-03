@@ -130,7 +130,14 @@ void Mesh::setGameObject(GameObject* object)
 
 std::vector<char> Mesh::serialize()
 {
-	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name, material->getWatcherFileName(), false);
+	std::string materialName = "assets/DefaultMaterial.mat.ini";
+	if (material == nullptr) {}
+	else
+	{
+		materialName = material->getWatcherFileName();
+	}
+
+	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name, materialName, false);
 	return structToBytes(mnd);
 }
 
@@ -339,4 +346,3 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	Mesh::meshMap[name] = meshData;
 
 }
-
