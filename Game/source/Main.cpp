@@ -46,8 +46,8 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	GameObject *scene = loadScene("assets/pressure.dae");
-	scene->transform.setPosition(0, -0.5f, 0);
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
+	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	bool didSetCamera = false;

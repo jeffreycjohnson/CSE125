@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Laser.cpp" />
     <ClCompile Include="source\Rotating.cpp" />
     <ClCompile Include="source\Plate.cpp" />
     <ClCompile Include="source\Activator.cpp" />
@@ -34,6 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Laser.h" />
     <ClInclude Include="source\Rotating.h" />
     <ClInclude Include="source\Plate.h" />
     <ClInclude Include="source\Activator.h" />
