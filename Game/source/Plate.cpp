@@ -26,6 +26,7 @@ void Plate::fixedUpdate()
 	{
 		isNotColliding = false;
 		activate();
+		std::cout << "activated plate" << std::endl;
 	}
 
 	isColliding = false;
