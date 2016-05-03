@@ -9,6 +9,7 @@
 #include "Laser.h"
 #include "Rotating.h"
 #include "Plate.h"
+#include "Door.h"
 
 
 //http://blog.noctua-software.com/object-factory-c++.html
@@ -73,6 +74,20 @@ void ActivatorRegistrator::create()
 			targ->addComponent(t);
 			idToTargets[targetID] = t;
 		}
+	}
+
+	auto vddoors = GameObject::FindAllByPrefix("vddoor_");
+	for (auto& vddoor : vddoors)
+	{
+		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
+		auto tokens = split(vddoor->getName(), '_');
+		int targetID = std::stoi(tokens[1]);
+		int threshold = std::stoi(tokens[2]);
+
+		Target *t = new Door(threshold, DOWN);
+		vddoor->addComponent(t);
+
+		idToTargets[targetID] = t;
 	}
 
 	// REGISTER ACTIVATORS
