@@ -353,6 +353,9 @@
     <None Include="..\shaders\linear_depth.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\assets\particles\example_particle.ini">
+      <Filter>Configuration</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">

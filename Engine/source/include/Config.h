@@ -48,6 +48,7 @@ public:
 	float getFloat(const std::string& section, const std::string& key) const;
 	std::string getString(const std::string& section, const std::string& key) const;
     glm::vec3 getColor(const std::string& section, const std::string& key) const;
+	glm::vec3 getFloatVector(const std::string& section, const std::string& key) const;
 
     bool hasKey(const std::string& section, const std::string& key) const;
     bool hasSection(const std::string& section) const;

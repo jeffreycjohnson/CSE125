@@ -40,6 +40,8 @@ public:
 
 	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();
+
+	void loadParticleFile(std::string filename);
 	void update(float deltaTime) override;
 	void draw() override;
 	void init();

@@ -81,6 +81,46 @@ glm::vec3 ConfigFile::getColor(const std::string& section, const std::string& ke
     }
 }
 
+glm::vec3 ConfigFile::getFloatVector(const std::string & section, const std::string & key) const
+{
+	try
+	{
+		// Really quick n dirty parser for vector 3s:
+		// ------
+		// velocity={ 3.2, 5.4, 1.2345 }
+		// ------
+		auto str = sections.at(section).get(key);
+		std::stringstream x, y, z;
+		int mode = 0;
+		for (int i = 0; i < str.length(); ++i) {
+			char c = str.at(i);
+			if (c == '{' || c == '}') continue;
+			if (c == ',') {
+				++mode;
+				continue;
+			}
+			if ((c >= '0' && c <= '9') || (c == '.')) {
+				switch (mode) {
+					case 0:
+						x << c;
+						break;
+					case 1:
+						y << c;
+						break;
+					case 2:
+						z << c;
+						break;
+				}
+			}
+		}
+		return glm::vec3(std::atof(x.str().c_str()), std::atof(y.str().c_str()), std::atof(z.str().c_str()));
+	}
+	catch (...)
+	{
+		return glm::vec3();
+	}
+}
+
 bool ConfigFile::hasKey(const std::string& section, const std::string& key) const
 {
     try
