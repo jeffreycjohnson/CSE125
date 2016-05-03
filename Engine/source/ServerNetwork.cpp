@@ -208,6 +208,7 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 	// 1ms timeout for detecting messages
 	// we dont got time for waiting!
 	timeval tv;
+    tv.tv_sec = 0;
 	tv.tv_usec = 1000;
 
 	/**

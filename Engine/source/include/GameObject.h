@@ -117,7 +117,7 @@ protected:
 
     std::vector<Component*> componentList;
     std::string name;
-	int ID;
+	int ID = -1;
 	static std::multimap<std::string, GameObject*> nameMap;
     static std::map<int, GameObject*> idMap;
 	void removeName();
