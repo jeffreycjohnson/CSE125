@@ -1,6 +1,6 @@
 #include "Activator.h"
 
-
+std::map<std::string, ActivatorFactory*> Activator::factories;
 
 Activator::Activator()
 {

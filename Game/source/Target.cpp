@@ -1,5 +1,11 @@
 #include "Target.h"
 
+std::map<std::string, TargetFactory*> Target::factories;
+
+Target::Target()
+{
+}
+
 Target::Target(int activationThreshold)
 	: activationThreshold(activationThreshold)
 {

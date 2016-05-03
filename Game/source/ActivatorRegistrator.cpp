@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <sstream>
 
@@ -14,27 +15,15 @@
 
 
 //http://blog.noctua-software.com/object-factory-c++.html
-class TargetFactory
-{
-public:
-	virtual Target *create() = 0;
-};
-
-class ActivatorFactory
-{
-public:
-	virtual Activator *create() = 0;
-};
-
 
 #define REGISTER_TARGET(klass) \
     class klass##Factory : public TargetFactory { \
     public: \
         klass##Factory() \
         { \
-            Object::registerType(#klass, this); \
+            Target::registerType(#klass, this); \
         } \
-        virtual Object *create() { \
+        virtual Target *create() { \
             return new klass(); \
         } \
     }; \
@@ -45,13 +34,29 @@ public:
     public: \
         klass##Factory() \
         { \
-            Object::registerType(#klass, this); \
+            Activator::registerType(#klass, this); \
         } \
-        virtual Object *create() { \
+        virtual Activator *create() { \
             return new klass(); \
         } \
     }; \
     static klass##Factory global_##klass##Factory;
+
+REGISTER_TARGET(Laser)
+REGISTER_TARGET(Rotating)
+REGISTER_ACTIVATOR(Plate)
+
+std::map<std::string, TargetFactory *> ActivatorRegistrator::prefixToTarget =
+{
+	{ "rotate_" , &global_RotatingFactory},
+	{ "laser_", &global_LaserFactory},
+};
+
+std::map<std::string, ActivatorFactory *> ActivatorRegistrator::prefixToActivator =
+{
+	{ "rotate_" , &global_PlateFactory },
+};
+
 
 
 std::vector<std::string> split(const std::string &s, char delim) {
@@ -96,20 +101,6 @@ void ActivatorRegistrator::create()
 		idToTargets[targetID] = t;
 	}
 
-	auto lasers = GameObject::FindAllByPrefix("laser_");
-	for (auto& laser : lasers)
-	{
-		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
-		auto tokens = split(laser->getName(), '_');
-		int targetID = std::stoi(tokens[1]);
-		int threshold = std::stoi(tokens[2]);
-
-		Target *t = new FixedLaser(threshold);
-		laser->addComponent(t);
-
-		idToTargets[targetID] = t;
-	}
-
 	// REGISTER ACTIVATORS
 	auto plates = GameObject::FindAllByPrefix("plate_");
 	for (auto& plate : plates)
@@ -126,9 +117,7 @@ void ActivatorRegistrator::create()
 			activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
 		}
 
-		/// TODO THIS ONLY NECESSARY DUE TO LACK OF BUBBLING
 		plate->addComponent(activator);
 	}
-
-	int x = 5;
+	//int x = 5;
 }

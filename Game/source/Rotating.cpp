@@ -2,6 +2,10 @@
 
 #include "Timer.h"
 
+Rotating::Rotating()
+{
+}
+
 Rotating::Rotating(int activationThreshold)
 	: Target(activationThreshold)
 {
