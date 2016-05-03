@@ -12,6 +12,48 @@
 #include "Rotating.h"
 #include "Plate.h"
 
+
+//http://blog.noctua-software.com/object-factory-c++.html
+class TargetFactory
+{
+public:
+	virtual Target *create() = 0;
+};
+
+class ActivatorFactory
+{
+public:
+	virtual Activator *create() = 0;
+};
+
+
+#define REGISTER_TARGET(klass) \
+    class klass##Factory : public TargetFactory { \
+    public: \
+        klass##Factory() \
+        { \
+            Object::registerType(#klass, this); \
+        } \
+        virtual Object *create() { \
+            return new klass(); \
+        } \
+    }; \
+    static klass##Factory global_##klass##Factory;
+
+#define REGISTER_ACTIVATOR(klass) \
+    class klass##Factory : public ActivatorFactory { \
+    public: \
+        klass##Factory() \
+        { \
+            Object::registerType(#klass, this); \
+        } \
+        virtual Object *create() { \
+            return new klass(); \
+        } \
+    }; \
+    static klass##Factory global_##klass##Factory;
+
+
 std::vector<std::string> split(const std::string &s, char delim) {
 	std::vector<std::string> elems;
 
