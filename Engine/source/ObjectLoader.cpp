@@ -69,13 +69,14 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 	}
 
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
-		nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c]));
+		nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
 	}
 
 	return nodeObject;
 }
 
-static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string, Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights) {
+static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string,
+        Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights, bool loadColliders) {
     GameObject* nodeObject = new GameObject();
 
     //add mesh to this object
@@ -126,10 +127,10 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 		if (childName.find("Colliders") != std::string::npos) {
 			// StaticColliders   vs.    Colliders
 			bool isStatic = childName.find("Static") == 0;
-			nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
+			if(loadColliders) nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
 		}
 		else {
-			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights));
+			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights, loadColliders));
 		}
     }
 
@@ -165,7 +166,7 @@ void linkRoot(Animation* anim, Transform* currentTransform) {
 	}
 }
 
-GameObject* loadScene(const std::string& filename) {
+GameObject* loadScene(const std::string& filename, bool loadColliders) {
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(filename,
@@ -188,7 +189,7 @@ GameObject* loadScene(const std::string& filename) {
         if (l->mType == aiLightSource_POINT)
         {
             auto pointLight = new PointLight(true);
-            pointLight->gradient = new Texture("assets/gradient.png");
+            //pointLight->gradient = new Texture("assets/gradient.png");
             light = pointLight;
         }
         else if (l->mType == aiLightSource_DIRECTIONAL)
@@ -211,7 +212,7 @@ GameObject* loadScene(const std::string& filename) {
 
 	std::unordered_map<std::string, Transform*> loadingAcceleration;
 
-	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration, lights);
+	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration, lights, loadColliders);
 
 	if (scene->HasAnimations()) {
 		retScene->addComponent(new Animation(scene, loadingAcceleration));

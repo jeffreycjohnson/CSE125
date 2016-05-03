@@ -119,7 +119,7 @@ protected:
     std::string name;
 	int ID;
 	static std::multimap<std::string, GameObject*> nameMap;
-	static std::map<int, GameObject*> idMap;
+    static std::map<int, GameObject*> idMap;
 	void removeName();
 	void removeID();
 

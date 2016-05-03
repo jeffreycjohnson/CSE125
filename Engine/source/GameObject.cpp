@@ -21,10 +21,10 @@ std::vector<void(*)(void)> GameObject::postFixedCallbacks;
 std::vector<void(*)(void)> GameObject::preVarCallbacks;
 std::vector<void(*)(void)> GameObject::postVarCallbacks;
 
-int GameObject::objectIDCounter;
+int GameObject::objectIDCounter = 1;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
 std::map<int, GameObject*> GameObject::idMap;
-GameObject GameObject::SceneRoot;
+GameObject GameObject::SceneRoot(0, "SceneRoot");
 
 GameObject * GameObject::FindByName(const std::string& name)
 {

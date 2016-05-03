@@ -198,6 +198,7 @@ PointLight::PointLight(bool shadow)
         shadowMap->passes.push_back(std::make_unique<PointShadowPass>());
         shadowMap->setGameObject(gameObject);
     }
+    gradient = new Texture("assets/gradient.png");
 }
 
 void PointLight::forwardPass(int index)
