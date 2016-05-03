@@ -40,13 +40,6 @@ glm::vec3 DebugPass::octreeColor = glm::vec3(1, 1, 0); // Yellow
 void DebugPass::render(Camera* camera) {
 	if (Renderer::drawDebug) {
 		GameObject::SceneRoot.debugDraw();
-		// SceneRoot should have an OctreeManager component; no more need for globals
-		/*if (Octree::DYNAMIC_TREE != nullptr) { 
-			Octree::DYNAMIC_TREE->debugDraw();
-		}
-		if (Octree::STATIC_TREE != nullptr) {
-			Octree::STATIC_TREE->debugDraw();
-		}*/
 	}
 }
 

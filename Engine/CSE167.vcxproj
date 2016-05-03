@@ -195,9 +195,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\NetworkStats.cpp" />
-    <ClCompile Include="source\OctreeManager.cpp" />
     <ClCompile Include="source\Ray.cpp" />
     <ClCompile Include="source\NetworkManager.cpp" />
+    <ClCompile Include="RayHitInfo.cpp" />
+    <ClCompile Include="source\include\Collision.cpp" />
     <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />
     <ClCompile Include="source\ClientNetwork.cpp" />
@@ -213,6 +214,7 @@
     <ClCompile Include="source\FileWatcher.cpp" />
     <ClCompile Include="source\NetworkUtility.cpp" />
     <ClCompile Include="source\Octree.cpp" />
+    <ClCompile Include="source\OctreeManager.cpp" />
     <ClCompile Include="source\OctreeNode.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />

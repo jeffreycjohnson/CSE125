@@ -346,4 +346,3 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	Mesh::meshMap[name] = meshData;
 
 }
-

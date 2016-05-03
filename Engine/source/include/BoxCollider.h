@@ -35,12 +35,13 @@ private:
 
 public:
 
+	static bool drawBoxPoints;
+
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
 	void destroy() override;
 	void fixedUpdate() override;
 	void debugDraw() override;
-	void onCollisionEnter(GameObject* other) override;
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
@@ -48,6 +49,7 @@ public:
 	bool intersects(const BoxCollider& other) const;
 	bool intersects(const CapsuleCollider& other) const;
 	bool intersects(const SphereCollider& other) const;
+	RayHitInfo intersects(const Ray& ray) const override;
 	
 	BoxCollider getAABB() const override;
 	ColliderType getColliderType() override {

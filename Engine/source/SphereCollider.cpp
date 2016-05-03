@@ -54,10 +54,6 @@ void SphereCollider::debugDraw()
 	}
 }
 
-void SphereCollider::onCollisionEnter(GameObject * other)
-{
-}
-
 bool SphereCollider::insideOrIntersects(const glm::vec3 & point) const
 {
 	// Assumes point is provided in worldSpace
@@ -82,6 +78,11 @@ bool SphereCollider::intersects(const SphereCollider & other) const
 {
 	float distance = (other.centerWorld - centerWorld).length();
 	return (distance <= radiusWorld + other.radiusWorld);
+}
+
+RayHitInfo SphereCollider::intersects(const Ray & ray) const
+{
+	return RayHitInfo(); // TODO: Implement ray::sphere intersection
 }
 
 BoxCollider SphereCollider::getAABB() const

@@ -8,11 +8,11 @@
 #include "RenderPass.h"
 #include "Skybox.h"
 #include "ActivatorRegistrator.h"
+#include "NetworkManager.h"
 #include "Config.h"
 
 #include <iostream>
 #include <stdexcept>
-#include "NetworkManager.h"
 
 extern void RunEngine(int caller);
 extern void InitializeEngine(std::string windowName);
@@ -64,4 +64,16 @@ int main(int argc, char** argv)
 	{
 		const auto& eptr = std::current_exception();
 	}
+	
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
+	scene->transform.setPosition(0, -0.5f, 0);
+	GameObject::SceneRoot.addChild(scene);
+
+	// setup network
+	GameObject *player = loadScene("assets/cubeman.dae");
+	player->addComponent(new FPSMovement(1.5f, 0.5f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+	player->addComponent(Renderer::mainCamera);
+	GameObject::SceneRoot.addChild(player);
+
+    RunEngine(2); // running engine as client
 }

@@ -6,6 +6,8 @@
 #include "Renderer.h"
 #include "RenderPass.h"
 
+bool BoxCollider::drawBoxPoints = false;
+
 BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset), dimensions(dimensions)
 {
 	float halfW = dimensions.x / 2;
@@ -39,6 +41,8 @@ void BoxCollider::fixedUpdate()
 {
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
+		offsetWorld = glm::vec3(matrix * glm::vec4(offset, 1));
+		dimensionsWorld = glm::vec3(matrix * glm::vec4(dimensions, 1));
 		for (int i = 0; i < 8; i++)
 		{
 			transformPoints[i] = glm::vec3(matrix * glm::vec4(points[i], 1));
@@ -89,19 +93,43 @@ void BoxCollider::debugDraw()
 			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
 
-		// Draw all 8 points of the box
-		for (int i = 0; i < 8; ++i) {
-			Renderer::drawSphere(transformPoints[i], 0.2f, color); // Global
+		if (rayHitDebugdraw) {
+			color = glm::vec4(0.8, 0.8, 0.2, 1);
+			rayHitDebugdraw = false; // Reset every draw call
 		}
 
 		glm::vec3 dims = dimensions;
-		dims /= 2;
-		Renderer::drawBox(offset, dims, color, &gameObject->transform);
-	}
-}
 
-void BoxCollider::onCollisionEnter(GameObject* other)
-{
+		// Spheres around each point
+		float sphereRadii = 0.05 * std::max(std::abs(xmax - xmin), std::max(std::abs(ymax - ymin), std::abs(zmin - zmax)));
+		
+		if (isAxisAligned) {
+			// Draw axis-aligned bounding box
+			dims = glm::vec3(std::abs(xmax - xmin), std::abs(ymax - ymin), std::abs(zmax - zmin));
+			dims /= 2;
+			Renderer::drawBox(offsetWorld, dims, color);
+			if (drawBoxPoints) {
+				Renderer::drawSphere(glm::vec3(xmin, ymin, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmin, ymax, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmin, ymin, zmax), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmin, ymax, zmax), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymin, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymax, zmin), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymin, zmax), sphereRadii, color);
+				Renderer::drawSphere(glm::vec3(xmax, ymax, zmax), sphereRadii, color);
+			}
+		}
+		else {
+			// Draws oriented bounding box
+			dims /= 2;
+			Renderer::drawBox(offset, dims, color, &gameObject->transform);
+			if (drawBoxPoints) {
+				for (int i = 0; i < 8; ++i) {
+					Renderer::drawSphere(transformPoints[i], sphereRadii, color); // Global
+				}
+			}
+		}
+	}
 }
 
 void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
@@ -113,12 +141,18 @@ void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
 	ymax = max.y;
 	zmax = max.z;
 
-	float halfW = std::abs(xmax - xmin);
-	float halfH = std::abs(ymax - ymin);
-	float halfD = std::abs(zmax - zmin);
+	float halfW = std::abs(xmax - xmin) / 2;
+	float halfH = std::abs(ymax - ymin) / 2;
+	float halfD = std::abs(zmax - zmin) / 2;
 
 	glm::vec3 offset = (min + max);
 	offset /= 2;
+
+	// If it's axis-aligned better set up those world coords
+	if (isAxisAligned) {
+		offsetWorld = offset;
+		dimensionsWorld = glm::vec3(halfW, halfH, halfD);
+	}
 
 	// To prevent update() from fucking it up
 	points[0] = offset + glm::vec3(halfW, halfH, halfD);
@@ -191,5 +225,55 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 	else {
 		return false;
 	}
+
+}
+
+RayHitInfo BoxCollider::intersects(const Ray & ray) const
+{
+	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+	RayHitInfo hit;
+
+	float tmin = (xmin - ray.origin.x) / ray.direction.x;
+	float tmax = (xmax - ray.origin.x) / ray.direction.x;
+
+	if (tmin > tmax) std::swap(tmin, tmax);
+
+	float tymin = (ymin - ray.origin.y) / ray.direction.y;
+	float tymax = (ymax - ray.origin.y) / ray.direction.y;
+
+	if (tymin > tymax) std::swap(tymin, tymax);
+
+	if ((tmin > tymax) || (tymin > tmax)) {
+		hit.intersects = false;
+		return hit;
+	}
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (zmin - ray.origin.z) / ray.direction.z;
+	float tzmax = (zmax - ray.origin.z) / ray.direction.z;
+
+	if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax)) {
+		hit.intersects = false;
+		return hit;
+	}
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	// Return the tmin/tmax that is closest to the ray's origin
+	hit.hitTime = std::min(tmin, tmax);
+	hit.collider = (Collider*)this;
+	hit.intersects = true;
+	return hit;
 
 };

@@ -6,12 +6,11 @@
 #include "Timer.h"
 #include "Renderer.h"
 #include "Material.h"
-#include "OctreeManager.h"
-#include <iostream>
-#include <functional>
 #include "NetworkManager.h"
 #include "NetworkUtility.h"
 #include "ObjectLoader.h"
+#include "OctreeManager.h"
+
 #include <algorithm>
 #include <iterator>
 #include <iostream>
@@ -144,6 +143,7 @@ GameObject::~GameObject() {
 }
 
 void GameObject::addChild(GameObject* go) {
+
     transform.children.push_back(&go->transform);
 	go->transform.setParent(&transform);
 
@@ -152,7 +152,7 @@ void GameObject::addChild(GameObject* go) {
 	if (ptr != nullptr) {
 		ptr->insertGameObject(go);
 	}
-
+	
 	go->postToNetwork();
 }
 
