@@ -3,6 +3,10 @@
 #include "FPSMovement.h"
 #include <iostream>
 
+Laser::Laser()
+{
+}
+
 Laser::Laser(int activationThreshold)
 	: Target(activationThreshold)
 {

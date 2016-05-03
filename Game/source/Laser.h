@@ -7,6 +7,7 @@ class Laser :
 	public Target
 {
 public:
+	Laser();
 	Laser(int activationThreshold);
 	~Laser();
 

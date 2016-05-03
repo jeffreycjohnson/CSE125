@@ -7,6 +7,7 @@ class Rotating :
 	public Target
 {
 public:
+	Rotating();
 	Rotating(int activationThreshold);
 	~Rotating();
 
