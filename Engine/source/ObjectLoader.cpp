@@ -75,6 +75,27 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 	return nodeObject;
 }
 
+static Mesh* loadMesh(const aiScene* scene, aiNode* currentNode, std::string filename, unsigned int index) {
+	int meshIndex = currentNode->mMeshes[index];
+	std::string meshName = filename + "/" + scene->mMeshes[meshIndex]->mName.C_Str();
+	if (index > 0) meshName = meshName + "/" + std::to_string(index);
+	if (!Mesh::meshMap.count(meshName)) {
+		Mesh::loadMesh(meshName, scene->mMeshes[meshIndex]);
+	}
+
+	auto mesh = new Mesh(meshName);
+
+	auto aMat = scene->mMaterials[scene->mMeshes[meshIndex]->mMaterialIndex];
+	aiString matName;
+	if (AI_SUCCESS == aMat->Get(AI_MATKEY_NAME, matName))
+	{
+		Material * mat = new Material(getPath(filename) + matName.C_Str() + ".mat.ini", scene->mMeshes[meshIndex]->HasBones());
+		mesh->setMaterial(mat);
+	}
+
+	return mesh;
+}
+
 static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string,
         Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights, bool loadColliders) {
     GameObject* nodeObject = new GameObject();
@@ -99,25 +120,17 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
         nodeObject->addComponent(lights[name]);
     }
 
-    if (currentNode->mNumMeshes > 0) {
-		int meshIndex = *currentNode->mMeshes;
-		std::string meshName = filename + "/" + scene->mMeshes[meshIndex]->mName.C_Str();
-        if (!Mesh::meshMap.count(meshName)) {
-            Mesh::loadMesh(meshName, scene->mMeshes[meshIndex]);
-        }
-
-        auto mesh = new Mesh(meshName);
-
-        auto aMat = scene->mMaterials[scene->mMeshes[meshIndex]->mMaterialIndex];
-        aiString matName;
-        if (AI_SUCCESS == aMat->Get(AI_MATKEY_NAME, matName))
-        {
-            Material * mat = new Material(getPath(filename) + matName.C_Str() + ".mat.ini", scene->mMeshes[*currentNode->mMeshes]->HasBones());
-            mesh->setMaterial(mat);
-        }
-
-        nodeObject->addComponent(mesh);
-    }
+	for (unsigned int i = 0; i < currentNode->mNumMeshes; i++) {
+		auto mesh = loadMesh(scene, currentNode, filename, i);
+		if (i == 0) {
+			nodeObject->addComponent(mesh);
+		}
+		else {
+			auto child = new GameObject();
+			nodeObject->addChild(child);
+			child->addComponent(mesh);
+		}
+	}
 
     loadingAcceleration[currentNode->mName.C_Str()] = &nodeObject->transform;
 
@@ -170,8 +183,8 @@ GameObject* loadScene(const std::string& filename, bool loadColliders) {
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(filename,
-		aiProcess_Triangulate | aiProcess_GenNormals |
-		aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality |
+		aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_ValidateDataStructure |
+		aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality | aiProcess_FindInstances | 
 		aiProcess_FindInvalidData | aiProcess_GenUVCoords | aiProcess_TransformUVCoords |
 		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
 
