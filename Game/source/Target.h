@@ -25,6 +25,8 @@ public:
 	void releaseTrigger(TriggerType triggerType);
 
 	bool isActivated();
+
+	void setThreshold(int threshold) { activationThreshold = threshold; }
 };
 
 #endif // TARGET_H
