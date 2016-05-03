@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "GameObject.h"
 #include "Input.h"
+#include "OctreeManager.h"
+#include "ServerInput.h"
 #include "Renderer.h"
 #include "Timer.h"
 #include "OctreeManager.h"
@@ -128,6 +130,7 @@ void FPSMovement::fixedUpdate()
 		respawn();
 	}
 	recalculate();
+	raycast();
 }
 
 glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
@@ -196,4 +199,16 @@ void FPSMovement::recalculate()
 
 void FPSMovement::respawn() {
 	position = initialPosition;
+}
+
+void FPSMovement::raycast()
+{
+	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
+	if (octreeManager)
+	{
+		Ray ray(verticality->transform.getPosition(), front);
+		auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
+
+		if (cast.intersects) std::cout << "HEY I MADE A HIT WOW" << std::endl;
+	}
 }

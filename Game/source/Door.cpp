@@ -40,7 +40,5 @@ void Door::fixedUpdate()
 	openness = std::min(1.0f, openness);
 	openness = std::max(0.0f, openness);
 
-	std::cout << openness << std::endl;
-
-	gameObject->transform.setPosition(initPosit + moveDirectionVec() * openness * 2.0f);
+	gameObject->transform.setPosition(initPosit + moveDirectionVec() * openness * 2.5f);
 }

@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	}*/
 	
 	GameObject *scene = loadScene("assets/button_action.dae");
-	scene->transform.setPosition(0, -0.3f, 0);
+	scene->transform.setPosition(0, -.29f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	bool didSetCamera = false;
