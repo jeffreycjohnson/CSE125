@@ -20,6 +20,7 @@ class FixedLaser :
 private:
 	bool areLasersOff;
 public:
+	FixedLaser() {}
 	FixedLaser(int activationThreshold);
 	~FixedLaser();
 
