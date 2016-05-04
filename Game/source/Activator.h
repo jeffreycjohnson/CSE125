@@ -13,12 +13,6 @@
 
 //http://blog.noctua-software.com/object-factory-c++.html
 
-class ActivatorFactory
-{
-public:
-	virtual Activator *create() = 0;
-};
-
 class Target;
 
 enum TriggerType
@@ -48,19 +42,12 @@ class Activator :
 private:
 	TriggerType triggerType;
 	std::vector<Connection> connections;
-	static std::map<std::string, ActivatorFactory*> factories;
 
 public:
 	Activator();
 	virtual ~Activator() = 0;
 
 	void addConnection(Connection connection);
-
-	static void registerType(
-		const std::string& name, ActivatorFactory *factory)
-	{
-		factories[name] = factory;
-	}
 	void activate();
 	void deactivate();
 };

@@ -1,11 +1,8 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
-#include <string>
-#include <map>
-#include <unordered_map>
-#include <vector>
 #include <sstream>
+#include <functional>
 
 #include "GameObject.h"
 
@@ -16,45 +13,15 @@
 
 //http://blog.noctua-software.com/object-factory-c++.html
 
-#define REGISTER_TARGET(klass) \
-    class klass##Factory : public TargetFactory { \
-    public: \
-        klass##Factory() \
-        { \
-            Target::registerType(#klass, this); \
-        } \
-        virtual Target *create() { \
-            return new klass(); \
-        } \
-    }; \
-    static klass##Factory global_##klass##Factory;
-
-#define REGISTER_ACTIVATOR(klass) \
-    class klass##Factory : public ActivatorFactory { \
-    public: \
-        klass##Factory() \
-        { \
-            Activator::registerType(#klass, this); \
-        } \
-        virtual Activator *create() { \
-            return new klass(); \
-        } \
-    }; \
-    static klass##Factory global_##klass##Factory;
-
-REGISTER_TARGET(Laser)
-REGISTER_TARGET(Rotating)
-REGISTER_ACTIVATOR(Plate)
-
-std::map<std::string, TargetFactory *> ActivatorRegistrator::prefixToTarget =
+std::map<std::string, std::function<Target*(std::vector<std::string>)>> ActivatorRegistrator::prefixToTarget =
 {
-	{ "rotate_" , &global_RotatingFactory},
-	{ "laser_", &global_LaserFactory},
+	{ "rotate_" , [](std::vector<std::string> args) {return new Rotating();}},
+	{ "laser_",   [](std::vector<std::string> args) {return new FixedLaser();}},
 };
 
-std::map<std::string, ActivatorFactory *> ActivatorRegistrator::prefixToActivator =
+std::map<std::string, std::function<Activator*(std::vector<std::string>)>> ActivatorRegistrator::prefixToActivator =
 {
-	{ "rotate_" , &global_PlateFactory },
+	{ "plate_" ,  [](std::vector<std::string> args) {return new Plate();}},
 };
 
 
@@ -87,37 +54,46 @@ void ActivatorRegistrator::create()
 
 	/// TODO OBVIOUSLY HANDLE MORE TARGETS
 	std::map<int, Target*> idToTargets;
-	auto rotates = GameObject::FindAllByPrefix("rotate_");
-	for (auto& rotate : rotates)
-	{
-		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
-		auto tokens = split(rotate->getName(), '_');
-		int targetID = std::stoi(tokens[1]);
-		int threshold = std::stoi(tokens[2]);
 
-		Target *t = new Rotating(threshold);
-		rotate->addComponent(t);
+	// REGISTER TARGETS
+	for (auto keyval : prefixToTarget) {
+		auto targs = GameObject::FindAllByPrefix(keyval.first);
+		for (auto targ : targs) {
+			auto tokens = split(targ->getName(), '_');
 
-		idToTargets[targetID] = t;
+			//MAGIC LAMBA. ASK ME ELTON FOR THE DETAILS
+			Target *t = keyval.second(tokens);
+
+			//TODO Placeholder
+			int targetID = std::stoi(tokens[1]);
+			int threshold = std::stoi(tokens[2]);
+
+			t->setThreshold(threshold);
+
+			targ->addComponent(t);
+			idToTargets[targetID] = t;
+		}
 	}
 
 	// REGISTER ACTIVATORS
-	auto plates = GameObject::FindAllByPrefix("plate_");
-	for (auto& plate : plates)
-	{
-		auto tokens = split(plate->getName(), '_');
+	for (auto keyval : prefixToActivator) {
+		auto activators = GameObject::FindAllByPrefix(keyval.first);
+		for (auto act : activators) {
+			auto tokens = split(act->getName(), '_');
 
-		Activator* activator = new Plate;
-		for (int i = 1; i < tokens.size(); i += 3)
-		{
-			int targetID = std::stoi(tokens[i + 0]);
-			TriggerType triggerType = strToTriggerType(tokens[i + 1]);
-			int activatorID = std::stoi(tokens[i + 2]);
+			Activator * activator = keyval.second(tokens);
 
-			activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
+			//PlaceHolder code
+			for (int i = 1; i < tokens.size(); i += 3) {
+				int targetID = std::stoi(tokens[i + 0]);
+				TriggerType triggerType = strToTriggerType(tokens[i + 1]);
+				int activatorID = std::stoi(tokens[i + 2]);
+
+				activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
+			}
+
+			//Add Component to current Game object
+			act->addComponent(activator);
 		}
-
-		plate->addComponent(activator);
 	}
-	//int x = 5;
 }
