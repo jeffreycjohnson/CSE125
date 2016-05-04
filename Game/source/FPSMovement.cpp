@@ -12,13 +12,12 @@
 const float SPEED = 3.0f;
 
 FPSMovement::FPSMovement(int clientId, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
-	: clientId(clientId), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
+	: clientId(clientId), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality), initialPosition(position)
 {
 	this->front = glm::vec3(0, 0, -1);
 
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
-
 	pastFirstTick = false;
 }
 
@@ -97,4 +96,8 @@ void FPSMovement::recalculate()
 
 	// and transform me please
 	gameObject->transform.setPosition(position.x, position.y, position.z);
+}
+
+void FPSMovement::respawn() {
+	position = initialPosition;
 }

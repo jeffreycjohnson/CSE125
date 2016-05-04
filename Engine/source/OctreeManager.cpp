@@ -237,6 +237,7 @@ void OctreeManager::beforeFixedUpdate() {
 		// /!\ Warning: the following code is black magic. Exercise caution.
 
 		for (auto other : collisionData.collidees) {
+			other = other->transform.getParent()->getParent()->gameObject;
 			if (colliding && previouslyColliding) {
 				// Static Collision Stay
 				caller->collisionCallback(other, &Component::staticCollisionStay);
@@ -281,6 +282,7 @@ void OctreeManager::beforeFixedUpdate() {
 		bool previouslyColliding = collisionData.collider->previouslyColliding;
 
 		for (auto other : collisionData.collidees) {
+			other = other->transform.getParent()->getParent()->gameObject;
 			if (colliding && previouslyColliding) {
 				// Collision Stay
 				caller->collisionCallback(other, &Component::collisionStay);

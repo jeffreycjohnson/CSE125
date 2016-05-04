@@ -16,6 +16,7 @@ private:
 
 	bool pastFirstTick;
 	glm::vec2 lastMousePosition;
+	glm::vec3 initialPosition;
 
 	void recalculate();
 public:
@@ -27,6 +28,7 @@ public:
 
 	void create() override;
 	void fixedUpdate() override;
+	void respawn();
 };
 
 #endif // PLAYER_MOVEMENT_H
