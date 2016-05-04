@@ -50,12 +50,30 @@ static GameObject* parseEmitterNode(const aiScene* scene, aiNode* currentNode) {
 	// Particle emitters should be named after a corresponding "particle.ini" file
 	// in the hierarchy.   e.g.
 	// Emitters
-	//   Fire    -->  maps to "assets/particles/Fire.particle.ini"
+	//   FireEmitter    -->  maps to "assets/particles/Fire.particle.ini"
 	std::string name = currentNode->mName.C_Str();
-	std::string path = "assets/particles/" + path + ".particle.ini";
+	auto end = name.find("Emitter");
+	if (name != "Emitters" && end != std::string::npos) {
+		name.replace(end, name.length() - end, "");
 
-	ConfigFile file(path);
-	GPUEmitter* emitter = GPUEmitter::createFromConfigFile(file);
+		if (name.length() > 0) {
+			std::string path = "assets/particles/" + name + ".particle.ini";
+
+			ConfigFile file(path);
+			GPUEmitter* emitter = GPUEmitter::createFromConfigFile(file, nodeObject);
+			nodeObject->addComponent(emitter);
+			emitter->init();
+			emitter->play();
+
+		}
+	}
+
+	// Iterate through the children of the Emitters node & add the emitters
+	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
+		nodeObject->addChild(parseEmitterNode(scene, currentNode->mChildren[c]));
+	}
+	
+	return nodeObject;
 
 }
 
@@ -173,7 +191,7 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 			bool isStatic = childName.find("Static") == 0;
 			if(loadColliders) nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
 		}
-		else if (childName.find("Emitters") != std::string::npos) {
+		else if (childName.find("Emitter") != std::string::npos) {
 			if (loadEmitters) nodeObject->addChild(parseEmitterNode(scene, currentNode->mChildren[c]));
 		}
 		else {

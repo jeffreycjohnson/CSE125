@@ -11,6 +11,8 @@ GPUEmitter::GPUEmitter()
 {
 	// for internal use ONLY, doesn't init stuff. Gets called by static factory method
 	//   "createFromConfigFile"
+	texture = nullptr;
+	gameObject = nullptr;
 }
 
 GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
@@ -58,15 +60,19 @@ GPUEmitter::~GPUEmitter()
 	// Delete for arrays is handled in genParticles
 }
 
-GPUEmitter* GPUEmitter::createFromConfigFile(const ConfigFile& file)
+GPUEmitter* GPUEmitter::createFromConfigFile(const ConfigFile& file, GameObject* go)
 {
-
 	GPUEmitter* out = new GPUEmitter;
 
 	if (out->texture != nullptr) {
 		delete out->texture;
 		out->texture = new Texture(file.getString("Particle","texture"));
 	}
+	else {
+		out->texture = new Texture(file.getString("Particle", "texture"));
+	}
+
+	out->gameObject = go;
 
 	out->velocity = file.getFloatVector("Particle","velocity");
 	out->minStartSize = file.getFloat("Particle","minStartSize");
@@ -96,6 +102,10 @@ GPUEmitter* GPUEmitter::createFromConfigFile(const ConfigFile& file)
 	out->loop = file.getBool("Particle", "loop");
 	out->additive = file.getBool("Particle", "additive");
 	out->rotateTowardsVelocity = file.getBool("Particle", "rotateTowardsVelocity");
+
+	if (file.getBool("Particle", "play")) {
+		out->play();
+	}
 
 	return out;
 
@@ -157,6 +167,11 @@ void GPUEmitter::draw()
 		glDepthMask(true);
 		glDisable(GL_BLEND);
 	}
+}
+
+void GPUEmitter::debugDraw()
+{
+	Renderer::drawSphere(gameObject->transform.getPosition(), 0.125f, glm::vec4(1, 0, 1, 1), &gameObject->transform);
 }
 
 void GPUEmitter::init()
