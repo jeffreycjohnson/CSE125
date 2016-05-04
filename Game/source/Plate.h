@@ -12,6 +12,8 @@ private:
 	bool isNotColliding;
 public:
 	Plate();
+	Plate(std::vector<std::string> tokens);
+
 	~Plate();
 
 	void fixedUpdate() override;

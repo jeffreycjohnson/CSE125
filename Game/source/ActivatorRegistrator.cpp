@@ -15,13 +15,13 @@
 
 std::map<std::string, std::function<Target*(std::vector<std::string>)>> ActivatorRegistrator::prefixToTarget =
 {
-	{ "rotate_" , [](std::vector<std::string> args) {return new Rotating();}},
-	{ "laser_",   [](std::vector<std::string> args) {return new FixedLaser();}},
+	{ "rotate_" , [](std::vector<std::string> args) {return new Rotating(args);}},
+	{ "laser_",   [](std::vector<std::string> args) {return new FixedLaser(args);}},
 };
 
 std::map<std::string, std::function<Activator*(std::vector<std::string>)>> ActivatorRegistrator::prefixToActivator =
 {
-	{ "plate_" ,  [](std::vector<std::string> args) {return new Plate();}},
+	{ "plate_" ,  [](std::vector<std::string> args) {return new Plate(args);}},
 };
 
 

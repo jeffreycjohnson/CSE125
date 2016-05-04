@@ -8,6 +8,8 @@ class Rotating :
 {
 public:
 	Rotating();
+	Rotating(std::vector<std::string> tokens);
+
 	Rotating(int activationThreshold);
 	~Rotating();
 
