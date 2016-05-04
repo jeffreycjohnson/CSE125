@@ -50,4 +50,19 @@ CMakeCache.txt
 *.swp
 
 # Binary Files
-Assets/*
+#Assets/*
+*.png
+*.tga
+*.dds
+*.wav
+*.ogg
+*.jpg
+*.hdr
+*.xcf
+Assets/*.zip
+
+# 3D Models
+*.blend
+*.blend.*
+*.dae
+*.fbx
