@@ -36,14 +36,15 @@ void FixedLaser::fixedUpdate()
 
 void FixedLaser::collisionEnter(GameObject *other)
 {
-	std::cout << "collision enter!" << std::endl;
+
 }
 
 void FixedLaser::collisionStay(GameObject *other)
 {
-	std::cout << "collision stay!" << std::endl;
 	// respawns player at their original starting point.
-	GameObject * go = other->transform.getParent()->gameObject;
-	FPSMovement * fps = go->getComponent<FPSMovement>();
-	fps->respawn();
+	if (!areLasersOff) {
+		GameObject * go = other->transform.getParent()->gameObject;
+		FPSMovement * fps = go->getComponent<FPSMovement>();
+		fps->respawn();
+	}
 }
