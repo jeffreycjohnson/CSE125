@@ -6,6 +6,13 @@
 
 using namespace std;
 
+
+GPUEmitter::GPUEmitter()
+{
+	// for internal use ONLY, doesn't init stuff. Gets called by static factory method
+	//   "createFromConfigFile"
+}
+
 GPUEmitter::GPUEmitter(GameObject* go, string tex, bool burstEmitter)
 {
 	gameObject = go;
@@ -51,38 +58,46 @@ GPUEmitter::~GPUEmitter()
 	// Delete for arrays is handled in genParticles
 }
 
-void GPUEmitter::loadParticleFile(std::string filename)
+GPUEmitter* GPUEmitter::createFromConfigFile(const ConfigFile& file)
 {
-	ConfigFile file(filename);
 
-	velocity = file.getFloatVector("Particle","velocity");
-	minStartSize = file.getFloat("Particle","minStartSize");
-	maxStartSize = file.getFloat("Particle","maxStartSize");
-	minEndSize = file.getFloat("Particle", "minEndSize");
-	maxEndSize = file.getFloat("Particle", "maxEndSize");
-	startOpacity = file.getFloat("Particle", "startOpacity");
-	endOpacity = file.getFloat("Particle", "endOpacity");
-	minDuration = file.getFloat("Particle", "minDuration");
-	maxDuration = file.getFloat("Particle", "maxDuration");
-	minStartColor = file.getColor("Particle", "minStartColor");
-	maxStartColor = file.getColor("Particle", "maxStartColor");
-	minEndColor = file.getColor("Particle", "minEndColor");
-	maxEndColor = file.getColor("Particle", "maxEndColor");
-	minStartVelocity = file.getFloatVector("Particle", "minStartVelocity");
-	maxStartVelocity = file.getFloatVector("Particle", "maxStartVelocity");
-	minAcceleration = file.getFloatVector("Particle", "minAcceleration");
-	maxAcceleration = file.getFloatVector("Particle", "maxAcceleration");
-	minStartAngle = file.getFloat("Particle", "minStartAngle");
-	maxStartAngle = file.getFloat("Particle", "maxStartAngle");
-	minAngularVelocity = file.getFloat("Particle", "minAngularVelocity");
-	maxAngularVelocity = file.getFloat("Particle", "maxAngularVelocity");
-	emitterVelocity = file.getFloatVector("Particle", "emitterVelocity");
-	emitterVelocityScale = file.getFloat("Particle", "emitterVelocityScale");
-	burst = file.getBool("Particle", "burstEmitter");
-	count = file.getInt("Particle", "count");
-	loop = file.getBool("Particle", "loop");
-	additive = file.getBool("Particle", "additive");
-	rotateTowardsVelocity = file.getBool("Particle", "rotateTowardsVelocity");
+	GPUEmitter* out = new GPUEmitter;
+
+	if (out->texture != nullptr) {
+		delete out->texture;
+		out->texture = new Texture(file.getString("Particle","texture"));
+	}
+
+	out->velocity = file.getFloatVector("Particle","velocity");
+	out->minStartSize = file.getFloat("Particle","minStartSize");
+	out->maxStartSize = file.getFloat("Particle","maxStartSize");
+	out->minEndSize = file.getFloat("Particle", "minEndSize");
+	out->maxEndSize = file.getFloat("Particle", "maxEndSize");
+	out->startOpacity = file.getFloat("Particle", "startOpacity");
+	out->endOpacity = file.getFloat("Particle", "endOpacity");
+	out->minDuration = file.getFloat("Particle", "minDuration");
+	out->maxDuration = file.getFloat("Particle", "maxDuration");
+	out->minStartColor = file.getColor("Particle", "minStartColor");
+	out->maxStartColor = file.getColor("Particle", "maxStartColor");
+	out->minEndColor = file.getColor("Particle", "minEndColor");
+	out->maxEndColor = file.getColor("Particle", "maxEndColor");
+	out->minStartVelocity = file.getFloatVector("Particle", "minStartVelocity");
+	out->maxStartVelocity = file.getFloatVector("Particle", "maxStartVelocity");
+	out->minAcceleration = file.getFloatVector("Particle", "minAcceleration");
+	out->maxAcceleration = file.getFloatVector("Particle", "maxAcceleration");
+	out->minStartAngle = file.getFloat("Particle", "minStartAngle");
+	out->maxStartAngle = file.getFloat("Particle", "maxStartAngle");
+	out->minAngularVelocity = file.getFloat("Particle", "minAngularVelocity");
+	out->maxAngularVelocity = file.getFloat("Particle", "maxAngularVelocity");
+	out->emitterVelocity = file.getFloatVector("Particle", "emitterVelocity");
+	out->emitterVelocityScale = file.getFloat("Particle", "emitterVelocityScale");
+	out->burst = file.getBool("Particle", "burst");
+	out->count = file.getInt("Particle", "count");
+	out->loop = file.getBool("Particle", "loop");
+	out->additive = file.getBool("Particle", "additive");
+	out->rotateTowardsVelocity = file.getBool("Particle", "rotateTowardsVelocity");
+
+	return out;
 
 }
 

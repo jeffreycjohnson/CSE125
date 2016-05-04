@@ -26,6 +26,8 @@ private:
 	GLuint genParticles();
     void setUniforms();
 
+	GPUEmitter(); // Private ctor for internal use ONLY
+
 public:
 	float minStartSize, maxStartSize, minEndSize, maxEndSize;
 	float startOpacity, endOpacity;
@@ -41,7 +43,8 @@ public:
 	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();
 
-	void loadParticleFile(std::string filename);
+	static GPUEmitter* createFromConfigFile(const ConfigFile& file);
+
 	void update(float deltaTime) override;
 	void draw() override;
 	void init();

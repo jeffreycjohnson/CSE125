@@ -353,8 +353,8 @@
     <None Include="..\shaders\linear_depth.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\assets\particles\example_particle.ini">
-      <Filter>Configuration</Filter>
+    <None Include="..\assets\particles\Default.particle.ini">
+      <Filter>Particles</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -393,6 +393,9 @@
     </Filter>
     <Filter Include="Source\Collision">
       <UniqueIdentifier>{3fd70865-c2a3-40e3-b8be-128445228e75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Particles">
+      <UniqueIdentifier>{cc71d9ab-a878-44d7-b38b-d9154fee9f4a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

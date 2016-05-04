@@ -252,12 +252,15 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 	}
 	else {
 		// If we are a leaf node
-		if (depth < Octree::MAX_DEPTH) {
+		if (colliders.size() >= Octree::LEAF_THRESHOLD && depth < Octree::MAX_DEPTH) {
 			subdivide(); // The subdivide *may* fail, so for now we recurse
 			insert(colliderBeingInserted, colliderAABB);
 		}
 		else {
 			colliders.push_back(colliderBeingInserted);
+			colliderBeingInserted->nodeId = nodeId;
+			colliderBeingInserted->octree = this->tree;
+			return true;
 		}
 	}
 }
