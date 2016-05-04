@@ -6,6 +6,11 @@ Rotating::Rotating()
 {
 }
 
+Rotating::Rotating(std::vector<std::string> tokens)
+{
+	//TODO parse(tokens);
+}
+
 Rotating::Rotating(int activationThreshold)
 	: Target(activationThreshold)
 {
