@@ -7,8 +7,7 @@
 
 enum ColliderType {
 	UNKNOWN,   // Unknown
-	AABB,
-	OBB,
+	BOX,
 	SPHERE,
 	CAPSULE
 };

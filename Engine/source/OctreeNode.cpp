@@ -73,7 +73,7 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 			if (colliderPtr == &box) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
 
-				case ColliderType::AABB:
+				case ColliderType::BOX:
 				{
 					BoxCollider* myBox = (BoxCollider*)colliderPtr;
 					if (myBox->intersects(box)) {
@@ -117,7 +117,7 @@ CollisionInfo OctreeNode::collidesWith(const SphereCollider& collider, Collision
 		for (auto colliderPtr : colliders) {
 			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
-				case ColliderType::AABB:
+				case ColliderType::BOX:
 				{
 					BoxCollider* myBox = (BoxCollider*)colliderPtr;
 					if (myBox->intersects(collider)) {
@@ -159,7 +159,6 @@ CollisionInfo OctreeNode::collidesWith(const SphereCollider& collider, Collision
 
 }
 
-
 CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider, CollisionInfo& info) {
 
 	// Check object against all of the objects in our colliders list
@@ -168,7 +167,7 @@ CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider, Collisio
 			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
 
-				case ColliderType::AABB:
+				case ColliderType::BOX:
 				{
 					BoxCollider* myBox = (BoxCollider*)colliderPtr;
 					if (myBox->intersects(collider)) {

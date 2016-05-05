@@ -55,7 +55,7 @@ public:
 	
 	BoxCollider getAABB() const override;
 	ColliderType getColliderType() override {
-		return ColliderType::AABB;
+		return ColliderType::BOX;
 	};
 };
 

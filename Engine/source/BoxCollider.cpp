@@ -182,11 +182,19 @@ bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 }
 
 bool BoxCollider::intersects(const BoxCollider& other) const {
-	return (
+	bool intersectsAABB = (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
 		this->ymin <= other.ymax && other.ymin <= this->ymax &&
 		this->zmin <= other.zmax && other.zmin <= this->zmax
 	);
+	if (!isAxisAligned && intersectsAABB) {
+		// If we collide with the OBB's AABB, we will also collide with the OBB,
+		// because geometry.
+
+	}
+	else {
+		return intersectsAABB;
+	}
 }
 
 bool BoxCollider::intersects(const CapsuleCollider & other) const

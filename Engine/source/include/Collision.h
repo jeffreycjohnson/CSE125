@@ -128,6 +128,7 @@ private:
 	/* Member Functions */
 
 	void raycast(const Ray&, RayHitInfo&);
+
 	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
 	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
 	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
