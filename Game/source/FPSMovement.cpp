@@ -3,8 +3,10 @@
 #include <iostream>
 
 #include <glm/glm/gtc/matrix_transform.hpp>
+#include <glm/glm/gtx/string_cast.hpp>
 
 #include "Camera.h"
+#include "Collider.h"
 #include "GameObject.h"
 #include "Input.h"
 #include "OctreeManager.h"
@@ -82,10 +84,10 @@ void FPSMovement::fixedUpdate()
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
 
 	yaw += mouseDelta.x * mouseSensitivity;
-	pitch += mouseDelta.y * mouseSensitivity;
+	pitch += -1 * mouseDelta.y * mouseSensitivity;
 
 	// can't look past certain angles
-	pitch = fmaxf(-85.0f, fminf(85.0f, pitch));
+	pitch = fmaxf(-89.0f, fminf(89.0f, pitch));
 
 	lastMousePosition = currMousePosition;
 
@@ -129,6 +131,9 @@ void FPSMovement::fixedUpdate()
 	if (position.y < deathFloor) {
 		respawn();
 	}
+	position += ServerInput::getAxis("pitch", clientId) * worldFront * speed;
+	position += ServerInput::getAxis("roll", clientId) * normRight * speed;
+	
 	recalculate();
 	raycast();
 }
@@ -167,10 +172,10 @@ void FPSMovement::recalculate()
 	float sinPitch = glm::sin(glm::radians(pitch));
 
 	// recalculate direction variables
-	front = glm::vec3(
+	front = glm::normalize(glm::vec3(
 		cosYaw * cosPitch,
 		sinPitch,
-		sinYaw * cosPitch);
+		sinYaw * cosPitch));
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
 
@@ -180,8 +185,13 @@ void FPSMovement::recalculate()
 	}
 
 	// now construct quaternion for mouselook
-	glm::quat x = glm::angleAxis(glm::radians(-yaw), worldUp);
-	glm::quat y = glm::angleAxis(glm::radians(-pitch), glm::vec3(1, 0, 0));
+	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
+	glm::vec3 frontUp = glm::dot(front, worldUp) * worldUp;
+
+	glm::quat x = glm::inverse(glm::quat(glm::lookAt(gameObject->transform.getWorldPosition(), gameObject->transform.getWorldPosition() + worldFront, worldUp)));
+	glm::quat y = glm::angleAxis(glm::radians(pitch), glm::vec3(1, 0, 0));
+
+	glm::quat xy = glm::inverse(glm::quat(glm::lookAt(verticality->transform.getWorldPosition(), verticality->transform.getWorldPosition() + front, worldUp)));
 
 	if (verticality != nullptr)
 	{
@@ -190,7 +200,7 @@ void FPSMovement::recalculate()
 	}
 	else
 	{
-		gameObject->transform.setRotate(x * y);
+		gameObject->transform.setRotate(xy);
 	}
 
 	// and transform me please
@@ -206,9 +216,21 @@ void FPSMovement::raycast()
 	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (octreeManager)
 	{
-		Ray ray(verticality->transform.getPosition(), front);
+		Ray ray(verticality->transform.getWorldPosition(), glm::vec3(front));
 		auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
 
-		if (cast.intersects) std::cout << "HEY I MADE A HIT WOW" << std::endl;
+		if (cast.intersects)
+		{
+			std::cout << "HIT" << std::endl;
+		}
+		else
+		{
+			std::cout << "NOHIT" << std::endl;
+		}
 	}
+}
+
+void FPSMovement::debugDraw()
+{
+	Renderer::drawArrow(position, front, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
 }
