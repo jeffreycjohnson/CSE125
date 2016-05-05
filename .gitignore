@@ -63,6 +63,6 @@ Assets/*.zip
 
 # 3D Models
 *.blend
-*.blend.*
+*.blend1
 *.dae
 *.fbx

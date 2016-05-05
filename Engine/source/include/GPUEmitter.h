@@ -28,8 +28,6 @@ private:
 
 	GPUEmitter(); // Private ctor for internal use ONLY
 
-	bool enabled;
-
 public:
 	float minStartSize, maxStartSize, minEndSize, maxEndSize;
 	float startOpacity, endOpacity;
@@ -40,7 +38,7 @@ public:
 	float minStartAngle, maxStartAngle, minAngularVelocity, maxAngularVelocity;
 	float emitterVelocityScale;
 	int count; // Per second
-	bool loop, additive, rotateTowardsVelocity;
+	bool enabled, loop, additive, rotateTowardsVelocity;
 
 	GPUEmitter(GameObject*, std::string, bool);
 	~GPUEmitter();

@@ -62,15 +62,15 @@ GPUEmitter::~GPUEmitter()
 
 GPUEmitter* GPUEmitter::createFromConfigFile(const ConfigFile& file, GameObject* go)
 {
-	GPUEmitter* out = new GPUEmitter;
+	GPUEmitter* out = new GPUEmitter(go, file.getString("Particle","texture"), file.getBool("Particle","burst"));
 
-	if (out->texture != nullptr) {
+	/*if (out->texture != nullptr) {
 		delete out->texture;
 		out->texture = new Texture(file.getString("Particle","texture"));
 	}
 	else {
 		out->texture = new Texture(file.getString("Particle", "texture"));
-	}
+	}*/
 
 	out->gameObject = go;
 

@@ -24,8 +24,8 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
 	//colliders.push_back(this); // TODO: Remove naive implementation once octree is working
-	colliding = false;
-	previouslyColliding = false;
+	colliding = previouslyColliding = false;
+	collidingStatic = previouslyCollidingStatic = false;
 	passive = true;
 	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
 
@@ -79,14 +79,14 @@ void BoxCollider::fixedUpdate()
 }
 
 BoxCollider BoxCollider::getAABB() const {
-	return *this;
+	return *this; // TODO: change for OBB later
 }
 
 void BoxCollider::debugDraw()
 {
 	if (DebugPass::drawColliders) {
 		glm::vec4 color;
-		if (colliding) {
+		if (colliding || collidingStatic) {
 			color = glm::vec4(DebugPass::collidingColor, 1.0);
 		}
 		else {

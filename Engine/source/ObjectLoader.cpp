@@ -52,6 +52,8 @@ static GameObject* parseEmitterNode(const aiScene* scene, aiNode* currentNode) {
 	// Emitters
 	//   FireEmitter    -->  maps to "assets/particles/Fire.particle.ini"
 	std::string name = currentNode->mName.C_Str();
+	nodeObject->setName(name);
+
 	auto end = name.find("Emitter");
 	if (name != "Emitters" && end != std::string::npos) {
 		name.replace(end, name.length() - end, "");
@@ -63,7 +65,7 @@ static GameObject* parseEmitterNode(const aiScene* scene, aiNode* currentNode) {
 			GPUEmitter* emitter = GPUEmitter::createFromConfigFile(file, nodeObject);
 			nodeObject->addComponent(emitter);
 			emitter->init();
-			emitter->play();
+//			emitter->play();
 
 		}
 	}
@@ -92,9 +94,8 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 	nodeObject->transform.translate(pos.x, pos.y, pos.z);
 	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
 
-	// TODO: Add these colliders when they are created to the OctreeManager component that should be added to root
-
 	std::string name = currentNode->mName.C_Str();
+
 	if (name.find("BoxCollider") == 0) {
 		auto box = new BoxCollider(glm::vec3(0), glm::vec3(2));
 		box->setStatic(isStatic);
@@ -192,7 +193,7 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 			if(loadColliders) nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
 		}
 		else if (childName.find("Emitter") != std::string::npos) {
-			if (loadEmitters) nodeObject->addChild(parseEmitterNode(scene, currentNode->mChildren[c]));
+			if (loadEmitters) nodeObject->addChild(parseEmitterNode(scene, currentNode->mChildren[c])); // TODO: LaserEmitter breaks this :(
 		}
 		else {
 			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights, loadColliders, loadEmitters));

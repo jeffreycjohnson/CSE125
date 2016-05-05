@@ -8,6 +8,7 @@ CapsuleCollider::CapsuleCollider(glm::vec3 a, glm::vec3 b, float dist) {
 	this->b = b;
 	this->dist = dist;
 	colliding = previouslyColliding = false;
+	collidingStatic = previouslyCollidingStatic = false;
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
 		this->a_world = glm::vec3(matrix * glm::vec4(a,1));
@@ -45,7 +46,7 @@ void CapsuleCollider::debugDraw()
 {
 	if (DebugPass::drawColliders) {
 		glm::vec4 color(DebugPass::colliderColor, 1);
-		if (colliding) {
+		if (colliding || collidingStatic) {
 			color = glm::vec4(DebugPass::collidingColor, 1);
 		}
 		Renderer::drawCapsule(a, b, dist, color);

@@ -22,8 +22,11 @@ protected:
 	NodeId nodeId = Octree::UNKNOWN_NODE;
 	Octree* octree;
 
-	bool previouslyColliding; // Colliding during frame N
-	bool colliding;           // Colliding during frame N + 1
+	bool previouslyColliding; // Colliding during frame N        (Dynamic vs Dynamic)
+	bool colliding;           // Colliding during frame N + 1    (Dynamic vs Dynamic)
+	bool previouslyCollidingStatic; // N
+	bool collidingStatic;           // N + 1
+
 	std::set<GameObject*> previousColliders; // Ptrs to gameObjects we collided with last frame
 
 	// Given the collisions we have found at frame N, we will want to add these

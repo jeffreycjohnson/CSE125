@@ -4,10 +4,13 @@
 #include "ObjectLoader.h"
 #include "Input.h"
 #include "Collision.h"
+#include "GPUEmitter.h"
 #include <iostream>
 
 extern void RunEngine(int caller);
 extern void InitializeEngine();
+
+GPUEmitter* particleSystem = nullptr;
 
 // provides camera controls
 class Controls : public Component {
@@ -19,6 +22,9 @@ public:
 		glm::quat yaw = glm::angleAxis(Input::getAxis("pitch") * dt * 2, glm::vec3(-1, 0, 0));
 		//gameObject->transform.rotate(roll*pitch*yaw);
 		float speed = 10.0; // 10 units/sec
+		if (particleSystem) {
+			particleSystem->play();
+		}
 		Renderer::mainCamera->gameObject->transform.translate(glm::vec3(Input::getAxis("roll") * dt * speed, Input::getAxis("yaw") * dt * speed, Input::getAxis("pitch") * speed * dt));
 	}
 };
@@ -41,6 +47,12 @@ int main(int argc, char** argv)
 	auto scene = loadScene(name);
 	scene->addComponent(new Controls());
 	GameObject::SceneRoot.addChild(scene);
+
+	// Load particle emitter
+	auto emitter = GameObject::SceneRoot.FindByName("DefaultEmitter");
+	if (emitter != nullptr) {
+		particleSystem = emitter->getComponent<GPUEmitter>();
+	}
 
 	RunEngine(2); // Run Engine as modelviewer
 	
