@@ -66,24 +66,46 @@ void FPSMovement::fixedUpdate()
 			raycastHit = hit.intersects;
 		}
 
-		Ray* moveRay = new Ray(position, moveDir);
-		moveHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
+		glm::vec3 leftRayPos = position + glm::normalize(glm::vec3(-moveDir.z, moveDir.y, moveDir.x))*playerRadiusTime;
+		Ray* moveRayL = new Ray(leftRayPos, moveDir);
+		RayHitInfo moveHitL = oct->raycast(*moveRayL, Octree::STATIC_ONLY);
+
+		
+
+		glm::vec3 rightRayPos = position + glm::normalize(glm::vec3(moveDir.z, moveDir.y, -moveDir.x))*playerRadiusTime;
+		Ray* moveRayR = new Ray(rightRayPos, moveDir);
+		RayHitInfo moveHitR = oct->raycast(*moveRayR, Octree::STATIC_ONLY);
+
+		
+
+		if(std::abs(moveHitL.hitTime) < std::abs(moveHitR.hitTime))
+			moveHit = moveHitL;
+		else moveHit = moveHitR;
+
+		if ((moveHitL.intersects || moveHitR.intersects) && moveHit.hitTime >= 0) {
+			std::cout << "L pos = " << leftRayPos.x << ", " << leftRayPos.z << std::endl;
+			std::cout << "R pos = " << rightRayPos.x << ", " << rightRayPos.z << std::endl;
+
+			std::cout << "L hit = " << moveHitL.hitTime << ", normal:" << moveHitL.normal.x << ", " << moveHitL.normal.z << std::endl;
+			std::cout << "R hit = " << moveHitR.hitTime << ", normal:" << moveHitR.normal.x << ", " << moveHitR.normal.z << std::endl;
+			std::cout << "chosen hit time = " << moveHit.hitTime << ", normal:" << moveHit.normal.x << ", " << moveHit.normal.z << std::endl;
+		}
+
 		if (moveHit.intersects && moveHit.hitTime >= 0) {
-			//Ray* intersectPointRay = new Ray(position + (-moveHit.normal * playerRadiusTime), moveDir);
-			RayHitInfo intersectHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
-			if (/*length(moveDir)+ */playerRadiusTime >= intersectHit.hitTime) {
-				//std::cout << "JUMPING!" << std::endl;
-				//glm::vec3 newMoveVec = moveDir * (intersectHit.hitTime - playerRadiusTime);
+			//RayHitInfo intersectHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
+			if (playerRadiusTime >= moveHit.hitTime) {
 				glm::vec3 newMoveVec = moveDir;
 				if (moveHit.normal.x != 0)
 					newMoveVec.x = 0;
 				if (moveHit.normal.z != 0)
 					newMoveVec.z = 0;
-				//glm::vec3 newMoveVec = moveDir*moveHit.normal;
-				//std::cout << "hit time - radius = " << intersectHit.hitTime - playerRadiusTime << std::endl;
-				std::cout << "hit time = " << intersectHit.hitTime << std::endl;
-				std::cout << "OLD MOVE VEC = " << moveDir.x << ", " << moveDir.y << ", " << moveDir.z << std::endl;
-				std::cout << "NEW MOVE VEC = " << newMoveVec.x << ", " << newMoveVec.y << ", " << newMoveVec.z << std::endl;
+
+				if (moveHitL.normal != moveHitR.normal)
+					newMoveVec = glm::vec3(0);
+
+				//std::cout << "hit time = " << moveHit.hitTime << std::endl;
+				//std::cout << "OLD MOVE VEC = " << moveDir.x << ", " << moveDir.y << ", " << moveDir.z << std::endl;
+				//std::cout << "NEW MOVE VEC = " << newMoveVec.x << ", " << newMoveVec.y << ", " << newMoveVec.z << std::endl;
 				position += newMoveVec;
 				gameObject->transform.setPosition(position.x, position.y, position.z);
 				hitWall = true;
