@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	}*/
 
 	// cache all meshes
-	auto artsy = loadScene("assets/CorridorPuzzle.dae", false);
+	auto artsy = loadScene("assets/pressure.dae", false);
 	artsy->destroy();
 	delete artsy;
 

@@ -8,6 +8,7 @@ SphereCollider::SphereCollider(glm::vec3 c, float r) {
 	center = c;
 	radius = r;
 	colliding = previouslyColliding = false;
+	collidingStatic = previouslyCollidingStatic = false;
 	if (gameObject != nullptr) {
 		glm::mat4 matrix = gameObject->transform.getTransformMatrix();
 		centerWorld = glm::vec3(matrix * glm::vec4(c, 1));
@@ -44,7 +45,7 @@ void SphereCollider::debugDraw()
 {
 	if (DebugPass::drawColliders) {
 		glm::vec4 color;
-		if (colliding) {
+		if (colliding || collidingStatic) {
 			color = glm::vec4(DebugPass::collidingColor, 1);
 		}
 		else {

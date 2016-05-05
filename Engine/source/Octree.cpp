@@ -19,6 +19,8 @@ const float Octree::RAY_STEP = 0.01f;
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
 	root = new OctreeNode(min, max, this);
 	objects = 0;
+	nodeCounter = 0;
+	restriction = BuildMode::BOTH;
 };
 
 Octree::~Octree() {

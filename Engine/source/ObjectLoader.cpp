@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Renderer.h"
 #include "Material.h"
+#include "Config.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
@@ -12,6 +13,7 @@
 
 #include "Animation.h"
 #include "Light.h"
+#include "GPUEmitter.h"
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
@@ -26,6 +28,55 @@ std::string getPath(const std::string& name)
     auto index = name.find_last_of("\\/");
     if (index == std::string::npos) return name;
     return name.substr(0, index + 1);
+}
+
+static GameObject* parseEmitterNode(const aiScene* scene, aiNode* currentNode) {
+	// Extract mesh transform data from Assimp
+
+	GameObject* nodeObject = new GameObject();
+
+	aiVector3D pos;
+	aiVector3D scale;
+	aiQuaternion rotate;
+
+	currentNode->mTransformation.Decompose(scale, rotate, pos);
+
+	glm::vec3 glmScale(scale.x, scale.y, scale.z);
+
+	nodeObject->transform.setScale(glmScale);
+	nodeObject->transform.translate(pos.x, pos.y, pos.z);
+	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
+
+	// Particle emitters should be named after a corresponding "particle.ini" file
+	// in the hierarchy.   e.g.
+	// Emitters
+	//   FireEmitter    -->  maps to "assets/particles/Fire.particle.ini"
+	std::string name = currentNode->mName.C_Str();
+	nodeObject->setName(name);
+
+	auto end = name.find("Emitter");
+	if (name != "Emitters" && end != std::string::npos) {
+		name.replace(end, name.length() - end, "");
+
+		if (name.length() > 0) {
+			std::string path = "assets/particles/" + name + ".particle.ini";
+
+			ConfigFile file(path);
+			GPUEmitter* emitter = GPUEmitter::createFromConfigFile(file, nodeObject);
+			nodeObject->addComponent(emitter);
+			emitter->init();
+//			emitter->play();
+
+		}
+	}
+
+	// Iterate through the children of the Emitters node & add the emitters
+	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
+		nodeObject->addChild(parseEmitterNode(scene, currentNode->mChildren[c]));
+	}
+	
+	return nodeObject;
+
 }
 
 static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, bool isStatic = false) {
@@ -43,9 +94,8 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 	nodeObject->transform.translate(pos.x, pos.y, pos.z);
 	nodeObject->transform.rotate(glm::quat(rotate.w, rotate.x, rotate.y, rotate.z));
 
-	// TODO: Add these colliders when they are created to the OctreeManager component that should be added to root
-
 	std::string name = currentNode->mName.C_Str();
+
 	if (name.find("BoxCollider") == 0) {
 		auto box = new BoxCollider(glm::vec3(0), glm::vec3(2));
 		box->setStatic(isStatic);
@@ -97,7 +147,7 @@ static Mesh* loadMesh(const aiScene* scene, aiNode* currentNode, std::string fil
 }
 
 static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::string filename, std::unordered_map<std::string,
-        Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights, bool loadColliders) {
+        Transform*>& loadingAcceleration, std::map<std::string, Light*>& lights, bool loadColliders, bool loadEmitters) {
     GameObject* nodeObject = new GameObject();
 
     //add mesh to this object
@@ -142,8 +192,11 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 			bool isStatic = childName.find("Static") == 0;
 			if(loadColliders) nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));
 		}
+		else if (childName.find("Emitter") != std::string::npos) {
+			if (loadEmitters) nodeObject->addChild(parseEmitterNode(scene, currentNode->mChildren[c])); // TODO: LaserEmitter breaks this :(
+		}
 		else {
-			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights, loadColliders));
+			nodeObject->addChild(parseNode(scene, currentNode->mChildren[c], filename, loadingAcceleration, lights, loadColliders, loadEmitters));
 		}
     }
 
@@ -179,7 +232,7 @@ void linkRoot(Animation* anim, Transform* currentTransform) {
 	}
 }
 
-GameObject* loadScene(const std::string& filename, bool loadColliders) {
+GameObject* loadScene(const std::string& filename, bool loadColliders, bool loadEmitters) {
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(filename,
@@ -226,7 +279,7 @@ GameObject* loadScene(const std::string& filename, bool loadColliders) {
 
 	std::unordered_map<std::string, Transform*> loadingAcceleration;
 
-	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration, lights, loadColliders);
+	GameObject* retScene = parseNode(scene, scene->mRootNode, filename, loadingAcceleration, lights, loadColliders, loadEmitters);
 
 	if (scene->HasAnimations()) {
 		retScene->addComponent(new Animation(scene, loadingAcceleration));

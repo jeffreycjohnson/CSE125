@@ -4,7 +4,7 @@
 #include <functional>
 
 // returns the root game object of the file, with all children correctly added
-GameObject* loadScene(const std::string& filename, bool loadColliders = true);
+GameObject* loadScene(const std::string& filename, bool loadColliders = true, bool loadEmitters = true);
 
 extern std::unordered_multimap<std::string, std::function<void(GameObject*)>> componentMap;
 

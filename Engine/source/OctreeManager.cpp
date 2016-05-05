@@ -93,7 +93,6 @@ void OctreeManager::removeGameObject(GameObject *gameObject)
 		for (auto child : gameObject->transform.children) {
 			removeGameObject(child->gameObject);
 		}
-
 	}
 }
 
@@ -134,14 +133,14 @@ void OctreeManager::probeForStaticCollisions() {
 		
 					CollisionInfo colInfo = staticObjects->collidesWith(*colliderIter);
 					if (colInfo.numCollisions > 0) {
-						colInfo.collider->colliding = true;
+						colInfo.collider->collidingStatic = true;
 						colInfo.collider->addPreviousColliders(colInfo);
 						staticCollisions.push_back(colInfo); // [static] Enter or Stay
 						staticCollisionsThisFrame += colInfo.numCollisions;
 					}
 					else {
-						colInfo.collider->colliding = false;
-						if (colInfo.collider->previouslyColliding == true) {
+						colInfo.collider->collidingStatic = false;
+						if (colInfo.collider->previouslyCollidingStatic == true) {
 							// staticCollisionExit() event should be fired here
 							//colInfo.collider->removePreviousColliders(colInfo);
 							staticCollisions.push_back(colInfo); // TODO: ignore collision exit for now
@@ -178,7 +177,6 @@ void OctreeManager::probeForDynamicCollisions() {
 						colInfo.collider->colliding = false;
 						if (colInfo.collider->previouslyColliding == true) {
 							// CollisionExit() event should be fired here
-							//colInfo.collider->removePreviousColliders(colInfo);
 							dynamicCollisions.push_back(colInfo); // TODO: Ignore collision exit for now
 						}
 					}
@@ -229,10 +227,10 @@ void OctreeManager::beforeFixedUpdate() {
 		caller = caller->transform.getParent()->getParent()->gameObject;
 
 		// state @ N - 1
-		bool colliding = collisionData.collider->colliding;
+		bool colliding = collisionData.collider->collidingStatic;
 
 		// state @ N - 2
-		bool previouslyColliding = collisionData.collider->previouslyColliding;
+		bool previouslyColliding = collisionData.collider->previouslyCollidingStatic;
 
 		// /!\ Warning: the following code is black magic. Exercise caution.
 
@@ -314,8 +312,8 @@ void OctreeManager::afterFixedUpdate() {
 	// but the previouslyCollding boolean reflected the colliding state of N - 2,
 	// so we need to update it to whatever happened *this* frame.
 	for (auto collision : staticCollisions) {
-		collision.collider->previouslyColliding = collision.collider->colliding;
-		collision.collider->removePreviousColliders(collision);
+		collision.collider->previouslyCollidingStatic = collision.collider->collidingStatic;
+		collision.collider->removePreviousColliders(collision); // TODO: this was broken anyway, but it's more broken b/c it doesn't separate Dynamic & Static collisions
 		collision.collider->addPreviousColliders(collision);
 	}
 	for (auto collision : dynamicCollisions) {
