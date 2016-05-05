@@ -18,9 +18,11 @@
   http://mathworld.wolfram.com/Plane.html
 */
 #include "ForwardDecs.h"
+#include "Collision.h"
 
 class Plane {
 private:
+	// Ax + By + Cz + D = 0
 	float A, B, C, D; // May be useful
 	glm::vec3 N;      // Plane normal
 
@@ -37,4 +39,6 @@ public:
 	// Returns the SIGNED distance from the point to the plane!
 	// If you need absolute distance, remeber to use std::abs
 	float distanceToPoint(const glm::vec3&);
+
+	RayHitInfo intersects(const Ray& ray);
 };

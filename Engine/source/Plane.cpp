@@ -13,6 +13,9 @@ Plane::Plane(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2) {
 
 Plane::Plane(glm::vec3 p0, glm::vec3 normal) {
 	N = glm::normalize(normal);
+	A = N.x;
+	B = N.y;
+	C = N.z;
 	D = glm::dot(-N, p0);
 };
 
@@ -34,4 +37,32 @@ float Plane::distanceToPoint(const glm::vec3& point) {
 	float distance = (A * point.x + B * point.y + C * point.z + D);
 	distance /= std::sqrtf(A * A + B * B + C * C);
 	return distance;
+}
+
+RayHitInfo Plane::intersects(const Ray & ray)
+{
+	RayHitInfo hitInfo;
+
+	// Ray:    P         = O + t * D
+	// Plane:  N * P + d = 0
+
+	// Substitute:   N * (O + t * D) + d = 0
+	//               t = -(N * O + d) / (N * D)
+
+	float denominator = glm::dot(N, ray.direction);
+	float numerator = -(glm::dot(N, ray.origin) + D);
+
+	if (denominator > 0.0f - FLT_EPSILON && denominator < 0.0f + FLT_EPSILON ) {
+		// If the denominator is within FLT_EPSILON of zero, no intersection
+		hitInfo.intersects = false;
+		// Remember: If dot product between two vectors is 0, the vectors are orthogonal to each other
+	}
+	else {
+		hitInfo.hitTime = numerator / denominator;
+		hitInfo.intersects = true;
+		hitInfo.collider = nullptr;
+		hitInfo.point = ray.getPos(hitInfo.hitTime);
+	}
+
+	return hitInfo;
 }
