@@ -1,5 +1,9 @@
 #include "Target.h"
 
+Target::Target()
+{
+}
+
 Target::Target(int activationThreshold)
 	: activationThreshold(activationThreshold)
 {

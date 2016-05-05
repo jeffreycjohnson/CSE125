@@ -1,7 +1,5 @@
 #include "Activator.h"
 
-
-
 Activator::Activator()
 {
 }

@@ -1,16 +1,30 @@
 #include "ActivatorRegistrator.h"
 
 #include <iostream>
-#include <string>
-#include <map>
-#include <vector>
 #include <sstream>
+#include <functional>
 
 #include "GameObject.h"
 
 #include "Laser.h"
 #include "Rotating.h"
 #include "Plate.h"
+
+
+//http://blog.noctua-software.com/object-factory-c++.html
+
+std::map<std::string, std::function<Target*(std::vector<std::string>)>> ActivatorRegistrator::prefixToTarget =
+{
+	{ "rotate_" , [](std::vector<std::string> args) {return new Rotating(args);}},
+	{ "laser_",   [](std::vector<std::string> args) {return new FixedLaser(args);}},
+};
+
+std::map<std::string, std::function<Activator*(std::vector<std::string>)>> ActivatorRegistrator::prefixToActivator =
+{
+	{ "plate_" ,  [](std::vector<std::string> args) {return new Plate(args);}},
+};
+
+
 
 std::vector<std::string> split(const std::string &s, char delim) {
 	std::vector<std::string> elems;
@@ -40,53 +54,46 @@ void ActivatorRegistrator::create()
 
 	/// TODO OBVIOUSLY HANDLE MORE TARGETS
 	std::map<int, Target*> idToTargets;
-	auto rotates = GameObject::FindAllByPrefix("rotate_");
-	for (auto& rotate : rotates)
-	{
-		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
-		auto tokens = split(rotate->getName(), '_');
-		int targetID = std::stoi(tokens[1]);
-		int threshold = std::stoi(tokens[2]);
 
-		Target *t = new Rotating(threshold);
-		rotate->addComponent(t);
+	// REGISTER TARGETS
+	for (auto keyval : prefixToTarget) {
+		auto targs = GameObject::FindAllByPrefix(keyval.first);
+		for (auto targ : targs) {
+			auto tokens = split(targ->getName(), '_');
 
-		idToTargets[targetID] = t;
-	}
+			//MAGIC LAMBA. ASK ME ELTON FOR THE DETAILS
+			Target *t = keyval.second(tokens);
 
-	auto lasers = GameObject::FindAllByPrefix("laser_");
-	for (auto& laser : lasers)
-	{
-		/// TODO ADD EXTRA PARAMATER TO CONTROL ACTIVATION THRESHOLD
-		auto tokens = split(laser->getName(), '_');
-		int targetID = std::stoi(tokens[1]);
-		int threshold = std::stoi(tokens[2]);
+			//TODO Placeholder
+			int targetID = std::stoi(tokens[1]);
+			int threshold = std::stoi(tokens[2]);
 
-		Target *t = new FixedLaser(threshold);
-		laser->addComponent(t);
+			t->setThreshold(threshold);
 
-		idToTargets[targetID] = t;
+			targ->addComponent(t);
+			idToTargets[targetID] = t;
+		}
 	}
 
 	// REGISTER ACTIVATORS
-	auto plates = GameObject::FindAllByPrefix("plate_");
-	for (auto& plate : plates)
-	{
-		auto tokens = split(plate->getName(), '_');
+	for (auto keyval : prefixToActivator) {
+		auto activators = GameObject::FindAllByPrefix(keyval.first);
+		for (auto act : activators) {
+			auto tokens = split(act->getName(), '_');
 
-		Activator* activator = new Plate;
-		for (int i = 1; i < tokens.size(); i += 3)
-		{
-			int targetID = std::stoi(tokens[i + 0]);
-			TriggerType triggerType = strToTriggerType(tokens[i + 1]);
-			int activatorID = std::stoi(tokens[i + 2]);
+			Activator * activator = keyval.second(tokens);
 
-			activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
+			//PlaceHolder code
+			for (int i = 1; i < tokens.size(); i += 3) {
+				int targetID = std::stoi(tokens[i + 0]);
+				TriggerType triggerType = strToTriggerType(tokens[i + 1]);
+				int activatorID = std::stoi(tokens[i + 2]);
+
+				activator->addConnection(Connection(idToTargets.at(targetID), triggerType));
+			}
+
+			//Add Component to current Game object
+			act->addComponent(activator);
 		}
-
-		/// TODO THIS ONLY NECESSARY DUE TO LACK OF BUBBLING
-		plate->addComponent(activator);
 	}
-
-	int x = 5;
 }

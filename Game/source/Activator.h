@@ -8,6 +8,10 @@
 
 #include <vector>
 #include <stdexcept>
+#include <string>
+#include <map>
+
+//http://blog.noctua-software.com/object-factory-c++.html
 
 class Target;
 
@@ -44,7 +48,6 @@ public:
 	virtual ~Activator() = 0;
 
 	void addConnection(Connection connection);
-	
 	void activate();
 	void deactivate();
 };

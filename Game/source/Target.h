@@ -5,6 +5,8 @@
 #include "GameObject.h"
 
 #include "Activator.h"
+#include <string>
+#include <map>
 
 enum TriggerType;
 
@@ -17,7 +19,9 @@ private:
 
 	int positives;
 	int negatives;
+	
 public:
+	Target();
 	Target(int activationThreshold);
 	virtual ~Target() = 0;
 
@@ -25,6 +29,9 @@ public:
 	void releaseTrigger(TriggerType triggerType);
 
 	bool isActivated();
+
+	void setThreshold(int threshold) { activationThreshold = threshold; }
+
 };
 
 #endif // TARGET_H

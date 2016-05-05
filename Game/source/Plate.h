@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PLATE_H
+#define PLATE_H
+
 #include "Activator.h"
 
 class Plate :
@@ -10,6 +12,8 @@ private:
 	bool isNotColliding;
 public:
 	Plate();
+	Plate(std::vector<std::string> tokens);
+
 	~Plate();
 
 	void fixedUpdate() override;
@@ -17,3 +21,4 @@ public:
 	void collisionStay(GameObject *other) override;
 };
 
+#endif //PLATE_H

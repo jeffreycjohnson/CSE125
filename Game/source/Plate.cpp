@@ -8,6 +8,11 @@ Plate::Plate()
 	isColliding = false;
 }
 
+Plate::Plate(std::vector<std::string> tokens)
+{
+	//TODO parse(tokens);
+}
+
 Plate::~Plate()
 {
 }

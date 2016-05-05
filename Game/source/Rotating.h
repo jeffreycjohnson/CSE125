@@ -7,6 +7,9 @@ class Rotating :
 	public Target
 {
 public:
+	Rotating();
+	Rotating(std::vector<std::string> tokens);
+
 	Rotating(int activationThreshold);
 	~Rotating();
 
