@@ -22,6 +22,9 @@ std::string ServerNetwork::port;
 std::vector<int> ServerNetwork::clients;
 std::unordered_map<int, PreviousData> ServerNetwork::previousClientData;
 
+//bool init_log = false;
+//std::vector<std::vector<int>> logger;
+
 void ServerNetwork::setup(std::string port)
 {
 	ServerNetwork::port = port;
@@ -215,6 +218,7 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 	 * Realtalk: is doing select necessary? As the sockets are all nonblocking what's
 	 * the harm in just polling *all* of them to see if they have data?
 	 */
+#ifdef __SELECTIT
 	int selResult = select(clients.back() + 1, &readfds, NULL, NULL, &tv);
 	if (selResult < 0)
 	{
@@ -226,13 +230,17 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 # endif
 		WSACleanup();
 	}
+#endif
 
 	for (int client_id = 0; client_id < clients.size(); ++client_id){
 		int relevantSocket = clients[client_id];
 
+#ifdef __SELECTIT
+
 		if (!FD_ISSET(relevantSocket, &readfds)){
 			//std::cerr << client_id << " with socket " << relevantSocket << "is not ready to be read" << std::endl;
 		}
+#endif
 		std::vector<NetworkResponse> relevantResponse = ServerNetwork::handleClient(relevantSocket);
 		responses[client_id] = relevantResponse;
 	}
@@ -251,7 +259,7 @@ void ServerNetwork::broadcastBytes(const std::vector<char> &bytes, int msgType, 
 void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int msgType, int id)
 {
 	int clientSock = ServerNetwork::clients[clientID];
-
+	NetworkStats::registerMsgType(clientID, msgType);
 	// insert encoded type
 	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
 	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
