@@ -58,6 +58,8 @@ void FPSMovement::fixedUpdate()
 			lastRayPoint = ray.getPos(hit.hitTime);
 			if (hit.collider != nullptr) {
 				hit.collider->rayHitDebugdraw = true; // Don't manually set colliding EVER, this is just for debug visualization
+				if (playerRadiusTime == 0)
+					playerRadiusTime = std::abs(hit.hitTime);
 			}
 		}
 		else {
@@ -67,17 +69,29 @@ void FPSMovement::fixedUpdate()
 		Ray* moveRay = new Ray(position, moveDir);
 		moveHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
 		if (moveHit.intersects && moveHit.hitTime >= 0) {
-			std::cout << "TEST HIT at: " << moveHit.hitTime << std::endl;
-			std::cout << "Hit Normal = " << moveHit.normal.x << ", " << moveHit.normal.y << ", " << moveHit.normal.z << std::endl;
-			Ray* intersectPointRay = new Ray(position + (-moveHit.normal * playerRadius), moveDir);
+			//Ray* intersectPointRay = new Ray(position + (-moveHit.normal * playerRadiusTime), moveDir);
 			RayHitInfo intersectHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
-			//std::cout << "moveDirLength = " << length(moveDir) << std::endl;
-			//std::cout << "interesctHitTime = " << intersectHit.hitTime << std::endl;
-			//if (length(moveDir) >= intersectHit.hitTime) {
-			//	std::cout << "JUMPING!" << std::endl;
-			//}
+			if (/*length(moveDir)+ */playerRadiusTime >= intersectHit.hitTime) {
+				//std::cout << "JUMPING!" << std::endl;
+				//glm::vec3 newMoveVec = moveDir * (intersectHit.hitTime - playerRadiusTime);
+				glm::vec3 newMoveVec = moveDir;
+				if (moveHit.normal.x != 0)
+					newMoveVec.x = 0;
+				if (moveHit.normal.z != 0)
+					newMoveVec.z = 0;
+				//glm::vec3 newMoveVec = moveDir*moveHit.normal;
+				//std::cout << "hit time - radius = " << intersectHit.hitTime - playerRadiusTime << std::endl;
+				std::cout << "hit time = " << intersectHit.hitTime << std::endl;
+				std::cout << "OLD MOVE VEC = " << moveDir.x << ", " << moveDir.y << ", " << moveDir.z << std::endl;
+				std::cout << "NEW MOVE VEC = " << newMoveVec.x << ", " << newMoveVec.y << ", " << newMoveVec.z << std::endl;
+				position += newMoveVec;
+				gameObject->transform.setPosition(position.x, position.y, position.z);
+				hitWall = true;
+			}
+			else hitWall = false;
 
 		}
+		else hitWall = false;
 	}
 
 }
@@ -105,12 +119,12 @@ void FPSMovement::update(float dt)
 	glm::vec3 zComp = Input::getAxis("pitch") * normRight * speed;
 
 	moveDir = xComp + zComp;
-
-	position += xComp + zComp;
-
-	//Ray *ray = new Ray(position, xComp + zComp);
+	if (!hitWall) {
+		position += xComp + zComp;
+	}
 
 	recalculate();
+
 }
 
 void FPSMovement::debugDraw()

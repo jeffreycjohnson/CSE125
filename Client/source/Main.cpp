@@ -55,6 +55,8 @@ int main(int argc, char** argv)
 	player->addComponent(new FPSMovement(1.5f, 0.5f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
 	player->addComponent(Renderer::mainCamera);
 	GameObject::SceneRoot.addChild(player);
+	//Transform *trans = GameObject::FindByName("CubeMan")->transform.children[0]->children[0];
+	//float playerWidth = player->getComponent<BoxCollider>().getWidth();
 
 
 	try

@@ -12,8 +12,8 @@ private:
 
 	glm::vec3 position, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
-
-	float playerRadius = 1;
+	float playerRadiusTime;
+	bool hitWall;
 
 	glm::vec2 lastMousePosition;
 

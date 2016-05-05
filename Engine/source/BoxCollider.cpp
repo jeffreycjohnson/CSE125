@@ -312,3 +312,7 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	return hit;
 
 };
+
+float BoxCollider::getWidth() {
+	return xmax - xmin;
+}
