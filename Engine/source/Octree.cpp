@@ -192,20 +192,9 @@ CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a b
 
 	colInfo.collider = ptr;
 
-	if (root) {
-		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
-		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
-		CapsuleCollider* capsule = dynamic_cast<CapsuleCollider*>(ptr);
-
-		if (box != nullptr) {
-			return root->collidesWith(*box, colInfo);
-		}
-		else if (sphere != nullptr) {
-			return root->collidesWith(*sphere, colInfo); // TODO: remember to update sphere & capsule coolideswith() with changes to Box version
-		}
-		else if (capsule != nullptr) {
-			return root->collidesWith(*capsule, colInfo);
-		}
+	if (root && ptr != nullptr) {
+		BoxCollider aabb = ptr->getAABB(); // Avoid having to recompute this over and over and over...
+		return root->collidesWith(ptr, aabb, colInfo);
 	}
 	else {
 		return colInfo;

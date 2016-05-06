@@ -64,19 +64,18 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
 
 };
 
-// TODO: Condense the "collidesWith" methods into one method, since there's a lot of repetition
-CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& info) {
+CollisionInfo OctreeNode::collidesWith(Collider* collider, const BoxCollider& aabb, CollisionInfo& info) {
 
 	// Check object against all of the objects in our colliders list
-	if (intersects(box)) {
+	if (intersects(aabb)) {
 		for (auto colliderPtr : colliders) {
-			if (colliderPtr == &box) continue; // Don't check colliders against themselves
+			if (colliderPtr == collider) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
 
 				case ColliderType::BOX:
 				{
 					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(box)) {
+					if (myBox->intersects(*(BoxCollider*)collider)) {
 						info.add(myBox);
 					}
 					break;
@@ -84,7 +83,7 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 				case ColliderType::SPHERE:
 				{
 					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(box)) {
+					if (mySphere->intersects(*(SphereCollider*)collider)) {
 						info.add(mySphere);
 					}
 					break;
@@ -92,7 +91,7 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 				case ColliderType::CAPSULE:
 				{
 					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(box)) {
+					if (myCapsule->intersects(*(CapsuleCollider*)collider)) {
 						info.add(myCapsule);
 					}
 					break;
@@ -102,107 +101,14 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 		
 		// If we have children, check them afterwards
 		for (auto child : children) {
-			child->collidesWith(box, info);
+			if (child->colliders.size() > 0 && child->isLeaf())
+				child->collidesWith(collider, aabb, info);
 		}
 	}
 
 	return info;
 
 };
-
-CollisionInfo OctreeNode::collidesWith(const SphereCollider& collider, CollisionInfo& info) {
-	
-	// Check object against all of the objects in our colliders list
-	if (intersects(collider.getAABB())) { // TODO: avoid recomputing this
-		for (auto colliderPtr : colliders) {
-			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
-			switch (colliderPtr->getColliderType()) {
-				case ColliderType::BOX:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(collider)) {
-						info.add(myBox);
-					}
-					break;
-				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(collider)) {
-						info.add(mySphere);
-					}
-					break;
-				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(collider)) {
-						info.add(myCapsule);
-					}
-					break;
-				}
-			}
-		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			child->collidesWith(collider, info);
-		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			child->collidesWith(collider, info);
-		}
-	}
-	
-	return info;
-
-}
-
-CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider, CollisionInfo& info) {
-
-	// Check object against all of the objects in our colliders list
-	if (intersects(collider.getAABB())) { // TODO: avoid recomputing this
-		for (auto colliderPtr : colliders) {
-			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
-			switch (colliderPtr->getColliderType()) {
-
-				case ColliderType::BOX:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(collider)) {
-						info.add(myBox);
-					}
-					break;
-				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(collider)) {
-						info.add(mySphere);
-					}
-					break;
-				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(collider)) {
-						info.add(myCapsule);
-					}
-					break;
-				}
-			}
-		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			child->collidesWith(collider, info);
-		}
-	}
-
-	return info;
-
-}
 
 bool OctreeNode::intersects(const BoxCollider& box) {
 

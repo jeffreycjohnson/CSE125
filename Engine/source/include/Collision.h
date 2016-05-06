@@ -58,9 +58,6 @@ public:
 	void rebuild();
 
 	RayHitInfo raycast(const Ray&, float minDist = RAY_MIN, float maxDist = RAY_MAX);
-
-	// Don't use this \/
-	//CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
 	CollisionInfo collidesWith(Collider*);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
@@ -129,9 +126,8 @@ private:
 
 	void raycast(const Ray&, RayHitInfo&);
 
-	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
-	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
-	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
+	// Condensed this into one function. It forces some casting, but oh well.
+	CollisionInfo collidesWith(Collider*, const BoxCollider& aabb, CollisionInfo&);
 	
 	// Add or remove nodes to the data structure
 	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted
