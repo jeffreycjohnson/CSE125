@@ -82,7 +82,7 @@ bool SphereCollider::intersects(const SphereCollider & other) const
 	return distance <= 0;
 }
 
-RayHitInfo SphereCollider::intersects(const Ray & ray) const
+RayHitInfo SphereCollider::raycast(const Ray & ray) const
 {
 	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
 	// This function returns the earliest hit along the ray of the sphere, provided the hit happens in front of the ray (t >= 0)

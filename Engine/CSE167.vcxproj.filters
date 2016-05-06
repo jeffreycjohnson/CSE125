@@ -136,9 +136,6 @@
     <ClCompile Include="source\NetworkStats.cpp">
       <Filter>Source\Network</Filter>
     </ClCompile>
-    <ClCompile Include="RayHitInfo.cpp">
-      <Filter>Source\Collision</Filter>
-    </ClCompile>
     <ClCompile Include="source\include\Collision.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>

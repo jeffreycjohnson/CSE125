@@ -41,14 +41,14 @@ OctreeNode::~OctreeNode() {
 
 void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
 
-	RayHitInfo againstMe = myAABB->intersects(ray);
+	RayHitInfo againstMe = myAABB->raycast(ray);
 
 	if (againstMe.hitTime > hitInfo.hitTime || hitInfo.hitTime <= 0 ) {
 		return; // Nothing inside of us will collide with this
 	}
 
 	for (auto obj : colliders) {
-		auto temphit = obj->intersects(ray);
+		auto temphit = obj->raycast(ray);
 		if (temphit.intersects && temphit.hitTime > 0) {
 			if (temphit.hitTime < hitInfo.hitTime) {
 				hitInfo = temphit;

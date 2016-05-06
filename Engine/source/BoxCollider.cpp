@@ -274,9 +274,10 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 
 }
 
-RayHitInfo BoxCollider::intersects(const Ray & ray) const
+RayHitInfo BoxCollider::raycast(const Ray & ray) const
 {
 	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+	// Because this is a raycast, we only want to register hits with things in front of the ray (t > 0)
 	RayHitInfo hit;
 
 	float tmin = (xmin - ray.origin.x) / ray.direction.x;
