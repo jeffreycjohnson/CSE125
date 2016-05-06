@@ -139,7 +139,7 @@ private:
 
 	// Used internally for inserting/moving colliders around the octree
 	bool intersects(const BoxCollider&);
-	void subdivide();
+	bool subdivide();
 
 	//void collapseIntoParent(); // Uhheeeh ummm,... figure this out
 	void debugDraw();

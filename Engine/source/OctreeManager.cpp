@@ -13,6 +13,7 @@ OctreeManager::OctreeManager()
 {
 	staticObjects = nullptr;
 	dynamicObjects = nullptr;
+	dynamicCollisionsThisFrame = staticCollisionsThisFrame = 0;
 }
 
 

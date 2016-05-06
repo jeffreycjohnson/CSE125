@@ -84,6 +84,6 @@ glm::vec3 Plane::getNormal()
 	return N;
 }
 
-void Plane::debugDraw() {
-	Renderer::drawArrow(normalBase, N, glm::vec4());
+void Plane::debugDraw(const glm::vec3& pos) {
+	Renderer::drawArrow(pos, N, glm::vec4(1,1,1,1));
 }

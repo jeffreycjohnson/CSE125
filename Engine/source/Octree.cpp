@@ -17,10 +17,10 @@ const float Octree::RAY_STEP = 0.01f;
 //Octree* Octree::DYNAMIC_TREE = nullptr;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
-	root = new OctreeNode(min, max, this);
 	objects = 0;
 	nodeCounter = 0;
 	restriction = BuildMode::BOTH;
+	root = new OctreeNode(min, max, this);
 };
 
 Octree::~Octree() {
@@ -154,8 +154,10 @@ void Octree::rebuild()
 		std::list<Collider*> colliders; // TODO: maybe vector would be faster, not sure
 		for (auto pair : nodeMap) {
 			auto node = pair.second;
-			for (auto colliderPtr : node->colliders) {
-				colliders.push_back(colliderPtr);
+			if (node != nullptr) {
+				for (auto colliderPtr : node->colliders) {
+					colliders.push_back(colliderPtr);
+				}
 			}
 		}
 		for (auto collider : colliders) {
@@ -176,6 +178,7 @@ RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
 	if (root) {
 		root->raycast(ray, hitInfo);
 	}
+	// TODO: these next 3 lines of code should be okay, but that's for another commit
 	//if (hitInfo.hitTime < minDist || hitInfo.hitTime > maxDist) {
 	//	hitInfo.intersects = false;
 	//}

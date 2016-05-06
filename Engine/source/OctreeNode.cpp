@@ -212,7 +212,6 @@ bool OctreeNode::intersects(const BoxCollider& box) {
 
 bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& colliderAABB) {
 
-	
 	// Keeps track of the number of intersections the box has with our children
 	int collisions = 0;
 	unsigned int index = 0;
@@ -253,8 +252,14 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 	else {
 		// If we are a leaf node
 		if (colliders.size() >= Octree::LEAF_THRESHOLD && depth < Octree::MAX_DEPTH) {
-			subdivide(); // The subdivide *may* fail, so for now we recurse
-			insert(colliderBeingInserted, colliderAABB);
+			// The subdivide *may* fail, so for now we recurse
+			bool success = subdivide();
+			if (!success) {
+				colliders.push_back(colliderBeingInserted);
+				colliderBeingInserted->nodeId = nodeId;
+				colliderBeingInserted->octree = this->tree;
+				return true;
+			}
 		}
 		else {
 			colliders.push_back(colliderBeingInserted);
@@ -274,7 +279,7 @@ void OctreeNode::remove(Collider * colliderBeingRemoved)
 	}
 }
 
-void OctreeNode::subdivide() {
+bool OctreeNode::subdivide() {
 	if (children.empty() && depth < Octree::MAX_DEPTH) {
 		// Figure out the dimensions of each child
 		float xDist = std::abs(max.x - min.x) / 2;
@@ -318,13 +323,26 @@ void OctreeNode::subdivide() {
 		// Insert all of our colliders into each of those children, and let recursion deal with it
 		std::list<Collider*> stragglers;
 		for (auto collider : colliders) {
+
 			BoxCollider aabb = collider->getAABB();
+			OctreeNode* favoriteChild = nullptr;
+			int childIntersections = 0;
 			for (auto child : children) {
+				
 				// Aaaaand this method becomes MORE expensive b/c we have to compute the AABBs again...
-				if (!child->insert(collider, aabb)) {
-					// If we couldn't insert this guy further down the tree, keep it here
-					stragglers.push_back(collider);
+				
+				if (child->myAABB->intersects(aabb)) {
+					childIntersections++;
+					favoriteChild = child;
 				}
+
+			}
+
+			if (childIntersections == 1 && favoriteChild != nullptr) {
+				favoriteChild->insert(collider, aabb);
+			}
+			else {
+				stragglers.push_back(collider);
 			}
 		}
 
@@ -332,8 +350,12 @@ void OctreeNode::subdivide() {
 		colliders.clear();
 		colliders = stragglers;
 
+		return true;
+
 	}
-	//else // TODO: Will I need to do anything in the else case should a subdivide() call fail?
+	else {
+		return false; // Subdivide failed
+	}
 }
 
 bool OctreeNode::isLeaf() const {

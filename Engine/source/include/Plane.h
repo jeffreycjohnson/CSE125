@@ -47,5 +47,5 @@ public:
 
 	RayHitInfo intersects(const Ray& ray);
 	glm::vec3 getNormal();
-	void debugDraw();
+	void debugDraw(const glm::vec3& pos);
 };

@@ -161,12 +161,12 @@ void BoxCollider::debugDraw()
 			}
 		}
 		// Draw planes (normals)
-		ABCD.debugDraw();
-		ACEG.debugDraw();
-		ABEF.debugDraw();
-		EFGH.debugDraw();
-		BDFH.debugDraw();
-		CDGH.debugDraw();
+		/*ABCD.debugDraw(offsetWorld);
+		ACEG.debugDraw(offsetWorld);
+		ABEF.debugDraw(offsetWorld);
+		EFGH.debugDraw(offsetWorld);
+		BDFH.debugDraw(offsetWorld);
+		CDGH.debugDraw(offsetWorld);*/ // not worth, draw arrow is fucked
 	}
 }
 
