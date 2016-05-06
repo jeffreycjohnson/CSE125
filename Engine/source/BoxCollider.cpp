@@ -79,6 +79,7 @@ void BoxCollider::fixedUpdate()
 		for (int i = 0; i < 8; ++i) {
 			transformPoints[i] = points[i];
 		}
+		offsetWorld = offset;
 	}
 
 	// Calculate axis aligned bounding box
@@ -252,7 +253,7 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 	glm::vec3 c = other.getCenterWorld();
 	float radius = other.getRadiusWorld();
 	float r_squared = radius * radius;
-
+	/*
 	e = std::fmaxf(xmin - c.x, 0) + std::fmaxf(c.x - xmax, 0);
 	if (e <= radius) return false;
 	d += e * e;
@@ -263,14 +264,37 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 
 	e = std::fmaxf(zmin - c.z, 0) + std::fmaxf(c.z - zmax, 0);
 	if (e <= radius) return false;
-	d += e * e;
+	d += e * e;*/
 
-	if (d <= r_squared) {
-		return true;
+	// Arvo's original method
+	if (c.x < xmin) {
+		e = c.x - xmin;
+		d = d + e * e;
 	}
-	else {
-		return false;
+	else if (c.x > xmax) {
+		e = c.x - xmax;
+		d += e * e;
 	}
+
+	if (c.y < ymin) {
+		e = c.y - ymin;
+		d = d + e * e;
+	}
+	else if (c.y > ymax) {
+		e = c.y - ymax;
+		d = d + e * e;
+	}
+
+	if (c.z < zmin) {
+		e = c.z - zmin;
+		d += e * e;
+	}
+	else if (c.z > zmax) {
+		e = c.z - zmax;
+		d = d + e * e;
+	}
+
+	return (d <= r_squared);
 
 }
 

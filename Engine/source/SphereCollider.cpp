@@ -52,6 +52,8 @@ void SphereCollider::debugDraw()
 			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
 		Renderer::drawSphere(centerWorld, radiusWorld, color);
+		auto aabb = getAABB();
+		aabb.debugDraw();
 	}
 }
 
@@ -78,7 +80,7 @@ bool SphereCollider::intersects(const CapsuleCollider & other) const
 bool SphereCollider::intersects(const SphereCollider & other) const
 {
 	// Algo modified from Dirk Gregorius' GDC 2013 slides
-	float distance = (other.centerWorld - centerWorld).length() - (radiusWorld + other.radiusWorld);
+	float distance = (other.centerWorld - centerWorld).length() - (other.radiusWorld + radiusWorld);
 	return distance <= 0;
 }
 
@@ -126,7 +128,7 @@ RayHitInfo SphereCollider::raycast(const Ray & ray) const
 BoxCollider SphereCollider::getAABB() const
 {
 	// Remember to pass in the world coordinates
-	return BoxCollider(centerWorld, glm::vec3(radiusWorld,radiusWorld,radiusWorld));
+	return BoxCollider(centerWorld, glm::vec3(2 * radiusWorld, 2 * radiusWorld, 2 * radiusWorld));
 };
 
 glm::vec3 SphereCollider::getCenterWorld() const {

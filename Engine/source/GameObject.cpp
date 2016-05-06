@@ -79,7 +79,7 @@ void GameObject::UpdateScene(NetworkState caller)
 	}
 
 	// ONLY client and offline get variable update
-	if (caller == NetworkState::CLIENT_MODE || caller == NetworkState::SERVER_MODE)  
+	if (caller == NetworkState::CLIENT_MODE || /*caller == NetworkState::SERVER_MODE ||*/ caller == NetworkState::OFFLINE)  
 	{
 		for (auto& callback : preVarCallbacks) callback();
 
