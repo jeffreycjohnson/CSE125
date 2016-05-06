@@ -86,7 +86,9 @@ public:
 	virtual bool intersects(const BoxCollider& other) const = 0; 
 	virtual bool intersects(const CapsuleCollider& other) const = 0;
 	virtual bool intersects(const SphereCollider& other) const = 0;
-	virtual RayHitInfo intersects(const Ray& ray) const = 0;
+
+	// Performs a raycast. Not full-blown ray intersection: t must be > 0
+	virtual RayHitInfo raycast(const Ray& ray) const = 0;
 
 	// Returns an axis-aligned bounding box defined for WORLD coordinates
 	virtual BoxCollider getAABB() const = 0;

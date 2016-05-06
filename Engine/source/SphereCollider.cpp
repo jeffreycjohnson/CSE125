@@ -84,7 +84,39 @@ bool SphereCollider::intersects(const SphereCollider & other) const
 
 RayHitInfo SphereCollider::intersects(const Ray & ray) const
 {
-	return RayHitInfo(); // TODO: Implement ray::sphere intersection
+	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
+	// This function returns the earliest hit along the ray of the sphere, provided the hit happens in front of the ray (t >= 0)
+	RayHitInfo hit;
+	float r_squared = radiusWorld * radiusWorld;
+	hit.collider = (Collider*)this;
+
+	// Analytic solution which uses the quadratic formula
+	float a = glm::dot(ray.direction, ray.direction);
+	float b = 2 * glm::dot(ray.direction, ray.origin);
+	float c = glm::dot(ray.origin, ray.origin) - r_squared;
+
+	// t = ( -b +/- sqrt(b^2 - 4ac) ) / 2a
+
+	float discriminant = b * b - 4 * a * c;
+
+	if (discriminant > 0) {
+		// Two solutions to quadratic formula. But
+		float t0 = (-b - discriminant) / (2 * a);
+		float t1 = (-b + discriminant) / (2 * a);
+		hit.hitTime = std::min(t0, t1);
+		hit.intersects = hit.hitTime > 0;
+	}
+	else if (discriminant == 0) {
+		// Ray intersects 1 point on sphere (e.g. a tangent line)
+		hit.hitTime = -b / (2 * a);
+		hit.intersects = true;
+	}
+	else {
+		// No solution  -> sqrt( -x ) is imaginary
+		hit.intersects = false;
+	}
+
+	return hit;
 }
 
 BoxCollider SphereCollider::getAABB() const
