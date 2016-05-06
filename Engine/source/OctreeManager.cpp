@@ -26,17 +26,17 @@ OctreeManager::~OctreeManager()
 		delete dynamicObjects;
 }
 
-RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max)
+RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max, Collider* ignore)
 {
 	if (whichTree == Octree::DYNAMIC_ONLY) {
-		return dynamicObjects->raycast(ray, t_min, t_max);
+		return dynamicObjects->raycast(ray, t_min, t_max, ignore);
 	}
 	else if (whichTree == Octree::STATIC_ONLY) {
-		return staticObjects->raycast(ray, t_min, t_max);
+		return staticObjects->raycast(ray, t_min, t_max, ignore);
 	}
 	else {
-		auto dynaHit = dynamicObjects->raycast(ray, t_min, t_max);
-		auto statHit = staticObjects->raycast(ray, t_min, t_max);
+		auto dynaHit = dynamicObjects->raycast(ray, t_min, t_max, ignore);
+		auto statHit = staticObjects->raycast(ray, t_min, t_max, ignore);
 		if (dynaHit.intersects && statHit.intersects) {
 			if (dynaHit.hitTime < statHit.hitTime) {
 				return dynaHit;

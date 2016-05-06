@@ -39,7 +39,7 @@ OctreeNode::~OctreeNode() {
 	tree->removeNode(this->nodeId);
 }
 
-void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
+void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) {
 
 	RayHitInfo againstMe = myAABB->raycast(ray);
 
@@ -48,6 +48,7 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
 	}
 
 	for (auto obj : colliders) {
+		if (obj == ignore) continue; // This is the ignored collider, so just skip it
 		auto temphit = obj->raycast(ray);
 		if (temphit.intersects && temphit.hitTime > 0) {
 			if (temphit.hitTime < hitInfo.hitTime) {

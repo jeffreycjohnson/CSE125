@@ -165,14 +165,14 @@ void Octree::rebuild()
 	}
 }
 
-RayHitInfo Octree::raycast(const Ray & ray, float t_min, float t_max)
+RayHitInfo Octree::raycast(const Ray & ray, float t_min, float t_max, Collider* ignore)
 {
 
 	RayHitInfo hitInfo;
 	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return hitInfo;
 
 	if (root) {
-		root->raycast(ray, hitInfo);
+		root->raycast(ray, hitInfo, ignore);
 	}
 	if (hitInfo.hitTime < t_min || hitInfo.hitTime > t_max) {
 		hitInfo.intersects = false;
