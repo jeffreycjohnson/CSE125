@@ -59,7 +59,7 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) 
 
 	for (auto child : children) {
 		if (child != nullptr) {
-			child->raycast(ray, hitInfo);
+			child->raycast(ray, hitInfo, ignore);
 		}
 	}
 
