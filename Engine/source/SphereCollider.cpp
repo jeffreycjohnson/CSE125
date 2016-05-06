@@ -77,8 +77,9 @@ bool SphereCollider::intersects(const CapsuleCollider & other) const
 
 bool SphereCollider::intersects(const SphereCollider & other) const
 {
-	float distance = (other.centerWorld - centerWorld).length();
-	return (distance <= radiusWorld + other.radiusWorld);
+	// Algo modified from Dirk Gregorius' GDC 2013 slides
+	float distance = (other.centerWorld - centerWorld).length() - (radiusWorld + other.radiusWorld);
+	return distance <= 0;
 }
 
 RayHitInfo SphereCollider::intersects(const Ray & ray) const
