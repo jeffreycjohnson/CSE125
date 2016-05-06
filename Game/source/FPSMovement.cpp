@@ -17,8 +17,6 @@
 #include "ServerInput.h"
 #include "Config.h"
 
-const float SPEED = 3.0f;
-
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
@@ -95,12 +93,13 @@ void FPSMovement::fixedUpdate()
 
 	moveDir = xComp + zComp;
 	if (!hitWall) {
-		position += xComp + zComp;
+		//moveDir = glm::normalize(moveDir) * speed;
+		position += moveDir;
 	}
 
 	Ray downRay(position, -worldUp);
 	RayHitInfo downHit = oct->raycast(downRay, Octree::STATIC_ONLY);
-	if (downHit.intersects && downHit.hitTime > playerHeightRadius - 0.1f && downHit.hitTime < playerHeightRadius + 0.1f) {
+	if (downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f) {
 		std::cout << "ON FLOOR" << std::endl;
 		vSpeed = baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
