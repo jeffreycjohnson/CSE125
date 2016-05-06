@@ -21,7 +21,11 @@ public:
 	OctreeManager();
 	~OctreeManager();
 
-	RayHitInfo raycast(const Ray& ray, Octree::BuildMode whichTree);
+	// Gameplay Collision detection API
+	RayHitInfo raycast(const Ray& ray, Octree::BuildMode whichTree, float t_min = Octree::RAY_MIN, float t_max = Octree::RAY_MAX);
+
+	// Returns any collisions that occur against the axis-aligned bounding box defined by the two min & max points
+	CollisionInfo collisionBox(glm::vec3 min, glm::vec3 max, Octree::BuildMode whichTree);
 
 	// Adds or removes gameobjects (and all their colliders) to the
 	// apropriate octree. Will recursively add children as well.

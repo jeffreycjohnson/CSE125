@@ -26,16 +26,49 @@ OctreeManager::~OctreeManager()
 		delete dynamicObjects;
 }
 
-RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree)
+RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max)
 {
 	if (whichTree == Octree::DYNAMIC_ONLY) {
-		return dynamicObjects->raycast(ray);
+		return dynamicObjects->raycast(ray, t_min, t_max);
 	}
 	else if (whichTree == Octree::STATIC_ONLY) {
-		return staticObjects->raycast(ray);
+		return staticObjects->raycast(ray, t_min, t_max);
 	}
 	else {
-		throw "This doens't work";
+		auto dynaHit = dynamicObjects->raycast(ray, t_min, t_max);
+		auto statHit = staticObjects->raycast(ray, t_min, t_max);
+		if (dynaHit.intersects && statHit.intersects) {
+			if (dynaHit.hitTime < statHit.hitTime) {
+				return dynaHit;
+			}
+			else {
+				return statHit;
+			}
+		}
+		else if (dynaHit.intersects && !statHit.intersects) {
+			return dynaHit;
+		}
+		else if (!dynaHit.intersects && statHit.intersects) {
+			return statHit;
+		}
+	}
+}
+
+CollisionInfo OctreeManager::collisionBox(glm::vec3 min, glm::vec3 max, Octree::BuildMode whichTree)
+{
+	BoxCollider temp(glm::vec3(0), glm::vec3(0));
+	temp.setMinAndMax(min, max);
+	if (whichTree == Octree::BuildMode::STATIC_ONLY) {
+		return staticObjects->collidesWith(&temp);
+	}
+	else if (whichTree == Octree::BuildMode::DYNAMIC_ONLY) {
+		return dynamicObjects->collidesWith(&temp);
+	}
+	else {
+		auto s_cols = staticObjects->collidesWith(&temp);
+		auto d_cols = dynamicObjects->collidesWith(&temp);
+		s_cols.merge(d_cols);
+		return s_cols;
 	}
 }
 

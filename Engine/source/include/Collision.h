@@ -33,7 +33,6 @@ public:
 	static const int MAX_DEPTH = 12;
 	static const float RAY_MIN;
 	static const float RAY_MAX;
-	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
 	enum BuildMode {
@@ -57,7 +56,7 @@ public:
 	// Preserves the min/max and BuildMode restrictions from build
 	void rebuild();
 
-	RayHitInfo raycast(const Ray&, float minDist = RAY_MIN, float maxDist = RAY_MAX);
+	RayHitInfo raycast(const Ray&, float t_min = RAY_MIN, float t_max = RAY_MAX);
 	CollisionInfo collidesWith(Collider*);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */

@@ -9,12 +9,8 @@
 #include <iostream>
 
 // Raycasting constants
-const float Octree::RAY_MIN = FLT_EPSILON;
+const float Octree::RAY_MIN = 0.0f;
 const float Octree::RAY_MAX = FLT_MAX;
-const float Octree::RAY_STEP = 0.01f;
-
-//Octree* Octree::STATIC_TREE  = nullptr; // Globals are bad.
-//Octree* Octree::DYNAMIC_TREE = nullptr;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
 	objects = 0;
@@ -169,7 +165,7 @@ void Octree::rebuild()
 	}
 }
 
-RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
+RayHitInfo Octree::raycast(const Ray & ray, float t_min, float t_max)
 {
 
 	RayHitInfo hitInfo;
@@ -178,10 +174,9 @@ RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
 	if (root) {
 		root->raycast(ray, hitInfo);
 	}
-	// TODO: these next 3 lines of code should be okay, but that's for another commit
-	//if (hitInfo.hitTime < minDist || hitInfo.hitTime > maxDist) {
-	//	hitInfo.intersects = false;
-	//}
+	if (hitInfo.hitTime < t_min || hitInfo.hitTime > t_max) {
+		hitInfo.intersects = false;
+	}
 	return hitInfo;
 }
 
