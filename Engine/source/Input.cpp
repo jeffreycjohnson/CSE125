@@ -614,6 +614,7 @@ std::vector<char> Input::serialize(int playerID)
 	ind.roll = Input::getAxis("roll");
 	ind.mouseX = Input::mousePosition().x;
 	ind.mouseY = Input::mousePosition().y;
+	ind.jump = Input::getAxis("fire");
 
 	std::vector<char> bytes;
 	bytes.resize(sizeof(ind));
