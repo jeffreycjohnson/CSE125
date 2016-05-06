@@ -22,6 +22,7 @@ private:
 	bool raycastHit;
 
 	void recalculate();
+	glm::vec3 handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection);
 public:
 	FPSMovement(
 		float moveSpeed, float mouseSensitivity,

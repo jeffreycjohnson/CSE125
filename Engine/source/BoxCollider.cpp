@@ -304,6 +304,12 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 		finalNorm = tmaxNorm;
 	}
 
+	if (Input::getButtonDown("fire") && xmin < -1.7 && xmin > -1.9) {
+		std::cout << "ray = " << ray.direction.x << ", " << ray.direction.z << std::endl;
+		std::cout << "max = " << xmax << ", " << ymax << std::endl;
+		std::cout << "min = " << xmin << ", " << ymin << std::endl;
+	}
+
 	// Return the tmin/tmax that is closest to the ray's origin
 	hit.hitTime = finalT;
 	hit.collider = (Collider*)this;

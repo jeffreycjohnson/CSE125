@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "Collider.h"
 #include "Collision.h"
+#include "BoxCollider.h"
 
 const float SPEED = 3.0f;
 
@@ -51,71 +52,41 @@ void FPSMovement::fixedUpdate()
 
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct != nullptr) {
-		Ray ray = Renderer::mainCamera->getEyeRay();
-		auto hit = oct->raycast(ray, Octree::DYNAMIC_ONLY);
-		if (hit.intersects) {
-			raycastHit = hit.intersects;
-			lastRayPoint = ray.getPos(hit.hitTime);
-			if (hit.collider != nullptr) {
-				hit.collider->rayHitDebugdraw = true; // Don't manually set colliding EVER, this is just for debug visualization
-				if (playerRadiusTime == 0)
-					playerRadiusTime = std::abs(hit.hitTime);
-			}
-		}
-		else {
-			raycastHit = hit.intersects;
+		if (playerRadiusTime == 0) {
+			Transform playerTrans = GameObject::FindByName("CubeMan")->transform;
+			GameObject * go = playerTrans.children[0]->children[0]->gameObject;
+			BoxCollider * b = go->getComponent<BoxCollider>();
+			playerRadiusTime = b->getWidth()/2;
+			std::cout << playerRadiusTime << std::endl;
 		}
 
-		glm::vec3 leftRayPos = position + glm::normalize(glm::vec3(-moveDir.z, moveDir.y, moveDir.x))*playerRadiusTime;
-		Ray* moveRayL = new Ray(leftRayPos, moveDir);
-		RayHitInfo moveHitL = oct->raycast(*moveRayL, Octree::STATIC_ONLY);
+		hitWall = false;
+		glm::vec3 newMoveVec = moveDir;
 
-		
+		newMoveVec = handleRayCollision(position, moveDir, newMoveVec);
+		newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
+		newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
 
-		glm::vec3 rightRayPos = position + glm::normalize(glm::vec3(moveDir.z, moveDir.y, -moveDir.x))*playerRadiusTime;
-		Ray* moveRayR = new Ray(rightRayPos, moveDir);
-		RayHitInfo moveHitR = oct->raycast(*moveRayR, Octree::STATIC_ONLY);
-
-		
-
-		if(std::abs(moveHitL.hitTime) < std::abs(moveHitR.hitTime))
-			moveHit = moveHitL;
-		else moveHit = moveHitR;
-
-		if ((moveHitL.intersects || moveHitR.intersects) && moveHit.hitTime >= 0) {
-			std::cout << "L pos = " << leftRayPos.x << ", " << leftRayPos.z << std::endl;
-			std::cout << "R pos = " << rightRayPos.x << ", " << rightRayPos.z << std::endl;
-
-			std::cout << "L hit = " << moveHitL.hitTime << ", normal:" << moveHitL.normal.x << ", " << moveHitL.normal.z << std::endl;
-			std::cout << "R hit = " << moveHitR.hitTime << ", normal:" << moveHitR.normal.x << ", " << moveHitR.normal.z << std::endl;
-			std::cout << "chosen hit time = " << moveHit.hitTime << ", normal:" << moveHit.normal.x << ", " << moveHit.normal.z << std::endl;
-		}
-
-		if (moveHit.intersects && moveHit.hitTime >= 0) {
-			//RayHitInfo intersectHit = oct->raycast(*moveRay, Octree::STATIC_ONLY);
-			if (playerRadiusTime >= moveHit.hitTime) {
-				glm::vec3 newMoveVec = moveDir;
-				if (moveHit.normal.x != 0)
-					newMoveVec.x = 0;
-				if (moveHit.normal.z != 0)
-					newMoveVec.z = 0;
-
-				if (moveHitL.normal != moveHitR.normal)
-					newMoveVec = glm::vec3(0);
-
-				//std::cout << "hit time = " << moveHit.hitTime << std::endl;
-				//std::cout << "OLD MOVE VEC = " << moveDir.x << ", " << moveDir.y << ", " << moveDir.z << std::endl;
-				//std::cout << "NEW MOVE VEC = " << newMoveVec.x << ", " << newMoveVec.y << ", " << newMoveVec.z << std::endl;
-				position += newMoveVec;
-				gameObject->transform.setPosition(position.x, position.y, position.z);
-				hitWall = true;
-			}
-			else hitWall = false;
-
-		}
-		else hitWall = false;
+		position += newMoveVec;
+		gameObject->transform.setPosition(position.x, position.y, position.z);
 	}
 
+}
+
+glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
+	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
+	Ray moveRay(position, castDirection);
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::STATIC_ONLY);
+	glm::vec3 newMoveVec = moveDirection;
+	if (moveHit.intersects && moveHit.hitTime <= playerRadiusTime && moveHit.hitTime >= 0) {
+		if (moveHit.normal.x != 0)
+			newMoveVec.x = 0;
+		if (moveHit.normal.z != 0)
+			newMoveVec.z = 0;
+
+		hitWall = true;
+	}
+	return newMoveVec;
 }
 
 void FPSMovement::update(float dt)
