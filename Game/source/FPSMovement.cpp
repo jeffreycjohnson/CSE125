@@ -98,7 +98,8 @@ void FPSMovement::fixedUpdate()
 	if (!hitWall) {
 		position += xComp + zComp;
 	}
-
+	float jump = ServerInput::getAxis("jump", clientID);
+	std::cout << "jump: " << jump << std::endl;
 	recalculate();
 }
 
