@@ -9,6 +9,7 @@
 #include "GameObject.h"
 #include "ThreadPool.h"
 #include "RenderPass.h"
+#include "NetworkManager.h"
 
 
 #define MODEL_MATRIX "uM_Matrix"
@@ -155,7 +156,7 @@ void Renderer::init(int window_width, int window_height) {
     resize(windowWidth, windowHeight);
 }
 
-void Renderer::loop(int caller) {
+void Renderer::loop(NetworkState caller) {
     extractObjects();
 
     for(auto camera : cameras)

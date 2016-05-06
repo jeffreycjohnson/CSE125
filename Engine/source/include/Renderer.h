@@ -3,6 +3,7 @@
 
 #include "ForwardDecs.h"
 #include "Shader.h"
+#include "NetworkManager.h"
 #include <glfw3.h>  // I'm so sorry, Jeff
 #include <vector>
 #include <list>
@@ -64,7 +65,7 @@ class Renderer
 		static int shaderForwardLightList[2];
 
 		static void init(int w, int h);
-		static void loop(int caller);
+		static void loop(NetworkState caller);
 
 		static void extractObjects();
 		static void applyPerFrameData(Camera* camera);

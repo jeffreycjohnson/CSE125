@@ -8,26 +8,34 @@ class FPSMovement : public Component
 private:
 	GameObject* verticality;
 
-	int clientId;
 	float moveSpeed, mouseSensitivity;
 
-	glm::vec3 position, front, up, right, worldUp;
+	glm::vec3 position, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
+	float playerRadiusTime;
+	bool hitWall, pastFirstTick;
+	int clientID;
 
-	bool pastFirstTick;
 	glm::vec2 lastMousePosition;
 	glm::vec3 initialPosition;
 
+	// ray cast debugging
+	glm::vec3 lastRayPoint;
+	bool raycastHit;
+
 	void recalculate();
+	glm::vec3 handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection);
 public:
 	FPSMovement(
-		int clientId, float moveSpeed, float mouseSensitivity,
+		int clientID, float moveSpeed, float mouseSensitivity,
 		glm::vec3 position, glm::vec3 up,
 		GameObject* verticality = nullptr);
 	~FPSMovement() {};
 
 	void create() override;
 	void fixedUpdate() override;
+	void debugDraw() override;
+
 	void respawn();
 };
 

@@ -5,6 +5,7 @@
 #include "SphereCollider.h"
 #include "CapsuleCollider.h"
 #include <sstream>
+#include <iostream>
 
 OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth) {
 	this->min = min;
@@ -48,7 +49,7 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
 
 	for (auto obj : colliders) {
 		auto temphit = obj->intersects(ray);
-		if (temphit.intersects) {
+		if (temphit.intersects && temphit.hitTime > 0) {
 			if (temphit.hitTime < hitInfo.hitTime) {
 				hitInfo = temphit;
 			}

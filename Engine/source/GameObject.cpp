@@ -67,7 +67,7 @@ std::vector<GameObject*> GameObject::FindAllByPrefix(const std::string & name)
 	return ret;
 }
 
-void GameObject::UpdateScene(int caller)
+void GameObject::UpdateScene(NetworkState caller)
 {
 	while (Timer::nextFixedStep()) {
 		for (auto& callback : preFixedCallbacks) callback();
@@ -81,7 +81,7 @@ void GameObject::UpdateScene(int caller)
 	}
 
 	// ONLY client and offline get variable update
-	if (caller == 0 || caller == 2)  
+	if (caller == NetworkState::CLIENT_MODE || caller == NetworkState::SERVER_MODE)  
 	{
 		for (auto& callback : preVarCallbacks) callback();
 

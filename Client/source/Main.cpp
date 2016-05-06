@@ -4,7 +4,6 @@
 #include "Camera.h"
 #include "Renderer.h"
 #include "ObjectLoader.h"
-#include "FPSMovement.h"
 #include "RenderPass.h"
 #include "Skybox.h"
 #include "ActivatorRegistrator.h"
@@ -14,7 +13,7 @@
 #include <iostream>
 #include <stdexcept>
 
-extern void RunEngine(int caller);
+extern void RunEngine(NetworkState caller);
 extern void InitializeEngine(std::string windowName);
 
 int main(int argc, char** argv)
@@ -25,6 +24,7 @@ int main(int argc, char** argv)
 	std::string serverip = file.getString("NetworkOptions", "serverip");
 	std::string port = file.getString("NetworkOptions", "port");
 	auto pair = NetworkManager::InitializeClient(serverip, port);
+	//NetworkManager::InitializeOffline();
 
 	/*for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -46,19 +46,22 @@ int main(int argc, char** argv)
 	}*/
 
 	// cache all meshes
-	auto artsy = loadScene("assets/pressure.dae", false);
-	artsy->destroy();
-	delete artsy;
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
+	scene->destroy();
+	delete scene;
 
-	auto go = loadScene("assets/cubeman.dae", false);
-	go->destroy();
-	delete go;
+	GameObject *player = loadScene("assets/cubeman.dae");
+	player->destroy();
+	delete player;
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
+	//Transform *trans = GameObject::FindByName("CubeMan")->transform.children[0]->children[0];
+	//float playerWidth = player->getComponent<BoxCollider>().getWidth();
+
 
 	try
 	{
-		RunEngine(0); // running engine as client
+		RunEngine(NetworkState::CLIENT_MODE); // running engine as client
 	}
 	catch (...)
 	{

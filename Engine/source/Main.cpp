@@ -11,6 +11,7 @@
 #include "OctreeManager.h"
 #include "Config.h"
 #include "BoxCollider.h"
+#include "NetworkManager.h"
 
 #include <glfw3.h>
 #include <chrono>
@@ -120,8 +121,9 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 }
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.
-void RunEngine(int caller)
+void RunEngine(NetworkState caller)
 {
+	NetworkManager::setState(caller);
 	std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
     auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);

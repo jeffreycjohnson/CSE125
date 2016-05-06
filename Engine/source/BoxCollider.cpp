@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "RenderPass.h"
+#include <iostream>
 
 bool BoxCollider::drawBoxPoints = false;
 
@@ -236,44 +237,82 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	float tmin = (xmin - ray.origin.x) / ray.direction.x;
 	float tmax = (xmax - ray.origin.x) / ray.direction.x;
 
-	if (tmin > tmax) std::swap(tmin, tmax);
+	glm::vec3 tminNorm = glm::vec3(-1.0f, 0.0f, 0.0f);
+	glm::vec3 tmaxNorm = glm::vec3(1.0f, 0.0f, 0.0f);
+
+	if (tmin > tmax) {
+		std::swap(tmin, tmax);
+		std::swap(tminNorm, tmaxNorm);
+	}
 
 	float tymin = (ymin - ray.origin.y) / ray.direction.y;
 	float tymax = (ymax - ray.origin.y) / ray.direction.y;
 
-	if (tymin > tymax) std::swap(tymin, tymax);
+	glm::vec3 tyminNorm = glm::vec3(0.0f, -1.0f, 0.0f);
+	glm::vec3 tymaxNorm = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	if (tymin > tymax) {
+		std::swap(tymin, tymax);
+		std::swap(tyminNorm, tymaxNorm);
+	}
 
 	if ((tmin > tymax) || (tymin > tmax)) {
 		hit.intersects = false;
 		return hit;
 	}
 
-	if (tymin > tmin)
+	if (tymin > tmin) {
 		tmin = tymin;
+		tminNorm = tyminNorm;
+	}
 
-	if (tymax < tmax)
+	if (tymax < tmax) {
 		tmax = tymax;
+		tmaxNorm = tymaxNorm;
+	}
 
 	float tzmin = (zmin - ray.origin.z) / ray.direction.z;
 	float tzmax = (zmax - ray.origin.z) / ray.direction.z;
 
-	if (tzmin > tzmax) std::swap(tzmin, tzmax);
+	glm::vec3 tzminNorm = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 tzmaxNorm = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	if (tzmin > tzmax) {
+		std::swap(tzmin, tzmax);
+		std::swap(tzminNorm, tzmaxNorm);
+	}
 
 	if ((tmin > tzmax) || (tzmin > tmax)) {
 		hit.intersects = false;
 		return hit;
 	}
 
-	if (tzmin > tmin)
+	if (tzmin > tmin) {
 		tmin = tzmin;
+		tminNorm = tzminNorm;
+	}
 
-	if (tzmax < tmax)
+	if (tzmax < tmax) {
 		tmax = tzmax;
+		tmaxNorm = tzmaxNorm;
+	}
+
+	float finalT = tmin;
+	glm::vec3 finalNorm = tminNorm;
+	if (tmin > tmax) {
+		finalT = tmax;
+		finalNorm = tmaxNorm;
+	}
 
 	// Return the tmin/tmax that is closest to the ray's origin
-	hit.hitTime = std::min(tmin, tmax);
+	hit.hitTime = finalT;
 	hit.collider = (Collider*)this;
 	hit.intersects = true;
+	hit.normal = finalNorm;
 	return hit;
 
 };
+
+float BoxCollider::getWidth() {
+	return xmax - xmin;
+}

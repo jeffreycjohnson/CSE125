@@ -189,11 +189,12 @@ void OctreeManager::probeForDynamicCollisions() {
 };
 
 void OctreeManager::updateDynamicObjectsInOctree() {
+	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return;
 	dynamicObjects->rebuild();
 }
 
 void OctreeManager::beforeFixedUpdate() {
-
+	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return;
 	// When this function is called, we assume that all colliders are in the state
 	// (e.g. position) for frame N - 1.
 
@@ -307,6 +308,7 @@ void OctreeManager::fixedUpdate() {
 };
 
 void OctreeManager::afterFixedUpdate() {
+	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return;
 
 	// Before the fixed update, we did all the collision detection for N - 1,
 	// but the previouslyCollding boolean reflected the colliding state of N - 2,

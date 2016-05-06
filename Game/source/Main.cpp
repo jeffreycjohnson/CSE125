@@ -15,7 +15,7 @@
 #include <iostream>
 #include "NetworkManager.h"
 
-extern void RunEngine(int caller);
+extern void RunEngine(NetworkState caller);
 extern void InitializeEngine(std::string windowName);
 
 int main(int argc, char** argv)
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 		}
 	}*/
 	
-	GameObject *scene = loadScene("assets/pressure.dae");
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
 	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
 
 	try
 	{
-		RunEngine(0); // running engine as server
+		RunEngine(NetworkState::SERVER_MODE); // running engine as server
 	}
 	catch (...)
 	{

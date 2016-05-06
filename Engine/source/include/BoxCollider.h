@@ -44,6 +44,8 @@ public:
 	void debugDraw() override;
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
 
+	float getWidth();
+
 	bool insideOrIntersects(const glm::vec3& point) const override;
 
 	bool intersects(const BoxCollider& other) const;

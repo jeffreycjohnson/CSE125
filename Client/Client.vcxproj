@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
     <ClCompile Include="source\Main.cpp" />
-    <ClCompile Include="source\FPSMovement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\CSE167.vcxproj">
@@ -30,7 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\ActivatorRegistrator.h" />
-    <ClInclude Include="source\FPSMovement.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CB1B1C63-4A20-411F-A9E5-E694D6BF480C}</ProjectGuid>

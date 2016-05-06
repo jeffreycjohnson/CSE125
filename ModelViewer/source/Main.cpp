@@ -6,8 +6,9 @@
 #include "Collision.h"
 #include "GPUEmitter.h"
 #include <iostream>
+#include "NetworkManager.h"
 
-extern void RunEngine(int caller);
+extern void RunEngine(NetworkState caller);
 extern void InitializeEngine();
 
 GPUEmitter* particleSystem = nullptr;
@@ -54,6 +55,6 @@ int main(int argc, char** argv)
 		particleSystem = emitter->getComponent<GPUEmitter>();
 	}
 
-	RunEngine(2); // Run Engine as modelviewer
+	RunEngine(NetworkState::OFFLINE); // Run Engine as modelviewer
 	
 }

@@ -169,7 +169,10 @@ void Octree::rebuild()
 
 RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
 {
+
 	RayHitInfo hitInfo;
+	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return hitInfo;
+
 	if (root) {
 		root->raycast(ray, hitInfo);
 	}
@@ -180,8 +183,10 @@ RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
 }
 
 CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a bug here, or in OctreeNode::collidesWith
-	
+
 	CollisionInfo colInfo;
+	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return colInfo;
+
 	colInfo.collider = ptr;
 
 	if (root) {

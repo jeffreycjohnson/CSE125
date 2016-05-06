@@ -22,6 +22,7 @@ enum NetworkState
 	OFFLINE
 };
 
+
 class NetworkManager
 {
 private:
@@ -51,6 +52,7 @@ public:
 	static void PostMessage(const std::vector<char>& bytes, int messageType, int messageID, int forClient = -1);
 
 	static NetworkState getState();
+	static void setState(NetworkState newState);
 };
 
 #endif // NETWORK_MANAGER_H
