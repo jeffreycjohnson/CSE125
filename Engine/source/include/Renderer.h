@@ -88,6 +88,7 @@ class Renderer
 
         static void drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform = nullptr);
         static void drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform = nullptr);
+		static void drawArrow(glm::vec3 pos, glm::vec3 dir, const glm::vec4& color, Transform* transform = nullptr);
 		static void drawCapsule(glm::vec3 pointA, glm::vec3 pointB, float radius, const glm::vec4& color);
 
 private:

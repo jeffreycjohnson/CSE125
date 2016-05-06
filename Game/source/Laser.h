@@ -18,11 +18,15 @@ class FixedLaser :
 {
 private:
 	bool areLasersOff;
+
 public:
 	FixedLaser(int activationThreshold);
 	~FixedLaser();
 
 	void fixedUpdate() override;
+	void collisionEnter(GameObject * other) override;
+	void collisionStay(GameObject * other) override;
+
 };
 
 #endif // LASER_H

@@ -25,7 +25,6 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
-
 	pastFirstTick = false;
 	raycastHit = false;
 }
@@ -159,4 +158,8 @@ void FPSMovement::recalculate()
 
 	// and transform me please
 	gameObject->transform.setPosition(position.x, position.y, position.z);
+}
+
+void FPSMovement::respawn() {
+	position = initialPosition;
 }

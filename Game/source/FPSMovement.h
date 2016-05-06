@@ -17,6 +17,7 @@ private:
 	int clientID;
 
 	glm::vec2 lastMousePosition;
+	glm::vec3 initialPosition;
 
 	// ray cast debugging
 	glm::vec3 lastRayPoint;
@@ -35,6 +36,7 @@ public:
 	void fixedUpdate() override;
 	void debugDraw() override;
 
+	void respawn();
 };
 
 #endif // PLAYER_MOVEMENT_H
