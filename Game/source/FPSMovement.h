@@ -9,6 +9,7 @@ private:
 	const float baseVSpeed = -0.2f;
 	const float startJumpSpeed = 0.3f;
 	const float vAccel = -0.02f;
+	const float speed = 1.0f;
 
 	GameObject* verticality;
 
