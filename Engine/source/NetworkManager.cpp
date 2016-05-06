@@ -39,6 +39,11 @@ NetworkState NetworkManager::getState()
 	return NetworkManager::state;
 }
 
+void NetworkManager::setState(NetworkState newState)
+{
+	state = newState;
+}
+
 // --- SERVER FUNC --- //
 
 std::vector<ClientID> NetworkManager::InitializeServer(std::string port, int numberOfClients)

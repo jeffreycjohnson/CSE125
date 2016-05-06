@@ -53,7 +53,7 @@ void FPSMovement::fixedUpdate()
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct != nullptr) {
 		if (playerRadiusTime == 0) {
-			Transform playerTrans = GameObject::FindByName("CubeMan")->transform;
+			Transform playerTrans = GameObject::FindByName("Player")->transform;
 			GameObject * go = playerTrans.children[0]->children[0]->gameObject;
 			BoxCollider * b = go->getComponent<BoxCollider>();
 			playerRadiusTime = b->getWidth()/2;

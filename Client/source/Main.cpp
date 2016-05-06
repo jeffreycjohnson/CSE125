@@ -14,7 +14,7 @@
 #include <iostream>
 #include <stdexcept>
 
-extern void RunEngine(int caller);
+extern void RunEngine(NetworkState caller);
 extern void InitializeEngine(std::string windowName);
 
 int main(int argc, char** argv)
@@ -22,10 +22,10 @@ int main(int argc, char** argv)
     InitializeEngine("CLIENT");
 	ConfigFile file("config/options.ini");
 
-	//std::string serverip = file.getString("NetworkOptions", "serverip");
-	//std::string port = file.getString("NetworkOptions", "port");
-	//auto pair = NetworkManager::InitializeClient(serverip, port);
-	NetworkManager::InitializeOffline();
+	std::string serverip = file.getString("NetworkOptions", "serverip");
+	std::string port = file.getString("NetworkOptions", "port");
+	auto pair = NetworkManager::InitializeClient(serverip, port);
+	//NetworkManager::InitializeOffline();
 
 	/*for (auto& skybox : Renderer::mainCamera->passes)
 	{
@@ -46,22 +46,23 @@ int main(int argc, char** argv)
 		}
 	}*/
 
-	GameObject *scene = loadScene("assets/wall_pressure.dae");
-	scene->transform.setPosition(0, -0.5f, 0);
-	GameObject::SceneRoot.addChild(scene);
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
+	scene->destroy();
+	delete scene;
 
 	// setup network
 	GameObject *player = loadScene("assets/cubeman.dae");
-	player->addComponent(new FPSMovement(1.5f, 0.5f, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
-	player->addComponent(Renderer::mainCamera);
-	GameObject::SceneRoot.addChild(player);
+	player->destroy();
+	delete player;
+
+	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 	//Transform *trans = GameObject::FindByName("CubeMan")->transform.children[0]->children[0];
 	//float playerWidth = player->getComponent<BoxCollider>().getWidth();
 
 
 	try
 	{
-		RunEngine(2); // running engine as client
+		RunEngine(NetworkState::CLIENT_MODE); // running engine as client
 	}
 	catch (...)
 	{

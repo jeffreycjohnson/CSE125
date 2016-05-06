@@ -5,8 +5,9 @@
 #include "Input.h"
 #include "Collision.h"
 #include <iostream>
+#include "NetworkManager.h"
 
-extern void RunEngine(int caller);
+extern void RunEngine(NetworkState caller);
 extern void InitializeEngine();
 
 // provides camera controls
@@ -42,6 +43,6 @@ int main(int argc, char** argv)
 	scene->addComponent(new Controls());
 	GameObject::SceneRoot.addChild(scene);
 
-	RunEngine(2); // Run Engine as modelviewer
+	RunEngine(NetworkState::OFFLINE); // Run Engine as modelviewer
 	
 }

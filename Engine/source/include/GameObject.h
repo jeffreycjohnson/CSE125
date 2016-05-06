@@ -4,6 +4,7 @@
 #include "ForwardDecs.h"
 #include "Transform.h"
 #include "Component.h"
+#include "NetworkManager.h"
 #include <vector>
 #include <map>
 
@@ -23,7 +24,7 @@ public:
 	static GameObject* FindByID(const int& id);
 	static std::vector<GameObject*> FindAllByName(const std::string& name);
 	static std::vector<GameObject*> FindAllByPrefix(const std::string& name);
-	static void UpdateScene(int caller);
+	static void UpdateScene(NetworkState caller);
 
 	// registering callbacks for updates
 	static void AddPreFixedUpdateCallback(void(*callback)(void));
