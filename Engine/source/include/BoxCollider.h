@@ -45,6 +45,7 @@ public:
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
 
 	float getWidth();
+	float getHeight();
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
 

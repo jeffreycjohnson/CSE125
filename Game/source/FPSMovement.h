@@ -6,13 +6,17 @@
 class FPSMovement : public Component
 {
 private:
+	const float baseVSpeed = -0.2f;
+	const float startJumpSpeed = 0.3f;
+	const float vAccel = -0.02f;
+
 	GameObject* verticality;
 
 	float moveSpeed, mouseSensitivity;
 
 	glm::vec3 position, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
-	float playerRadiusTime;
+	float playerRadius, playerHeightRadius, vSpeed;
 	bool hitWall, pastFirstTick;
 	int clientID;
 
