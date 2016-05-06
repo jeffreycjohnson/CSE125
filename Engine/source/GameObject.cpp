@@ -72,10 +72,8 @@ void GameObject::UpdateScene(NetworkState caller)
 	while (Timer::nextFixedStep()) {
 		for (auto& callback : preFixedCallbacks) callback();
 
-			// server or offline
-			SceneRoot.beforeFixedUpdate();
-			SceneRoot.fixedUpdate();
-			SceneRoot.afterFixedUpdate();
+		// server or offline
+		SceneRoot.fixedUpdate();
 
 		for (auto& callback : postFixedCallbacks) callback();
 	}
@@ -265,29 +263,6 @@ void GameObject::update(float deltaTime)
     }
 }
 
-void GameObject::beforeFixedUpdate() // TODO: remove this when merging with Jason's branch
-{
-	for (auto component : componentList)
-	{
-		if (newlyCreated || component->newlyCreated)
-		{
-			component->create();
-			component->newlyCreated = false;
-		}
-	}
-	newlyCreated = false;
-
-	if (dead || !active) return;
-	for (unsigned int i = 0; i < transform.children.size(); i++)
-	{
-		transform.children[i]->gameObject->beforeFixedUpdate();
-	}
-	for (auto component : componentList)
-	{
-		if (component->active) component->beforeFixedUpdate();
-	}
-}
-
 void GameObject::fixedUpdate()
 {
 	for (auto component : componentList)
@@ -309,29 +284,6 @@ void GameObject::fixedUpdate()
     {
         if (component->active) component->fixedUpdate();
     }
-}
-
-void GameObject::afterFixedUpdate() // TODO: remove this when merging with Jason's branch
-{
-	for (auto component : componentList)
-	{
-		if (newlyCreated || component->newlyCreated)
-		{
-			component->create();
-			component->newlyCreated = false;
-		}
-	}
-	newlyCreated = false;
-
-	if (dead || !active) return;
-	for (unsigned int i = 0; i < transform.children.size(); i++)
-	{
-		transform.children[i]->gameObject->beforeFixedUpdate();
-	}
-	for (auto component : componentList)
-	{
-		if (component->active) component->afterFixedUpdate();
-	}
 }
 
 void GameObject::extract()

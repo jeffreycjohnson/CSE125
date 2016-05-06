@@ -16,7 +16,7 @@ SphereCollider::SphereCollider(glm::vec3 c, float r) {
 	}
 	else {
 		// Assume world space coordinates
-		LOG("Warning: collider specified with no gameObject! Assuming world space coordinates.");
+		//LOG("Warning: collider specified with no gameObject! Assuming world space coordinates.");
 		centerWorld = c;
 		radiusWorld = r;
 	}

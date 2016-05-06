@@ -31,9 +31,13 @@ public:
 	void buildStaticOctree(const glm::vec3&, const glm::vec3&);
 	void buildDynamicOctree(const glm::vec3&, const glm::vec3&);
 
-	void beforeFixedUpdate() override;
+	// These 2 functions are hooked into UpdateScene() by two lambda
+	// expressions, which can be found in LoadOctreeOptions() in 
+	//     Engine/source/Main.cpp
+	void beforeFixedUpdate();
+	void afterFixedUpdate();
+
 	void fixedUpdate() override;
-	void afterFixedUpdate() override;
 
 	void debugDraw() override;
 
