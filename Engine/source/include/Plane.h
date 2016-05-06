@@ -17,17 +17,24 @@
   http://www.lighthouse3d.com/tutorials/maths/plane/
   http://mathworld.wolfram.com/Plane.html
 */
+#pragma once
 #include "ForwardDecs.h"
 
 class Plane {
 private:
+	// Ax + By + Cz + D = 0
 	float A, B, C, D; // May be useful
 	glm::vec3 N;      // Plane normal
+
+	// A point at which we can draw the base of the normal.
+	// It is guaranteed to be a point on the Plane.
+	glm::vec3 normalBase;
 
 	static const int INSIDE  = 0;
 	static const int OUTSIDE = 1;
 
 public:
+	Plane(); // Creates plane with normal = 0, A-D = 0 as well
 	Plane(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2);
 	Plane(glm::vec3 p0, glm::vec3 normal);
 	~Plane();
@@ -37,4 +44,8 @@ public:
 	// Returns the SIGNED distance from the point to the plane!
 	// If you need absolute distance, remeber to use std::abs
 	float distanceToPoint(const glm::vec3&);
+
+	RayHitInfo intersects(const Ray& ray);
+	glm::vec3 getNormal();
+	void debugDraw(const glm::vec3& pos);
 };

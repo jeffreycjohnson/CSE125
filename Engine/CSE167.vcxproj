@@ -197,7 +197,6 @@
     <ClCompile Include="source\NetworkStats.cpp" />
     <ClCompile Include="source\Ray.cpp" />
     <ClCompile Include="source\NetworkManager.cpp" />
-    <ClCompile Include="RayHitInfo.cpp" />
     <ClCompile Include="source\include\Collision.cpp" />
     <ClCompile Include="source\NetworkStruct.cpp" />
     <ClCompile Include="source\ServerInput.cpp" />

@@ -73,7 +73,7 @@ bool CapsuleCollider::intersects(const SphereCollider& other) const {
 	return false;
 }
 
-RayHitInfo CapsuleCollider::intersects(const Ray & ray) const
+RayHitInfo CapsuleCollider::raycast(const Ray & ray) const
 {
 	return RayHitInfo(); // TODO: CapsuleCollider implement ray
 };

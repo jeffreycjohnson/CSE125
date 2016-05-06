@@ -116,8 +116,16 @@ void LoadOctreeOptionsAndInitialize(ConfigFile& file) {
 	manager->buildStaticOctree(min, max);
 	manager->buildDynamicOctree(min, max);
 
-	// TODO: When this is merged into develop, register the before 
-	// and after callbacks on the OctreeManager.
+	// Register the before and after callbacks on the OctreeManager.
+	GameObject::AddPreFixedUpdateCallback(([]() {
+		auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
+		octreeManager->beforeFixedUpdate();
+	}));
+	GameObject::AddPostFixedUpdateCallback([]() {
+		auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
+		octreeManager->afterFixedUpdate();
+	});
+
 }
 
 // Caller will be 0 if client, 1 if server, 2 if modelviewer.
@@ -146,6 +154,7 @@ void RunEngine(NetworkState caller)
 		Renderer::loop(caller);
 	}
 
+	// TODO: All the memory associated with the OctreeManager is leaking right now
 	Renderer::shutdown = true;
     delete workerPool;
 	glfwDestroyWindow(mainWindow);

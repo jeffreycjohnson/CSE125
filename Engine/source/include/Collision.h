@@ -33,7 +33,6 @@ public:
 	static const int MAX_DEPTH = 12;
 	static const float RAY_MIN;
 	static const float RAY_MAX;
-	static const float RAY_STEP;
 	static const NodeId UNKNOWN_NODE = 0; // First real node has ID = 1
 
 	enum BuildMode {
@@ -57,10 +56,7 @@ public:
 	// Preserves the min/max and BuildMode restrictions from build
 	void rebuild();
 
-	RayHitInfo raycast(const Ray&, float minDist = RAY_MIN, float maxDist = RAY_MAX);
-
-	// Don't use this \/
-	//CollisionInfo raycast(Ray, float min_t = RAY_MIN, float max_t = RAY_MAX, float step = Octree::RAY_STEP);
+	RayHitInfo raycast(const Ray&, float t_min = RAY_MIN, float t_max = RAY_MAX, Collider* ignore = nullptr);
 	CollisionInfo collidesWith(Collider*);
 
 	/* I'm afraid of storing pointers inside of BoxColliders, in case things get deleted on-the-fly. */
@@ -127,10 +123,10 @@ private:
 
 	/* Member Functions */
 
-	void raycast(const Ray&, RayHitInfo&);
-	CollisionInfo collidesWith(const BoxCollider&, CollisionInfo&);
-	CollisionInfo collidesWith(const CapsuleCollider&, CollisionInfo&);
-	CollisionInfo collidesWith(const SphereCollider&, CollisionInfo&);
+	void raycast(const Ray&, RayHitInfo&, Collider*);
+
+	// Condensed this into one function. It forces some casting, but oh well.
+	CollisionInfo collidesWith(Collider*, const BoxCollider& aabb, CollisionInfo&);
 	
 	// Add or remove nodes to the data structure
 	bool insert(Collider* colliderBeingInserted, const BoxCollider&); // Returns true if the node was successfully inserted
@@ -138,7 +134,7 @@ private:
 
 	// Used internally for inserting/moving colliders around the octree
 	bool intersects(const BoxCollider&);
-	void subdivide();
+	bool subdivide();
 
 	//void collapseIntoParent(); // Uhheeeh ummm,... figure this out
 	void debugDraw();

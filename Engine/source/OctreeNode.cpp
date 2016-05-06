@@ -39,16 +39,17 @@ OctreeNode::~OctreeNode() {
 	tree->removeNode(this->nodeId);
 }
 
-void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
+void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) {
 
-	RayHitInfo againstMe = myAABB->intersects(ray);
+	RayHitInfo againstMe = myAABB->raycast(ray);
 
 	if (againstMe.hitTime > hitInfo.hitTime || hitInfo.hitTime <= 0 ) {
 		return; // Nothing inside of us will collide with this
 	}
 
 	for (auto obj : colliders) {
-		auto temphit = obj->intersects(ray);
+		if (obj == ignore) continue; // This is the ignored collider, so just skip it
+		auto temphit = obj->raycast(ray);
 		if (temphit.intersects && temphit.hitTime > 0) {
 			if (temphit.hitTime < hitInfo.hitTime) {
 				hitInfo = temphit;
@@ -58,25 +59,24 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo) {
 
 	for (auto child : children) {
 		if (child != nullptr) {
-			child->raycast(ray, hitInfo);
+			child->raycast(ray, hitInfo, ignore);
 		}
 	}
 
 };
 
-// TODO: Condense the "collidesWith" methods into one method, since there's a lot of repetition
-CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& info) {
+CollisionInfo OctreeNode::collidesWith(Collider* collider, const BoxCollider& aabb, CollisionInfo& info) {
 
 	// Check object against all of the objects in our colliders list
-	if (intersects(box)) {
+	if (intersects(aabb)) {
 		for (auto colliderPtr : colliders) {
-			if (colliderPtr == &box) continue; // Don't check colliders against themselves
+			if (colliderPtr == collider) continue; // Don't check colliders against themselves
 			switch (colliderPtr->getColliderType()) {
 
-				case ColliderType::AABB:
+				case ColliderType::BOX:
 				{
 					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(box)) {
+					if (myBox->intersects(*(BoxCollider*)collider)) {
 						info.add(myBox);
 					}
 					break;
@@ -84,7 +84,7 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 				case ColliderType::SPHERE:
 				{
 					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(box)) {
+					if (mySphere->intersects(*(SphereCollider*)collider)) {
 						info.add(mySphere);
 					}
 					break;
@@ -92,7 +92,7 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 				case ColliderType::CAPSULE:
 				{
 					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(box)) {
+					if (myCapsule->intersects(*(CapsuleCollider*)collider)) {
 						info.add(myCapsule);
 					}
 					break;
@@ -102,108 +102,14 @@ CollisionInfo OctreeNode::collidesWith(const BoxCollider& box, CollisionInfo& in
 		
 		// If we have children, check them afterwards
 		for (auto child : children) {
-			child->collidesWith(box, info);
+			if (child->colliders.size() > 0 && child->isLeaf())
+				child->collidesWith(collider, aabb, info);
 		}
 	}
 
 	return info;
 
 };
-
-CollisionInfo OctreeNode::collidesWith(const SphereCollider& collider, CollisionInfo& info) {
-	
-	// Check object against all of the objects in our colliders list
-	if (intersects(collider.getAABB())) { // TODO: avoid recomputing this
-		for (auto colliderPtr : colliders) {
-			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
-			switch (colliderPtr->getColliderType()) {
-				case ColliderType::AABB:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(collider)) {
-						info.add(myBox);
-					}
-					break;
-				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(collider)) {
-						info.add(mySphere);
-					}
-					break;
-				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(collider)) {
-						info.add(myCapsule);
-					}
-					break;
-				}
-			}
-		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			child->collidesWith(collider, info);
-		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			child->collidesWith(collider, info);
-		}
-	}
-	
-	return info;
-
-}
-
-
-CollisionInfo OctreeNode::collidesWith(const CapsuleCollider& collider, CollisionInfo& info) {
-
-	// Check object against all of the objects in our colliders list
-	if (intersects(collider.getAABB())) { // TODO: avoid recomputing this
-		for (auto colliderPtr : colliders) {
-			if (colliderPtr == &collider) continue; // Don't check colliders against themselves
-			switch (colliderPtr->getColliderType()) {
-
-				case ColliderType::AABB:
-				{
-					BoxCollider* myBox = (BoxCollider*)colliderPtr;
-					if (myBox->intersects(collider)) {
-						info.add(myBox);
-					}
-					break;
-				}
-				case ColliderType::SPHERE:
-				{
-					SphereCollider* mySphere = (SphereCollider*)colliderPtr;
-					if (mySphere->intersects(collider)) {
-						info.add(mySphere);
-					}
-					break;
-				}
-				case ColliderType::CAPSULE:
-				{
-					CapsuleCollider* myCapsule = (CapsuleCollider*)colliderPtr;
-					if (myCapsule->intersects(collider)) {
-						info.add(myCapsule);
-					}
-					break;
-				}
-			}
-		}
-
-		// If we have children, check them afterwards
-		for (auto child : children) {
-			child->collidesWith(collider, info);
-		}
-	}
-
-	return info;
-
-}
 
 bool OctreeNode::intersects(const BoxCollider& box) {
 
@@ -213,7 +119,6 @@ bool OctreeNode::intersects(const BoxCollider& box) {
 
 bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& colliderAABB) {
 
-	
 	// Keeps track of the number of intersections the box has with our children
 	int collisions = 0;
 	unsigned int index = 0;
@@ -254,8 +159,14 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 	else {
 		// If we are a leaf node
 		if (colliders.size() >= Octree::LEAF_THRESHOLD && depth < Octree::MAX_DEPTH) {
-			subdivide(); // The subdivide *may* fail, so for now we recurse
-			insert(colliderBeingInserted, colliderAABB);
+			// The subdivide *may* fail, so for now we recurse
+			bool success = subdivide();
+			if (!success) {
+				colliders.push_back(colliderBeingInserted);
+				colliderBeingInserted->nodeId = nodeId;
+				colliderBeingInserted->octree = this->tree;
+				return true;
+			}
 		}
 		else {
 			colliders.push_back(colliderBeingInserted);
@@ -275,7 +186,7 @@ void OctreeNode::remove(Collider * colliderBeingRemoved)
 	}
 }
 
-void OctreeNode::subdivide() {
+bool OctreeNode::subdivide() {
 	if (children.empty() && depth < Octree::MAX_DEPTH) {
 		// Figure out the dimensions of each child
 		float xDist = std::abs(max.x - min.x) / 2;
@@ -319,13 +230,26 @@ void OctreeNode::subdivide() {
 		// Insert all of our colliders into each of those children, and let recursion deal with it
 		std::list<Collider*> stragglers;
 		for (auto collider : colliders) {
+
 			BoxCollider aabb = collider->getAABB();
+			OctreeNode* favoriteChild = nullptr;
+			int childIntersections = 0;
 			for (auto child : children) {
+				
 				// Aaaaand this method becomes MORE expensive b/c we have to compute the AABBs again...
-				if (!child->insert(collider, aabb)) {
-					// If we couldn't insert this guy further down the tree, keep it here
-					stragglers.push_back(collider);
+				
+				if (child->myAABB->intersects(aabb)) {
+					childIntersections++;
+					favoriteChild = child;
 				}
+
+			}
+
+			if (childIntersections == 1 && favoriteChild != nullptr) {
+				favoriteChild->insert(collider, aabb);
+			}
+			else {
+				stragglers.push_back(collider);
 			}
 		}
 
@@ -333,8 +257,12 @@ void OctreeNode::subdivide() {
 		colliders.clear();
 		colliders = stragglers;
 
+		return true;
+
 	}
-	//else // TODO: Will I need to do anything in the else case should a subdivide() call fail?
+	else {
+		return false; // Subdivide failed
+	}
 }
 
 bool OctreeNode::isLeaf() const {

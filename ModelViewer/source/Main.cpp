@@ -24,6 +24,9 @@ public:
 		//gameObject->transform.rotate(roll*pitch*yaw);
 		float speed = 10.0; // 10 units/sec
 		if (particleSystem) {
+			//particleSystem->play();
+		}
+		if (Input::getButtonDown("space")) {
 			particleSystem->play();
 		}
 		Renderer::mainCamera->gameObject->transform.translate(glm::vec3(Input::getAxis("roll") * dt * speed, Input::getAxis("yaw") * dt * speed, Input::getAxis("pitch") * speed * dt));

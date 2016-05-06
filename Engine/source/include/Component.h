@@ -20,12 +20,7 @@ public:
 	virtual void setGameObject(GameObject* go);
 
 	virtual void update(float deltaTime);
-	
-	// Guranteed to be called before every fixed update
-	// DO NOT USE (before/after)FixedUpdate() for gameplay logic!
-	virtual void beforeFixedUpdate();
 	virtual void fixedUpdate();
-	virtual void afterFixedUpdate();
 
 	virtual void draw();
 	virtual void debugDraw();

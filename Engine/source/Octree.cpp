@@ -9,18 +9,14 @@
 #include <iostream>
 
 // Raycasting constants
-const float Octree::RAY_MIN = FLT_EPSILON;
+const float Octree::RAY_MIN = 0.0f;
 const float Octree::RAY_MAX = FLT_MAX;
-const float Octree::RAY_STEP = 0.01f;
-
-//Octree* Octree::STATIC_TREE  = nullptr; // Globals are bad.
-//Octree* Octree::DYNAMIC_TREE = nullptr;
 
 Octree::Octree(glm::vec3 min, glm::vec3 max) {
-	root = new OctreeNode(min, max, this);
 	objects = 0;
 	nodeCounter = 0;
 	restriction = BuildMode::BOTH;
+	root = new OctreeNode(min, max, this);
 };
 
 Octree::~Octree() {
@@ -154,8 +150,10 @@ void Octree::rebuild()
 		std::list<Collider*> colliders; // TODO: maybe vector would be faster, not sure
 		for (auto pair : nodeMap) {
 			auto node = pair.second;
-			for (auto colliderPtr : node->colliders) {
-				colliders.push_back(colliderPtr);
+			if (node != nullptr) {
+				for (auto colliderPtr : node->colliders) {
+					colliders.push_back(colliderPtr);
+				}
 			}
 		}
 		for (auto collider : colliders) {
@@ -167,18 +165,18 @@ void Octree::rebuild()
 	}
 }
 
-RayHitInfo Octree::raycast(const Ray & ray, float minDist, float maxDist)
+RayHitInfo Octree::raycast(const Ray & ray, float t_min, float t_max, Collider* ignore)
 {
 
 	RayHitInfo hitInfo;
 	if (NetworkManager::getState() == NetworkState::CLIENT_MODE) return hitInfo;
 
 	if (root) {
-		root->raycast(ray, hitInfo);
+		root->raycast(ray, hitInfo, ignore);
 	}
-	//if (hitInfo.hitTime < minDist || hitInfo.hitTime > maxDist) {
-	//	hitInfo.intersects = false;
-	//}
+	if (hitInfo.hitTime < t_min || hitInfo.hitTime > t_max) {
+		hitInfo.intersects = false;
+	}
 	return hitInfo;
 }
 
@@ -189,20 +187,9 @@ CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a b
 
 	colInfo.collider = ptr;
 
-	if (root) {
-		BoxCollider* box = dynamic_cast<BoxCollider*>(ptr);
-		SphereCollider* sphere = dynamic_cast<SphereCollider*>(ptr);
-		CapsuleCollider* capsule = dynamic_cast<CapsuleCollider*>(ptr);
-
-		if (box != nullptr) {
-			return root->collidesWith(*box, colInfo);
-		}
-		else if (sphere != nullptr) {
-			return root->collidesWith(*sphere, colInfo); // TODO: remember to update sphere & capsule coolideswith() with changes to Box version
-		}
-		else if (capsule != nullptr) {
-			return root->collidesWith(*capsule, colInfo);
-		}
+	if (root && ptr != nullptr) {
+		BoxCollider aabb = ptr->getAABB(); // Avoid having to recompute this over and over and over...
+		return root->collidesWith(ptr, aabb, colInfo);
 	}
 	else {
 		return colInfo;

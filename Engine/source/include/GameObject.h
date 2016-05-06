@@ -90,18 +90,13 @@ public:
 	void debugDraw();
     
 	void update(float deltaTime);
-	void beforeFixedUpdate(); // <-- Do not use this for gameplay logic!!!
     void fixedUpdate();
-	void afterFixedUpdate();  // <-- Do not use this for gameplay logic!!!
 
 	// <-- we no longer need this because I am a fucking wizard
     void collisionEnter(GameObject* other); // TODO: Remove, ALL HAIL THE DARK LORD FRIEDMAN
 
 	// Forgive me for functional C++, but I'm too lazy to write duplicate extra functions -- Dexter
 	void collisionCallback(GameObject* other, void(Component::*callback)(GameObject*));
-
-    //void collisionStay(GameObject* other);
-    //void collisionExit(GameObject* other);
 
 	void extract();
 

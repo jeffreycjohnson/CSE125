@@ -16,7 +16,7 @@ SphereCollider::SphereCollider(glm::vec3 c, float r) {
 	}
 	else {
 		// Assume world space coordinates
-		LOG("Warning: collider specified with no gameObject! Assuming world space coordinates.");
+		//LOG("Warning: collider specified with no gameObject! Assuming world space coordinates.");
 		centerWorld = c;
 		radiusWorld = r;
 	}
@@ -52,6 +52,8 @@ void SphereCollider::debugDraw()
 			color = glm::vec4(DebugPass::colliderColor, 1);
 		}
 		Renderer::drawSphere(centerWorld, radiusWorld, color);
+		auto aabb = getAABB();
+		aabb.debugDraw();
 	}
 }
 
@@ -77,19 +79,56 @@ bool SphereCollider::intersects(const CapsuleCollider & other) const
 
 bool SphereCollider::intersects(const SphereCollider & other) const
 {
-	float distance = (other.centerWorld - centerWorld).length();
-	return (distance <= radiusWorld + other.radiusWorld);
+	// Algo modified from Dirk Gregorius' GDC 2013 slides
+	float distance = (other.centerWorld - centerWorld).length() - (other.radiusWorld + radiusWorld);
+	return distance <= 0;
 }
 
-RayHitInfo SphereCollider::intersects(const Ray & ray) const
+RayHitInfo SphereCollider::raycast(const Ray & ray) const
 {
-	return RayHitInfo(); // TODO: Implement ray::sphere intersection
+	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection
+	// This function returns the earliest hit along the ray of the sphere, provided the hit happens in front of the ray (t >= 0)
+	RayHitInfo hit;
+	float r_squared = radiusWorld * radiusWorld;
+	hit.collider = (Collider*)this;
+
+	// Analytic solution which uses the quadratic formula
+	float a = glm::dot(ray.direction, ray.direction);
+	float b = 2 * glm::dot(ray.direction, ray.origin);
+	float c = glm::dot(ray.origin, ray.origin) - r_squared;
+
+	// t = ( -b +/- sqrt(b^2 - 4ac) ) / 2a
+
+	float discriminant = b * b - 4 * a * c;
+
+	if (discriminant > 0) {
+		// Two solutions to quadratic formula. But
+		float t0 = (-b - discriminant) / (2 * a);
+		float t1 = (-b + discriminant) / (2 * a);
+		hit.hitTime = std::min(t0, t1);
+		hit.intersects = hit.hitTime > 0;
+		hit.point = ray.getPos(hit.hitTime);
+		hit.normal = glm::normalize(hit.point - centerWorld);
+	}
+	else if (discriminant == 0) {
+		// Ray intersects 1 point on sphere (e.g. a tangent line)
+		hit.hitTime = -b / (2 * a);
+		hit.intersects = true;
+		hit.point = ray.getPos(hit.hitTime);
+		hit.normal = glm::normalize(hit.point - centerWorld);
+	}
+	else {
+		// No solution  -> sqrt( -x ) is imaginary
+		hit.intersects = false;
+	}
+
+	return hit;
 }
 
 BoxCollider SphereCollider::getAABB() const
 {
 	// Remember to pass in the world coordinates
-	return BoxCollider(centerWorld, glm::vec3(radiusWorld,radiusWorld,radiusWorld));
+	return BoxCollider(centerWorld, glm::vec3(2 * radiusWorld, 2 * radiusWorld, 2 * radiusWorld));
 };
 
 glm::vec3 SphereCollider::getCenterWorld() const {

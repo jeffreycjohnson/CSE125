@@ -48,15 +48,7 @@ void Component::deactivate()
 {
 }*/
 
-void Component::beforeFixedUpdate()
-{
-}
-
 void Component::fixedUpdate()
-{
-}
-
-void Component::afterFixedUpdate()
 {
 }
 

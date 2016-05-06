@@ -16,26 +16,51 @@ BoxCollider::BoxCollider(glm::vec3 offset, glm::vec3 dimensions) : offset(offset
 	float halfD = dimensions.z / 2;
 
 	// points[] array is in object space!
-	points[0] = offset + glm::vec3(halfW, halfH, halfD);
-	points[1] = offset + glm::vec3(halfW, halfH, -halfD);
-	points[2] = offset + glm::vec3(halfW, -halfH, halfD);
-	points[3] = offset + glm::vec3(halfW, -halfH, -halfD);
-	points[4] = offset + glm::vec3(-halfW, halfH, halfD);
-	points[5] = offset + glm::vec3(-halfW, halfH, -halfD);
-	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
-	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
-	//colliders.push_back(this); // TODO: Remove naive implementation once octree is working
+	points[0] = offset + glm::vec3(halfW, halfH, halfD);    // A
+	points[1] = offset + glm::vec3(halfW, halfH, -halfD);   // B
+	points[2] = offset + glm::vec3(halfW, -halfH, halfD);   // C
+	points[3] = offset + glm::vec3(halfW, -halfH, -halfD);  // D
+	points[4] = offset + glm::vec3(-halfW, halfH, halfD);   // E
+	points[5] = offset + glm::vec3(-halfW, halfH, -halfD);  // F
+	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);  // G
+	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD); // H
+
+	// Planes:
+	// ABCD (right)    EFGH (left)
+	// ACEG (front)    BDFH (back)
+	// ABEF (top)      CDGH (bottom)
+
 	colliding = previouslyColliding = false;
 	collidingStatic = previouslyCollidingStatic = false;
 	passive = true;
 	isAxisAligned = true; // For now, ALL box colliders are axis-aligned
 
 	// Force computation of xmin/xmax etc.
-	update(0.0f);
+	fixedUpdate();
 }
 
 BoxCollider::~BoxCollider()
 {
+}
+
+void BoxCollider::calculatePlanes()
+{
+	// Do mathz here in world space
+	glm::vec3 A, B, C, D, E, G;
+	A = transformPoints[0];
+	B = transformPoints[1];
+	C = transformPoints[2];
+	D = transformPoints[3];
+	E = transformPoints[4];
+	G = transformPoints[6];
+
+	ABCD = Plane(A, glm::cross(D - C, A - C));
+	ACEG = Plane(A, glm::cross(C - G, E - G));
+	ABEF = Plane(A, glm::cross(B - A, E - A));
+
+	EFGH = Plane(E, -ABCD.getNormal());
+	BDFH = Plane(B, -ACEG.getNormal());
+	CDGH = Plane(C, -ABEF.getNormal());
 }
 
 void BoxCollider::fixedUpdate()
@@ -54,6 +79,7 @@ void BoxCollider::fixedUpdate()
 		for (int i = 0; i < 8; ++i) {
 			transformPoints[i] = points[i];
 		}
+		offsetWorld = offset;
 	}
 
 	// Calculate axis aligned bounding box
@@ -77,6 +103,11 @@ void BoxCollider::fixedUpdate()
 		if (zmax < transformPoints[i].z)
 			zmax = transformPoints[i].z;
 	}
+
+	// Recalculate the planes if we are an OBB
+	//if (!isAxisAligned) {
+		calculatePlanes();
+	//}
 }
 
 BoxCollider BoxCollider::getAABB() const {
@@ -130,6 +161,13 @@ void BoxCollider::debugDraw()
 				}
 			}
 		}
+		// Draw planes (normals)
+		/*ABCD.debugDraw(offsetWorld);
+		ACEG.debugDraw(offsetWorld);
+		ABEF.debugDraw(offsetWorld);
+		EFGH.debugDraw(offsetWorld);
+		BDFH.debugDraw(offsetWorld);
+		CDGH.debugDraw(offsetWorld);*/ // not worth, draw arrow is fucked
 	}
 }
 
@@ -182,11 +220,19 @@ bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 }
 
 bool BoxCollider::intersects(const BoxCollider& other) const {
-	return (
+	bool intersectsAABB = (
 		this->xmin <= other.xmax && other.xmin <= this->xmax &&
 		this->ymin <= other.ymax && other.ymin <= this->ymax &&
 		this->zmin <= other.zmax && other.zmin <= this->zmax
 	);
+	if (!isAxisAligned && intersectsAABB) {
+		// If we collide with the OBB's AABB, we will also collide with the OBB,
+		// because geometry.
+
+	}
+	else {
+		return intersectsAABB;
+	}
 }
 
 bool BoxCollider::intersects(const CapsuleCollider & other) const
@@ -207,7 +253,7 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 	glm::vec3 c = other.getCenterWorld();
 	float radius = other.getRadiusWorld();
 	float r_squared = radius * radius;
-
+	/*
 	e = std::fmaxf(xmin - c.x, 0) + std::fmaxf(c.x - xmax, 0);
 	if (e <= radius) return false;
 	d += e * e;
@@ -218,20 +264,44 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 
 	e = std::fmaxf(zmin - c.z, 0) + std::fmaxf(c.z - zmax, 0);
 	if (e <= radius) return false;
-	d += e * e;
+	d += e * e;*/
 
-	if (d <= r_squared) {
-		return true;
+	// Arvo's original method
+	if (c.x < xmin) {
+		e = c.x - xmin;
+		d = d + e * e;
 	}
-	else {
-		return false;
+	else if (c.x > xmax) {
+		e = c.x - xmax;
+		d += e * e;
 	}
+
+	if (c.y < ymin) {
+		e = c.y - ymin;
+		d = d + e * e;
+	}
+	else if (c.y > ymax) {
+		e = c.y - ymax;
+		d = d + e * e;
+	}
+
+	if (c.z < zmin) {
+		e = c.z - zmin;
+		d += e * e;
+	}
+	else if (c.z > zmax) {
+		e = c.z - zmax;
+		d = d + e * e;
+	}
+
+	return (d <= r_squared);
 
 }
 
-RayHitInfo BoxCollider::intersects(const Ray & ray) const
+RayHitInfo BoxCollider::raycast(const Ray & ray) const
 {
 	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+	// Because this is a raycast, we only want to register hits with things in front of the ray (t > 0)
 	RayHitInfo hit;
 
 	float tmin = (xmin - ray.origin.x) / ray.direction.x;
@@ -309,6 +379,7 @@ RayHitInfo BoxCollider::intersects(const Ray & ray) const
 	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	hit.normal = finalNorm;
+	hit.point = ray.getPos(finalT);
 	return hit;
 
 };
