@@ -73,6 +73,8 @@ void FPSMovement::fixedUpdate()
 		gameObject->transform.setPosition(position.x, position.y, position.z);
 	}
 
+	//Start Jump Logic Here
+
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
 
@@ -98,7 +100,6 @@ void FPSMovement::fixedUpdate()
 	}
 
 	recalculate();
-
 }
 
 glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
