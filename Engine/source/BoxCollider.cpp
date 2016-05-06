@@ -355,6 +355,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	hit.normal = finalNorm;
+	hit.point = ray.getPos(finalT);
 	return hit;
 
 };

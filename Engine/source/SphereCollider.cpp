@@ -105,11 +105,15 @@ RayHitInfo SphereCollider::raycast(const Ray & ray) const
 		float t1 = (-b + discriminant) / (2 * a);
 		hit.hitTime = std::min(t0, t1);
 		hit.intersects = hit.hitTime > 0;
+		hit.point = ray.getPos(hit.hitTime);
+		hit.normal = glm::normalize(hit.point - centerWorld);
 	}
 	else if (discriminant == 0) {
 		// Ray intersects 1 point on sphere (e.g. a tangent line)
 		hit.hitTime = -b / (2 * a);
 		hit.intersects = true;
+		hit.point = ray.getPos(hit.hitTime);
+		hit.normal = glm::normalize(hit.point - centerWorld);
 	}
 	else {
 		// No solution  -> sqrt( -x ) is imaginary
