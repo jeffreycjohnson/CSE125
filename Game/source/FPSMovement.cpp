@@ -97,9 +97,18 @@ void FPSMovement::fixedUpdate()
 		position += moveDir;
 	}
 
-	Ray downRay(position, -worldUp);
-	RayHitInfo downHit = oct->raycast(downRay, Octree::STATIC_ONLY);
-	if (downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f) {
+	glm::vec3 downRayPos = position /*- glm::vec3(0, playerHeightRadius, 0)*/;
+	Ray downRayStatic(downRayPos, -worldUp);
+	RayHitInfo downHitStatic = oct->raycast(downRayStatic, Octree::STATIC_ONLY);
+	Ray downRayDynamic(downRayPos, -worldUp);
+	RayHitInfo downHitDynamic = oct->raycast(downRayDynamic, Octree::DYNAMIC_ONLY);
+
+	RayHitInfo downHit = downHitStatic;
+	if (downHitDynamic.hitTime < downHitStatic.hitTime)
+		downHit = downHitDynamic;
+
+
+	if (downHit.intersects && downHit.hitTime < playerHeightRadius+ 0.1f) {
 		std::cout << "ON FLOOR" << std::endl;
 		vSpeed = baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
