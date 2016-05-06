@@ -1,9 +1,19 @@
 #include "Plane.h"
+#include "Collision.h"
+#include "Renderer.h"
+
+Plane::Plane()
+{
+	N = glm::vec3(0, 0, 0);
+	A = B = C = D = 0.0f;
+	normalBase = glm::vec3(0);
+}
 
 Plane::Plane(glm::vec3 p0, glm::vec3 p1, glm::vec3 p2) {
 	glm::vec3 u = p1 - p0;
 	glm::vec3 v = p2 - p0;
 	N = glm::normalize(glm::cross(u, v));
+	normalBase = p0;
 
 	A = N.x;
 	B = N.y;
@@ -17,6 +27,7 @@ Plane::Plane(glm::vec3 p0, glm::vec3 normal) {
 	B = N.y;
 	C = N.z;
 	D = glm::dot(-N, p0);
+	normalBase = p0;
 };
 
 Plane::~Plane() {
@@ -62,7 +73,17 @@ RayHitInfo Plane::intersects(const Ray & ray)
 		hitInfo.intersects = true;
 		hitInfo.collider = nullptr;
 		hitInfo.point = ray.getPos(hitInfo.hitTime);
+		//hitInfo.normal = N; // TODO: Uncomment this after I rebase
 	}
 
 	return hitInfo;
+}
+
+glm::vec3 Plane::getNormal()
+{
+	return N;
+}
+
+void Plane::debugDraw() {
+	Renderer::drawArrow(normalBase, N, glm::vec4());
 }
