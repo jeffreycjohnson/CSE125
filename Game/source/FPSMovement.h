@@ -10,6 +10,7 @@ private:
 	const float startJumpSpeed = 0.3f;
 	const float vAccel = -0.02f;
 	const float speed = 1.0f;
+	const float deathFloor = -20.0f;
 
 	GameObject* verticality;
 

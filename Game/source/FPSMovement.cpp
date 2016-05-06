@@ -112,11 +112,9 @@ void FPSMovement::fixedUpdate()
 		position.y += vSpeed;
 	}
 
-	
-
-
-	float jump = ServerInput::getAxis("jump", clientID);
-	//std::cout << "jump: " << jump << std::endl;
+	if (position.y < deathFloor) {
+		respawn();
+	}
 	recalculate();
 }
 
