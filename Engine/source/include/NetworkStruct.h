@@ -70,6 +70,7 @@ struct InputNetworkData
 
 	float yaw, pitch, roll;
 	float mouseX, mouseY;
+	float jump;
 };
 #pragma pack(pop)
 

@@ -15,8 +15,7 @@
 #include "Collision.h"
 #include "BoxCollider.h"
 #include "ServerInput.h"
-
-const float SPEED = 3.0f;
+#include "Config.h"
 
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
@@ -54,12 +53,12 @@ void FPSMovement::fixedUpdate()
 
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct != nullptr) {
-		if (playerRadiusTime == 0) {
+		if (playerRadius == 0 || playerHeightRadius == 0) {
 			Transform playerTrans = GameObject::FindByName("Player")->transform;
 			GameObject * go = playerTrans.children[0]->children[0]->gameObject;
 			BoxCollider * b = go->getComponent<BoxCollider>();
-			playerRadiusTime = b->getWidth() / 2;
-			std::cout << playerRadiusTime << std::endl;
+			playerRadius = b->getWidth() / 2;
+			playerHeightRadius = b->getHeight() / 2;
 		}
 
 		hitWall = false;
@@ -94,11 +93,31 @@ void FPSMovement::fixedUpdate()
 
 	moveDir = xComp + zComp;
 	if (!hitWall) {
-		position += xComp + zComp;
+		position += moveDir;
 	}
 
-	recalculate();
+	Ray downRay(position, -worldUp);
+	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
 
+	if (downHit.intersects && downHit.hitTime < playerHeightRadius+ 0.1f) {
+		vSpeed = baseVSpeed;
+		position.y = position.y - downHit.hitTime + playerHeightRadius;
+		if (ServerInput::getAxis("jump", clientID) != 0) {
+			vSpeed = startJumpSpeed;
+			position.y += vSpeed;
+		}
+	}
+	else {
+		vSpeed += vAccel;
+		position.y += vSpeed;
+	}
+
+	
+
+
+	float jump = ServerInput::getAxis("jump", clientID);
+	//std::cout << "jump: " << jump << std::endl;
+	recalculate();
 }
 
 glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
@@ -106,7 +125,7 @@ glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDire
 	Ray moveRay(position, castDirection);
 	RayHitInfo moveHit = oct->raycast(moveRay, Octree::STATIC_ONLY);
 	glm::vec3 newMoveVec = moveDirection;
-	if (moveHit.intersects && moveHit.hitTime <= playerRadiusTime && moveHit.hitTime >= 0) {
+	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
 		if (moveHit.normal.x != 0)
 			newMoveVec.x = 0;
 		if (moveHit.normal.z != 0)
