@@ -258,7 +258,7 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 	axes.push_back(Ray(A, glm::cross(A - E, A_other - C_other)));
 	axes.push_back(Ray(A, glm::cross(A - E, A_other - E_other)));
 
-	// TODO:   ^   with all of those cross products, we could optimize
+	// Note that the cross product of two identical vectors = the 0 vector
 
 	/* pseudocode:
 	
@@ -271,16 +271,24 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 	
 	*/
 
-	assert(axes.size() == NUM_AXES);
+	//assert(axes.size() == NUM_AXES);
+	glm::vec3 zero(0);
 
 	for (int axis = 0; axis < NUM_AXES; ++axis) {
 		float my_proj_min = INFINITY, my_proj_max = -INFINITY;
 		float ot_proj_min = INFINITY, ot_proj_max = -INFINITY;
 
+		if (axes[axis].direction == zero) {
+			continue;
+		}
+
 		for (int vertex = 0; vertex < 8; ++vertex) {
 			// Project each vertex of our box onto the axis (our std::vector of Rays)
 			// The dot product gives us the signed distance to that point.
 			float temp = glm::dot(transformPoints[vertex], axes[axis].direction);
+
+			// Debug assertion to make sure we don't dot against the 0 vector
+			assert(!std::isnan(temp));
 
 			// Build the interval (e.g. the object's "shadow") along the axis over time
 			my_proj_min = std::min(my_proj_min, temp);
@@ -290,6 +298,7 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 		// Now, project the other box's vertices onto the same axis
 		for (int otherVertex = 0; otherVertex < 8; ++otherVertex) {
 			float temp = glm::dot(other.transformPoints[otherVertex], axes[axis].direction);
+			assert(!std::isnan(temp));
 			ot_proj_min = std::min(my_proj_min, temp);
 			ot_proj_max = std::max(my_proj_max, temp);
 		}

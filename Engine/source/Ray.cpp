@@ -1,7 +1,12 @@
 #include "Collision.h"
 
 Ray::Ray(glm::vec3 o, glm::vec3 d) : origin(o), direction(d) {
-	direction = glm::normalize(direction);
+	if (d.length() == 0) {
+		direction = d; // Don't normalize zero vector, that becomes NaN
+	}
+	else {
+		direction = glm::normalize(direction);
+	}
 	t = 0.0f;
 }
 
