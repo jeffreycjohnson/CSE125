@@ -43,7 +43,6 @@ private:
 	bool separatingAxisExists(const BoxCollider& other) const;
 
 public:
-
 	static bool drawBoxPoints;
 
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
@@ -55,9 +54,11 @@ public:
 	void fixedUpdate() override;
 	void debugDraw() override;
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
+	void setAxisAligned(bool axisAligned);
 
 	float getWidth();
 	float getHeight();
+	float getDepth();
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
 

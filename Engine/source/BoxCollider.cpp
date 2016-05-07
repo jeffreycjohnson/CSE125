@@ -104,10 +104,8 @@ void BoxCollider::fixedUpdate()
 			zmax = transformPoints[i].z;
 	}
 
-	// Recalculate the planes if we are an OBB
-	//if (!isAxisAligned) {
-		calculatePlanes();
-	//}
+	calculatePlanes();
+
 }
 
 BoxCollider BoxCollider::getAABB() const {
@@ -203,8 +201,12 @@ void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
 	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
 
-	update(0.0f); // Recalculate points, etc.
+	fixedUpdate(); // Recalculate points, etc.
 }
+
+void BoxCollider::setAxisAligned(bool axisAligned) {
+	isAxisAligned = axisAligned;
+};
 
 void BoxCollider::destroy()
 {
@@ -490,4 +492,8 @@ float BoxCollider::getWidth() {
 
 float BoxCollider::getHeight() {
 	return ymax - ymin;
+}
+
+float BoxCollider::getDepth() {
+	return zmax - zmin;
 }
