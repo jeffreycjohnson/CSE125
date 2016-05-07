@@ -116,10 +116,22 @@ Material::Material(Shader* shader, bool transparent) : shader(shader), transpare
 {
 }
 
-Material::Material(const std::string& file, bool hasAnimations) : hasAnimations(hasAnimations), autoReload(true)
+static std::string inParentDir(const std::string& file)
 {
-    loadFromFile(file);
+    auto path = getPath(file);
+    path = getPath(path.substr(0, path.length() - 1));
+    auto name = file.substr(file.find_last_of("/") + 1);
+    return path + name;
+}
+
+Material::Material(std::string file, bool hasAnimations) : hasAnimations(hasAnimations), autoReload(true)
+{
     watcher = std::make_unique<FileWatcher>(file, 60);
+    while (!watcher->exists && getPath(file) != "") {
+        file = inParentDir(file);
+        watcher = std::make_unique<FileWatcher>(file, 60);
+    }
+    loadFromFile(file);
 }
 
 Material::UniformSetter Material::operator[](const std::string& name)

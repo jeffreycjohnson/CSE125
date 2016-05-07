@@ -52,7 +52,7 @@ public:
     bool transparent;
 
     explicit Material(Shader *, bool transparent = true);
-    explicit Material(const std::string& file, bool hasAnimations=false);
+    explicit Material(std::string file, bool hasAnimations=false);
     UniformSetter operator[](const std::string& name);
     void bind();
     const bool autoReload = false;

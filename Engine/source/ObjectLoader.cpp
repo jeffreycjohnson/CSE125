@@ -26,7 +26,7 @@ int counter = 0;
 std::string getPath(const std::string& name)
 {
     auto index = name.find_last_of("\\/");
-    if (index == std::string::npos) return name;
+    if (index == std::string::npos) return "";
     return name.substr(0, index + 1);
 }
 
