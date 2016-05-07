@@ -211,6 +211,98 @@ void BoxCollider::destroy()
 	Collider::destroy();
 }
 
+bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
+	// The SAT states that:
+	// "If two convex objects are not penetrating, there exists an axis for which the projection of the objects will not overlap."
+
+	// References:
+	// Dirk Gregarious' GDC talk (2013)   (because it's interesting)
+	// http://gamedev.stackexchange.com/questions/44500/how-many-and-which-axes-to-use-for-3d-obb-collision-with-sat (OBBs, in particular)
+	// http://www.dyn4j.org/2010/01/sat/  (conceptual, SAT in 2D)
+
+	static const int NUM_AXES = 15;
+	std::vector<Ray> axes;
+
+	glm::vec3 A, B, C, E, A_other, B_other, C_other, E_other;
+	A = transformPoints[0];
+	B = transformPoints[1];
+	C = transformPoints[2];
+	E = transformPoints[4];
+	A_other = other.transformPoints[0];
+	B_other = other.transformPoints[1];
+	C_other = other.transformPoints[2];
+	E_other = other.transformPoints[4];
+
+	// 3 axes from face normals of the object
+	axes.push_back(Ray(A, ABCD.getNormal())); // right
+	axes.push_back(Ray(B, ACEG.getNormal())); // front
+	axes.push_back(Ray(C, ABEF.getNormal())); // top
+
+	// 3 axes from face normals of the OTHER object
+	axes.push_back(Ray(A_other, other.ABCD.getNormal())); // right
+	axes.push_back(Ray(B_other, other.ACEG.getNormal())); // front
+	axes.push_back(Ray(C_other, other.ABEF.getNormal())); // top
+
+	// 9 remaining axes from cross products of edges
+	axes.push_back(Ray(A, glm::cross(A - B, A_other - B_other)));
+	axes.push_back(Ray(A, glm::cross(A - B, A_other - C_other)));
+	axes.push_back(Ray(A, glm::cross(A - B, A_other - E_other)));
+
+	axes.push_back(Ray(A, glm::cross(A - C, A_other - B_other)));
+	axes.push_back(Ray(A, glm::cross(A - C, A_other - C_other)));
+	axes.push_back(Ray(A, glm::cross(A - C, A_other - E_other)));
+
+	axes.push_back(Ray(A, glm::cross(A - E, A_other - B_other)));
+	axes.push_back(Ray(A, glm::cross(A - E, A_other - C_other)));
+	axes.push_back(Ray(A, glm::cross(A - E, A_other - E_other)));
+
+	// TODO:   ^   with all of those cross products, we could optimize
+
+	/* pseudocode:
+	
+	for all axes:
+		Projection p = this->project()
+		Projection c = other.project()
+
+		if ( !overlaps(p,c) )
+			return true; // sep axis found
+	
+	*/
+
+	assert(axes.size() == NUM_AXES);
+
+	for (int axis = 0; axis < NUM_AXES; ++axis) {
+		float my_proj_min = INFINITY, my_proj_max = -INFINITY;
+		float ot_proj_min = INFINITY, ot_proj_max = -INFINITY;
+
+		for (int vertex = 0; vertex < 8; ++vertex) {
+			// Project each vertex of our box onto the axis (our std::vector of Rays)
+			// The dot product gives us the signed distance to that point.
+			float temp = glm::dot(transformPoints[vertex], axes[axis].direction);
+
+			// Build the interval (e.g. the object's "shadow") along the axis over time
+			my_proj_min = std::min(my_proj_min, temp);
+			my_proj_max = std::max(my_proj_max, temp);
+		}
+
+		// Now, project the other box's vertices onto the same axis
+		for (int otherVertex = 0; otherVertex < 8; ++otherVertex) {
+			float temp = glm::dot(other.transformPoints[otherVertex], axes[axis].direction);
+			ot_proj_min = std::min(my_proj_min, temp);
+			ot_proj_max = std::max(my_proj_max, temp);
+		}
+
+		// Compare the intervals
+		// [my_proj_min, my_proj_max], [ot_proj_min, ot_proj_max]
+		if (my_proj_max < ot_proj_min || ot_proj_max < my_proj_min) {
+			return true; // We found a separating axis between the two boxes!
+		}
+	}
+
+	return false; // No separating axis was detected
+
+};
+
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 	return (
 		this->xmin <= point.x && point.x <= this->xmax &&
@@ -228,7 +320,15 @@ bool BoxCollider::intersects(const BoxCollider& other) const {
 	if (!isAxisAligned && intersectsAABB) {
 		// If we collide with the OBB's AABB, we will also collide with the OBB,
 		// because geometry.
-
+		if (intersectsAABB) {
+			// If the AABBs overlap, we will need to use the Separating Axis Theorem.
+			// If no separating axis exists between this box and the other, then
+			// the objects must penetrate each other.
+			return !separatingAxisExists(other);
+		}
+		else {
+			return false;
+		}
 	}
 	else {
 		return intersectsAABB;

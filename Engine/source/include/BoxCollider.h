@@ -40,6 +40,8 @@ private:
 	// Six box planes in WORLD SPACE
 	Plane ABCD, ACEG, ABEF, EFGH, BDFH, CDGH;
 
+	bool separatingAxisExists(const BoxCollider& other) const;
+
 public:
 
 	static bool drawBoxPoints;
