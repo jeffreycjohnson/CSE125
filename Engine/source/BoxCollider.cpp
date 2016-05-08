@@ -278,7 +278,7 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 		float my_proj_min = INFINITY, my_proj_max = -INFINITY;
 		float ot_proj_min = INFINITY, ot_proj_max = -INFINITY;
 
-		if (axes[axis].direction == zero) {
+		if (axes[axis].direction == zero || glm::isnan(axes[axis].direction).b ) {
 			continue;
 		}
 
