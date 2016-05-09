@@ -250,13 +250,13 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 	axes.push_back(Ray(A, glm::cross(A - B, A_other - C_other)));
 	axes.push_back(Ray(A, glm::cross(A - B, A_other - E_other)));
 
-	axes.push_back(Ray(A, glm::cross(A - C, A_other - B_other)));
-	axes.push_back(Ray(A, glm::cross(A - C, A_other - C_other)));
-	axes.push_back(Ray(A, glm::cross(A - C, A_other - E_other)));
+	axes.push_back(Ray(C, glm::cross(A - C, A_other - B_other)));
+	axes.push_back(Ray(C, glm::cross(A - C, A_other - C_other)));
+	axes.push_back(Ray(C, glm::cross(A - C, A_other - E_other)));
 
-	axes.push_back(Ray(A, glm::cross(A - E, A_other - B_other)));
-	axes.push_back(Ray(A, glm::cross(A - E, A_other - C_other)));
-	axes.push_back(Ray(A, glm::cross(A - E, A_other - E_other)));
+	axes.push_back(Ray(E, glm::cross(A - E, A_other - B_other)));
+	axes.push_back(Ray(E, glm::cross(A - E, A_other - C_other)));
+	axes.push_back(Ray(E, glm::cross(A - E, A_other - E_other)));
 
 	// Note that the cross product of two identical vectors = the 0 vector
 
@@ -299,8 +299,8 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 		for (int otherVertex = 0; otherVertex < 8; ++otherVertex) {
 			float temp = glm::dot(other.transformPoints[otherVertex], axes[axis].direction);
 			assert(!std::isnan(temp));
-			ot_proj_min = std::min(my_proj_min, temp);
-			ot_proj_max = std::max(my_proj_max, temp);
+			ot_proj_min = std::min(ot_proj_min, temp);
+			ot_proj_max = std::max(ot_proj_max, temp);
 		}
 
 		// Compare the intervals
