@@ -21,6 +21,7 @@ private:
 	float playerRadius, playerHeightRadius, vSpeed;
 	bool hitWall, pastFirstTick;
 	int clientID;
+	bool setVerticalityForward;
 
 	glm::vec2 lastMousePosition;
 	glm::vec3 initialPosition;

@@ -30,7 +30,11 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 
 void FPSMovement::create()
 {
-	if (verticality) this->gameObject->addChild(verticality);
+	if (verticality) 
+	{
+		this->gameObject->addChild(verticality);
+		verticality->transform.translate(worldUp * 0.6f);
+	}
 
 	//Input::hideCursor();
 	recalculate();
@@ -166,6 +170,11 @@ void FPSMovement::recalculate()
 		sinYaw * cosPitch);
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
+
+	if (!setVerticalityForward) {
+		verticality->transform.translate(-right * 0.35f);
+		setVerticalityForward = true;
+	}
 
 	// now construct quaternion for mouselook
 	glm::quat x = glm::angleAxis(glm::radians(-yaw), worldUp);
