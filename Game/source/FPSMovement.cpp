@@ -98,25 +98,31 @@ void FPSMovement::fixedUpdate()
 
 	Ray downRay(position, -worldUp);
 	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
+	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
 
-	if (downHit.intersects && downHit.hitTime < playerHeightRadius+ 0.1f) {
+	Ray upRay(position, worldUp);
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH);
+	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
+
+	if (standingOnSurface) {
 		vSpeed = baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
-		if (ServerInput::getAxis("jump", clientID) != 0) {
+		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
 		}
 	}
 	else {
+		if (hitHead && vSpeed > 0)
+			vSpeed = 0;
+
 		vSpeed += vAccel;
 		position.y += vSpeed;
 	}
 
-	
-
-
-	float jump = ServerInput::getAxis("jump", clientID);
-	//std::cout << "jump: " << jump << std::endl;
+	if (position.y < deathFloor) {
+		respawn();
+	}
 	recalculate();
 }
 
