@@ -133,7 +133,7 @@ void FPSMovement::fixedUpdate()
 glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	Ray moveRay(position, castDirection);
-	RayHitInfo moveHit = oct->raycast(moveRay, Octree::STATIC_ONLY);
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
 	glm::vec3 newMoveVec = moveDirection;
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
 		if (moveHit.normal.x != 0)
