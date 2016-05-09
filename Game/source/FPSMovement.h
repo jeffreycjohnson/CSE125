@@ -7,8 +7,8 @@ class FPSMovement : public Component
 {
 private:
 	const float baseVSpeed = -0.2f;
-	const float startJumpSpeed = 0.3f;
-	const float vAccel = -0.02f;
+	const float startJumpSpeed = 0.25f;
+	const float vAccel = -0.015f;
 	const float speed = 1.0f;
 	const float deathFloor = -20.0f;
 
@@ -21,6 +21,7 @@ private:
 	float playerRadius, playerHeightRadius, vSpeed;
 	bool hitWall, pastFirstTick;
 	int clientID;
+	bool setVerticalityForward;
 
 	glm::vec2 lastMousePosition;
 	glm::vec3 initialPosition;

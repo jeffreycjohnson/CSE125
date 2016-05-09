@@ -30,7 +30,11 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 
 void FPSMovement::create()
 {
-	if (verticality) this->gameObject->addChild(verticality);
+	if (verticality) 
+	{
+		this->gameObject->addChild(verticality);
+		verticality->transform.translate(worldUp * 0.6f);
+	}
 
 	//Input::hideCursor();
 	recalculate();
@@ -98,16 +102,24 @@ void FPSMovement::fixedUpdate()
 
 	Ray downRay(position, -worldUp);
 	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
+	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
 
-	if (downHit.intersects && downHit.hitTime < playerHeightRadius+ 0.1f) {
+	Ray upRay(position, worldUp);
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH);
+	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
+
+	if (standingOnSurface) {
 		vSpeed = baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
-		if (ServerInput::getAxis("jump", clientID) != 0) {
+		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
 		}
 	}
 	else {
+		if (hitHead && vSpeed > 0)
+			vSpeed = 0;
+
 		vSpeed += vAccel;
 		position.y += vSpeed;
 	}
@@ -121,7 +133,7 @@ void FPSMovement::fixedUpdate()
 glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	Ray moveRay(position, castDirection);
-	RayHitInfo moveHit = oct->raycast(moveRay, Octree::STATIC_ONLY);
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
 	glm::vec3 newMoveVec = moveDirection;
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
 		if (moveHit.normal.x != 0)
@@ -158,6 +170,11 @@ void FPSMovement::recalculate()
 		sinYaw * cosPitch);
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
+
+	if (!setVerticalityForward) {
+		verticality->transform.translate(-right * 0.35f);
+		setVerticalityForward = true;
+	}
 
 	// now construct quaternion for mouselook
 	glm::quat x = glm::angleAxis(glm::radians(-yaw), worldUp);
