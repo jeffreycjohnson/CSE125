@@ -21,7 +21,7 @@ void GBufferPass::render(Camera* camera)
     camera->fbo->bind(3, buffers);
     for (auto mesh : Renderer::renderBuffer.deferred)
     {
-        mesh->material->bind();
+        mesh->getMaterial()->bind();
         mesh->draw();
     }
     CHECK_ERROR();

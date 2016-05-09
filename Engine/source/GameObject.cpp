@@ -291,10 +291,10 @@ void GameObject::extract()
 	if (visible && active && !dead) {
 		Mesh* mesh;
 		if ((mesh = getComponent<Mesh>()) != nullptr && mesh->active) {
-			if (mesh->material && mesh->material->transparent) {
+			if (mesh->getMaterial() && mesh->getMaterial()->transparent) {
 				Renderer::renderBuffer.forward.push_back(mesh);
 			}
-			else if(mesh->material)
+			else if(mesh->getMaterial())
 			{
                 Renderer::renderBuffer.deferred.push_back(mesh);
 			}

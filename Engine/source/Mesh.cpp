@@ -131,8 +131,7 @@ void Mesh::setGameObject(GameObject* object)
 std::vector<char> Mesh::serialize()
 {
 	std::string materialName = "assets/DefaultMaterial.mat.ini";
-	if (material == nullptr) {}
-	else
+	if (material != nullptr)
 	{
 		materialName = material->getWatcherFileName();
 	}
@@ -171,6 +170,12 @@ void Mesh::postToNetwork()
 void Mesh::setMaterial(Material *mat) 
 {
 	material = mat;
+	postToNetwork();
+}
+
+Material * Mesh::getMaterial()
+{
+	return material;
 }
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {

@@ -25,6 +25,7 @@ private:
 	Mesh();
 
 	void postToNetwork();
+	Material* material = nullptr;
 
 public:
 	static std::unordered_map<std::string, MeshData> meshMap;
@@ -36,13 +37,14 @@ public:
 	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
 
     std::string name;
-	Material* material = nullptr;
 	Animation* animationRoot;
     
     explicit Mesh(std::string);
 	~Mesh();
 
 	void setMaterial(Material *mat);
+	Material * getMaterial();
+
 	void setGameObject(GameObject* object) override;
 	void draw() override;
 

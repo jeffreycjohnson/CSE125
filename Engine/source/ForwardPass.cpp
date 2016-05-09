@@ -15,10 +15,10 @@ void ForwardPass::render(Camera* camera) {
 		l->forwardPass(lightIndex++);
 	}
 	for (auto mesh : Renderer::renderBuffer.forward) {
-        if(mesh->material->shader == &Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == &Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_FALSE);
-        mesh->material->bind();
+        if(mesh->getMaterial()->shader == &Renderer::getShader(FORWARD_UNLIT) || mesh->getMaterial()->shader == &Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_FALSE);
+        mesh->getMaterial()->bind();
 		mesh->draw();
-        if (mesh->material->shader == &Renderer::getShader(FORWARD_UNLIT) || mesh->material->shader == &Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_TRUE);
+        if (mesh->getMaterial()->shader == &Renderer::getShader(FORWARD_UNLIT) || mesh->getMaterial()->shader == &Renderer::getShader(FORWARD_EMISSIVE)) glDepthMask(GL_TRUE);
 	}
 }
 
@@ -61,7 +61,7 @@ void DirectionalShadowPass::render(Camera* camera)
     glDrawBuffer(GL_NONE);
 
     for (auto mesh : Renderer::renderBuffer.deferred) {
-        Material* mat = mesh->material;
+        Material* mat = mesh->getMaterial();
         Shader* s = nullptr;
         if (mat->shader == &Renderer::getShader(DEFERRED_PBR_SHADER_ANIM)) s = &Renderer::getShader(SHADOW_SHADER_ANIM);
         else s = &Renderer::getShader(SHADOW_SHADER);
