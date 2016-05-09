@@ -135,7 +135,8 @@ void FPSMovement::fixedUpdate()
 	position += ServerInput::getAxis("roll", clientId) * normRight * speed;
 	
 	recalculate();
-	raycast();
+
+	if (ServerInput::getAxis("aim", clientId)) raycast();
 }
 
 glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
@@ -218,15 +219,6 @@ void FPSMovement::raycast()
 	{
 		Ray ray(verticality->transform.getWorldPosition(), glm::vec3(front));
 		auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
-
-		if (cast.intersects)
-		{
-			std::cout << "HIT" << std::endl;
-		}
-		else
-		{
-			std::cout << "NOHIT" << std::endl;
-		}
 	}
 }
 

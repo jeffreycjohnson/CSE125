@@ -616,6 +616,8 @@ std::vector<char> Input::serialize(int playerID)
 	ind.mouseY = Input::mousePosition().y;
 	ind.jump = Input::getAxis("fire");
 
+	ind.aim = Input::getAxis("aim");
+
 	std::vector<char> bytes;
 	bytes.resize(sizeof(ind));
 	memcpy(bytes.data(), &ind, sizeof(ind));

@@ -19,6 +19,8 @@ float ServerInput::getAxis(std::string name, int clientId)
 	if (name == "roll") return ServerInput::clientMovementData[clientId].roll;
 	if (name == "jump") return ServerInput::clientMovementData[clientId].jump;
 
+	if (name == "aim") return ServerInput::clientMovementData[clientId].aim;
+
 	std::cerr << "Requesting invalid axis " << name << std::endl;
 	return 0.0f;
 }
@@ -34,4 +36,6 @@ void ServerInput::deserializeAndApply(std::vector<char> bytes, int clientId)
 
 	ServerInput::clientMovementData[clientId].mousePos.x = ind.mouseX;
 	ServerInput::clientMovementData[clientId].mousePos.y = ind.mouseY;
+
+	ServerInput::clientMovementData[clientId].aim = ind.aim;
 }

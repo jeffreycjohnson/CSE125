@@ -16,6 +16,8 @@
 struct MovementData {
 	float yaw, pitch, roll, jump;
 	glm::vec2 mousePos;
+
+	float aim;
 };
 
 class ServerInput
