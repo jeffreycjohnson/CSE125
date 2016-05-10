@@ -46,15 +46,15 @@ int main(int argc, char** argv)
 		}
 	}*/
 	
-	GameObject *scene = loadScene("assets/button_action.dae");
-	scene->transform.setPosition(0, -.29f, 0);
+	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
+	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	bool didSetCamera = false;
 	for (auto client : clientIDs) {
 		GameObject *player = loadScene("assets/cubeman.dae");
 		GameObject *verticality = new GameObject;
-		player->addComponent(new FPSMovement(client, 1.5f, 0.5f, glm::vec3(client, 0, -client), glm::vec3(0, 3, 0), verticality));
+		player->addComponent(new FPSMovement(client, 1.5f, 0.5f, glm::vec3(client, 0, -client), glm::vec3(0, 1, 0), verticality));
 		if (!didSetCamera)
 		{
 			didSetCamera = true;

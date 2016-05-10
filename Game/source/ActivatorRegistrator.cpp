@@ -59,8 +59,6 @@ void ActivatorRegistrator::create()
 	// REGISTER TARGETS
 	for (auto keyval : prefixToTarget) 
 	{
-
-
 		auto targs = GameObject::FindAllByPrefix(keyval.first);
 		for (auto targ : targs) 
 		{
