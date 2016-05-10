@@ -55,6 +55,9 @@ RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, 
 		else if (!dynaHit.intersects && statHit.intersects) {
 			return statHit;
 		}
+		else {
+			return statHit; // Default ray hit obj should be false
+		}
 	}
 }
 

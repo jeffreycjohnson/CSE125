@@ -316,10 +316,106 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 
 void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 {
+
+	// http://what-when-how.com/advanced-methods-in-computer-graphics/collision-detection-advanced-methods-in-computer-graphics-part-3/
+
+	glm::vec3 A, B, C, E, F;
+	A = transformPoints[0];
+	B = transformPoints[1];
+	C = transformPoints[2];
+	E = transformPoints[4];
+	F = transformPoints[5];
+
+	// x
+	glm::vec3 e1 = A - E;
+	glm::vec3 e1_min_norm, e1_max_norm;
+	float w1 = e1.length();
+
+	// y
+	glm::vec3 e2 = A - C;
+	glm::vec3 e2_min_norm, e2_max_norm;
+	float w2 = e2.length();
+
+	// z
+	glm::vec3 e3 = A - B;
+	glm::vec3 e3_min_norm, e3_max_norm;
+	float w3 = e3.length();
+
+	// using semantics from example
+
+	glm::vec3 m = ray.direction;
+	glm::vec3 p = ray.origin;
+	glm::vec3 c = offsetWorld;
+
+	float t1Min, t1Max, t2Min, t2Max, t3Min, t3Max, tMin, tMax;
+
+	auto dot = glm::dot(m, e1);
+	if (dot > 0) {
+		e1_min_norm = EFGH.getNormal();
+		e1_max_norm = ABCD.getNormal();
+		t1Min = (-w1 - glm::dot(p, e1)) / glm::dot(m, e1);
+		t1Max = (w1 - glm::dot(p, e1)) / glm::dot(m, e1);
+	}
+	else if (dot < 0) {
+		e1_min_norm = ABCD.getNormal(); 
+		e1_max_norm = EFGH.getNormal();
+		t1Min = (w1 - glm::dot(p, e1)) / glm::dot(m, e1);
+		t1Max = (-w1 - glm::dot(p, e1)) / glm::dot(m, e1);
+	}
+
+	dot = glm::dot(m, e2);
+	if (dot > 0) {
+		e2_min_norm = ABEF.getNormal();
+		e2_max_norm = CDGH.getNormal();
+		t2Min = (-w1 - glm::dot(p, e2)) / glm::dot(m, e2);
+		t2Max = (w1 - glm::dot(p, e2)) / glm::dot(m, e2);
+	}
+	else if (dot < 0) {
+		e2_min_norm = CDGH.getNormal();
+		e2_max_norm = ABEF.getNormal();
+		t2Min = (w1 - glm::dot(p, e2)) / glm::dot(m, e2);
+		t2Max = (-w1 - glm::dot(p, e2)) / glm::dot(m, e2);
+	}
+
+	dot = glm::dot(m, e3);
+	if (dot > 0) {
+		e3_min_norm = BDFH.getNormal();
+		e3_max_norm = ACEG.getNormal();
+		t3Min = (-w1 - glm::dot(p, e3)) / glm::dot(m, e3);
+		t3Max = (w1 - glm::dot(p, e3)) / glm::dot(m, e3);
+	}
+	else if (dot < 0) {
+		e3_min_norm = ACEG.getNormal();
+		e3_max_norm = BDFH.getNormal();
+		t3Min = (w1 - glm::dot(p, e3)) / glm::dot(m, e3);
+		t3Max = (-w1 - glm::dot(p, e3)) / glm::dot(m, e3);
+	}
+
+	tMin = std::max(std::max(t1Min, t2Min), std::max(t2Min, t3Min));
+	tMax = std::min(std::min(t1Max, t2Max), std::min(t2Max, t3Max));
+
+	// Shitty way to do this, but screw it
+	if (tMin == t1Min) {
+		hit.normal = e1_min_norm;
+	}
+	else if (tMin == t2Min) {
+		hit.normal = e2_min_norm;
+	}
+	else {
+		hit.normal = e3_min_norm;
+	}
+
+	if (tMin < tMax) {
+		hit.intersects = true;
+	}
+	else {
+		hit.intersects = false;
+	}
+
 	// Courtesy of: http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
 
 	// Intersection method from Real-Time Rendering and Essential Mathematics for Games
-
+/*
 	float tMin = Octree::RAY_MIN;
 	float tMax = Octree::RAY_MAX;
 
@@ -335,7 +431,7 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 	glm::vec3 n_min, n_max; // Normals at min & max intersection points
 
 	glm::mat4 ModelMatrix = gameObject->transform.getTransformMatrix();
-	glm::vec3 OBBposition_worldspace = offsetWorld; //(ModelMatrix[3].x, ModelMatrix[3].y, ModelMatrix[3].z);
+	glm::vec3 OBBposition_worldspace(ModelMatrix[3].x, ModelMatrix[3].y, ModelMatrix[3].z); //  = offsetWorld; //
 
 	glm::vec3 delta = OBBposition_worldspace - ray.origin;
 
@@ -474,10 +570,11 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 		}
 	}
 
+
 	hit.hitTime = tMin;
 	hit.normal = n_min; // pls?
 	hit.intersects = true;
-	return;
+	return; */
 };
 
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
@@ -665,10 +762,10 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 	}
 	else {
 		//rayAABB(ray, hit);
-		//rayOBB(ray, hit);
-
+		rayOBB(ray, hit);
+		return hit;
 		// The Lazy Way (TM)
-		std::vector<RayHitInfo> hits;
+		/*std::vector<RayHitInfo> hits;
 		hits.push_back(ABCD.intersects(ray));
 		hits.push_back(ABEF.intersects(ray));
 		hits.push_back(ACEG.intersects(ray));
@@ -707,8 +804,8 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 				finalHit = hit;
 			}
 
-		}
-		return finalHit;
+		}*/
+		//return finalHit;
 	}
 	if (hit.intersects) {
 		hit.point = ray.getPos(hit.hitTime);

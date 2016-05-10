@@ -180,6 +180,7 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 			return true;
 		}
 	}
+	return false;
 }
 
 void OctreeNode::remove(Collider * colliderBeingRemoved)
