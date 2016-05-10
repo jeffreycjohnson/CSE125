@@ -261,7 +261,13 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int 
 	int clientSock = ServerNetwork::clients[clientID];
 	NetworkStats::registerMsgType(clientID, msgType);
 	// insert encoded type
-	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
+	int checksum = 0;
+	for (char c : bytes) {
+		checksum += c;
+	}
+
+	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id, checksum);
+	//std::cout << "Sending " << encodedMsg.size() << " bytes to client " << clientID  << " with checksum " << checksum << std::endl;
 	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
 		int wsaLastError = WSAGetLastError();

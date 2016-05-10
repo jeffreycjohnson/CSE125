@@ -10,19 +10,20 @@
 #define DEFAULT_BUFLEN 2048
 #define DEBUG 0
 
-std::vector<char> encodeMessage(const std::vector<char> &message, int messageType, int id)
+std::vector<char> encodeMessage(const std::vector<char> &message, int messageType, int id, int checksum)
 {
 	std::vector<char> encodedMsg;
 	encodedMsg.resize(METADATA_LEN + message.size() * sizeof(char));
-
 	// get extra params
 	int rawByteLen = htonl(METADATA_LEN + message.size() * sizeof(char));
 	int encodedType = htonl(messageType);
 	int encodedId = htonl(id);
+	int encodedCheckSum = htonl(checksum);
 	
 	*((int*)(encodedMsg.data())) = rawByteLen;
 	*((int*)(encodedMsg.data() + sizeof(int))) = encodedType;
 	*((int*)(encodedMsg.data() + sizeof(int) + sizeof(int))) = encodedId;
+	*((int*)(encodedMsg.data() + sizeof(int) + sizeof(int) + sizeof(int))) = encodedCheckSum;
 	memcpy(encodedMsg.data() + METADATA_LEN, message.data(), message.size());
 
 	return encodedMsg;
@@ -41,6 +42,7 @@ std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id,
 	*msgLen = ntohl(*((int*)(buf)));
 	*msgType = ntohl(*((int*)(buf + sizeof(int))));
 	*id = ntohl(*((int*)(buf + sizeof(int) + sizeof(int))));
+	int checksum = ntohl(*((int *)(buf + sizeof(int) + sizeof(int) + sizeof(int))));
 
 	if (*msgType == 0)
 	{
@@ -51,7 +53,13 @@ std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id,
 
 	inputSize = NetworkStruct::sizeOf(*msgType);
 	std::vector<char> input(buf + METADATA_LEN, buf + *msgLen);
-
+	int calcCheckSum = 0;
+	for (char c : input) {
+		calcCheckSum += c;
+	}
+	if (calcCheckSum != checksum) {
+		std::cerr << std::endl << "Invalid Checksum!!!" << std::endl << std::endl;
+	}
 	return input;
 }
 
