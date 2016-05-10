@@ -59,7 +59,7 @@ void FPSMovement::fixedUpdate()
 	}
 
 	RayHitInfo moveHit;
-
+	
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct != nullptr) {
 		if (playerRadius == 0 || playerHeightRadius == 0) {
@@ -73,14 +73,16 @@ void FPSMovement::fixedUpdate()
 		hitWall = false;
 		glm::vec3 newMoveVec = moveDir;
 
-		newMoveVec = handleRayCollision(position, moveDir, newMoveVec);
-		newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
-		newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
+		if (moveDir != glm::vec3(0)) {
+			newMoveVec = handleRayCollision(position, moveDir, newMoveVec);
+			newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
+			newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
 
-		position += newMoveVec;
-		gameObject->transform.setPosition(position.x, position.y, position.z);
+			position += newMoveVec;
+			gameObject->transform.setPosition(position.x, position.y, position.z);
+		}
 	}
-
+	
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
 
@@ -93,7 +95,7 @@ void FPSMovement::fixedUpdate()
 	lastMousePosition = currMousePosition;
 
 	// act on keyboard
-	float speed = moveSpeed * dt;
+	float speed = moveSpeed *dt;
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
@@ -106,7 +108,7 @@ void FPSMovement::fixedUpdate()
 	}
 
 	Ray downRay(position, -worldUp);
-	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
+	/*RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
 	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
 
 	Ray upRay(position, worldUp);
@@ -131,7 +133,7 @@ void FPSMovement::fixedUpdate()
 
 	if (position.y < deathFloor) {
 		respawn();
-	}
+	}*/
 	
 	recalculate();
 
@@ -214,6 +216,7 @@ void FPSMovement::respawn() {
 
 void FPSMovement::raycastMouse()
 {
+	return; // Jason said to do this and I trust him
 	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (!octreeManager) return;
 

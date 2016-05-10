@@ -323,6 +323,15 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 	float tMin = Octree::RAY_MIN;
 	float tMax = Octree::RAY_MAX;
 
+	// **aaaahhhh*** Since this method transforms the Ray into Object space, we need to use
+	// object min & max points
+
+	glm::vec3 localMin(INFINITY), localMax(-INFINITY);
+	for (int i = 0; i < 8; ++i) {
+		localMin = glm::vec3(std::min(localMin.x, points[i].x), std::min(localMin.y, points[i].y), std::min(localMin.z, points[i].z));
+		localMax = glm::vec3(std::max(localMax.x, points[i].x), std::max(localMax.y, points[i].y), std::max(localMax.z, points[i].z));
+	}
+
 	glm::vec3 n_min, n_max; // Normals at min & max intersection points
 
 	glm::mat4 ModelMatrix = gameObject->transform.getTransformMatrix();
@@ -338,8 +347,8 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 		if (fabs(f) > 0.001f) { // Standard case
 
-			float t1 = (e + xmin) / f; // Intersection with the "left" plane
-			float t2 = (e + xmax) / f; // Intersection with the "right" plane
+			float t1 = (e + localMin.x) / f; // Intersection with the "left" plane
+			float t2 = (e + localMax.x) / f; // Intersection with the "right" plane
 											 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
 
 			glm::vec3 n_near = EFGH.getNormal(); // left plane
@@ -373,7 +382,7 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 		}
 		else { // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
-			if (-e + xmin > 0.0f || -e + xmax < 0.0f) {
+			if (-e + localMin.x > 0.0f || -e + localMax.x < 0.0f) {
 				hit.intersects = false;
 				return;
 			}
@@ -390,8 +399,8 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 		if (fabs(f) > 0.001f) {
 
-			float t1 = (e + ymin) / f; // bottom plane
-			float t2 = (e + ymax) / f; // top plane
+			float t1 = (e + localMin.y) / f; // bottom plane
+			float t2 = (e + localMax.y) / f; // top plane
 
 			glm::vec3 n_near = CDGH.getNormal();  // bottom plane
 			glm::vec3 n_far = ABEF.getNormal(); // top plane
@@ -416,7 +425,7 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 		}
 		else {
-			if (-e + ymin > 0.0f || -e + ymax < 0.0f) {
+			if (-e + localMin.y > 0.0f || -e + localMax.y < 0.0f) {
 				hit.intersects = false;
 				return;
 			}
@@ -433,8 +442,8 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 		if (fabs(f) > 0.001f) {
 
-			float t1 = (e + zmin) / f; // front plane
-			float t2 = (e + zmax) / f; // back plane
+			float t1 = (e + localMin.z) / f; // front plane
+			float t2 = (e + localMax.z) / f; // back plane
 
 			glm::vec3 n_near = BDFH.getNormal();  // back plane
 			glm::vec3 n_far = ACEG.getNormal(); // front plane
@@ -458,7 +467,7 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 			}
 		}
 		else {
-			if (-e + zmin > 0.0f || -e + zmax < 0.0f) {
+			if (-e + localMin.z > 0.0f || -e + localMax.z < 0.0f) {
 				hit.intersects = false;
 				return;
 			}
@@ -655,8 +664,51 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 		rayAABB(ray, hit);
 	}
 	else {
-		rayAABB(ray, hit);
+		//rayAABB(ray, hit);
 		//rayOBB(ray, hit);
+
+		// The Lazy Way (TM)
+		std::vector<RayHitInfo> hits;
+		hits.push_back(ABCD.intersects(ray));
+		hits.push_back(ABEF.intersects(ray));
+		hits.push_back(ACEG.intersects(ray));
+		hits.push_back(BDFH.intersects(ray));
+		hits.push_back(CDGH.intersects(ray));
+		hits.push_back(EFGH.intersects(ray));
+
+		RayHitInfo finalHit;
+		finalHit.hitTime = INFINITY;
+		for (auto hit : hits) {
+
+			// All plane normals for box are pointing outward
+			// For a point to lie in the OBB, it must have signed distance
+			// to the plane of <= 0 to ALL planes
+			auto point = ray.getPos(hit.hitTime);
+			if (ABCD.distanceToPoint(point) > 0) {
+				hit.intersects = false; continue;
+			}
+			if (ABEF.distanceToPoint(point) > 0) {
+				hit.intersects = false; continue;
+			}
+			if (ACEG.distanceToPoint(point) > 0) {
+				hit.intersects = false; continue;
+			}
+			if (BDFH.distanceToPoint(point) > 0) {
+				hit.intersects = false; continue;
+			}
+			if (CDGH.distanceToPoint(point) > 0) {
+				hit.intersects = false; continue;
+			}
+			if (EFGH.distanceToPoint(point) > 0) {
+				hit.intersects = false; continue;
+			}
+
+			if (hit.intersects && hit.hitTime < finalHit.hitTime) {
+				finalHit = hit;
+			}
+
+		}
+		return finalHit;
 	}
 	if (hit.intersects) {
 		hit.point = ray.getPos(hit.hitTime);

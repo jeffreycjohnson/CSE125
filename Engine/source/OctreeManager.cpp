@@ -28,6 +28,10 @@ OctreeManager::~OctreeManager()
 
 RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max, Collider* ignore)
 {
+	if (glm::isnan(ray.direction).b) {
+		return RayHitInfo(); // No NaN(s) allowed.
+	}
+
 	if (whichTree == Octree::DYNAMIC_ONLY) {
 		return dynamicObjects->raycast(ray, t_min, t_max, ignore);
 	}

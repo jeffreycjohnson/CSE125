@@ -73,7 +73,7 @@ RayHitInfo Plane::intersects(const Ray & ray) const
 		hitInfo.intersects = true;
 		hitInfo.collider = nullptr;
 		hitInfo.point = ray.getPos(hitInfo.hitTime);
-		//hitInfo.normal = N; // TODO: Uncomment this after I rebase
+		hitInfo.normal = N;
 	}
 
 	return hitInfo;

@@ -43,6 +43,11 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) 
 
 	RayHitInfo againstMe = myAABB->raycast(ray);
 
+	// If something has become NaN, we should reset it
+	if (std::isnan(hitInfo.hitTime)) {
+		hitInfo.hitTime = Octree::RAY_MAX;
+	}
+
 	if (againstMe.hitTime > hitInfo.hitTime || hitInfo.hitTime <= 0 ) {
 		return; // Nothing inside of us will collide with this
 	}
