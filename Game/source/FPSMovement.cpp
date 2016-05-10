@@ -124,8 +124,8 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
 		handleWallSlide(position, moveDir);
-		handleWallSlide(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
-		handleWallSlide(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+		//handleWallSlide(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
+		//handleWallSlide(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
 	}
 
 	//Update the position with the new movement vector
@@ -180,10 +180,18 @@ void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
 		//If the wall's normal along a certain vector is not zero, we zero out the moveDir along that vector
 		//NOTE: THIS IS HARDCODED TO ASSUME AXIS-ALIGNED BBs
-		if (moveHit.normal.x != 0)
+		/*if (moveHit.normal.x != 0)
 			moveDir.x = 0;
 		if (moveHit.normal.z != 0)
-			moveDir.z = 0;
+			moveDir.z = 0;*/
+
+		glm::vec3 desiredNewPos = position + moveDir;
+		glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - moveHit.hitTime);
+		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
+		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
+		position = newPos;
+		moveDir = glm::vec3(0);
+		//std::cout << distBehindWall << std::endl;
 	}
 }
 
