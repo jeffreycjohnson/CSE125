@@ -406,6 +406,7 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 	}
 
 	if (tMin < tMax) {
+		hit.hitTime = tMin;
 		hit.intersects = true;
 	}
 	else {
