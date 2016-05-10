@@ -265,6 +265,12 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		position.y += vSpeed;
 	}
 
+	if (position.y < deathFloor) {
+		respawn();
+	}
+	
+	recalculate();
+	raycastMouse();
 }
 
 void FPSMovement::checkOnSurface(glm::vec3 position, glm::vec3 direction) {

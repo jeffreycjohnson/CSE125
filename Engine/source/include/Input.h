@@ -69,6 +69,9 @@ private:
 	static glm::vec2 mousePosBuff;
 	static glm::vec2 scrollBuff, scrollAmount;
 
+	static std::unordered_map<std::pair<int, std::string>, float> serverAxisMap;
+	static std::unordered_map<std::pair<int, std::string>, bool> serverButtonMap;
+
 	static void changeState(std::unordered_map<int, Button>::iterator, int);
 	static float getAxisHelper(GLFWinput, InputData);
 	static InputState getButtonHelper(std::string);
@@ -116,6 +119,8 @@ public:
 	/// serialization
 	static std::vector<char> Input::serialize();
 	static std::vector<char> Input::serialize(int playerID);
+
+	static std::vector<char> Input::deserializeAndApply(std::vector<char> bytes);
 };
 
 #endif

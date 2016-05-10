@@ -18,6 +18,9 @@ unordered_map<int, Button> Input::joystickMap;
 glm::vec2 Input::mousePosBuff;
 glm::vec2 Input::scrollBuff, Input::scrollAmount;
 
+std::unordered_map<std::pair<int, std::string>, float> Input::serverAxisMap;
+std::unordered_map<std::pair<int, std::string>, bool> Input::serverButtonMap;
+
 Input::Input()
 {
 	// Initialize cursor to default
@@ -599,28 +602,62 @@ void Input::scroll_callback(GLFWwindow*, double xoffset, double yoffset)
 
 // ------------ Serialization Functions ------
 
+template <class Type>
+std::stringbuf& put(std::stringbuf& buf, const Type& var)
+{
+	buf.sputn(reinterpret_cast<const char*>(&var), sizeof var);
+
+	return buf;
+}
+
+template <class Type>
+std::stringbuf& get(std::stringbuf& buf, Type& var)
+{
+	buf.sgetn(reinterpret_cast<char*>(&var), sizeof(var));
+
+	return buf;
+}
+
+
 std::vector<char> Input::serialize()
 {
-	return Input::serialize(0);
+	return Input::serialize(-1);
 }
 
 std::vector<char> Input::serialize(int playerID)
 {
-	InputNetworkData ind;
+	/**
+	 * jj1 	 
+	 */
+	
+	std::vector<float> data;
 
-	ind.playerID = playerID;
-	ind.yaw = Input::getAxis("yaw");
-	ind.pitch = Input::getAxis("pitch");
-	ind.roll = Input::getAxis("roll");
-	ind.mouseX = Input::mousePosition().x;
-	ind.mouseY = Input::mousePosition().y;
-	ind.jump = Input::getAxis("fire");
+	data.push_back(playerID);
 
-	ind.aim = Input::getAxis("aim");
+	auto mp = Input::mousePosition();
+	data.push_back(mp.x);
+	data.push_back(mp.y);
 
-	std::vector<char> bytes;
-	bytes.resize(sizeof(ind));
-	memcpy(bytes.data(), &ind, sizeof(ind));
+	for (auto& input : inputs)
+	{
+		data.push_back(Input::getAxis(input.first));
+	}
+
+	for (auto& input : inputs)
+	{
+		data.push_back(Input::getButtonHelper(input.first));
+	}
+
+	const char* charr = reinterpret_cast<const char*>(&data[0]);
+	vector<char> bytes(charr, charr + sizeof(float) * data.size());
 
 	return bytes;
+}
+
+std::vector<char> Input::deserializeAndApply(std::vector<char> bytes)
+{
+	const float* floatr = reinterpret_cast<const float*>(&bytes[0]);
+	std::vector<float> floats(floatr, floatr + bytes.size() / sizeof(float));
+
+	
 }
