@@ -56,8 +56,6 @@ int main(int argc, char** argv)
 	delete player;
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-	//Transform *trans = GameObject::FindByName("CubeMan")->transform.children[0]->children[0];
-	//float playerWidth = player->getComponent<BoxCollider>().getWidth();
 
 	Input::hideCursor();
 
