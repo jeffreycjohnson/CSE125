@@ -7,14 +7,14 @@ Laser::Laser()
 {
 }
 
-Laser::Laser(std::vector<std::string> tokens)
+Laser::Laser(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+	: isFixed(true), areLasersOff(false)
 {
-	//TODO parse(tokens);
-}
+	int targetID = std::stoi(tokens[1]);
+	int threshold = std::stoi(tokens[2]);
 
-Laser::Laser(int activationThreshold)
-	: Target(activationThreshold)
-{
+	setThreshold(threshold);
+	(*idToTarget)[targetID] = this;
 }
 
 Laser::~Laser()
@@ -23,40 +23,24 @@ Laser::~Laser()
 
 void Laser::fixedUpdate()
 {
-}
-
-FixedLaser::FixedLaser(std::vector<std::string> tokens)
-{
-	//TODO parse(tokens);
-}
-
-FixedLaser::FixedLaser(int activationThreshold)
-	: Target(activationThreshold), areLasersOff(false)
-{
-}
-
-FixedLaser::~FixedLaser()
-{
-}
-
-void FixedLaser::fixedUpdate()
-{
 	if (isActivated() && !areLasersOff)
 	{
 		areLasersOff = true;
 		gameObject->setVisible(false);
 	}
+	else if (!isActivated() && areLasersOff && !isFixed)
+	{
+		areLasersOff = false;
+		gameObject->setVisible(true);
+	}
 }
 
-void FixedLaser::collisionEnter(GameObject *other)
-{
 
-}
-
-void FixedLaser::collisionStay(GameObject *other)
+void Laser::collisionStay(GameObject *other)
 {
 	// respawns player at their original starting point.
-	if (!areLasersOff) {
+	if (!areLasersOff) 
+	{
 		GameObject * go = other->transform.getParent()->gameObject;
 		FPSMovement * fps = go->getComponent<FPSMovement>();
 		fps->respawn();

@@ -9,6 +9,7 @@
 #include "ActivatorRegistrator.h"
 #include "NetworkManager.h"
 #include "Config.h"
+#include "Input.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -57,6 +58,8 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
 	//Transform *trans = GameObject::FindByName("CubeMan")->transform.children[0]->children[0];
 	//float playerWidth = player->getComponent<BoxCollider>().getWidth();
+
+	Input::hideCursor();
 
 
 	try

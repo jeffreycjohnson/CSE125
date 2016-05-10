@@ -21,6 +21,8 @@
 #include "ServerInput.h"
 #include "Config.h"
 
+#include "PressButton.h"
+
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
@@ -96,8 +98,8 @@ void FPSMovement::fixedUpdate()
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	glm::vec3 xComp = ServerInput::getAxis("roll", clientID) * worldFront * speed;
-	glm::vec3 zComp = ServerInput::getAxis("pitch", clientID) * normRight * speed;
+	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront * speed;
+	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight * speed;
 
 	moveDir = xComp + zComp;
 	if (!hitWall) {
@@ -131,15 +133,14 @@ void FPSMovement::fixedUpdate()
 	if (position.y < deathFloor) {
 		respawn();
 	}
-	position += ServerInput::getAxis("pitch", clientId) * worldFront * speed;
-	position += ServerInput::getAxis("roll", clientId) * normRight * speed;
 	
 	recalculate();
 
-	if (ServerInput::getAxis("aim", clientId)) raycast();
+	raycastMouse();
 }
 
-glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) {
+glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection) 
+{
 	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	Ray moveRay(position, castDirection);
 	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
@@ -212,17 +213,24 @@ void FPSMovement::respawn() {
 	position = initialPosition;
 }
 
-void FPSMovement::raycast()
+void FPSMovement::raycastMouse()
 {
 	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
-	if (octreeManager)
-	{
-		Ray ray(verticality->transform.getWorldPosition(), glm::vec3(front));
-		auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
-	}
-}
+	if (!octreeManager) return;
 
-void FPSMovement::debugDraw()
-{
-	Renderer::drawArrow(position, front, glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
+	auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
+
+	if (!cast.intersects) return;
+
+	if (ServerInput::getAxis("aim", clientID))
+	{
+		std::cout << "BUTTON TRIGGER" << std::endl;
+		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
+		std::cout << hit->getName() << std::endl;
+		if (hit->getComponent<PressButton>())
+		{
+			hit->getComponent<PressButton>()->trigger();
+		}
+	}
 }

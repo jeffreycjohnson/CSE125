@@ -54,8 +54,7 @@ int main(int argc, char** argv)
 	for (auto client : clientIDs) {
 		GameObject *player = loadScene("assets/cubeman.dae");
 		GameObject *verticality = new GameObject;
-		verticality->transform.translate(glm::vec3(0, 0.2f, 0));
-		player->addComponent(new FPSMovement(client, 1.5f, 0.5f, glm::vec3(client, 0, -client), glm::vec3(0, 1, 0), verticality));
+		player->addComponent(new FPSMovement(client, 1.5f, 0.5f, glm::vec3(client, 0, -client), glm::vec3(0, 3, 0), verticality));
 		if (!didSetCamera)
 		{
 			didSetCamera = true;

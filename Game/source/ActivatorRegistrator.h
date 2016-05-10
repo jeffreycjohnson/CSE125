@@ -10,11 +10,14 @@
 #include <functional>
 #include <string>
 
+typedef std::function<Target*(std::vector<std::string>, std::map<int, Target*>*)> targFun;
+typedef std::function<Activator*(std::vector<std::string>, const std::map<int, Target*>&)> actvFun;
+
 class ActivatorRegistrator : public Component
 {
 public:
-	static std::map<std::string, std::function<Target*(std::vector<std::string>)>> prefixToTarget;
-	static std::map<std::string, std::function<Activator*(std::vector<std::string>)>> prefixToActivator;
+	static std::map<std::string, targFun> prefixToTarget;
+	static std::map<std::string, actvFun> prefixToActivator;
 	ActivatorRegistrator();
 	~ActivatorRegistrator();
 

@@ -7,33 +7,18 @@
 class Laser :
 	public Target
 {
-public:
-	Laser();
-
-	Laser(std::vector<std::string> tokens);
-	Laser(int activationThreshold);
-	~Laser();
-
-	void fixedUpdate() override;
-};
-
-class FixedLaser :
-	public Target
-{
 private:
+	bool isFixed;
 	bool areLasersOff;
 
 public:
-	FixedLaser(std::vector<std::string> tokens);
+	Laser();
+	Laser(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
 
-	FixedLaser() {}
-	FixedLaser(int activationThreshold);
-	~FixedLaser();
+	~Laser();
 
 	void fixedUpdate() override;
-	void collisionEnter(GameObject * other) override;
 	void collisionStay(GameObject * other) override;
-
 };
 
 #endif // LASER_H

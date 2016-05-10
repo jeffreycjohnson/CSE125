@@ -3,9 +3,16 @@
 #include "Timer.h"
 #include <iostream>
 
-Door::Door(int activationThreshold, DoorMovement moveDirection)
-	: Target(activationThreshold), moveDirection(moveDirection)
+Door::Door() {}
+
+Door::Door(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget, DoorMovement moveDirection)
+	: moveDirection(moveDirection)
 {
+	int targetID = std::stoi(tokens[1]);
+	int threshold = std::stoi(tokens[2]);
+
+	setThreshold(threshold);
+	(*idToTarget)[targetID] = this;
 }
 
 Door::~Door()

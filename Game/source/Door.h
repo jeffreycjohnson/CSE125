@@ -3,6 +3,9 @@
 
 #include "Target.h"
 
+#include <map>
+#include <vector>
+
 enum DoorMovement
 {
 	UP,
@@ -21,7 +24,9 @@ private:
 
 	glm::vec3 moveDirectionVec();
 public:
-	Door(int activationThreshold, DoorMovement moveDirection);
+	Door();
+	Door(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget, DoorMovement moveDirection);
+	
 	~Door();
 
 	void create() override;
