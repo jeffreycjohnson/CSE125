@@ -28,7 +28,6 @@ private:
 
 	void handleHorizontalMovement(float dt);
 	void handleVerticalMovement(float dt);
-	bool handleVerticalRaycast(glm::vec3 position, glm::vec3 direction);
 	void getPlayerRadii();
 	void recalculate();
 	void handleWallSlide(glm::vec3 position, glm::vec3 castDirection);
