@@ -7,17 +7,21 @@ class FPSMovement : public Component
 {
 private:
 	const float baseVSpeed = -0.2f;
-	const float startJumpSpeed = 12.5f;
-	const float vAccel = -0.75f;
+	const float startJumpSpeed = 0.25f;
+	const float vAccel = -0.015f;
+	const float speed = 1.0f;
 	const float deathFloor = -20.0f;
 
 	GameObject* verticality;
 
+	float moveSpeed, mouseSensitivity;
+
 	glm::vec3 position, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
-	float moveSpeed, mouseSensitivity, playerRadius, playerHeightRadius, vSpeed;
-	bool pastFirstTick, setVerticalityForward;
+	float playerRadius, playerHeightRadius, vSpeed;
+	bool hitWall, pastFirstTick;
 	int clientID;
+	bool setVerticalityForward;
 
 	glm::vec2 lastMousePosition;
 	glm::vec3 initialPosition;
@@ -26,11 +30,8 @@ private:
 	glm::vec3 lastRayPoint;
 	bool raycastHit;
 
-	void handleHorizontalMovement(float dt);
-	void handleVerticalMovement(float dt);
-	void getPlayerRadii();
 	void recalculate();
-	void handleWallSlide(glm::vec3 position, glm::vec3 castDirection);
+	glm::vec3 handleRayCollision(glm::vec3 position, glm::vec3 castDirection, glm::vec3 moveDirection);
 	void raycastMouse();
 public:
 	FPSMovement(
