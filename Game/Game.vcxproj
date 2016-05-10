@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Key.cpp" />
+    <ClCompile Include="source\KeyHoleActivator.cpp" />
+    <ClCompile Include="source\KeyHoleTarget.cpp" />
+    <ClCompile Include="source\Inventory.cpp" />
     <ClCompile Include="source\PressButton.cpp" />
     <ClCompile Include="source\Door.cpp" />
     <ClCompile Include="source\Laser.cpp" />
@@ -37,6 +41,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Key.h" />
+    <ClInclude Include="source\KeyHoleActivator.h" />
+    <ClInclude Include="source\KeyHoleTarget.h" />
+    <ClInclude Include="source\Inventory.h" />
     <ClInclude Include="source\PressButton.h" />
     <ClInclude Include="source\Door.h" />
     <ClInclude Include="source\Laser.h" />

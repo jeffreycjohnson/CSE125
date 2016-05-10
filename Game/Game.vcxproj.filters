@@ -48,6 +48,18 @@
     <ClCompile Include="source\PressButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Inventory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Key.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\KeyHoleActivator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\KeyHoleTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\FPSMovement.h">
@@ -71,13 +83,25 @@
     <ClInclude Include="source\Rotating.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Laser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\Door.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\PressButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Laser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Inventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Key.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\KeyHoleActivator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\KeyHoleTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

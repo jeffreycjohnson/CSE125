@@ -22,6 +22,9 @@
 #include "Config.h"
 
 #include "PressButton.h"
+#include "Key.h"
+#include "KeyHoleActivator.h"
+#include "Inventory.h"
 
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
@@ -262,6 +265,13 @@ void FPSMovement::raycastMouse()
 		if (hit->getComponent<PressButton>())
 		{
 			hit->getComponent<PressButton>()->trigger();
+		}
+		else if (hit->getComponent<Key>()) {
+			this->gameObject->getComponent<Inventory>()->setKey(hit);
+		}
+		else if (hit->getComponent<KeyHoleActivator>() && this->gameObject->getComponent<Inventory>()->hasKey() ) {
+			// if (key matches KeyHoleActivator) 
+			this->gameObject->getComponent<Inventory>()->getKey()->getComponent<Key>()->trigger();
 		}
 	}
 }
