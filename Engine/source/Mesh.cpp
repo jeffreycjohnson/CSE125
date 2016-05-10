@@ -32,7 +32,6 @@
 std::unordered_map<std::string, MeshData> Mesh::meshMap;
 std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
 
-
 Mesh* Mesh::fromCachedMeshData(std::string name)
 {
 	auto iter = Mesh::meshMap.find(name);

@@ -4,7 +4,6 @@ Activator::Activator()
 {
 }
 
-
 Activator::~Activator()
 {
 }

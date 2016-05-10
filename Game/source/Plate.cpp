@@ -2,15 +2,17 @@
 
 #include <iostream>
 
-Plate::Plate()
+Plate::Plate(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets)
+	: isNotColliding(true), isColliding(false)
 {
-	isNotColliding = true;
-	isColliding = false;
-}
+	for (int i = 1; i < tokens.size(); i += 3)
+	{
+		int targetID = std::stoi(tokens[i + 0]);
+		TriggerType triggerType = strToTriggerType(tokens[i + 1]);
+		int activatorID = std::stoi(tokens[i + 2]);
 
-Plate::Plate(std::vector<std::string> tokens)
-{
-	//TODO parse(tokens);
+		this->addConnection(Connection(idToTargets.at(targetID), triggerType));
+	}
 }
 
 Plate::~Plate()

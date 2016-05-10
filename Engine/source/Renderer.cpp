@@ -298,9 +298,9 @@ void Renderer::drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& c
 
 void Renderer::drawArrow(glm::vec3 pos, glm::vec3 dir, const glm::vec4& color, Transform* transform)
 {
-	auto rot = glm::rotation(glm::vec3(0, 1, 0), glm::normalize(dir));
+	auto rot = glm::rotation(glm::vec3(0,1,0), glm::normalize(dir));
 	auto mat = glm::translate(glm::mat4_cast(rot), pos);
-	if (transform) mat = mat * transform->getTransformMatrix();
+	if(transform) mat = mat * transform->getTransformMatrix();
 	drawWireframe("assets/Primatives.obj/Arrow_Outline", glm::vec3(0), glm::vec3(glm::length(dir) / 10.f), color, mat);
 }
 
