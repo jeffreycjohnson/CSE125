@@ -41,6 +41,8 @@ private:
 	Plane ABCD, ACEG, ABEF, EFGH, BDFH, CDGH;
 
 	bool separatingAxisExists(const BoxCollider& other) const;
+	void rayAABB(const Ray& ray, RayHitInfo& hit) const;
+	void rayOBB(const Ray& ray, RayHitInfo& hit) const;
 
 public:
 	static bool drawBoxPoints;

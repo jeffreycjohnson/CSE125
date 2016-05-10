@@ -312,6 +312,163 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 
 	return false; // No separating axis was detected
 
+}
+
+void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
+{
+	// Courtesy of: http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
+
+	// Intersection method from Real-Time Rendering and Essential Mathematics for Games
+
+	float tMin = Octree::RAY_MIN;
+	float tMax = Octree::RAY_MAX;
+
+	glm::vec3 n_min, n_max; // Normals at min & max intersection points
+
+	glm::mat4 ModelMatrix = gameObject->transform.getTransformMatrix();
+	glm::vec3 OBBposition_worldspace = offsetWorld; //(ModelMatrix[3].x, ModelMatrix[3].y, ModelMatrix[3].z);
+
+	glm::vec3 delta = OBBposition_worldspace - ray.origin;
+
+	// Test intersection with the 2 planes perpendicular to the OBB's X axis
+	{
+		glm::vec3 xaxis(ModelMatrix[0].x, ModelMatrix[0].y, ModelMatrix[0].z); // ABCD.getNormal();//
+		float e = glm::dot(xaxis, delta);
+		float f = glm::dot(ray.direction, xaxis);
+
+		if (fabs(f) > 0.001f) { // Standard case
+
+			float t1 = (e + xmin) / f; // Intersection with the "left" plane
+			float t2 = (e + xmax) / f; // Intersection with the "right" plane
+											 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
+
+			glm::vec3 n_near = EFGH.getNormal(); // left plane
+			glm::vec3 n_far = ABCD.getNormal();  // right plane
+
+											 // We want t1 to represent the nearest intersection, 
+											 // so if it's not the case, invert t1 and t2
+			if (t1>t2) {
+				float w = t1; t1 = t2; t2 = w; // swap t1 and t2
+				std::swap(n_near, n_far);
+			}
+
+			// tMax is the nearest "far" intersection (amongst the X,Y and Z planes pairs)
+			if (t2 < tMax) {
+				tMax = t2;
+				n_max = n_far;
+			}
+			// tMin is the farthest "near" intersection (amongst the X,Y and Z planes pairs)
+			if (t1 > tMin) {
+				tMin = t1;
+				n_min = n_near;
+			}
+
+			// And here's the trick :
+			// If "far" is closer than "near", then there is NO intersection.
+			// See the images in the tutorials for the visual explanation.
+			if (tMax < tMin) {
+				hit.intersects = false;
+				return;
+			}
+
+		}
+		else { // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
+			if (-e + xmin > 0.0f || -e + xmax < 0.0f) {
+				hit.intersects = false;
+				return;
+			}
+		}
+	}
+
+
+	// Test intersection with the 2 planes perpendicular to the OBB's Y axis
+	// Exactly the same thing than above.
+	{
+		glm::vec3 yaxis(ModelMatrix[1].x, ModelMatrix[1].y, ModelMatrix[1].z); //  = ABEF.getNormal();//
+		float e = glm::dot(yaxis, delta);
+		float f = glm::dot(ray.direction, yaxis);
+
+		if (fabs(f) > 0.001f) {
+
+			float t1 = (e + ymin) / f; // bottom plane
+			float t2 = (e + ymax) / f; // top plane
+
+			glm::vec3 n_near = CDGH.getNormal();  // bottom plane
+			glm::vec3 n_far = ABEF.getNormal(); // top plane
+
+			if (t1>t2) { 
+				std::swap(t1, t2);
+				std::swap(n_near, n_far);
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+				n_max = n_far;
+			}
+			if (t1 > tMin) {
+				tMin = t1;
+				n_min = n_near;
+			}
+			if (tMin > tMax) {
+				hit.intersects = false;
+				return;
+			}
+
+		}
+		else {
+			if (-e + ymin > 0.0f || -e + ymax < 0.0f) {
+				hit.intersects = false;
+				return;
+			}
+		}
+	}
+
+
+	// Test intersection with the 2 planes perpendicular to the OBB's Z axis
+	// Exactly the same thing than above.
+	{
+		glm::vec3 zaxis(ModelMatrix[2].x, ModelMatrix[2].y, ModelMatrix[2].z); //  zaxis = ACEG.getNormal();//
+		float e = glm::dot(zaxis, delta);
+		float f = glm::dot(ray.direction, zaxis);
+
+		if (fabs(f) > 0.001f) {
+
+			float t1 = (e + zmin) / f; // front plane
+			float t2 = (e + zmax) / f; // back plane
+
+			glm::vec3 n_near = BDFH.getNormal();  // back plane
+			glm::vec3 n_far = ACEG.getNormal(); // front plane
+
+			if (t1>t2) {
+				std::swap(t1, t2);
+				std::swap(n_near, n_far);
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+				n_max = n_far;
+			}
+			if (t1 > tMin) {
+				tMin = t1;
+				n_min = n_near;
+			}
+			if (tMin > tMax) {
+				hit.intersects = false;
+				return;
+			}
+		}
+		else {
+			if (-e + zmin > 0.0f || -e + zmax < 0.0f) {
+				hit.intersects = false;
+				return;
+			}
+		}
+	}
+
+	hit.hitTime = tMin;
+	hit.normal = n_min; // pls?
+	hit.intersects = true;
+	return;
 };
 
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
@@ -409,11 +566,10 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 
 }
 
-RayHitInfo BoxCollider::raycast(const Ray & ray) const
+void BoxCollider::rayAABB(const Ray & ray, RayHitInfo& hit) const
 {
 	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 	// Because this is a raycast, we only want to register hits with things in front of the ray (t > 0)
-	RayHitInfo hit;
 
 	float tmin = (xmin - ray.origin.x) / ray.direction.x;
 	float tmax = (xmax - ray.origin.x) / ray.direction.x;
@@ -439,7 +595,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 	if ((tmin > tymax) || (tymin > tmax)) {
 		hit.intersects = false;
-		return hit;
+		return;
 	}
 
 	if (tymin > tmin) {
@@ -465,7 +621,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 	if ((tmin > tzmax) || (tzmin > tmax)) {
 		hit.intersects = false;
-		return hit;
+		return;
 	}
 
 	if (tzmin > tmin) {
@@ -487,12 +643,25 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 	// Return the tmin/tmax that is closest to the ray's origin
 	hit.hitTime = finalT;
-	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	hit.normal = finalNorm;
-	hit.point = ray.getPos(finalT);
-	return hit;
+}
 
+RayHitInfo BoxCollider::raycast(const Ray & ray) const
+{
+	RayHitInfo hit;
+	hit.collider = (Collider*)this;
+	if (isAxisAligned) {
+		rayAABB(ray, hit);
+	}
+	else {
+		rayAABB(ray, hit);
+		//rayOBB(ray, hit);
+	}
+	if (hit.intersects) {
+		hit.point = ray.getPos(hit.hitTime);
+	}
+	return hit;
 };
 
 float BoxCollider::getWidth() {

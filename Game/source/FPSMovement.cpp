@@ -21,7 +21,6 @@
 #include "ServerInput.h"
 #include "Config.h"
 
-#include "PressButton.h"
 
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
@@ -228,9 +227,6 @@ void FPSMovement::raycastMouse()
 		std::cout << "BUTTON TRIGGER" << std::endl;
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
 		std::cout << hit->getName() << std::endl;
-		if (hit->getComponent<PressButton>())
-		{
-			hit->getComponent<PressButton>()->trigger();
-		}
+		
 	}
 }
