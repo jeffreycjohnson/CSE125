@@ -46,12 +46,13 @@ BoxCollider::~BoxCollider()
 void BoxCollider::calculatePlanes()
 {
 	// Do mathz here in world space
-	glm::vec3 A, B, C, D, E, G;
+	glm::vec3 A, B, C, D, E, F, G;
 	A = transformPoints[0];
 	B = transformPoints[1];
 	C = transformPoints[2];
 	D = transformPoints[3];
 	E = transformPoints[4];
+	F = transformPoints[5];
 	G = transformPoints[6];
 
 	ABCD = Plane(A, glm::cross(D - C, A - C));
@@ -316,272 +317,143 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 
 void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 {
+	// Real Time Rendering method (2nd edition)
 
-	// http://what-when-how.com/advanced-methods-in-computer-graphics/collision-detection-advanced-methods-in-computer-graphics-part-3/
+	float tMin = -INFINITY;
+	float tMax = INFINITY;
 
+	glm::vec3 p = offsetWorld - ray.origin;
+
+	// Compute axes
 	glm::vec3 A, B, C, E, F;
-	A = transformPoints[0];
-	B = transformPoints[1];
-	C = transformPoints[2];
-	E = transformPoints[4];
+	A = transformPoints[0]; B = transformPoints[1];
+	C = transformPoints[2]; E = transformPoints[4];
 	F = transformPoints[5];
 
 	// x
-	glm::vec3 e1 = A - E;
-	glm::vec3 e1_min_norm, e1_max_norm;
-	float w1 = e1.length() / 2;
-	e1 = glm::normalize(e1);
-
+	glm::vec3 a_u = ABCD.getNormal();
+	glm::vec3 a_u_min_norm, a_u_max_norm;
+	float h_u = glm::distance(A, E) / 2.0f;
+	
 	// y
-	glm::vec3 e2 = A - C;
-	glm::vec3 e2_min_norm, e2_max_norm;
-	float w2 = e2.length() / 2;
-	e2 = glm::normalize(e2);
+	glm::vec3 a_v = a_v = ABEF.getNormal();
+	glm::vec3 a_v_min_norm, a_v_max_norm;
+	float h_v = glm::distance(A, C) / 2.0f;
 
 	// z
-	glm::vec3 e3 = A - B;
-	glm::vec3 e3_min_norm, e3_max_norm;
-	float w3 = e3.length() / 2;
-	e3 = glm::normalize(e3);
+	glm::vec3 a_w = ACEG.getNormal();
+	glm::vec3 a_w_min_norm, a_w_max_norm;
+	float h_w = glm::distance(A, B) / 2.0f;
 
+	// Axis U (x)
+	{
+		float e = glm::dot(a_u, p);
+		float f = glm::dot(a_u, ray.direction);
+		if (std::abs(f) > FLT_EPSILON) {
+			float t1 = (e + h_u) / f;
+			float t2 = (e - h_u) / f;
 
-	// using semantics from example
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
 
-	glm::vec3 m = ray.direction;
-	glm::vec3 p = ray.origin;
-	glm::vec3 c = offsetWorld;
+			if (t1 > tMin) {
+				tMin = t1;
+			}
 
-	float t1Min, t1Max, t2Min, t2Max, t3Min, t3Max, tMin, tMax;
-	t1Min = t2Min = t3Min = -INFINITY;
-	t1Max = t2Max = t3Max = INFINITY;
+			if (t2 < tMax) {
+				tMax = t2;
+			}
 
-	auto dot = glm::dot(m, e1);
-	if (dot > 0) {
-		e1_min_norm = -e1;//EFGH.getNormal();
-		e1_max_norm = e1;// ABCD.getNormal();
-		t1Min = (-w1 - glm::dot(p, e1)) / glm::dot(m, e1);
-		t1Max = (w1 - glm::dot(p, e1)) / glm::dot(m, e1);
-	}
-	else if (dot < 0) {
-		e1_min_norm = e1;// ABCD.getNormal();
-		e1_max_norm = -e1;// EFGH.getNormal();
-		t1Min = (w1 - glm::dot(p, e1)) / glm::dot(m, e1);
-		t1Max = (-w1 - glm::dot(p, e1)) / glm::dot(m, e1);
-	}
-
-	dot = glm::dot(m, e2);
-	if (dot > 0) {
-		e2_min_norm = -e2; // ABEF.getNormal();
-		e2_max_norm = e2; // CDGH.getNormal();
-		t2Min = (-w1 - glm::dot(p, e2)) / glm::dot(m, e2);
-		t2Max = (w1 - glm::dot(p, e2)) / glm::dot(m, e2);
-	}
-	else if (dot < 0) {
-		e2_min_norm = e2;//CDGH.getNormal();
-		e2_max_norm = -e2; // ABEF.getNormal();
-		t2Min = (w1 - glm::dot(p, e2)) / glm::dot(m, e2);
-		t2Max = (-w1 - glm::dot(p, e2)) / glm::dot(m, e2);
+			if (tMin > tMax || tMax < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = INFINITY; return;
+			}
+		}
+		else if ((-e - h_u) > 0 || (-e + h_u) < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = INFINITY; return;
+		}
 	}
 
-	dot = glm::dot(m, e3);
-	if (dot > 0) {
-		e3_min_norm = -e3; // BDFH.getNormal();
-		e3_max_norm = e3;// ACEG.getNormal();
-		t3Min = (-w1 - glm::dot(p, e3)) / glm::dot(m, e3);
-		t3Max = (w1 - glm::dot(p, e3)) / glm::dot(m, e3);
-	}
-	else if (dot < 0) {
-		e3_min_norm = e3;//ACEG.getNormal();
-		e3_max_norm = -e3;// BDFH.getNormal();
-		t3Min = (w1 - glm::dot(p, e3)) / glm::dot(m, e3);
-		t3Max = (-w1 - glm::dot(p, e3)) / glm::dot(m, e3);
+	// Axis V (y)
+	{
+		float e = glm::dot(a_v, p);
+		float f = glm::dot(a_v, ray.direction);
+		if (std::abs(f) > FLT_EPSILON) {
+			float t1 = (e + h_v) / f;
+			float t2 = (e - h_v) / f;
+
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
+
+			if (t1 > tMin) {
+				tMin = t1;
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+			}
+
+			if (tMin > tMax || tMax < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = INFINITY; return;
+			}
+		}
+		else if ((-e - h_v) > 0 || (-e + h_v) < 0) {
+			// No intersection
+			hit.intersects = false;
+			hit.hitTime = INFINITY; return;
+		}
 	}
 
-	tMin = std::max(std::max(t1Min, t2Min), std::max(t2Min, t3Min));
-	tMax = std::min(std::min(t1Max, t2Max), std::min(t2Max, t3Max));
+	// Axis W (z)
+	{
+		float e = glm::dot(a_w, p);
+		float f = glm::dot(a_w, ray.direction);
+		if (std::abs(f) > FLT_EPSILON) {
+			float t1 = (e + h_w) / f;
+			float t2 = (e - h_w) / f;
 
-	// Shitty way to do this, but screw it
-	if (tMin == t1Min) {
-		hit.normal = e1_min_norm;
-	}
-	else if (tMin == t2Min) {
-		hit.normal = e2_min_norm;
-	}
-	else {
-		hit.normal = e3_min_norm;
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
+
+			if (t1 > tMin) {
+				tMin = t1;
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+			}
+
+			if (tMin > tMax || tMax < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = INFINITY; return;
+			}
+		}
+		else if ((-e - h_w) > 0 || (-e + h_w) < 0) {
+			// No intersection
+			hit.intersects = false;
+			hit.hitTime = INFINITY; return;
+		}
 	}
 
-	if (tMin < tMax) {
+	if (tMin > 0) {
 		hit.hitTime = tMin;
 		hit.intersects = true;
+		return;
 	}
 	else {
-		hit.intersects = false;
+		hit.hitTime = tMax;
+		hit.intersects = true;
+		return;
 	}
-
-	// Courtesy of: http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
-
-	// Intersection method from Real-Time Rendering and Essential Mathematics for Games
-/*
-	float tMin = Octree::RAY_MIN;
-	float tMax = Octree::RAY_MAX;
-
-	// **aaaahhhh*** Since this method transforms the Ray into Object space, we need to use
-	// object min & max points
-
-	glm::vec3 localMin(INFINITY), localMax(-INFINITY);
-	for (int i = 0; i < 8; ++i) {
-		localMin = glm::vec3(std::min(localMin.x, points[i].x), std::min(localMin.y, points[i].y), std::min(localMin.z, points[i].z));
-		localMax = glm::vec3(std::max(localMax.x, points[i].x), std::max(localMax.y, points[i].y), std::max(localMax.z, points[i].z));
-	}
-
-	glm::vec3 n_min, n_max; // Normals at min & max intersection points
-
-	glm::mat4 ModelMatrix = gameObject->transform.getTransformMatrix();
-	glm::vec3 OBBposition_worldspace(ModelMatrix[3].x, ModelMatrix[3].y, ModelMatrix[3].z); //  = offsetWorld; //
-
-	glm::vec3 delta = OBBposition_worldspace - ray.origin;
-
-	// Test intersection with the 2 planes perpendicular to the OBB's X axis
-	{
-		glm::vec3 xaxis(ModelMatrix[0].x, ModelMatrix[0].y, ModelMatrix[0].z); // ABCD.getNormal();//
-		float e = glm::dot(xaxis, delta);
-		float f = glm::dot(ray.direction, xaxis);
-
-		if (fabs(f) > 0.001f) { // Standard case
-
-			float t1 = (e + localMin.x) / f; // Intersection with the "left" plane
-			float t2 = (e + localMax.x) / f; // Intersection with the "right" plane
-											 // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
-
-			glm::vec3 n_near = EFGH.getNormal(); // left plane
-			glm::vec3 n_far = ABCD.getNormal();  // right plane
-
-											 // We want t1 to represent the nearest intersection, 
-											 // so if it's not the case, invert t1 and t2
-			if (t1>t2) {
-				float w = t1; t1 = t2; t2 = w; // swap t1 and t2
-				std::swap(n_near, n_far);
-			}
-
-			// tMax is the nearest "far" intersection (amongst the X,Y and Z planes pairs)
-			if (t2 < tMax) {
-				tMax = t2;
-				n_max = n_far;
-			}
-			// tMin is the farthest "near" intersection (amongst the X,Y and Z planes pairs)
-			if (t1 > tMin) {
-				tMin = t1;
-				n_min = n_near;
-			}
-
-			// And here's the trick :
-			// If "far" is closer than "near", then there is NO intersection.
-			// See the images in the tutorials for the visual explanation.
-			if (tMax < tMin) {
-				hit.intersects = false;
-				return;
-			}
-
-		}
-		else { // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
-			if (-e + localMin.x > 0.0f || -e + localMax.x < 0.0f) {
-				hit.intersects = false;
-				return;
-			}
-		}
-	}
-
-
-	// Test intersection with the 2 planes perpendicular to the OBB's Y axis
-	// Exactly the same thing than above.
-	{
-		glm::vec3 yaxis(ModelMatrix[1].x, ModelMatrix[1].y, ModelMatrix[1].z); //  = ABEF.getNormal();//
-		float e = glm::dot(yaxis, delta);
-		float f = glm::dot(ray.direction, yaxis);
-
-		if (fabs(f) > 0.001f) {
-
-			float t1 = (e + localMin.y) / f; // bottom plane
-			float t2 = (e + localMax.y) / f; // top plane
-
-			glm::vec3 n_near = CDGH.getNormal();  // bottom plane
-			glm::vec3 n_far = ABEF.getNormal(); // top plane
-
-			if (t1>t2) { 
-				std::swap(t1, t2);
-				std::swap(n_near, n_far);
-			}
-
-			if (t2 < tMax) {
-				tMax = t2;
-				n_max = n_far;
-			}
-			if (t1 > tMin) {
-				tMin = t1;
-				n_min = n_near;
-			}
-			if (tMin > tMax) {
-				hit.intersects = false;
-				return;
-			}
-
-		}
-		else {
-			if (-e + localMin.y > 0.0f || -e + localMax.y < 0.0f) {
-				hit.intersects = false;
-				return;
-			}
-		}
-	}
-
-
-	// Test intersection with the 2 planes perpendicular to the OBB's Z axis
-	// Exactly the same thing than above.
-	{
-		glm::vec3 zaxis(ModelMatrix[2].x, ModelMatrix[2].y, ModelMatrix[2].z); //  zaxis = ACEG.getNormal();//
-		float e = glm::dot(zaxis, delta);
-		float f = glm::dot(ray.direction, zaxis);
-
-		if (fabs(f) > 0.001f) {
-
-			float t1 = (e + localMin.z) / f; // front plane
-			float t2 = (e + localMax.z) / f; // back plane
-
-			glm::vec3 n_near = BDFH.getNormal();  // back plane
-			glm::vec3 n_far = ACEG.getNormal(); // front plane
-
-			if (t1>t2) {
-				std::swap(t1, t2);
-				std::swap(n_near, n_far);
-			}
-
-			if (t2 < tMax) {
-				tMax = t2;
-				n_max = n_far;
-			}
-			if (t1 > tMin) {
-				tMin = t1;
-				n_min = n_near;
-			}
-			if (tMin > tMax) {
-				hit.intersects = false;
-				return;
-			}
-		}
-		else {
-			if (-e + localMin.z > 0.0f || -e + localMax.z < 0.0f) {
-				hit.intersects = false;
-				return;
-			}
-		}
-	}
-
-
-	hit.hitTime = tMin;
-	hit.normal = n_min; // pls?
-	hit.intersects = true;
-	return; */
 };
 
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
@@ -634,18 +506,6 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 	glm::vec3 c = other.getCenterWorld();
 	float radius = other.getRadiusWorld();
 	float r_squared = radius * radius;
-	/*
-	e = std::fmaxf(xmin - c.x, 0) + std::fmaxf(c.x - xmax, 0);
-	if (e <= radius) return false;
-	d += e * e;
-
-	e = std::fmaxf(ymin - c.y, 0) + std::fmaxf(c.y - ymax, 0);
-	if (e <= radius) return false;
-	d += e * e;
-
-	e = std::fmaxf(zmin - c.z, 0) + std::fmaxf(c.z - zmax, 0);
-	if (e <= radius) return false;
-	d += e * e;*/
 
 	// Arvo's original method
 	if (c.x < xmin) {

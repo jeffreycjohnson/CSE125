@@ -25,6 +25,7 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 
 	myAABB = new BoxCollider(center, dims);
 	myAABB->setMinAndMax(min, max);
+	myAABB->setAxisAligned(true);
 
 }
 
