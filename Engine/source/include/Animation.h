@@ -31,9 +31,11 @@ class Animation :
 	public Component
 {
 public:
-	
+	static std::unordered_map<std::string, AnimationData> animationMap;
 	Animation(const aiScene*, std::unordered_map<std::string, Transform*>);
 	~Animation();
+
+	Animation * fromCachedAnimationData(std::string name);
 
 	void play(int animation, bool loop);
 	void stop();

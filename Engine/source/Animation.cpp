@@ -2,6 +2,22 @@
 
 #include "Transform.h"
 
+std::unordered_map<std::string, AnimationData> Animation::animationMap;
+
+Animation* Animation::fromCachedAnimationData(std::string name)
+{
+	auto iter = Animation::animationMap.find(name);
+	if (iter == Animation::animationMap.end())
+	{
+		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+	}
+
+	Animation *created = new Animation;
+	created->name = name;
+
+	return created;
+}
+
 
 glm::vec3 interpolateKeyframes(std::vector<std::pair<float, glm::vec3>> data, float time) {
 	int positionIndex = 0;
