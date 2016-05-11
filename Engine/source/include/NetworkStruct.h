@@ -16,7 +16,8 @@ enum {
 	TRANSFORM_NETWORK_DATA,
 	MESH_NETWORK_DATA,
 	CAMERA_NETWORK_DATA,
-	LIGHT_NETWORK_DATA
+	LIGHT_NETWORK_DATA,
+	ANIMATION_NETWORK_DATA
 };
 
 class NetworkStruct
@@ -160,6 +161,13 @@ struct LightNetworkData
 			this->colorg = color.g;
 			this->colorb = color.b;
 	}
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct AnimationNetworkData
+{
+
 };
 #pragma pack(pop)
 
