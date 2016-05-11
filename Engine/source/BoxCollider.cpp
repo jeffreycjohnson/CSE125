@@ -329,17 +329,21 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 	// x
 	glm::vec3 e1 = A - E;
 	glm::vec3 e1_min_norm, e1_max_norm;
-	float w1 = e1.length();
+	float w1 = e1.length() / 2;
+	e1 = glm::normalize(e1);
 
 	// y
 	glm::vec3 e2 = A - C;
 	glm::vec3 e2_min_norm, e2_max_norm;
-	float w2 = e2.length();
+	float w2 = e2.length() / 2;
+	e2 = glm::normalize(e2);
 
 	// z
 	glm::vec3 e3 = A - B;
 	glm::vec3 e3_min_norm, e3_max_norm;
-	float w3 = e3.length();
+	float w3 = e3.length() / 2;
+	e3 = glm::normalize(e3);
+
 
 	// using semantics from example
 
@@ -348,45 +352,47 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 	glm::vec3 c = offsetWorld;
 
 	float t1Min, t1Max, t2Min, t2Max, t3Min, t3Max, tMin, tMax;
+	t1Min = t2Min = t3Min = -INFINITY;
+	t1Max = t2Max = t3Max = INFINITY;
 
 	auto dot = glm::dot(m, e1);
 	if (dot > 0) {
-		e1_min_norm = EFGH.getNormal();
-		e1_max_norm = ABCD.getNormal();
+		e1_min_norm = -e1;//EFGH.getNormal();
+		e1_max_norm = e1;// ABCD.getNormal();
 		t1Min = (-w1 - glm::dot(p, e1)) / glm::dot(m, e1);
 		t1Max = (w1 - glm::dot(p, e1)) / glm::dot(m, e1);
 	}
 	else if (dot < 0) {
-		e1_min_norm = ABCD.getNormal(); 
-		e1_max_norm = EFGH.getNormal();
+		e1_min_norm = e1;// ABCD.getNormal();
+		e1_max_norm = -e1;// EFGH.getNormal();
 		t1Min = (w1 - glm::dot(p, e1)) / glm::dot(m, e1);
 		t1Max = (-w1 - glm::dot(p, e1)) / glm::dot(m, e1);
 	}
 
 	dot = glm::dot(m, e2);
 	if (dot > 0) {
-		e2_min_norm = ABEF.getNormal();
-		e2_max_norm = CDGH.getNormal();
+		e2_min_norm = -e2; // ABEF.getNormal();
+		e2_max_norm = e2; // CDGH.getNormal();
 		t2Min = (-w1 - glm::dot(p, e2)) / glm::dot(m, e2);
 		t2Max = (w1 - glm::dot(p, e2)) / glm::dot(m, e2);
 	}
 	else if (dot < 0) {
-		e2_min_norm = CDGH.getNormal();
-		e2_max_norm = ABEF.getNormal();
+		e2_min_norm = e2;//CDGH.getNormal();
+		e2_max_norm = -e2; // ABEF.getNormal();
 		t2Min = (w1 - glm::dot(p, e2)) / glm::dot(m, e2);
 		t2Max = (-w1 - glm::dot(p, e2)) / glm::dot(m, e2);
 	}
 
 	dot = glm::dot(m, e3);
 	if (dot > 0) {
-		e3_min_norm = BDFH.getNormal();
-		e3_max_norm = ACEG.getNormal();
+		e3_min_norm = -e3; // BDFH.getNormal();
+		e3_max_norm = e3;// ACEG.getNormal();
 		t3Min = (-w1 - glm::dot(p, e3)) / glm::dot(m, e3);
 		t3Max = (w1 - glm::dot(p, e3)) / glm::dot(m, e3);
 	}
 	else if (dot < 0) {
-		e3_min_norm = ACEG.getNormal();
-		e3_max_norm = BDFH.getNormal();
+		e3_min_norm = e3;//ACEG.getNormal();
+		e3_max_norm = -e3;// BDFH.getNormal();
 		t3Min = (w1 - glm::dot(p, e3)) / glm::dot(m, e3);
 		t3Max = (-w1 - glm::dot(p, e3)) / glm::dot(m, e3);
 	}
@@ -765,48 +771,6 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 		//rayAABB(ray, hit);
 		rayOBB(ray, hit);
 		return hit;
-		// The Lazy Way (TM)
-		/*std::vector<RayHitInfo> hits;
-		hits.push_back(ABCD.intersects(ray));
-		hits.push_back(ABEF.intersects(ray));
-		hits.push_back(ACEG.intersects(ray));
-		hits.push_back(BDFH.intersects(ray));
-		hits.push_back(CDGH.intersects(ray));
-		hits.push_back(EFGH.intersects(ray));
-
-		RayHitInfo finalHit;
-		finalHit.hitTime = INFINITY;
-		for (auto hit : hits) {
-
-			// All plane normals for box are pointing outward
-			// For a point to lie in the OBB, it must have signed distance
-			// to the plane of <= 0 to ALL planes
-			auto point = ray.getPos(hit.hitTime);
-			if (ABCD.distanceToPoint(point) > 0) {
-				hit.intersects = false; continue;
-			}
-			if (ABEF.distanceToPoint(point) > 0) {
-				hit.intersects = false; continue;
-			}
-			if (ACEG.distanceToPoint(point) > 0) {
-				hit.intersects = false; continue;
-			}
-			if (BDFH.distanceToPoint(point) > 0) {
-				hit.intersects = false; continue;
-			}
-			if (CDGH.distanceToPoint(point) > 0) {
-				hit.intersects = false; continue;
-			}
-			if (EFGH.distanceToPoint(point) > 0) {
-				hit.intersects = false; continue;
-			}
-
-			if (hit.intersects && hit.hitTime < finalHit.hitTime) {
-				finalHit = hit;
-			}
-
-		}*/
-		//return finalHit;
 	}
 	if (hit.intersects) {
 		hit.point = ray.getPos(hit.hitTime);

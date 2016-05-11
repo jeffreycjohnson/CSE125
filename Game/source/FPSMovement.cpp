@@ -21,7 +21,6 @@
 #include "ServerInput.h"
 #include "Config.h"
 
-
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
@@ -75,8 +74,8 @@ void FPSMovement::fixedUpdate()
 
 		if (moveDir != glm::vec3(0)) {
 			newMoveVec = handleRayCollision(position, moveDir, newMoveVec);
-			newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
-			newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
+			//newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
+			//newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
 
 			position += newMoveVec;
 			gameObject->transform.setPosition(position.x, position.y, position.z);
@@ -134,6 +133,13 @@ void FPSMovement::fixedUpdate()
 	if (position.y < deathFloor) {
 		respawn();
 	}*/
+
+	// debug
+	auto rayray = Renderer::mainCamera->getEyeRay();
+	auto shit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(rayray, Octree::STATIC_ONLY);
+	raycastHit = shit.intersects;
+	lastRayPoint = rayray.getPos(shit.hitTime);
+	// end debug
 	
 	recalculate();
 
@@ -160,7 +166,7 @@ glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDire
 void FPSMovement::debugDraw()
 {
 	if (raycastHit) {
-		Renderer::drawSphere(lastRayPoint, 0.02f, glm::vec4(0, 0, 1, 1));
+		Renderer::drawSphere(lastRayPoint, 0.25f, glm::vec4(0, 0, 1, 1));
 	}
 
 	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
