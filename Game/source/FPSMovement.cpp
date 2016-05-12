@@ -40,6 +40,7 @@ void FPSMovement::create()
 	{
 		this->gameObject->addChild(verticality);
 		verticality->transform.translate(worldUp * 0.6f);
+		verticality->transform.translate(front * 0.35f);
 	}
 
 	//Input::hideCursor();
@@ -178,20 +179,12 @@ void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
 
 	//If we hit something in front of us, and it is within the player radius
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
-		//If the wall's normal along a certain vector is not zero, we zero out the moveDir along that vector
-		//NOTE: THIS IS HARDCODED TO ASSUME AXIS-ALIGNED BBs
-		/*if (moveHit.normal.x != 0)
-			moveDir.x = 0;
-		if (moveHit.normal.z != 0)
-			moveDir.z = 0;*/
-
+		//Dexter's Magic Math
 		glm::vec3 desiredNewPos = position + moveDir;
 		glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - moveHit.hitTime);
 		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
 		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
-		position = newPos;
-		moveDir = glm::vec3(0);
-		//std::cout << distBehindWall << std::endl;
+		moveDir = newPos - position;
 	}
 }
 
@@ -220,32 +213,23 @@ void FPSMovement::recalculate()
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
 
-	if (!setVerticalityForward) {
-		verticality->transform.translate(-right * 0.35f);
-		setVerticalityForward = true;
-	}
-
 	// now construct quaternion for mouselook
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
-	glm::vec3 frontUp = glm::dot(front, worldUp) * worldUp;
 
-	glm::quat x = glm::inverse(glm::quat(glm::lookAt(gameObject->transform.getWorldPosition(), gameObject->transform.getWorldPosition() + worldFront, worldUp)));
+	glm::mat4 newLookAt = glm::lookAt(gameObject->transform.getWorldPosition(), gameObject->transform.getWorldPosition() + worldFront, worldUp);
+	glm::quat x = glm::inverse(glm::quat(newLookAt));
 	glm::quat y = glm::angleAxis(glm::radians(pitch), glm::vec3(1, 0, 0));
 
-	glm::quat xy = glm::inverse(glm::quat(glm::lookAt(verticality->transform.getWorldPosition(), verticality->transform.getWorldPosition() + front, worldUp)));
+	glm::vec3 xrot = glm::eulerAngles(gameObject->transform.getRotation());
+	//std::cout << "X in rot: " << xrot.x * 180 / 3.141 << ", " << xrot.y << ", " << xrot.z << std::endl;
 
-	if (verticality != nullptr)
-	{
-		gameObject->transform.setRotate(x);
-		verticality->transform.setRotate(y);
-	}
-	else
-	{
-		gameObject->transform.setRotate(xy);
-	}
+	gameObject->transform.setRotate(x);
+	verticality->transform.setRotate(y);
 
 	// and transform me please
 	gameObject->transform.setPosition(position.x, position.y, position.z);
+
+	glm::vec3 rot = glm::eulerAngles(gameObject->transform.getRotation());
 }
 
 void FPSMovement::respawn() {
