@@ -385,7 +385,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 };
 
 float BoxCollider::getWidth() {
-	return xmax - xmin;
+	return std::sqrt((xmax - xmin)*(xmax - xmin) + (ymax - ymin)*(ymax - ymin));
 }
 
 float BoxCollider::getHeight() {

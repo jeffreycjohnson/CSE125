@@ -125,12 +125,30 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
 		handleWallSlide(position, moveDir);
-		//handleWallSlide(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
-		//handleWallSlide(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+		//handleWallSlide(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), true);
+		//handleWallSlide(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), true);
 	}
 
 	//Update the position with the new movement vector
 	position += moveDir;
+}
+
+void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
+{
+	//We raycast in the given direction
+	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
+	Ray moveRay(position, castDirection);
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
+
+	//If we hit something in front of us, and it is within the player radius
+	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
+		//Dexter's Magic Math
+		glm::vec3 desiredNewPos = position + moveDir;
+		glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - moveHit.hitTime);
+		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
+		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
+		moveDir = newPos - position;
+	}
 }
 
 void FPSMovement::handleVerticalMovement(float dt) {
@@ -167,24 +185,6 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		//If they are not on a surface they are either moving up or falling
 		vSpeed += vAccel;
 		position.y += vSpeed*dt;
-	}
-}
-
-void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
-{
-	//We raycast in the given direction
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
-	Ray moveRay(position, castDirection);
-	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
-
-	//If we hit something in front of us, and it is within the player radius
-	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
-		//Dexter's Magic Math
-		glm::vec3 desiredNewPos = position + moveDir;
-		glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - moveHit.hitTime);
-		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
-		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
-		moveDir = newPos - position;
 	}
 }
 
