@@ -14,7 +14,7 @@
 #include "Key.h"
 #include "KeyHoleActivator.h"
 #include "KeyHoleTarget.h"
-
+#include "Chest.h"
 
 //http://blog.noctua-software.com/object-factory-c++.html
 
@@ -24,6 +24,7 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 	{ "laser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget); } },
 	{ "vddoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, DOWN); } },
 	{ "keyhole_",  [](auto args, auto idToTarget) {return new KeyHoleTarget(args, idToTarget); } },
+	{ "chest_",  [](auto args, auto idToTarget) {return new Chest(args, idToTarget); } },
 };
 
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =

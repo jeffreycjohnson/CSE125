@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Chest.cpp" />
     <ClCompile Include="source\Key.cpp" />
     <ClCompile Include="source\KeyHoleActivator.cpp" />
     <ClCompile Include="source\KeyHoleTarget.cpp" />
@@ -41,6 +42,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Chest.h" />
     <ClInclude Include="source\Key.h" />
     <ClInclude Include="source\KeyHoleActivator.h" />
     <ClInclude Include="source\KeyHoleTarget.h" />

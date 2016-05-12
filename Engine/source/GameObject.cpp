@@ -157,13 +157,14 @@ void GameObject::addChild(GameObject* go) {
 void GameObject::removeChild(GameObject * go)
 {
 	auto child = std::find(transform.children.begin(), transform.children.end(), &go->transform);
-	if (child != transform.children.end())
+	if (child == transform.children.end())
 	{
 		throw std::runtime_error("Cannot remove child from gameobject parent if child is not child");
 	}
 
 	transform.children.erase(child);
 	go->transform.setParent(nullptr);
+	NetworkManager::PostMessage(go->serialize(), DESTROY_OBJECT_NETWORK_DATA, go->getID());
 }
 
 void GameObject::destroy() {
