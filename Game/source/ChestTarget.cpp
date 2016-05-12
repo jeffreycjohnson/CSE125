@@ -35,7 +35,7 @@ void ChestTarget::fixedUpdate()
 		openness = std::min(1.0f, openness);
 		openness = std::max(0.0f, openness);
 
-		gameObject->transform.children[0]->setPosition(initPosition + glm::vec3(0, 0, 1) * openness * 2.5f);
+		gameObject->transform.children[0]->setPosition(initPosition + glm::vec3(0, 0, 1) * openness * 2.0f);
 		gameObject->getComponent<ChestActivator>()->trigger();
 	}
 }

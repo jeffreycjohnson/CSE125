@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include <iostream>
 #include "KeyActivator.h"
+#include "KeyTarget.h"
 
 Inventory::Inventory()
 {
@@ -30,6 +31,8 @@ void Inventory::setKey(GameObject * key)
 		GameObject * hand = this->gameObject->transform.children[0]->children[1]->gameObject;
 		hand->addChild(key);
 		key->transform.setPosition(0.0f, 0.0f, 0.0f);
+		key->getComponent<KeyTarget>()->pickedUp = true;
+
 	}
 }
 

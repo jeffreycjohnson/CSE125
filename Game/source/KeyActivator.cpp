@@ -1,5 +1,5 @@
 #include "KeyActivator.h"
-
+#include "KeyTarget.h"
 
 
 KeyActivator::KeyActivator()
