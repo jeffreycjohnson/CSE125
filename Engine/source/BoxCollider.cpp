@@ -384,6 +384,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 };
 
+//TODO: Get working with OBBs
 float BoxCollider::getWidth() {
 	return std::sqrt((xmax - xmin)*(xmax - xmin) + (ymax - ymin)*(ymax - ymin));
 }

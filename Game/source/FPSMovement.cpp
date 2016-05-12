@@ -32,6 +32,11 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 	this->pitch = 0.0f;
 	pastFirstTick = false;
 	raycastHit = false;
+
+	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
+	if (oct == nullptr) {
+		throw "ERROR: Octree is a nullptr";
+	}
 }
 
 void FPSMovement::create()
@@ -64,8 +69,6 @@ void FPSMovement::fixedUpdate()
 	}
 
 	RayHitInfo moveHit;
-
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
@@ -106,8 +109,6 @@ void FPSMovement::getPlayerRadii() {
 }
 
 void FPSMovement::handleHorizontalMovement(float dt) {
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
-
 	// act on keyboard
 	float speed = moveSpeed * dt;
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
@@ -124,19 +125,27 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
-		handleWallSlide(position, moveDir);
-		//handleWallSlide(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), true);
-		//handleWallSlide(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), true);
+		bool moveDirModified = true;
+		int failCount = 0;
+		while (moveDirModified && failCount < 3) {
+			moveDirModified = slideAgainstWall(position, moveDir, failCount);
+			failCount++;
+		}
+
+		//std::cout << failCount << std::endl;
+		//We try 3 times to change moveDir, if our final try was inside a wall we don't move
+		if (moveDirModified && failCount == 3) {
+			moveDir = glm::vec3(0);
+		}
 	}
 
 	//Update the position with the new movement vector
 	position += moveDir;
 }
 
-void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
+bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, int failCount)
 {
 	//We raycast in the given direction
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	Ray moveRay(position, castDirection);
 	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
 
@@ -148,12 +157,39 @@ void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
 		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
 		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
 		moveDir = newPos - position;
+		return true;
 	}
+	else /*if(failCount != 1) */{
+		handleSideCollisions(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
+		handleSideCollisions(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+	}
+	return false;
+}
+
+void FPSMovement::handleSideCollisions(glm::vec3 position, glm::vec3 direction) {
+	Ray sideRay(position, direction);
+	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH);
+	
+	//PROBLEM: This means that the instant rotation that occurs when we hit a wall creates a jump when the side ray is suddenly way inside the wall
+	if (sideHit.intersects && sideHit.hitTime <= playerRadius && sideHit.hitTime >= 0) {
+		moveDir += -glm::normalize(direction)*(playerRadius - sideHit.hitTime);
+
+		/*glm::vec3 desiredNewPos = position + moveDir;
+		float dist = glm::dot(desiredNewPos, sideHit.normal);
+		if (dist < playerRadius) {
+			glm::vec3 q = desiredNewPos + playerRadius*sideHit.normal;
+			moveDir = q - position;
+		}*/
+		//glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - sideHit.hitTime);
+		//float distBehindWall = std::abs(glm::dot(behindVector, sideHit.normal));
+		//glm::vec3 newPos = desiredNewPos + distBehindWall * sideHit.normal;
+		//moveDir = newPos - position;
+	}
+
 }
 
 void FPSMovement::handleVerticalMovement(float dt) {
 	//This ray goes downwards from the player center
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	Ray downRay(position, -worldUp);
 	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
 	//If the player has a collider below them that is closer than half their height + 0.1f, then they are standing on it

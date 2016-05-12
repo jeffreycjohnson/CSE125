@@ -2,6 +2,7 @@
 #define PLAYER_MOVEMENT_H
 
 #include "Component.h"
+#include "OctreeManager.h"
 
 class FPSMovement : public Component
 {
@@ -10,6 +11,8 @@ private:
 	const float startJumpSpeed = 12.5f;
 	const float vAccel = -0.75f;
 	const float deathFloor = -20.0f;
+
+	OctreeManager* oct;
 
 	GameObject* verticality;
 
@@ -30,7 +33,8 @@ private:
 	void handleVerticalMovement(float dt);
 	void getPlayerRadii();
 	void recalculate();
-	void handleWallSlide(glm::vec3 position, glm::vec3 castDirection);
+	bool slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, int failCount);
+	void handleSideCollisions(glm::vec3 position, glm::vec3 direction);
 	void raycastMouse();
 public:
 	FPSMovement(
