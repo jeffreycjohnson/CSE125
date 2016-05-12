@@ -59,9 +59,9 @@ void BoxCollider::calculatePlanes()
 	ACEG = Plane(A, glm::cross(C - G, E - G));
 	ABEF = Plane(A, glm::cross(B - A, E - A));
 
-	EFGH = Plane(E, -ABCD.getNormal());
-	BDFH = Plane(B, -ACEG.getNormal());
-	CDGH = Plane(C, -ABEF.getNormal());
+	EFGH = Plane(A, -ABCD.getNormal());
+	BDFH = Plane(A, -ACEG.getNormal());
+	CDGH = Plane(A, -ABEF.getNormal());
 }
 
 void BoxCollider::fixedUpdate()
@@ -160,13 +160,6 @@ void BoxCollider::debugDraw()
 				}
 			}
 		}
-		// Draw planes (normals)
-		/*ABCD.debugDraw(offsetWorld);
-		ACEG.debugDraw(offsetWorld);
-		ABEF.debugDraw(offsetWorld);
-		EFGH.debugDraw(offsetWorld);
-		BDFH.debugDraw(offsetWorld);
-		CDGH.debugDraw(offsetWorld);*/ // not worth, draw arrow is fucked
 	}
 }
 
@@ -368,13 +361,13 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 			if (tMin > tMax || tMax < 0) {
 				// No intersection
 				hit.intersects = false;
-				hit.hitTime = INFINITY; return;
+				hit.hitTime = 0; return;
 			}
 		}
 		else if ((-e - h_u) > 0 || (-e + h_u) < 0) {
-				// No intersection
-				hit.intersects = false;
-				hit.hitTime = INFINITY; return;
+			// No intersection
+			hit.intersects = false;
+			hit.hitTime = 0; return;
 		}
 	}
 
@@ -401,13 +394,13 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 			if (tMin > tMax || tMax < 0) {
 				// No intersection
 				hit.intersects = false;
-				hit.hitTime = INFINITY; return;
+				hit.hitTime = 0; return;
 			}
 		}
 		else if ((-e - h_v) > 0 || (-e + h_v) < 0) {
 			// No intersection
 			hit.intersects = false;
-			hit.hitTime = INFINITY; return;
+			hit.hitTime = 0; return;
 		}
 	}
 
@@ -434,13 +427,13 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 			if (tMin > tMax || tMax < 0) {
 				// No intersection
 				hit.intersects = false;
-				hit.hitTime = INFINITY; return;
+				hit.hitTime = 0; return;
 			}
 		}
 		else if ((-e - h_w) > 0 || (-e + h_w) < 0) {
 			// No intersection
 			hit.intersects = false;
-			hit.hitTime = INFINITY; return;
+			hit.hitTime = 0; return;
 		}
 	}
 

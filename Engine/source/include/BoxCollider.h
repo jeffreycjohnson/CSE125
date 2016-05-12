@@ -44,13 +44,13 @@ private:
 	void rayAABB(const Ray& ray, RayHitInfo& hit) const;
 	void rayOBB(const Ray& ray, RayHitInfo& hit) const;
 
+	void calculatePlanes();
+
 public:
 	static bool drawBoxPoints;
 
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
-
-	void calculatePlanes();
 
 	void destroy() override;
 	void fixedUpdate() override;

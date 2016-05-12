@@ -74,8 +74,8 @@ void FPSMovement::fixedUpdate()
 
 		if (moveDir != glm::vec3(0)) {
 			newMoveVec = handleRayCollision(position, moveDir, newMoveVec);
-			//newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
-			//newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
+			newMoveVec = handleRayCollision(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x), newMoveVec);
+			newMoveVec = handleRayCollision(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x), newMoveVec);
 
 			position += newMoveVec;
 			gameObject->transform.setPosition(position.x, position.y, position.z);
@@ -136,7 +136,8 @@ void FPSMovement::fixedUpdate()
 
 	// debug
 	auto rayray = Renderer::mainCamera->getEyeRay();
-	auto shit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(rayray, Octree::STATIC_ONLY);
+	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
+	auto shit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(rayray, Octree::BOTH, 0, Octree::RAY_MAX, box);
 	raycastHit = shit.intersects;
 	lastRayPoint = rayray.getPos(shit.hitTime);
 	// end debug
