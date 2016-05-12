@@ -28,6 +28,7 @@ private:
 
 	// ray cast debugging
 	glm::vec3 lastRayPoint;
+	glm::vec3 lastRayPointPlusN;
 	bool raycastHit;
 
 	void recalculate();

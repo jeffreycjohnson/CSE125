@@ -325,18 +325,20 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 	// x
 	glm::vec3 a_u = ABCD.getNormal();
-	glm::vec3 a_u_min_norm, a_u_max_norm;
+	glm::vec3 a_u_max = -a_u;
 	float h_u = glm::distance(A, E) / 2.0f;
 	
 	// y
-	glm::vec3 a_v = a_v = ABEF.getNormal();
-	glm::vec3 a_v_min_norm, a_v_max_norm;
+	glm::vec3 a_v = ABEF.getNormal();
+	glm::vec3 a_v_max = -a_v;
 	float h_v = glm::distance(A, C) / 2.0f;
 
 	// z
 	glm::vec3 a_w = ACEG.getNormal();
-	glm::vec3 a_w_min_norm, a_w_max_norm;
+	glm::vec3 a_w_max = -a_w;
 	float h_w = glm::distance(A, B) / 2.0f;
+
+	glm::vec3 min_norm, max_norm;
 
 	// Axis U (x)
 	{
@@ -348,14 +350,17 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 			if (t1 > t2) {
 				std::swap(t1, t2);
+				std::swap(a_u, a_u_max);
 			}
 
 			if (t1 > tMin) {
 				tMin = t1;
+				min_norm = a_u;
 			}
 
 			if (t2 < tMax) {
 				tMax = t2;
+				max_norm = a_u_max;
 			}
 
 			if (tMin > tMax || tMax < 0) {
@@ -381,14 +386,17 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 			if (t1 > t2) {
 				std::swap(t1, t2);
+				std::swap(a_v, a_v_max);
 			}
 
 			if (t1 > tMin) {
 				tMin = t1;
+				min_norm = a_v;
 			}
 
 			if (t2 < tMax) {
 				tMax = t2;
+				max_norm = a_v_max;
 			}
 
 			if (tMin > tMax || tMax < 0) {
@@ -414,14 +422,17 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 			if (t1 > t2) {
 				std::swap(t1, t2);
+				std::swap(a_w, a_w_max);
 			}
 
 			if (t1 > tMin) {
 				tMin = t1;
+				min_norm = a_w;
 			}
 
 			if (t2 < tMax) {
 				tMax = t2;
+				max_norm = a_w_max;
 			}
 
 			if (tMin > tMax || tMax < 0) {
@@ -439,11 +450,13 @@ void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
 
 	if (tMin > 0) {
 		hit.hitTime = tMin;
+		hit.normal = min_norm;
 		hit.intersects = true;
 		return;
 	}
 	else {
 		hit.hitTime = tMax;
+		hit.normal = max_norm;
 		hit.intersects = true;
 		return;
 	}
@@ -621,7 +634,6 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 		rayAABB(ray, hit);
 	}
 	else {
-		//rayAABB(ray, hit);
 		rayOBB(ray, hit);
 		return hit;
 	}

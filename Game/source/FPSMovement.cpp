@@ -107,7 +107,7 @@ void FPSMovement::fixedUpdate()
 	}
 
 	Ray downRay(position, -worldUp);
-	/*RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
+	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
 	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
 
 	Ray upRay(position, worldUp);
@@ -132,7 +132,7 @@ void FPSMovement::fixedUpdate()
 
 	if (position.y < deathFloor) {
 		respawn();
-	}*/
+	}
 
 	// debug
 	auto rayray = Renderer::mainCamera->getEyeRay();
@@ -140,6 +140,7 @@ void FPSMovement::fixedUpdate()
 	auto shit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(rayray, Octree::BOTH, 0, Octree::RAY_MAX, box);
 	raycastHit = shit.intersects;
 	lastRayPoint = rayray.getPos(shit.hitTime);
+	lastRayPointPlusN = lastRayPoint + shit.normal;
 	// end debug
 	
 	recalculate();
@@ -167,7 +168,8 @@ glm::vec3 FPSMovement::handleRayCollision(glm::vec3 position, glm::vec3 castDire
 void FPSMovement::debugDraw()
 {
 	if (raycastHit) {
-		Renderer::drawSphere(lastRayPoint, 0.25f, glm::vec4(0, 0, 1, 1));
+		Renderer::drawSphere(lastRayPoint, 0.25f, glm::vec4(0, 0, 1, 1)); // blue = hitpoint
+		Renderer::drawSphere(lastRayPointPlusN, 0.25f, glm::vec4(1, 0, 1, 1)); // purple = normal + pt
 	}
 
 	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
