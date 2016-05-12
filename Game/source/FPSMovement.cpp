@@ -22,7 +22,8 @@
 #include "Config.h"
 
 #include "PressButton.h"
-#include "Key.h"
+#include "KeyTarget.h"
+#include "KeyActivator.h"
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
 
@@ -267,15 +268,15 @@ void FPSMovement::raycastMouse()
 		{
 			hit->getComponent<PressButton>()->trigger();
 		}
-		else if (hit->getComponent<Key>()) {
+		else if (hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp)) {
 			// pick up key
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
 		else if (hit->getComponent<KeyHoleTarget>() && this->gameObject->getComponent<Inventory>()->hasKey() ) {
 			// if KeyHoleTarget matches key currently in inventory
-			if (hit->getComponent<KeyHoleTarget>()->keyHoleID == this->gameObject->getComponent<Inventory>()->getKey()->getComponent<Key>()->keyHoleID) {
+			if (hit->getComponent<KeyHoleTarget>()->keyHoleID == this->gameObject->getComponent<Inventory>()->getKey()->getComponent<KeyActivator>()->keyHoleID) {
 				std::cout << "Key matches keyHole " << hit->getComponent<KeyHoleTarget>()->keyHoleID << std::endl;
-				this->gameObject->getComponent<Inventory>()->getKey()->getComponent<Key>()->trigger();
+				this->gameObject->getComponent<Inventory>()->getKey()->getComponent<KeyActivator>()->trigger();
 				this->gameObject->getComponent<Inventory>()->removeKey();
 			}
 		}

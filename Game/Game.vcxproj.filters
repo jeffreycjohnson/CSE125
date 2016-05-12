@@ -51,16 +51,22 @@
     <ClCompile Include="source\Inventory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Key.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\KeyHoleActivator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\KeyHoleTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Chest.cpp">
+    <ClCompile Include="source\ChestTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ChestActivator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\KeyActivator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\KeyTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,16 +104,22 @@
     <ClInclude Include="source\Inventory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Key.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\KeyHoleActivator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\KeyHoleTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Chest.h">
+    <ClInclude Include="source\ChestTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ChestActivator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\KeyActivator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\KeyTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

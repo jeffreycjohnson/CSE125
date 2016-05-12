@@ -1,34 +1,34 @@
-#include "Chest.h"
+#include "ChestTarget.h"
+#include "ChestActivator.h"
 #include <iostream>
 #include "Timer.h"
 
-Chest::Chest()
+ChestTarget::ChestTarget()
 {
 }
 
-Chest::Chest(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+ChestTarget::ChestTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
 {
-	int targetID = std::stoi(tokens[1]);
-	int threshold = std::stoi(tokens[2]);
+	int targetID = std::stoi(tokens[4]);
+	int threshold = std::stoi(tokens[5]);
 
 	setThreshold(threshold);
 	(*idToTarget)[targetID] = this;
 
 }
 
-Chest::~Chest()
+ChestTarget::~ChestTarget()
 {
 }
 
-void Chest::create()
+void ChestTarget::create()
 {
 	initPosition = gameObject->transform.children[0]->getPosition();
 }
 
-void Chest::fixedUpdate()
+void ChestTarget::fixedUpdate()
 {
 	if (isActivated()) {
-		std::cout << "chest is opened!" << std::endl;
 		float deltaTime = Timer::fixedTimestep;
 
 		openness += (deltaTime) * (isActivated() ? 1 : -1);
@@ -36,5 +36,6 @@ void Chest::fixedUpdate()
 		openness = std::max(0.0f, openness);
 
 		gameObject->transform.children[0]->setPosition(initPosition + glm::vec3(0, 0, 1) * openness * 2.5f);
+		gameObject->getComponent<ChestActivator>()->trigger();
 	}
 }

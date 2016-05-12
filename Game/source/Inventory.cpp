@@ -1,7 +1,7 @@
 #include "Inventory.h"
 #include "GameObject.h"
 #include <iostream>
-#include "Key.h"
+#include "KeyActivator.h"
 
 Inventory::Inventory()
 {
@@ -25,7 +25,7 @@ GameObject * Inventory::getKey()
 void Inventory::setKey(GameObject * key)
 {
 	if (key != nullptr && !hasKey()) {
-		std::cout << "Picked up key for keyHole " << key->getComponent<Key>()->keyHoleID << std::endl;
+		std::cout << "Picked up key for keyHole " << key->getComponent<KeyActivator>()->keyHoleID << std::endl;
 		this->key = key;
 		GameObject * hand = this->gameObject->transform.children[0]->children[1]->gameObject;
 		hand->addChild(key);

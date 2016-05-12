@@ -1,12 +1,12 @@
-#include "Key.h"
+#include "KeyActivator.h"
 
 
 
-Key::Key()
+KeyActivator::KeyActivator()
 {
 }
 
-Key::Key(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets)
+KeyActivator::KeyActivator(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets)
 {
 	keyHoleID = std::stoi(tokens[1]);
 	TriggerType triggerType = strToTriggerType(tokens[2]);
@@ -16,12 +16,12 @@ Key::Key(std::vector<std::string> tokens, const std::map<int, Target*>& idToTarg
 	
 }
 
-Key::~Key()
+KeyActivator::~KeyActivator()
 {
 }
 
-void Key::trigger()
+void KeyActivator::trigger()
 {
-	// Key has been brought to KeyHole so activate KeyHoleTarget
+	// KeyActivator has been brought to KeyHole so activate KeyHoleTarget
 	activate();
 }

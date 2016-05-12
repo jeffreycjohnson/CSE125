@@ -11,10 +11,12 @@
 #include "Plate.h"
 #include "PressButton.h"
 #include "Door.h"
-#include "Key.h"
+#include "KeyTarget.h"
+#include "KeyActivator.h"
 #include "KeyHoleActivator.h"
 #include "KeyHoleTarget.h"
-#include "Chest.h"
+#include "ChestActivator.h"
+#include "ChestTarget.h"
 
 //http://blog.noctua-software.com/object-factory-c++.html
 
@@ -24,7 +26,8 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 	{ "laser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget); } },
 	{ "vddoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, DOWN); } },
 	{ "keyhole_",  [](auto args, auto idToTarget) {return new KeyHoleTarget(args, idToTarget); } },
-	{ "chest_",  [](auto args, auto idToTarget) {return new Chest(args, idToTarget); } },
+	{ "chest_",  [](auto args, auto idToTarget) {return new ChestTarget(args, idToTarget); } },
+	{ "key_",  [](auto args, auto idToTarget) {return new KeyTarget(args, idToTarget); } },
 };
 
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
@@ -32,7 +35,8 @@ std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 	{ "plate_" ,  [](auto args, auto idToTarget) {return new Plate(args, idToTarget); } },
 	{ "timebutton_" ,  [](auto args, auto idToTarget) {return new PressButton(args, idToTarget); } },
 	{ "keyhole_" ,  [](auto args, auto idToTarget) {return new KeyHoleActivator(args, idToTarget); } },
-	{ "key_" ,  [](auto args, auto idToTarget) {return new Key(args, idToTarget); } },
+	{ "key_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },
+	{ "chest_" ,  [](auto args, auto idToTarget) {return new ChestActivator(args, idToTarget); } },
 };
 
 std::vector<std::string> split(const std::string &s, char delim) 
