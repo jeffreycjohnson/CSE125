@@ -23,7 +23,7 @@
 
 #include "PressButton.h"
 #include "Key.h"
-#include "KeyHoleActivator.h"
+#include "KeyHoleTarget.h"
 #include "Inventory.h"
 
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
@@ -253,7 +253,7 @@ void FPSMovement::raycastMouse()
 	if (!octreeManager) return;
 
 	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
-	auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
+	auto cast = octreeManager->raycast(ray, Octree::BuildMode::BOTH);
 
 	if (!cast.intersects) return;
 
@@ -262,16 +262,22 @@ void FPSMovement::raycastMouse()
 		std::cout << "BUTTON TRIGGER" << std::endl;
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
 		std::cout << hit->getName() << std::endl;
+
 		if (hit->getComponent<PressButton>())
 		{
 			hit->getComponent<PressButton>()->trigger();
 		}
 		else if (hit->getComponent<Key>()) {
+			// pick up key
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
-		else if (hit->getComponent<KeyHoleActivator>() && this->gameObject->getComponent<Inventory>()->hasKey() ) {
-			// if (key matches KeyHoleActivator) 
-			this->gameObject->getComponent<Inventory>()->getKey()->getComponent<Key>()->trigger();
+		else if (hit->getComponent<KeyHoleTarget>() && this->gameObject->getComponent<Inventory>()->hasKey() ) {
+			// if KeyHoleTarget matches key currently in inventory
+			if (hit->getComponent<KeyHoleTarget>()->keyHoleID == this->gameObject->getComponent<Inventory>()->getKey()->getComponent<Key>()->keyHoleID) {
+				std::cout << "Key matches keyHole " << hit->getComponent<KeyHoleTarget>()->keyHoleID << std::endl;
+				this->gameObject->getComponent<Inventory>()->getKey()->getComponent<Key>()->trigger();
+				this->gameObject->getComponent<Inventory>()->removeKey();
+			}
 		}
 	}
 }

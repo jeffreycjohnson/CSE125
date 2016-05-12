@@ -5,6 +5,8 @@ class KeyHoleTarget :
 	public Target
 {
 public:
+	int keyHoleID;
+
 	KeyHoleTarget();
 	KeyHoleTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
 

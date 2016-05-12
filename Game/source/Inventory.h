@@ -15,6 +15,8 @@ public:
 	GameObject * getKey();
 	void setKey(GameObject * key);
 	void removeKey();
+	void fixedUpdate() override;
+
 };
 
 #endif // INVENTORY_H

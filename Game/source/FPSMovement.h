@@ -42,7 +42,6 @@ public:
 	void create() override;
 	void fixedUpdate() override;
 	void debugDraw() override;
-
 	void respawn();
 };
 
