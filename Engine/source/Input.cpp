@@ -18,8 +18,9 @@ unordered_map<int, Button> Input::joystickMap;
 glm::vec2 Input::mousePosBuff;
 glm::vec2 Input::scrollBuff, Input::scrollAmount;
 
-std::unordered_map<std::pair<int, std::string>, float> Input::serverAxisMap;
-std::unordered_map<std::pair<int, std::string>, bool> Input::serverButtonMap;
+std::map<std::pair<int, std::string>, float> Input::serverAxisMap;
+std::map<std::pair<int, std::string>, InputState> Input::serverButtonMap;
+std::map<int, glm::vec2 > Input::serverMousePos;
 
 Input::Input()
 {
@@ -234,6 +235,8 @@ void Input::addInputsFromConfig(std::string configfile){
 		data.dead = file.getFloat(*i, "dead");
 		data.sensitivity = file.getFloat(*i, "sensitivity");
 		data.invert = file.getBool(*i, "invert");
+		data.joystick = (Joystick) file.getInt(*i, "joystick");
+		data.axis = (AxisType) file.getInt(*i, "axis");
 		addInput(data);
 	}
 }
@@ -321,8 +324,23 @@ void Input::addInput(InputData data)
 
 // ------------ Keymapped Inputs ------------ 
 
-float Input::getAxis(std::string name)
+float Input::getAxis(std::string name, int clientID)
 {
+	if (clientID > -1)
+	{
+		auto pair = std::make_pair(clientID, name);
+		auto& found = serverAxisMap.find(pair);
+
+		if (found != serverAxisMap.end())
+		{
+			return found->second;
+		}
+		else
+		{
+			return 0.0f;
+		}
+	}
+
 	// TODO: Error handling for nonexistent input
 	InputData data = inputs[name];
 	float result = 0;
@@ -430,28 +448,43 @@ float Input::getAxisHelper(GLFWinput in, InputData data)
 	return 0;
 }
 
-bool Input::getButtonDown(std::string name)
+bool Input::getButtonDown(std::string name, int clientID)
 {
-	return getButtonHelper(name) == InputState::BUTTON_DOWN;
+	return getButtonHelper(name, clientID) == InputState::BUTTON_DOWN;
 }
 
-bool Input::getButton(std::string name)
+bool Input::getButton(std::string name, int clientID)
 {
-	return getButtonHelper(name) == InputState::PRESSED;
+	return getButtonHelper(name, clientID) == InputState::PRESSED;
 }
 
-bool Input::getButtonUp(std::string name)
+bool Input::getButtonUp(std::string name, int clientID)
 {
-	return getButtonHelper(name) == InputState::BUTTON_UP;
+	return getButtonHelper(name, clientID) == InputState::BUTTON_UP;
 }
 
-bool Input::getButtonIdle(std::string name)
+bool Input::getButtonIdle(std::string name, int clientID)
 {
-	return getButtonHelper(name) == InputState::IDLE;
+	return getButtonHelper(name, clientID) == InputState::IDLE;
 }
 
-InputState Input::getButtonHelper(std::string name)
+InputState Input::getButtonHelper(std::string name, int clientID)
 {
+	if (clientID > -1)
+	{
+		auto pair = std::make_pair(clientID, name);
+		auto& found = serverButtonMap.find(pair);
+
+		if (found != serverButtonMap.end())
+		{
+			return found->second;
+		}
+		else
+		{
+			return InputState::UNDEFINED;
+		}
+	}
+	
 	InputData data = inputs[name];
 	InputState pos = GLFWInputToState(inputMap[data.positiveButton]);
 	InputState neg = GLFWInputToState(inputMap[data.negativeButton]);
@@ -470,8 +503,9 @@ InputState Input::getButtonHelper(std::string name)
 
 InputState Input::GLFWInputToState(GLFWinput in)
 {
-	if (in.id == 0)
-		return InputState::UNDEFINED;
+	// why does this work??
+	//if (in.id == 0)
+	//	return InputState::UNDEFINED;
 
 	if (in.type == InputType::KEYBOARD)
 	{
@@ -509,8 +543,22 @@ bool Input::getKeyIdle(string button)
 	return keyboardMap[inputMap[button].id].state == InputState::IDLE;
 }
 
-glm::vec2 Input::mousePosition()
+glm::vec2 Input::mousePosition(int clientID)
 {
+	if (clientID > -1)
+	{
+		auto& found = serverMousePos.find(clientID);
+
+		if (found != serverMousePos.end())
+		{
+			return found->second;
+		}
+		else
+		{
+			return glm::vec2(0, 0);
+		}
+	}
+
 	return mousePosBuff;
 }
 
@@ -626,10 +674,6 @@ std::vector<char> Input::serialize()
 
 std::vector<char> Input::serialize(int playerID)
 {
-	/**
-	 * jj1 	 
-	 */
-	
 	std::vector<float> data;
 
 	data.push_back(playerID);
@@ -654,10 +698,25 @@ std::vector<char> Input::serialize(int playerID)
 	return bytes;
 }
 
-std::vector<char> Input::deserializeAndApply(std::vector<char> bytes)
+void Input::deserializeAndApply(std::vector<char> bytes)
 {
 	const float* floatr = reinterpret_cast<const float*>(&bytes[0]);
 	std::vector<float> floats(floatr, floatr + bytes.size() / sizeof(float));
 
-	
+	int clientID = floats[0];
+
+	serverMousePos[clientID] = glm::vec2(floats[1], floats[2]);
+
+	int i = 3;
+	for (auto& input : inputs)
+	{
+		auto inputName = input.first;
+		serverAxisMap[std::make_pair(clientID, inputName)] = floats[i++];
+	}
+
+	for (auto& input : inputs)
+	{
+		auto inputName = input.first;
+		serverButtonMap[std::make_pair(clientID, inputName)] = (InputState)(int)(floats[i++]);
+	}
 }
