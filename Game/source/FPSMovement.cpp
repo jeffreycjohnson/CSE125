@@ -112,6 +112,12 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront * speed;
 	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight * speed;
 
+	moveDir = xComp + zComp;
+
+	if (ServerInput::getAxis("pitch", clientID) != 0) {
+		int x = 0xdeadbeef; // TODO: Debugggin
+	}
+
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
 		bool moveDirModified = true;
