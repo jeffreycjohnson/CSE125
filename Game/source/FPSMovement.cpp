@@ -85,7 +85,16 @@ void FPSMovement::fixedUpdate()
 	if (position.y < deathFloor) {
 		respawn();
 	}
-	
+
+	// Ray cast normal debug against OBBs
+	auto cameraRay = Renderer::mainCamera->getEyeRay();
+	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
+	auto camhit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(cameraRay, Octree::BOTH, 0, Octree::RAY_MAX, box);
+	raycastHit = camhit.intersects;
+	lastRayPoint = cameraRay.getPos(camhit.hitTime);
+	lastRayPointPlusN = lastRayPoint + camhit.normal;
+	// end debug
+
 	recalculate();
 	getPlayerRadii(); // Hmmm, suspicious
 	raycastMouse();
@@ -105,18 +114,18 @@ void FPSMovement::getPlayerRadii() {
 void FPSMovement::handleHorizontalMovement(float dt) {
 
 	// act on keyboard
-	float speed = moveSpeed *dt;
+	float speed = moveSpeed * dt;
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront * speed;
-	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight * speed;
-
+	//The move dir is the combined x and z movement components
+	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront;
+	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight;
 	moveDir = xComp + zComp;
 
-	if (ServerInput::getAxis("pitch", clientID) != 0) {
-		int x = 0xdeadbeef; // TODO: Debugggin
-	}
+	//Normalize the player's combined movement vector, and multiply it by the speed to ensure a constant velocity
+	if (glm::length(moveDir) > 0)
+		moveDir = glm::normalize(moveDir) * speed;
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
@@ -142,7 +151,7 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 {
 	//We raycast in the given direction
 	Ray moveRay(position, castDirection);
-	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
 
 	//If we hit something in front of us, and it is within the player radius
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
@@ -217,22 +226,6 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		position.y += vSpeed;
 	}
 
-	if (position.y < deathFloor) {
-		respawn();
-	}
-
-	// debug
-	auto rayray = Renderer::mainCamera->getEyeRay();
-	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
-	auto shit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(rayray, Octree::BOTH, 0, Octree::RAY_MAX, box);
-	raycastHit = shit.intersects;
-	lastRayPoint = rayray.getPos(shit.hitTime);
-	lastRayPointPlusN = lastRayPoint + shit.normal;
-	// end debug
-	
-	recalculate();
-
-	raycastMouse();
 }
 
 void FPSMovement::debugDraw()
@@ -286,12 +279,10 @@ void FPSMovement::respawn() {
 
 void FPSMovement::raycastMouse()
 {
-	return; // Jason said to do this and I trust him
-	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
-	if (!octreeManager) return;
+	if (!oct) return;
 
 	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
-	auto cast = octreeManager->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
+	auto cast = oct->raycast(ray, Octree::BuildMode::DYNAMIC_ONLY);
 
 	if (!cast.intersects) return;
 
