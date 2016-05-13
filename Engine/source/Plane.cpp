@@ -35,7 +35,7 @@ Plane::~Plane() {
 }
 
 // See header for clarification on Plane semantics
-bool Plane::pointInside(const glm::vec3& point) {
+bool Plane::pointInside(const glm::vec3& point) const {
 	float signedDist = distanceToPoint(point);
 	return (signedDist > 0);
 }
@@ -44,13 +44,13 @@ bool Plane::pointInside(const glm::vec3& point) {
 // Math reference: http://mathworld.wolfram.com/Plane.html
 // "If the sign is positive then the point is on the side that 
 //  agrees with the normal n, otherwise it is on the other side."
-float Plane::distanceToPoint(const glm::vec3& point) {
+float Plane::distanceToPoint(const glm::vec3& point) const {
 	float distance = (A * point.x + B * point.y + C * point.z + D);
 	distance /= std::sqrtf(A * A + B * B + C * C);
 	return distance;
 }
 
-RayHitInfo Plane::intersects(const Ray & ray)
+RayHitInfo Plane::intersects(const Ray & ray) const
 {
 	RayHitInfo hitInfo;
 
@@ -73,17 +73,17 @@ RayHitInfo Plane::intersects(const Ray & ray)
 		hitInfo.intersects = true;
 		hitInfo.collider = nullptr;
 		hitInfo.point = ray.getPos(hitInfo.hitTime);
-		//hitInfo.normal = N; // TODO: Uncomment this after I rebase
+		hitInfo.normal = N;
 	}
 
 	return hitInfo;
 }
 
-glm::vec3 Plane::getNormal()
+glm::vec3 Plane::getNormal() const
 {
 	return N;
 }
 
-void Plane::debugDraw(const glm::vec3& pos) {
+void Plane::debugDraw(const glm::vec3& pos) const {
 	Renderer::drawArrow(pos, N, glm::vec4(1,1,1,1));
 }

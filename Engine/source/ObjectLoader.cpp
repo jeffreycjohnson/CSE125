@@ -99,6 +99,7 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 	if (name.find("BoxCollider") == 0) {
 		auto box = new BoxCollider(glm::vec3(0), glm::vec3(2));
 		box->setStatic(isStatic);
+		box->setAxisAligned(false); // Load OBBs by default
 		nodeObject->addComponent(box);
 	}
 	else if (name.find("SphereCollider") == 0) {

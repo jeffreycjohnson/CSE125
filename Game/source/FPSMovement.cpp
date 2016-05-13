@@ -21,8 +21,6 @@
 #include "ServerInput.h"
 #include "Config.h"
 
-#include "PressButton.h"
-
 FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
 	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
@@ -33,6 +31,7 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 	pastFirstTick = false;
 	raycastHit = false;
 
+	playerBoxCollider = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct == nullptr) {
 		throw "ERROR: Octree is a nullptr";
@@ -62,13 +61,8 @@ void FPSMovement::fixedUpdate()
 
 		glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 		lastMousePosition = currMousePosition;
-
-		//On the very first tick we get the radii of the player's bounding boxes
-		getPlayerRadii();
 		return;
 	}
-
-	RayHitInfo moveHit;
 
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
@@ -93,7 +87,7 @@ void FPSMovement::fixedUpdate()
 	}
 	
 	recalculate();
-
+	getPlayerRadii(); // Hmmm, suspicious
 	raycastMouse();
 }
 
@@ -101,27 +95,22 @@ void FPSMovement::getPlayerRadii() {
 	//First we access the player's box collider
 	Transform playerTrans = GameObject::FindByName("Player")->transform;
 	GameObject * go = playerTrans.children[0]->children[0]->gameObject;
-	BoxCollider * b = go->getComponent<BoxCollider>();
+	playerBoxCollider = go->getComponent<BoxCollider>();
 
 	//Then we access it's width and height, to set the player radii
-	playerRadius = b->getWidth() / 2;
-	playerHeightRadius = b->getHeight() / 2;
+	playerRadius = playerBoxCollider->getWidth() / 2.0f;
+	playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
 }
 
 void FPSMovement::handleHorizontalMovement(float dt) {
+
 	// act on keyboard
-	float speed = moveSpeed * dt;
+	float speed = moveSpeed *dt;
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	//The move dir is the combined x and z movement components
-	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront;
-	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight;
-	moveDir = xComp + zComp;
-
-	//Normalize the player's combined movement vector, and multiply it by the speed to ensure a constant velocity
-	if (glm::length(moveDir) > 0)
-		moveDir = glm::normalize(moveDir) * speed;
+	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront * speed;
+	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight * speed;
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
@@ -195,45 +184,56 @@ void FPSMovement::handleSideCollisions(glm::vec3 position, glm::vec3 direction) 
 }
 
 void FPSMovement::handleVerticalMovement(float dt) {
-	//This ray goes downwards from the player center
+	
+	//This ray goes downwards from the player center, and IGNORE the player's collider
+
 	Ray downRay(position, -worldUp);
-	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
-	//If the player has a collider below them that is closer than half their height + 0.1f, then they are standing on it
+	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
 	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
 
-	//This ray goes up from the player center
 	Ray upRay(position, worldUp);
-	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH);
-	//If the player has a collider above them that is closer than half their height + 1.0f, then they hit their head on it
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
 	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
 
 	if (standingOnSurface) {
-		//If they are standing on a surface, their vertical movement gets reset to the base falling speed
 		vSpeed = baseVSpeed;
-		//Their y position is snapped to the surface they are on, plus half their height
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
-
-		//They can only jump if they don't have something on top of them
 		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0) {
 			vSpeed = startJumpSpeed;
-			position.y += vSpeed*dt;
+			position.y += vSpeed;
 		}
 	}
 	else {
-		//If they are moving up and hit their head, they stop moving up
 		if (hitHead && vSpeed > 0)
 			vSpeed = 0;
 
-		//If they are not on a surface they are either moving up or falling
 		vSpeed += vAccel;
-		position.y += vSpeed*dt;
+		position.y += vSpeed;
 	}
+
+	if (position.y < deathFloor) {
+		respawn();
+	}
+
+	// debug
+	auto rayray = Renderer::mainCamera->getEyeRay();
+	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
+	auto shit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(rayray, Octree::BOTH, 0, Octree::RAY_MAX, box);
+	raycastHit = shit.intersects;
+	lastRayPoint = rayray.getPos(shit.hitTime);
+	lastRayPointPlusN = lastRayPoint + shit.normal;
+	// end debug
+	
+	recalculate();
+
+	raycastMouse();
 }
 
 void FPSMovement::debugDraw()
 {
 	if (raycastHit) {
-		Renderer::drawSphere(lastRayPoint, 0.02f, glm::vec4(0, 0, 1, 1));
+		Renderer::drawSphere(lastRayPoint, 0.25f, glm::vec4(0, 0, 1, 1)); // blue = hitpoint
+		Renderer::drawSphere(lastRayPointPlusN, 0.25f, glm::vec4(1, 0, 1, 1)); // purple = normal + pt
 	}
 
 	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
@@ -280,6 +280,7 @@ void FPSMovement::respawn() {
 
 void FPSMovement::raycastMouse()
 {
+	return; // Jason said to do this and I trust him
 	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (!octreeManager) return;
 
@@ -293,9 +294,6 @@ void FPSMovement::raycastMouse()
 		std::cout << "BUTTON TRIGGER" << std::endl;
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
 		std::cout << hit->getName() << std::endl;
-		if (hit->getComponent<PressButton>())
-		{
-			hit->getComponent<PressButton>()->trigger();
-		}
+		
 	}
 }

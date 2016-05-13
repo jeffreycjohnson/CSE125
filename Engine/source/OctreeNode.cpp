@@ -25,6 +25,7 @@ OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* p
 
 	myAABB = new BoxCollider(center, dims);
 	myAABB->setMinAndMax(min, max);
+	myAABB->setAxisAligned(true);
 
 }
 
@@ -43,6 +44,11 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) 
 
 	RayHitInfo againstMe = myAABB->raycast(ray);
 
+	// If something has become NaN, we should reset it
+	if (std::isnan(hitInfo.hitTime)) {
+		hitInfo.hitTime = Octree::RAY_MAX;
+	}
+
 	if (againstMe.hitTime > hitInfo.hitTime || hitInfo.hitTime <= 0 ) {
 		return; // Nothing inside of us will collide with this
 	}
@@ -50,7 +56,7 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) 
 	for (auto obj : colliders) {
 		if (obj == ignore) continue; // This is the ignored collider, so just skip it
 		auto temphit = obj->raycast(ray);
-		if (temphit.intersects && temphit.hitTime > 0) {
+		if (temphit.intersects /*&& temphit.hitTime > 0*/) {
 			if (temphit.hitTime < hitInfo.hitTime) {
 				hitInfo = temphit;
 			}
@@ -175,6 +181,7 @@ bool OctreeNode::insert(Collider* colliderBeingInserted, const BoxCollider& coll
 			return true;
 		}
 	}
+	return false;
 }
 
 void OctreeNode::remove(Collider * colliderBeingRemoved)
