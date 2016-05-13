@@ -152,14 +152,20 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 	//If we hit something in front of us, and it is within the player radius
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
 		//Dexter's Magic Math
-		glm::vec3 desiredNewPos = position + moveDir;
+		glm::vec3 desiredNewPos = position + (moveDir * moveSpeed);
 		glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - moveHit.hitTime);
 		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
 		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
 		moveDir = newPos - position;
+
+		// new mathz
+		float dist = ((glm::dot(desiredNewPos, moveHit.normal)));
+		newPos = dist * moveHit.normal;
+		newPos = newPos + desiredNewPos;
+		moveDir = newPos - position;
 		return true;
 	}
-	else /*if(failCount != 1) */{
+	else {
 		handleSideCollisions(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
 		handleSideCollisions(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
 	}

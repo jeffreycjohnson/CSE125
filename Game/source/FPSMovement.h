@@ -51,4 +51,3 @@ public:
 };
 
 #endif // PLAYER_MOVEMENT_H
-
