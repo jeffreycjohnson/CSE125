@@ -19,7 +19,7 @@ private:
 
 	float moveSpeed, mouseSensitivity;
 
-	glm::vec3 position, front, up, right, worldUp, moveDir;
+	glm::vec3 position, forward, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
 	float playerRadius, playerHeightRadius, vSpeed;
 	bool hitWall, pastFirstTick;

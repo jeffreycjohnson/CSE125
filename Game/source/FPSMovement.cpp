@@ -30,6 +30,7 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 	this->pitch = 0.0f;
 	pastFirstTick = false;
 	raycastHit = false;
+	forward = glm::vec3(0);
 
 	playerBoxCollider = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
@@ -115,20 +116,21 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 
 	// act on keyboard
 	float speed = moveSpeed * dt;
-	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	//The move dir is the combined x and z movement components
-	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront;
-	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight;
-	moveDir = xComp + zComp;
+	glm::vec3 forwardComp = ServerInput::getAxis("pitch", clientID) * forward;
+	forwardComp.y = 0; // there is no such thing as "y"
+	glm::vec3 sideComp = ServerInput::getAxis("roll", clientID) * right;
+
+	//moveDir = (position + (ServerInput::getAxis("pitch", clientID) * forward)) - position;
+	moveDir = forwardComp + sideComp;
 
 	//Normalize the player's combined movement vector, and multiply it by the speed to ensure a constant velocity
 	if (glm::length(moveDir) > 0)
 		moveDir = glm::normalize(moveDir) * speed;
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
-	if (oct != nullptr) {
+	/*if (oct != nullptr) {
 		bool moveDirModified = true;
 		int failCount = 0;
 		while (moveDirModified && failCount < 3) {
@@ -141,7 +143,7 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 		if (moveDirModified && failCount == 3) {
 			moveDir = glm::vec3(0);
 		}
-	}
+	}*/
 
 	//Update the position with the new movement vector
 	position += moveDir;
@@ -162,7 +164,7 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
 		moveDir = newPos - position;
 
-		// new mathz
+		// new mathz   // TODO: Not sure if this is correct, but original code seemed to work for AABBs
 		float dist = ((glm::dot(desiredNewPos, moveHit.normal)));
 		newPos = dist * moveHit.normal;
 		newPos = newPos + desiredNewPos;
@@ -235,6 +237,12 @@ void FPSMovement::debugDraw()
 		Renderer::drawSphere(lastRayPointPlusN, 0.25f, glm::vec4(1, 0, 1, 1)); // purple = normal + pt
 	}
 
+	// visualizing various vectors of importance for movement
+	Renderer::drawSphere(position + forward, 0.25f, glm::vec4(1, 1, 0, 1)); // yellow
+	Renderer::drawSphere(position + front, 0.125f, glm::vec4(0, 1, 0, 1)); // lime green for (front)
+	Renderer::drawSphere(position, 0.25f, glm::vec4(1.000, 0.388, 0.278, 1)); // orange (position)
+
+
 	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
 }
 
@@ -253,6 +261,12 @@ void FPSMovement::recalculate()
 		sinYaw * cosPitch));
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
+
+	forward = (position + front) - position;
+	forward.y = 0; // pretend that the "y" axis doesn't exist
+	forward = glm::normalize(forward);
+
+	//glm::normalize(glm::cross(forward, worldUp));
 
 	// now construct quaternion for mouselook
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
