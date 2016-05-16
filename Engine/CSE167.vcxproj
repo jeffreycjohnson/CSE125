@@ -315,6 +315,8 @@
     <None Include="..\shaders\skybox.vert" />
     <None Include="..\shaders\ssao.frag" />
     <None Include="..\shaders\ssao_blur.frag" />
+    <None Include="..\shaders\ui.frag" />
+    <None Include="..\shaders\ui.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\config\options.ini">
