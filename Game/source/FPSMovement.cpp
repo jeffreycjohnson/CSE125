@@ -123,16 +123,21 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 	if (glm::length(moveDir) > 0)
 		moveDir = glm::normalize(moveDir) * speed;
 
-	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
+	//We raycast right, left, and forward and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
 		bool moveDirModified = true;
 		int failCount = 0;
+
+		//Force the players out of walls to their sides BEFORE foing the forward cast
+		handleSideCollisions(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
+		handleSideCollisions(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+
+		//Search for a valid forward vector for the player to move along
 		while (moveDirModified && failCount < 3) {
 			moveDirModified = slideAgainstWall(position, moveDir, failCount);
 			failCount++;
 		}
 
-		//std::cout << failCount << std::endl;
 		//We try 3 times to change moveDir, if our final try was inside a wall we don't move
 		if (moveDirModified && failCount == 3) {
 			moveDir = glm::vec3(0);
@@ -159,10 +164,6 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 		moveDir = newPos - position;
 		return true;
 	}
-	else /*if(failCount != 1) */{
-		handleSideCollisions(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
-		handleSideCollisions(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
-	}
 	return false;
 }
 
@@ -170,20 +171,9 @@ void FPSMovement::handleSideCollisions(glm::vec3 position, glm::vec3 direction) 
 	Ray sideRay(position, direction);
 	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH);
 	
-	//PROBLEM: This means that the instant rotation that occurs when we hit a wall creates a jump when the side ray is suddenly way inside the wall
+	//If the side raycast enters a wall, we force the player back along the sideray vector to keep them out of the wall
 	if (sideHit.intersects && sideHit.hitTime <= playerRadius && sideHit.hitTime >= 0) {
 		moveDir += -glm::normalize(direction)*(playerRadius - sideHit.hitTime);
-
-		/*glm::vec3 desiredNewPos = position + moveDir;
-		float dist = glm::dot(desiredNewPos, sideHit.normal);
-		if (dist < playerRadius) {
-			glm::vec3 q = desiredNewPos + playerRadius*sideHit.normal;
-			moveDir = q - position;
-		}*/
-		//glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - sideHit.hitTime);
-		//float distBehindWall = std::abs(glm::dot(behindVector, sideHit.normal));
-		//glm::vec3 newPos = desiredNewPos + distBehindWall * sideHit.normal;
-		//moveDir = newPos - position;
 	}
 
 }
