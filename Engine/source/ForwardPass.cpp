@@ -91,3 +91,33 @@ void PointShadowPass::render(Camera* camera)
     }
     CHECK_ERROR();
 }
+
+UIPass::UIPass() {
+	tex = std::make_unique<Texture>("assets/crosshair.png", true, GL_CLAMP_TO_EDGE);
+}
+
+UIPass::~UIPass() {
+
+}
+
+void UIPass::render(Camera * camera)
+{
+	auto& shader = Renderer::getShader(UI_SHADER);
+	glDisable(GL_STENCIL_TEST);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
+
+	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+		glBindVertexArray(currentEntry.vaoHandle);
+		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+	}
+
+	shader.use();
+	shader["uColor"] = glm::vec4(1);
+	tex->bindTexture(0);
+	shader["tex"] = 0;
+	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+	CHECK_ERROR();
+}

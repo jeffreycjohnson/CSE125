@@ -99,4 +99,15 @@ private:
     Framebuffer * blurBuffers[5];
 };
 
+class UIPass : public RenderPass
+{
+public:
+	UIPass();
+	~UIPass() override;
+	void render(Camera* camera) override;
+
+private:
+	std::unique_ptr<Texture> tex;
+};
+
 #endif
