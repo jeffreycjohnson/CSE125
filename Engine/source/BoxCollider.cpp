@@ -46,21 +46,22 @@ BoxCollider::~BoxCollider()
 void BoxCollider::calculatePlanes()
 {
 	// Do mathz here in world space
-	glm::vec3 A, B, C, D, E, G;
+	glm::vec3 A, B, C, D, E, F, G;
 	A = transformPoints[0];
 	B = transformPoints[1];
 	C = transformPoints[2];
 	D = transformPoints[3];
 	E = transformPoints[4];
+	F = transformPoints[5];
 	G = transformPoints[6];
 
 	ABCD = Plane(A, glm::cross(D - C, A - C));
 	ACEG = Plane(A, glm::cross(C - G, E - G));
 	ABEF = Plane(A, glm::cross(B - A, E - A));
 
-	EFGH = Plane(E, -ABCD.getNormal());
-	BDFH = Plane(B, -ACEG.getNormal());
-	CDGH = Plane(C, -ABEF.getNormal());
+	EFGH = Plane(A, -ABCD.getNormal());
+	BDFH = Plane(A, -ACEG.getNormal());
+	CDGH = Plane(A, -ABEF.getNormal());
 }
 
 void BoxCollider::fixedUpdate()
@@ -104,10 +105,8 @@ void BoxCollider::fixedUpdate()
 			zmax = transformPoints[i].z;
 	}
 
-	// Recalculate the planes if we are an OBB
-	//if (!isAxisAligned) {
-		calculatePlanes();
-	//}
+	calculatePlanes();
+
 }
 
 BoxCollider BoxCollider::getAABB() const {
@@ -161,13 +160,6 @@ void BoxCollider::debugDraw()
 				}
 			}
 		}
-		// Draw planes (normals)
-		/*ABCD.debugDraw(offsetWorld);
-		ACEG.debugDraw(offsetWorld);
-		ABEF.debugDraw(offsetWorld);
-		EFGH.debugDraw(offsetWorld);
-		BDFH.debugDraw(offsetWorld);
-		CDGH.debugDraw(offsetWorld);*/ // not worth, draw arrow is fucked
 	}
 }
 
@@ -203,13 +195,272 @@ void BoxCollider::setMinAndMax(const glm::vec3 & min, const glm::vec3 & max)
 	points[6] = offset + glm::vec3(-halfW, -halfH, halfD);
 	points[7] = offset + glm::vec3(-halfW, -halfH, -halfD);
 
-	update(0.0f); // Recalculate points, etc.
+	fixedUpdate(); // Recalculate points, etc.
 }
+
+void BoxCollider::setAxisAligned(bool axisAligned) {
+	isAxisAligned = axisAligned;
+};
 
 void BoxCollider::destroy()
 {
 	Collider::destroy();
 }
+
+bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
+	// The SAT states that:
+	// "If two convex objects are not penetrating, there exists an axis for which the projection of the objects will not overlap."
+
+	// References:
+	// Dirk Gregarious' GDC talk (2013)   (because it's interesting)
+	// http://gamedev.stackexchange.com/questions/44500/how-many-and-which-axes-to-use-for-3d-obb-collision-with-sat (OBBs, in particular)
+	// http://www.dyn4j.org/2010/01/sat/  (conceptual, SAT in 2D)
+
+	static const int NUM_AXES = 15;
+	std::vector<Ray> axes;
+
+	glm::vec3 A, B, C, E, A_other, B_other, C_other, E_other;
+	A = transformPoints[0];
+	B = transformPoints[1];
+	C = transformPoints[2];
+	E = transformPoints[4];
+	A_other = other.transformPoints[0];
+	B_other = other.transformPoints[1];
+	C_other = other.transformPoints[2];
+	E_other = other.transformPoints[4];
+
+	// 3 axes from face normals of the object
+	axes.push_back(Ray(A, ABCD.getNormal())); // right
+	axes.push_back(Ray(B, ACEG.getNormal())); // front
+	axes.push_back(Ray(C, ABEF.getNormal())); // top
+
+	// 3 axes from face normals of the OTHER object
+	axes.push_back(Ray(A_other, other.ABCD.getNormal())); // right
+	axes.push_back(Ray(B_other, other.ACEG.getNormal())); // front
+	axes.push_back(Ray(C_other, other.ABEF.getNormal())); // top
+
+	// 9 remaining axes from cross products of edges
+	axes.push_back(Ray(A, glm::cross(A - B, A_other - B_other)));
+	axes.push_back(Ray(A, glm::cross(A - B, A_other - C_other)));
+	axes.push_back(Ray(A, glm::cross(A - B, A_other - E_other)));
+
+	axes.push_back(Ray(C, glm::cross(A - C, A_other - B_other)));
+	axes.push_back(Ray(C, glm::cross(A - C, A_other - C_other)));
+	axes.push_back(Ray(C, glm::cross(A - C, A_other - E_other)));
+
+	axes.push_back(Ray(E, glm::cross(A - E, A_other - B_other)));
+	axes.push_back(Ray(E, glm::cross(A - E, A_other - C_other)));
+	axes.push_back(Ray(E, glm::cross(A - E, A_other - E_other)));
+
+	// Note that the cross product of two identical vectors = the 0 vector
+
+	/* pseudocode:
+	
+	for all axes:
+		Projection p = this->project()
+		Projection c = other.project()
+
+		if ( !overlaps(p,c) )
+			return true; // sep axis found
+	
+	*/
+
+	//assert(axes.size() == NUM_AXES);
+	glm::vec3 zero(0);
+
+	for (int axis = 0; axis < NUM_AXES; ++axis) {
+		float my_proj_min = INFINITY, my_proj_max = -INFINITY;
+		float ot_proj_min = INFINITY, ot_proj_max = -INFINITY;
+
+		if (axes[axis].direction == zero || glm::isnan(axes[axis].direction).b ) {
+			continue;
+		}
+
+		for (int vertex = 0; vertex < 8; ++vertex) {
+			// Project each vertex of our box onto the axis (our std::vector of Rays)
+			// The dot product gives us the signed distance to that point.
+			float temp = glm::dot(transformPoints[vertex], axes[axis].direction);
+
+			// Debug assertion to make sure we don't dot against the 0 vector
+			assert(!std::isnan(temp));
+
+			// Build the interval (e.g. the object's "shadow") along the axis over time
+			my_proj_min = std::min(my_proj_min, temp);
+			my_proj_max = std::max(my_proj_max, temp);
+		}
+
+		// Now, project the other box's vertices onto the same axis
+		for (int otherVertex = 0; otherVertex < 8; ++otherVertex) {
+			float temp = glm::dot(other.transformPoints[otherVertex], axes[axis].direction);
+			assert(!std::isnan(temp));
+			ot_proj_min = std::min(ot_proj_min, temp);
+			ot_proj_max = std::max(ot_proj_max, temp);
+		}
+
+		// Compare the intervals
+		// [my_proj_min, my_proj_max], [ot_proj_min, ot_proj_max]
+		if (my_proj_max < ot_proj_min || ot_proj_max < my_proj_min) {
+			return true; // We found a separating axis between the two boxes!
+		}
+	}
+
+	return false; // No separating axis was detected
+
+}
+
+void BoxCollider::rayOBB(const Ray & ray, RayHitInfo& hit) const
+{
+	// Real Time Rendering method (2nd edition)
+
+	float tMin = -INFINITY;
+	float tMax = INFINITY;
+
+	glm::vec3 p = offsetWorld - ray.origin;
+
+	// Compute axes
+	glm::vec3 A, B, C, E, F;
+	A = transformPoints[0]; B = transformPoints[1];
+	C = transformPoints[2]; E = transformPoints[4];
+	F = transformPoints[5];
+
+	// x
+	glm::vec3 a_u = ABCD.getNormal();
+	glm::vec3 a_u_max = -a_u;
+	float h_u = glm::distance(A, E) / 2.0f;
+	
+	// y
+	glm::vec3 a_v = ABEF.getNormal();
+	glm::vec3 a_v_max = -a_v;
+	float h_v = glm::distance(A, C) / 2.0f;
+
+	// z
+	glm::vec3 a_w = ACEG.getNormal();
+	glm::vec3 a_w_max = -a_w;
+	float h_w = glm::distance(A, B) / 2.0f;
+
+	glm::vec3 min_norm, max_norm;
+
+	// Axis U (x)
+	{
+		float e = glm::dot(a_u, p);
+		float f = glm::dot(a_u, ray.direction);
+		if (std::abs(f) > FLT_EPSILON) {
+			float t1 = (e + h_u) / f;
+			float t2 = (e - h_u) / f;
+
+			if (t1 > t2) {
+				std::swap(t1, t2);
+				std::swap(a_u, a_u_max);
+			}
+
+			if (t1 > tMin) {
+				tMin = t1;
+				min_norm = a_u;
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+				max_norm = a_u_max;
+			}
+
+			if (tMin > tMax || tMax < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = 0; return;
+			}
+		}
+		else if ((-e - h_u) > 0 || (-e + h_u) < 0) {
+			// No intersection
+			hit.intersects = false;
+			hit.hitTime = 0; return;
+		}
+	}
+
+	// Axis V (y)
+	{
+		float e = glm::dot(a_v, p);
+		float f = glm::dot(a_v, ray.direction);
+		if (std::abs(f) > FLT_EPSILON) {
+			float t1 = (e + h_v) / f;
+			float t2 = (e - h_v) / f;
+
+			if (t1 > t2) {
+				std::swap(t1, t2);
+				std::swap(a_v, a_v_max);
+			}
+
+			if (t1 > tMin) {
+				tMin = t1;
+				min_norm = a_v;
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+				max_norm = a_v_max;
+			}
+
+			if (tMin > tMax || tMax < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = 0; return;
+			}
+		}
+		else if ((-e - h_v) > 0 || (-e + h_v) < 0) {
+			// No intersection
+			hit.intersects = false;
+			hit.hitTime = 0; return;
+		}
+	}
+
+	// Axis W (z)
+	{
+		float e = glm::dot(a_w, p);
+		float f = glm::dot(a_w, ray.direction);
+		if (std::abs(f) > FLT_EPSILON) {
+			float t1 = (e + h_w) / f;
+			float t2 = (e - h_w) / f;
+
+			if (t1 > t2) {
+				std::swap(t1, t2);
+				std::swap(a_w, a_w_max);
+			}
+
+			if (t1 > tMin) {
+				tMin = t1;
+				min_norm = a_w;
+			}
+
+			if (t2 < tMax) {
+				tMax = t2;
+				max_norm = a_w_max;
+			}
+
+			if (tMin > tMax || tMax < 0) {
+				// No intersection
+				hit.intersects = false;
+				hit.hitTime = 0; return;
+			}
+		}
+		else if ((-e - h_w) > 0 || (-e + h_w) < 0) {
+			// No intersection
+			hit.intersects = false;
+			hit.hitTime = 0; return;
+		}
+	}
+
+	if (tMin > 0) {
+		hit.hitTime = tMin;
+		hit.normal = min_norm;
+		hit.intersects = true;
+		return;
+	}
+	else {
+		hit.hitTime = tMax;
+		hit.normal = max_norm;
+		hit.intersects = true;
+		return;
+	}
+};
 
 bool BoxCollider::insideOrIntersects(const glm::vec3& point) const {
 	return (
@@ -228,7 +479,15 @@ bool BoxCollider::intersects(const BoxCollider& other) const {
 	if (!isAxisAligned && intersectsAABB) {
 		// If we collide with the OBB's AABB, we will also collide with the OBB,
 		// because geometry.
-
+		if (intersectsAABB) {
+			// If the AABBs overlap, we will need to use the Separating Axis Theorem.
+			// If no separating axis exists between this box and the other, then
+			// the objects must penetrate each other.
+			return !separatingAxisExists(other);
+		}
+		else {
+			return false;
+		}
 	}
 	else {
 		return intersectsAABB;
@@ -253,18 +512,6 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 	glm::vec3 c = other.getCenterWorld();
 	float radius = other.getRadiusWorld();
 	float r_squared = radius * radius;
-	/*
-	e = std::fmaxf(xmin - c.x, 0) + std::fmaxf(c.x - xmax, 0);
-	if (e <= radius) return false;
-	d += e * e;
-
-	e = std::fmaxf(ymin - c.y, 0) + std::fmaxf(c.y - ymax, 0);
-	if (e <= radius) return false;
-	d += e * e;
-
-	e = std::fmaxf(zmin - c.z, 0) + std::fmaxf(c.z - zmax, 0);
-	if (e <= radius) return false;
-	d += e * e;*/
 
 	// Arvo's original method
 	if (c.x < xmin) {
@@ -298,11 +545,10 @@ bool BoxCollider::intersects(const SphereCollider & other) const
 
 }
 
-RayHitInfo BoxCollider::raycast(const Ray & ray) const
+void BoxCollider::rayAABB(const Ray & ray, RayHitInfo& hit) const
 {
 	// http://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 	// Because this is a raycast, we only want to register hits with things in front of the ray (t > 0)
-	RayHitInfo hit;
 
 	float tmin = (xmin - ray.origin.x) / ray.direction.x;
 	float tmax = (xmax - ray.origin.x) / ray.direction.x;
@@ -328,7 +574,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 	if ((tmin > tymax) || (tymin > tmax)) {
 		hit.intersects = false;
-		return hit;
+		return;
 	}
 
 	if (tymin > tmin) {
@@ -354,7 +600,7 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 	if ((tmin > tzmax) || (tzmin > tmax)) {
 		hit.intersects = false;
-		return hit;
+		return;
 	}
 
 	if (tzmin > tmin) {
@@ -376,18 +622,36 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 
 	// Return the tmin/tmax that is closest to the ray's origin
 	hit.hitTime = finalT;
-	hit.collider = (Collider*)this;
 	hit.intersects = true;
 	hit.normal = finalNorm;
-	hit.point = ray.getPos(finalT);
-	return hit;
+}
 
+RayHitInfo BoxCollider::raycast(const Ray & ray) const
+{
+	RayHitInfo hit;
+	hit.collider = (Collider*)this;
+	if (isAxisAligned) {
+		rayAABB(ray, hit);
+	}
+	else {
+		rayOBB(ray, hit);
+		return hit;
+	}
+	if (hit.intersects) {
+		hit.point = ray.getPos(hit.hitTime);
+	}
+	return hit;
 };
 
+//TODO: Get working with OBBs
 float BoxCollider::getWidth() {
-	return xmax - xmin;
+	return std::sqrt((xmax - xmin)*(xmax - xmin) + (zmax - zmin)*(zmax - zmin));
 }
 
 float BoxCollider::getHeight() {
 	return ymax - ymin;
+}
+
+float BoxCollider::getDepth() {
+	return zmax - zmin;
 }

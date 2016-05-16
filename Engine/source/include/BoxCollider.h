@@ -40,22 +40,27 @@ private:
 	// Six box planes in WORLD SPACE
 	Plane ABCD, ACEG, ABEF, EFGH, BDFH, CDGH;
 
-public:
+	bool separatingAxisExists(const BoxCollider& other) const;
+	void rayAABB(const Ray& ray, RayHitInfo& hit) const;
+	void rayOBB(const Ray& ray, RayHitInfo& hit) const;
 
+	void calculatePlanes();
+
+public:
 	static bool drawBoxPoints;
 
 	BoxCollider(glm::vec3 offset, glm::vec3 dimensions);
 	~BoxCollider();
 
-	void calculatePlanes();
-
 	void destroy() override;
 	void fixedUpdate() override;
 	void debugDraw() override;
 	void setMinAndMax(const glm::vec3& min, const glm::vec3& max);
+	void setAxisAligned(bool axisAligned);
 
 	float getWidth();
 	float getHeight();
+	float getDepth();
 
 	bool insideOrIntersects(const glm::vec3& point) const override;
 

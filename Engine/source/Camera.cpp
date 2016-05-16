@@ -122,7 +122,7 @@ float Camera::getFOV() const
 
 Ray Camera::getEyeRay() const
 {
-	return Ray(position, -forward);
+	return Ray(gameObject->transform.getWorldPosition(), -forward);
 }
 
 void Camera::setGameObject(GameObject * go)

@@ -43,6 +43,8 @@ void Laser::collisionStay(GameObject *other)
 	{
 		GameObject * go = other->transform.getParent()->gameObject;
 		FPSMovement * fps = go->getComponent<FPSMovement>();
-		fps->respawn();
+		if (fps != nullptr) {
+			fps->respawn();
+		}
 	}
 }

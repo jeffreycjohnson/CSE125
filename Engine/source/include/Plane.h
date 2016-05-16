@@ -39,13 +39,13 @@ public:
 	Plane(glm::vec3 p0, glm::vec3 normal);
 	~Plane();
 
-	bool pointInside(const glm::vec3&);
+	bool pointInside(const glm::vec3&) const;
 
 	// Returns the SIGNED distance from the point to the plane!
 	// If you need absolute distance, remeber to use std::abs
-	float distanceToPoint(const glm::vec3&);
+	float distanceToPoint(const glm::vec3&) const;
 
-	RayHitInfo intersects(const Ray& ray);
-	glm::vec3 getNormal();
-	void debugDraw(const glm::vec3& pos);
+	RayHitInfo intersects(const Ray& ray) const;
+	glm::vec3 getNormal() const;
+	void debugDraw(const glm::vec3& pos) const;
 };

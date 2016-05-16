@@ -36,6 +36,13 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 	this->pitch = 0.0f;
 	pastFirstTick = false;
 	raycastHit = false;
+	forward = glm::vec3(0);
+
+	playerBoxCollider = nullptr;
+	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
+	if (oct == nullptr) {
+		throw "ERROR: Octree is a nullptr";
+	}
 }
 
 void FPSMovement::create()
@@ -44,6 +51,7 @@ void FPSMovement::create()
 	{
 		this->gameObject->addChild(verticality);
 		verticality->transform.translate(worldUp * 0.6f);
+		verticality->transform.translate(front * 0.35f);
 	}
 
 	//Input::hideCursor();
@@ -60,15 +68,8 @@ void FPSMovement::fixedUpdate()
 
 		glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 		lastMousePosition = currMousePosition;
-
-		//On the very first tick we get the radii of the player's bounding boxes
-		getPlayerRadii();
 		return;
 	}
-
-	RayHitInfo moveHit;
-
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 
 	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
 	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
@@ -91,9 +92,18 @@ void FPSMovement::fixedUpdate()
 	if (position.y < deathFloor) {
 		respawn();
 	}
-	
-	recalculate();
 
+	// Ray cast normal debug against OBBs
+	auto cameraRay = Renderer::mainCamera->getEyeRay();
+	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
+	auto camhit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(cameraRay, Octree::BOTH, 0, Octree::RAY_MAX, box);
+	raycastHit = camhit.intersects;
+	lastRayPoint = cameraRay.getPos(camhit.hitTime);
+	lastRayPointPlusN = lastRayPoint + camhit.normal;
+	// end debug
+
+	recalculate();
+	getPlayerRadii(); // Hmmm, suspicious
 	raycastMouse();
 }
 
@@ -101,25 +111,25 @@ void FPSMovement::getPlayerRadii() {
 	//First we access the player's box collider
 	Transform playerTrans = GameObject::FindByName("Player")->transform;
 	GameObject * go = playerTrans.children[0]->children[0]->gameObject;
-	BoxCollider * b = go->getComponent<BoxCollider>();
+	playerBoxCollider = go->getComponent<BoxCollider>();
 
 	//Then we access it's width and height, to set the player radii
-	playerRadius = b->getWidth() / 2;
-	playerHeightRadius = b->getHeight() / 2;
+	playerRadius = playerBoxCollider->getWidth() / 2.0f;
+	playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
 }
 
 void FPSMovement::handleHorizontalMovement(float dt) {
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 
 	// act on keyboard
 	float speed = moveSpeed * dt;
-	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
 	glm::vec3 normRight = glm::normalize(right);
 
-	//The move dir is the combined x and z movement components
-	glm::vec3 xComp = ServerInput::getAxis("pitch", clientID) * worldFront;
-	glm::vec3 zComp = ServerInput::getAxis("roll", clientID) * normRight;
-	moveDir = xComp + zComp;
+	glm::vec3 forwardComp = ServerInput::getAxis("pitch", clientID) * forward;
+	forwardComp.y = 0; // there is no such thing as "y"
+	glm::vec3 sideComp = ServerInput::getAxis("roll", clientID) * right;
+
+	//moveDir = (position + (ServerInput::getAxis("pitch", clientID) * forward)) - position;
+	moveDir = forwardComp + sideComp;
 
 	//Normalize the player's combined movement vector, and multiply it by the speed to ensure a constant velocity
 	if (glm::length(moveDir) > 0)
@@ -127,75 +137,115 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
-		handleWallSlide(position, moveDir);
-		handleWallSlide(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
-		handleWallSlide(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+		bool moveDirModified = true;
+		int failCount = 0;
+
+		pushOutOfAdjacentWalls(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
+		pushOutOfAdjacentWalls(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+
+		// OKAY (verified)
+		while (moveDirModified && failCount < 3) {
+			moveDirModified = slideAgainstWall(position, moveDir, failCount);
+			failCount++;
+		}
+
+		//We try 3 times to change moveDir, if our final try was inside a wall we don't move
+		if (moveDirModified && failCount == 3) {
+			moveDir = glm::vec3(0);
+		}
 	}
 
 	//Update the position with the new movement vector
 	position += moveDir;
 }
 
-void FPSMovement::handleVerticalMovement(float dt) {
-	//This ray goes downwards from the player center
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
-	Ray downRay(position, -worldUp);
-	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH);
-	//If the player has a collider below them that is closer than half their height + 0.1f, then they are standing on it
-	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
-
-	//This ray goes up from the player center
-	Ray upRay(position, worldUp);
-	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH);
-	//If the player has a collider above them that is closer than half their height + 1.0f, then they hit their head on it
-	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
-
-	if (standingOnSurface) {
-		//If they are standing on a surface, their vertical movement gets reset to the base falling speed
-		vSpeed = baseVSpeed;
-		//Their y position is snapped to the surface they are on, plus half their height
-		position.y = position.y - downHit.hitTime + playerHeightRadius;
-
-		//They can only jump if they don't have something on top of them
-		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0) {
-			vSpeed = startJumpSpeed;
-			position.y += vSpeed*dt;
-		}
-	}
-	else {
-		//If they are moving up and hit their head, they stop moving up
-		if (hitHead && vSpeed > 0)
-			vSpeed = 0;
-
-		//If they are not on a surface they are either moving up or falling
-		vSpeed += vAccel;
-		position.y += vSpeed*dt;
-	}
-}
-
-void FPSMovement::handleWallSlide(glm::vec3 position, glm::vec3 castDirection)
+bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, int failCount)
 {
 	//We raycast in the given direction
-	auto oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	Ray moveRay(position, castDirection);
-	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH);
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
 
 	//If we hit something in front of us, and it is within the player radius
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
-		//If the wall's normal along a certain vector is not zero, we zero out the moveDir along that vector
-		//NOTE: THIS IS HARDCODED TO ASSUME AXIS-ALIGNED BBs
-		if (moveHit.normal.x != 0)
-			moveDir.x = 0;
-		if (moveHit.normal.z != 0)
-			moveDir.z = 0;
+
+		// First, get the desired new position, assuming there was no intersection
+		glm::vec3 desiredNewPos = position + (moveDir);
+		glm::vec3 behindVector = glm::normalize(moveDir) * (playerRadius - moveHit.hitTime);
+		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
+
+		// Project desired new position onto the wall's normal. If the dot product is negative (the position is behind
+		// the normal) then, we will want to offset our desired position to be IN FRONT OF the wall normal. we take
+		// the absolute value here, because we want a positive offset along the normal. We know the dot product will
+		// be negative, because the raycast hit within the player's radius.
+
+		//float distBehindWall = std::abs(glm::dot(desiredNewPos, moveHit.normal));
+		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
+		moveDir = newPos - position;
+		return true;
+
 	}
+	return false;
+}
+
+void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction) {
+
+	// This function checks whether the player's bounding box overlaps a wall in the given direction,
+	// and if so, offsets the player's position along the negative of the ray direction, so that the
+	// player no longer intersects that wall. Done once before movement logic, so that we don't slowly
+	// clip into walls when sliding.
+
+	Ray sideRay(position, direction);
+	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+
+	//If the side raycast enters a wall, we force the player back along the sideray vector to keep them out of the wall
+	if (sideHit.intersects && sideHit.hitTime <= playerRadius && sideHit.hitTime >= 0) {
+		moveDir += -glm::normalize(direction)*(playerRadius - sideHit.hitTime);
+	}
+
+}
+
+void FPSMovement::handleVerticalMovement(float dt) {
+	
+	//This ray goes downwards from the player center, and IGNORE the player's collider
+
+	Ray downRay(position, -worldUp);
+	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
+
+	Ray upRay(position, worldUp);
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
+
+	if (standingOnSurface) {
+		vSpeed = baseVSpeed;
+		position.y = position.y - downHit.hitTime + playerHeightRadius;
+		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0) {
+			vSpeed = startJumpSpeed;
+			position.y += vSpeed;
+		}
+	}
+	else {
+		if (hitHead && vSpeed > 0)
+			vSpeed = 0;
+
+		vSpeed += vAccel;
+		position.y += vSpeed;
+	}
+
 }
 
 void FPSMovement::debugDraw()
 {
 	if (raycastHit) {
-		Renderer::drawSphere(lastRayPoint, 0.02f, glm::vec4(0, 0, 1, 1));
+		Renderer::drawSphere(lastRayPoint, 0.25f, glm::vec4(0, 0, 1, 1)); // blue = hitpoint
+		Renderer::drawSphere(lastRayPointPlusN, 0.25f, glm::vec4(1, 0, 1, 1)); // purple = normal + pt
 	}
+
+	// visualizing various vectors of importance for movement
+	Renderer::drawSphere(position + forward, 0.25f, glm::vec4(1, 1, 0, 1)); // yellow
+	Renderer::drawSphere(position + front, 0.125f, glm::vec4(0, 1, 0, 1)); // lime green for (front)
+	Renderer::drawSphere(position, 0.25f, glm::vec4(1.000, 0.388, 0.278, 1)); // orange (position)
+
 
 	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
 }
@@ -216,32 +266,29 @@ void FPSMovement::recalculate()
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));
 
-	if (!setVerticalityForward) {
-		verticality->transform.translate(-right * 0.35f);
-		setVerticalityForward = true;
-	}
+	forward = (position + front) - position;
+	forward.y = 0; // pretend that the "y" axis doesn't exist
+	forward = glm::normalize(forward);
+
+	//glm::normalize(glm::cross(forward, worldUp));
 
 	// now construct quaternion for mouselook
 	glm::vec3 worldFront = glm::normalize(glm::cross(worldUp, right));
-	glm::vec3 frontUp = glm::dot(front, worldUp) * worldUp;
 
-	glm::quat x = glm::inverse(glm::quat(glm::lookAt(gameObject->transform.getWorldPosition(), gameObject->transform.getWorldPosition() + worldFront, worldUp)));
+	glm::mat4 newLookAt = glm::lookAt(gameObject->transform.getWorldPosition(), gameObject->transform.getWorldPosition() + worldFront, worldUp);
+	glm::quat x = glm::inverse(glm::quat(newLookAt));
 	glm::quat y = glm::angleAxis(glm::radians(pitch), glm::vec3(1, 0, 0));
 
-	glm::quat xy = glm::inverse(glm::quat(glm::lookAt(verticality->transform.getWorldPosition(), verticality->transform.getWorldPosition() + front, worldUp)));
+	glm::vec3 xrot = glm::eulerAngles(gameObject->transform.getRotation());
+	//std::cout << "X in rot: " << xrot.x * 180 / 3.141 << ", " << xrot.y << ", " << xrot.z << std::endl;
 
-	if (verticality != nullptr)
-	{
-		gameObject->transform.setRotate(x);
-		verticality->transform.setRotate(y);
-	}
-	else
-	{
-		gameObject->transform.setRotate(xy);
-	}
+	gameObject->transform.setRotate(x);
+	verticality->transform.setRotate(y);
 
 	// and transform me please
 	gameObject->transform.setPosition(position.x, position.y, position.z);
+
+	glm::vec3 rot = glm::eulerAngles(gameObject->transform.getRotation());
 }
 
 void FPSMovement::respawn() {
@@ -250,11 +297,10 @@ void FPSMovement::respawn() {
 
 void FPSMovement::raycastMouse()
 {
-	auto octreeManager = GameObject::SceneRoot.getComponent<OctreeManager>();
-	if (!octreeManager) return;
+	if (!oct) return;
 
 	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
-	auto cast = octreeManager->raycast(ray, Octree::BuildMode::BOTH);
+	auto cast = oct->raycast(ray, Octree::BuildMode::BOTH);
 
 	if (!cast.intersects) return;
 
