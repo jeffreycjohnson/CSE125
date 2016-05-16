@@ -12,7 +12,7 @@ Animation* Animation::fromCachedAnimationData(std::string name)
 		throw std::runtime_error("Can only create mesh from cached data if data in cache");
 	}
 
-	Animation *created = new Animation;
+	Animation *created = new Animation()
 	created->name = name;
 
 	return created;
