@@ -20,10 +20,10 @@ private:
 
 	glm::vec3 position, forward, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
+	RayHitInfo downHit;
 	float playerRadius, playerHeightRadius, vSpeed;
-	bool hitWall, pastFirstTick;
+	bool hitWall, pastFirstTick, standingOnSurface, justJumped;
 	int clientID;
-	bool setVerticalityForward;
 
 	glm::vec2 lastMousePosition;
 	glm::vec3 initialPosition;
@@ -35,6 +35,7 @@ private:
 
 	void handleHorizontalMovement(float dt);
 	void handleVerticalMovement(float dt);
+	void checkOnSurface(glm::vec3 position, glm::vec3 direction);
 	void getPlayerRadii();
 	void recalculate();
 	bool slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, int failCount);

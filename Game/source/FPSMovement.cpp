@@ -177,8 +177,6 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 		// the normal) then, we will want to offset our desired position to be IN FRONT OF the wall normal. we take
 		// the absolute value here, because we want a positive offset along the normal. We know the dot product will
 		// be negative, because the raycast hit within the player's radius.
-
-		//float distBehindWall = std::abs(glm::dot(desiredNewPos, moveHit.normal));
 		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
 		moveDir = newPos - position;
 		return true;
@@ -206,25 +204,38 @@ void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction
 
 void FPSMovement::handleVerticalMovement(float dt) {
 	
-	//This ray goes downwards from the player center, and IGNORE the player's collider
+	standingOnSurface = false;
+	//These rays goes downwards from the player, and IGNORES the player's collider
+	//Having 4 rays gives is more precision for knowing in the player is partially standing on a surface
+	checkOnSurface(position + glm::vec3(playerRadius / 3, 0, playerRadius / 3), -worldUp);
+	checkOnSurface(position + glm::vec3(playerRadius / 3, 0, -playerRadius / 3), -worldUp);
+	checkOnSurface(position + glm::vec3(-playerRadius / 3, 0, playerRadius / 3), -worldUp);
+	checkOnSurface(position + glm::vec3(-playerRadius / 3, 0, -playerRadius / 3), -worldUp);
 
-	Ray downRay(position, -worldUp);
-	RayHitInfo downHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
-	bool standingOnSurface = downHit.intersects && downHit.hitTime < playerHeightRadius + 0.1f;
-
+	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
 	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
 	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
 
+	//After we release the jump button, we can not jump again
+	if (ServerInput::getAxis("jump", clientID) == 0)
+		justJumped = false;
+
+	//If we are currently on a surface, snap us to the player's standing height
 	if (standingOnSurface) {
 		vSpeed = baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
-		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0) {
+
+		//If nothin is on our head, and we try to jump, and we aren't holding space from a previous jump
+		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0 && !justJumped) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
+			justJumped = true;
 		}
 	}
+	//If we're falling or flying upwards, accellerate down
 	else {
+		//If we hit our head while jumping, stop all upward momentum
 		if (hitHead && vSpeed > 0)
 			vSpeed = 0;
 
@@ -232,6 +243,21 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		position.y += vSpeed;
 	}
 
+}
+
+void FPSMovement::checkOnSurface(glm::vec3 position, glm::vec3 direction) {
+
+	//We raycast downwards from our position
+	Ray downRay(position, direction);
+	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+
+	//If standingOnSurface is already true, or this downHit has determined that we are on a surface, then set standingOnSurface to true
+	standingOnSurface = standingOnSurface || (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f);
+
+	//If we just found that we're standing on a surface, then the global downHit is set to this one
+	if (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f) {
+		downHit = newDownHit;
+	}
 }
 
 void FPSMovement::debugDraw()
