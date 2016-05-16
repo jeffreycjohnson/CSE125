@@ -10,7 +10,6 @@ private:
 	const float baseVSpeed = -0.2f;
 	const float startJumpSpeed = 0.25f;
 	const float vAccel = -0.015f;
-	const float speed = 1.0f;
 	const float deathFloor = -20.0f;
 
 	OctreeManager* oct;
@@ -39,7 +38,7 @@ private:
 	void getPlayerRadii();
 	void recalculate();
 	bool slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, int failCount);
-	void handleSideCollisions(glm::vec3 position, glm::vec3 direction);
+	void pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction);
 	void raycastMouse();
 
 public:

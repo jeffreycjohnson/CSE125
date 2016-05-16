@@ -130,20 +130,24 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 		moveDir = glm::normalize(moveDir) * speed;
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
-	/*if (oct != nullptr) {
+	if (oct != nullptr) {
 		bool moveDirModified = true;
 		int failCount = 0;
+
+		pushOutOfAdjacentWalls(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
+		pushOutOfAdjacentWalls(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+
+		// OKAY (verified)
 		while (moveDirModified && failCount < 3) {
 			moveDirModified = slideAgainstWall(position, moveDir, failCount);
 			failCount++;
 		}
 
-		//std::cout << failCount << std::endl;
 		//We try 3 times to change moveDir, if our final try was inside a wall we don't move
 		if (moveDirModified && failCount == 3) {
 			moveDir = glm::vec3(0);
 		}
-	}*/
+	}
 
 	//Update the position with the new movement vector
 	position += moveDir;
@@ -157,45 +161,39 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 
 	//If we hit something in front of us, and it is within the player radius
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
-		//Dexter's Magic Math
-		glm::vec3 desiredNewPos = position + (moveDir * moveSpeed);
-		glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - moveHit.hitTime);
+
+		// First, get the desired new position, assuming there was no intersection
+		glm::vec3 desiredNewPos = position + (moveDir);
+		glm::vec3 behindVector = glm::normalize(moveDir) * (playerRadius - moveHit.hitTime);
 		float distBehindWall = std::abs(glm::dot(behindVector, moveHit.normal));
+
+		// Project desired new position onto the wall's normal. If the dot product is negative (the position is behind
+		// the normal) then, we will want to offset our desired position to be IN FRONT OF the wall normal. we take
+		// the absolute value here, because we want a positive offset along the normal. We know the dot product will
+		// be negative, because the raycast hit within the player's radius.
+
+		//float distBehindWall = std::abs(glm::dot(desiredNewPos, moveHit.normal));
 		glm::vec3 newPos = desiredNewPos + distBehindWall * moveHit.normal;
 		moveDir = newPos - position;
-
-		// new mathz   // TODO: Not sure if this is correct, but original code seemed to work for AABBs
-		float dist = ((glm::dot(desiredNewPos, moveHit.normal)));
-		newPos = dist * moveHit.normal;
-		newPos = newPos + desiredNewPos;
-		moveDir = newPos - position;
 		return true;
-	}
-	else {
-		handleSideCollisions(position, glm::vec3(moveDir.z, moveDir.y, -moveDir.x));
-		handleSideCollisions(position, glm::vec3(-moveDir.z, moveDir.y, moveDir.x));
+
 	}
 	return false;
 }
 
-void FPSMovement::handleSideCollisions(glm::vec3 position, glm::vec3 direction) {
+void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction) {
+
+	// This function checks whether the player's bounding box overlaps a wall in the given direction,
+	// and if so, offsets the player's position along the negative of the ray direction, so that the
+	// player no longer intersects that wall. Done once before movement logic, so that we don't slowly
+	// clip into walls when sliding.
+
 	Ray sideRay(position, direction);
-	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH);
-	
-	//PROBLEM: This means that the instant rotation that occurs when we hit a wall creates a jump when the side ray is suddenly way inside the wall
+	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+
+	//If the side raycast enters a wall, we force the player back along the sideray vector to keep them out of the wall
 	if (sideHit.intersects && sideHit.hitTime <= playerRadius && sideHit.hitTime >= 0) {
 		moveDir += -glm::normalize(direction)*(playerRadius - sideHit.hitTime);
-
-		/*glm::vec3 desiredNewPos = position + moveDir;
-		float dist = glm::dot(desiredNewPos, sideHit.normal);
-		if (dist < playerRadius) {
-			glm::vec3 q = desiredNewPos + playerRadius*sideHit.normal;
-			moveDir = q - position;
-		}*/
-		//glm::vec3 behindVector = glm::normalize(desiredNewPos - position) * (playerRadius - sideHit.hitTime);
-		//float distBehindWall = std::abs(glm::dot(behindVector, sideHit.normal));
-		//glm::vec3 newPos = desiredNewPos + distBehindWall * sideHit.normal;
-		//moveDir = newPos - position;
 	}
 
 }

@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	}*/
 
 	// cache all meshes
-	GameObject *scene = loadScene("assets/CorridorPuzzle.dae");
+	GameObject *scene = loadScene("assets/CorridorPuzzleSlideTest.dae");
 	scene->destroy();
 	delete scene;
 
