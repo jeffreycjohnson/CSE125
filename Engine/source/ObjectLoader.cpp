@@ -101,6 +101,7 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 		box->setStatic(isStatic);
 		box->setAxisAligned(false); // Load OBBs by default
 		nodeObject->addComponent(box);
+		nodeObject->setName(name);
 	}
 	else if (name.find("SphereCollider") == 0) {
 		auto sphere = new SphereCollider(glm::vec3(0), 1.0f);
@@ -109,11 +110,13 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 		}
 		sphere->setStatic(isStatic);
 		nodeObject->addComponent(sphere);
+		nodeObject->setName(name);
 	}
 	else if (name.find("CapsuleCollider") == 0) {
 		auto capsule = new CapsuleCollider(glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), 1.f);
 		capsule->setStatic(isStatic);
 		nodeObject->addComponent(capsule);
+		nodeObject->setName(name);
 	}
 
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
