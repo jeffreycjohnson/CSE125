@@ -22,12 +22,12 @@ enum {
 };
 
 enum SoundState {
-	play,
-	pause,
-	stop,
-	toggle,
-	setLooping,
-	setVolume
+	playState,
+	pauseState,
+	stopState,
+	toggleState,
+	setLoopingState,
+	setVolumeState
 };
 
 class NetworkStruct

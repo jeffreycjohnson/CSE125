@@ -16,12 +16,30 @@ FMOD_RESULT Sound::result;
 
 Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D)
 {
+	isConstructed = true;
+
 	name = soundName;
 	this->volume = volume;
 	this->looping = looping;
 	this->is3D = is3D;
 	playing = active = playOnAwake;
 
+	result = system->playSound(soundMap[name], 0, true, &channel);
+	channel->setVolume(volume);
+	if (!is3D)
+		channel->setPriority(0);
+	if (looping)
+	{
+		channel->setMode(FMOD_LOOP_NORMAL);
+		channel->setLoopCount(-1);
+	}
+	else
+	{
+		channel->setMode(FMOD_LOOP_OFF);
+	}
+}
+
+void Sound::postConstructor() {
 	result = system->playSound(soundMap[name], 0, true, &channel);
 	channel->setVolume(volume);
 	if (!is3D)
@@ -229,5 +247,47 @@ void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 }
 
 void Sound::deserializeAndApply(std::vector<char> bytes){
-	
+	if ( bytes.size() == NetworkStruct::sizeOf(SOUND_INIT_NETWORK_DATA) ) {
+		//TODO Very hacky....
+		SoundInitNetworkData sind = structFromBytes<SoundInitNetworkData>(bytes);
+		name = std::string(sind.soundName);
+		this->volume = sind.volume;
+		this->looping = sind.looping;
+		this->is3D = sind.is3D;
+		playing = active = sind.playOnAwake;
+		isConstructed = true;
+	}
+	else if ( bytes.size() == NetworkStruct::sizeOf(SOUND_EVENT_NETWORK_DATA) ) {
+		SoundEventNetworkData sendata = structFromBytes<SoundEventNetworkData>(bytes);
+		switch (sendata.soundState) {
+		case playState:
+			play();
+			break;
+		case pauseState:
+			pause();
+			break;
+		case stopState:
+			stop();
+			break;
+		case toggleState:
+			toggle();
+			break;
+		case setLoopingState:
+			setLooping(sendata.looping, sendata.count);
+			break;
+		case setVolumeState:
+			setVolume(sendata.volume);
+			break;
+		default:
+			throw std::runtime_error("Something got goofed in sound");
+			break;
+		}
+	}
+	else {
+		throw std::runtime_error("NetworkStruct::sizeOf Has failed us!!!!!!! in Sound.cpp");
+	}
+}
+
+void Sound::sendEvent(int sstate, bool looping, int count, float volume) {
+
 }

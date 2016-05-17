@@ -18,11 +18,16 @@ private:
 	glm::vec3 position, prevPosition, velocity;
 	bool looping, playing, active, is3D;
 
+	bool isConstructed;
+
 	static FMOD_RESULT result; // For debugging
 
 public:
-	Sound(){}
+	Sound() {
+		isConstructed = true;
+	};
 	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
+	void postConstructor();
 	~Sound();
 
 	void update(float);
@@ -40,6 +45,7 @@ public:
 	static void updateFMOD();
 	static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
 	void deserializeAndApply(std::vector<char> bytes) override;
+	void sendEvent(int sstate, bool looping, int count, float volume);
 };
 
 #endif
