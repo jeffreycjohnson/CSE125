@@ -5,6 +5,10 @@
 #include "fmod/fmod_errors.h"
 #include <iostream>
 #include "Input.h"
+#include "Config.h"
+#include "NetworkManager.h"
+#include "NetworkUtility.h"
+
 
 FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
@@ -114,6 +118,34 @@ void Sound::setVolume(float volume)
 	channel->setVolume(volume);
 }
 
+void Sound::initFromConfig()
+{
+	ConfigFile file("config/sounds.ini");
+	std::string list = file.getString("SoundList", "soundlist");
+	std::vector<std::string> sounds;
+
+	//Split
+	size_t pos = 0;
+	std::string token;
+	while ((pos = list.find(";")) != std::string::npos) {
+		token = list.substr(0, pos);
+		sounds.push_back(token);
+		list.erase(0, pos + 1);
+	}
+
+	for (auto i = sounds.begin(); i != sounds.end(); ++i) {
+		SoundClass soundToAdd;
+		std::string fileName = file.getString(*i, "file");
+		std::string fmodMode = file.getString(*i, "fmodMode");
+		int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
+		//int exinfo = file.getInt(*i, "exinfo");
+		//TODO: Don't know what exinfo is
+		//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
+		system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
+		soundMap.insert({*i, soundToAdd});
+	}
+}
+
 void Sound::init()
 {
 	result = FMOD::System_Create(&system);
@@ -135,6 +167,7 @@ void Sound::init()
 	// Initialize our Instance with 128 channels
 	system->init(256, FMOD_INIT_NORMAL, NULL);
 
+#ifdef _SOUND_HARDCODE
 	// Generate sound map
 	SoundClass cabin;
 	system->createSound("assets/sounds/ambience/cabin.wav", FMOD_2D, NULL, &cabin);
@@ -158,9 +191,43 @@ void Sound::init()
 	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
 	soundMap.insert({ "music", music });
 	// Add more sounds as we need
+#else
+	initFromConfig();
+#endif
 }
 
 void Sound::updateFMOD()
 {
 	system->update();
+}
+
+void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messageId) {
+	GameObject *go = GameObject::FindByID(messageId);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("From Sound.cpp/Dispatch: Nonexistant gameobject");
+	}
+
+	if (messageType == SOUND_INIT_NETWORK_DATA) {
+		Sound * s;
+		s = go->getComponent<Sound>();
+		if (s == nullptr) {
+			s->deserializeAndApply(bytes);
+		}
+		else {
+			s = new Sound();
+			go->addComponent(s);
+			s->deserializeAndApply(bytes);
+		}
+	}
+	else if (messageType == SOUND_EVENT_NETWORK_DATA) {
+		//YOooooOO
+	}
+	else {
+		throw std::runtime_error("Sound Network Error!!!");
+	}
+}
+
+void Sound::deserializeAndApply(std::vector<char> bytes){
+	
 }

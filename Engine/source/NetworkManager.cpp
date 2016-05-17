@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Transform.h"
 #include "Light.h"
+#include "Sound.h"
 
 #include "NetworkStats.h"
 #include "ClientNetwork.h"
@@ -218,6 +219,10 @@ void NetworkManager::ReceiveClientMessages()
 			std::cerr << "Light it up" << std::endl;
 			Light::Dispatch(received.body, received.messageType, received.id);
 			break;
+		case SOUND_INIT_NETWORK_DATA:
+		case SOUND_EVENT_NETWORK_DATA:
+			std::cerr << "Init Sound" << std::endl;
+			Sound::Dispatch(received.body, received.messageType, received.id);
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
 			GameObject::Dispatch(received.body, received.messageType, received.id);
