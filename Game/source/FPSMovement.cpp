@@ -319,6 +319,7 @@ void FPSMovement::recalculate()
 
 void FPSMovement::respawn() {
 	position = initialPosition;
+	vSpeed = 0;
 }
 
 void FPSMovement::raycastMouse()
