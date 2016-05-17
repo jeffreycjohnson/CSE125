@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	}*/
 
 	// cache all meshes
-	GameObject *scene = loadScene("assets/key_action.dae");
+	GameObject *scene = loadScene("assets/security.dae");
 	scene->destroy();
 	delete scene;
 
