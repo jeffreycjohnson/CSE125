@@ -158,7 +158,11 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 
 int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType, int id)
 {
-	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id);
+	int checksum = 0;
+	for (char c : bytes) {
+		checksum += c;
+	}
+	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id, checksum);
 
 	//Need to Establish Connection
 	if (!ConnectionEstablished){
