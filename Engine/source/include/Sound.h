@@ -21,6 +21,7 @@ private:
 	static FMOD_RESULT result; // For debugging
 
 public:
+	Sound(){}
 	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
 	~Sound();
 
@@ -31,11 +32,14 @@ public:
 	void toggle();
 	void setLooping(bool looping, int count);
 	void setVolume(float volume);
+	static void initFromConfig();
 
 	static FMOD::System *system;
 	static std::unordered_map<std::string, FMOD::Sound*> soundMap;
 	static void init();
 	static void updateFMOD();
+	static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
+	void deserializeAndApply(std::vector<char> bytes) override;
 };
 
 #endif
