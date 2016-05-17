@@ -21,4 +21,11 @@ public:
 	void collisionStay(GameObject * other) override;
 };
 
+class Forcefield : public Target
+{
+public:
+	Forcefield(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
+	void fixedUpdate() override;
+};
+
 #endif // LASER_H
