@@ -30,8 +30,6 @@ std::vector<char> encodeMessage(const std::vector<char> &message, int messageTyp
 }
 
 std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id, int * msgLen) {
-	int inputSize = 0;
-
 	std::vector<char> empty;
 
 	if (buflen < METADATA_LEN){ // Buffer can't store contentLength and msgType
@@ -44,14 +42,6 @@ std::vector<char> decodeMessage(char * buf, int buflen, int * msgType, int * id,
 	*id = ntohl(*((int*)(buf + sizeof(int) + sizeof(int))));
 	int checksum = ntohl(*((int *)(buf + sizeof(int) + sizeof(int) + sizeof(int))));
 
-	if (*msgType == 0)
-	{
-		std::vector<char> input(buf, buf + *msgLen);
-		buflen += 3;
-		buflen -= 3;
-	}
-
-	inputSize = NetworkStruct::sizeOf(*msgType);
 	std::vector<char> input(buf + METADATA_LEN, buf + *msgLen);
 	int calcCheckSum = 0;
 	for (char c : input) {

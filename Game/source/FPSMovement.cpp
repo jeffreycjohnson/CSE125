@@ -94,12 +94,15 @@ void FPSMovement::fixedUpdate()
 	}
 
 	// Ray cast normal debug against OBBs
+
+	// BROKEN 0/10 WOULD NOT DEBUG AGAIN
 	auto cameraRay = Renderer::mainCamera->getEyeRay();
 	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
 	auto camhit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(cameraRay, Octree::BOTH, 0, Octree::RAY_MAX, box);
 	raycastHit = camhit.intersects;
 	lastRayPoint = cameraRay.getPos(camhit.hitTime);
 	lastRayPointPlusN = lastRayPoint + camhit.normal;
+	
 	// end debug
 
 	recalculate();
@@ -133,7 +136,9 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 
 	//Normalize the player's combined movement vector, and multiply it by the speed to ensure a constant velocity
 	if (glm::length(moveDir) > 0)
+	{
 		moveDir = glm::normalize(moveDir) * speed;
+	}
 
 	//We raycast forward, left, and right, and update the moveDir to slide along the walls we hit
 	if (oct != nullptr) {
@@ -276,6 +281,7 @@ void FPSMovement::debugDraw()
 	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
 }
 
+static int counter2 = 0;
 void FPSMovement::recalculate()
 {
 	// cache angles for front vector

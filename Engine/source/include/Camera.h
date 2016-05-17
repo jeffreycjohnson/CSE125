@@ -41,7 +41,7 @@ class Camera : public Component
 
 		std::vector<char> serialize();
 
-		void deserializeAndApply(std::vector<char> bytes);
+		void deserializeAndApply(int messageId);
 
 		static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
 };

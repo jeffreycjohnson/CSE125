@@ -132,21 +132,20 @@ void Camera::setGameObject(GameObject * go)
 
 std::vector<char> Camera::serialize()
 {
-	CameraNetworkData cnd = CameraNetworkData(gameObject->getID());
-	return structToBytes(cnd);
+	//CameraNetworkData cnd = CameraNetworkData(gameObject->getID());
+	return std::vector<char>();
 }
 
-void Camera::deserializeAndApply(std::vector<char> bytes)
+void Camera::deserializeAndApply(int messageId)
 {
-	CameraNetworkData cnd = structFromBytes<CameraNetworkData>(bytes);
-	GameObject * player = GameObject::FindByID(cnd.objectID);
-	std::cout << "received camera. Attaching to object " << cnd.objectID << std::endl;
+	GameObject * player = GameObject::FindByID(messageId);
+	std::cout << "received camera. Attaching to object " << messageId << std::endl;
 	Renderer::mainCamera->setGameObject(player);
 }
 
 void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
 {
-	CameraNetworkData cnd = structFromBytes<CameraNetworkData>(bytes);
+	//CameraNetworkData cnd = structFromBytes<CameraNetworkData>(bytes);
 	GameObject *go = GameObject::FindByID(messageId);
 	if (go == nullptr)
 	{
@@ -166,7 +165,7 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 		// player already has a camera
 		// change what it points to
 		std::cout << "changing camera..." << std::endl;
-		goCamera->deserializeAndApply(bytes);
+		goCamera->deserializeAndApply(messageId);
 	}
 	else
 	{

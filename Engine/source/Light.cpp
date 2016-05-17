@@ -181,7 +181,7 @@ void Light::postToNetwork()
     GameObject *my = gameObject;
     if (my == nullptr)
     {
-        std::cerr << "Light ain't got no attached game object modified??" << std::endl;
+        //std::cerr << "Light ain't got no attached game object modified??" << std::endl;
         return;
     }
 

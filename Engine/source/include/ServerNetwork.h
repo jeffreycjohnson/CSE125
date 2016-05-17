@@ -45,5 +45,8 @@ public:
 
 	static void broadcastBytes(const std::vector<char> &bytes, int msgType, int id);
 	static void sendBytes(int clientID, const std::vector<char> &bytes, int msgType, int id);
+	static void sendBytes(int clientID, const std::vector<char>& bytes);
+
+	static void sendMessages(int clientID, const std::vector<NetworkResponse>& messages);
 };
 
