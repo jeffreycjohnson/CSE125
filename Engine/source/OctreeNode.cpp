@@ -6,6 +6,7 @@
 #include "CapsuleCollider.h"
 #include <sstream>
 #include <iostream>
+#include <string>         // std::string
 
 OctreeNode::OctreeNode(glm::vec3 min, glm::vec3 max, Octree* tree, OctreeNode* parent, int depth) {
 	this->min = min;
@@ -55,6 +56,9 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) 
 
 	for (auto obj : colliders) {
 		if (obj == ignore) continue; // This is the ignored collider, so just skip it
+		if (obj->gameObject->getName().find("_trigger") != std::string::npos) {
+			continue;
+		}
 		auto temphit = obj->raycast(ray);
 		if (temphit.intersects /*&& temphit.hitTime > 0*/) {
 			if (temphit.hitTime < hitInfo.hitTime) {
