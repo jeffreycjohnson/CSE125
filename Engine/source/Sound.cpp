@@ -6,8 +6,7 @@
 #include <iostream>
 #include "Input.h"
 #include "Config.h"
-#include "NetworkManager.h"
-#include "NetworkUtility.h"
+
 
 
 FMOD::System* Sound::system;
@@ -289,12 +288,12 @@ std::vector<char> Sound::serialize(SoundNetworkData::soundState ss, bool looping
 {
 	SoundNetworkData snd = SoundNetworkData(
 		gameObject->getID(),
-		name,
-		volume,
-		active,
-		looping,
-		volume,
-		is3D,
+		this->name,
+		this->playing,
+		this->active,
+		this->looping,
+		this->volume,
+		this->is3D,
 		ss,
 		loopingParam,
 		count,
