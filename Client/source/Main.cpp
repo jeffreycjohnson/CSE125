@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 	scene->destroy();
 	delete scene;
 
-	GameObject *player = loadScene("assets/cubeman.dae");
+	GameObject *player = loadScene("assets/CorridorPuzzle.dae");
 	player->destroy();
 	delete player;
 

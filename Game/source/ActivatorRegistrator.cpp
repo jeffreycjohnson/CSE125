@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "GameObject.h"
+#include "Sound.h"
 
 #include "Laser.h"
 #include "Rotating.h"
@@ -17,8 +18,6 @@
 #include "KeyHoleTarget.h"
 #include "ChestActivator.h"
 #include "ChestTarget.h"
-
-//http://blog.noctua-software.com/object-factory-c++.html
 
 std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 {
@@ -78,6 +77,9 @@ void ActivatorRegistrator::create()
 			//MAGIC LAMBA. ASK ME ELTON FOR THE DETAILS
 			Target *t = keyval.second(tokens, &idToTargets);
 			targ->addComponent(t);
+
+			//Sound Testing
+			//targ->addComponent();
 		}
 	}
 
@@ -91,6 +93,8 @@ void ActivatorRegistrator::create()
 			Activator *activator = keyval.second(tokens, idToTargets);
 
 			act->addComponent(activator);
+			Sound *sound = new Sound("zeldasecret", false, false, 1.0f, true);
+			act->addComponent(sound);
 		}
 	}
 }

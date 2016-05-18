@@ -2,6 +2,7 @@
 #include "Input.h"
 #include "FPSMovement.h"
 #include <iostream>
+#include "Sound.h"
 
 Laser::Laser()
 {
@@ -26,7 +27,9 @@ void Laser::fixedUpdate()
 	if (isActivated() && !areLasersOff)
 	{
 		areLasersOff = true;
+		Sound * s = gameObject->getComponent<Sound>();
 		gameObject->setVisible(false);
+		s->play();
 	}
 	else if (!isActivated() && areLasersOff && !isFixed)
 	{
