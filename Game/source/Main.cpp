@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 				"assets/skyboxes/icyhell/icyhell_dn.tga",
 				"assets/skyboxes/icyhell/icyhell_ft.tga",
 				"assets/skyboxes/icyhell/icyhell_bk.tga",
-			};
+};
 			sp->skybox = new Skybox(imgs);
 
 			break;
