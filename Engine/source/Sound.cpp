@@ -100,17 +100,20 @@ void Sound::play()
 		playing = true;
 	}
 	active = true;
+	postToNetwork(SoundNetworkData::soundState::PLAY, false, -1, 0.0f);
 }
 
 void Sound::pause()
 {
 	playing = false;
+	postToNetwork(SoundNetworkData::soundState::PAUSE, false, -1, 0.0f);
 }
 
 void Sound::stop()
 {
 	channel->stop();
 	active = false;
+	postToNetwork(SoundNetworkData::soundState::STOP, false, -1, 0.0f);
 }
 
 void Sound::toggle()
@@ -119,6 +122,7 @@ void Sound::toggle()
 		stop();
 	else
 		play();
+	postToNetwork(SoundNetworkData::soundState::TOGGLE, false, -1, 0.0f);
 }
 
 void Sound::setLooping(bool looping, int count = -1)
@@ -129,11 +133,13 @@ void Sound::setLooping(bool looping, int count = -1)
 		channel->setMode(FMOD_LOOP_OFF);
 
 	channel->setLoopCount(count);
+	postToNetwork(SoundNetworkData::soundState::SET_LOOPING, looping, count, 0.0f);
 }
 
 void Sound::setVolume(float volume)
 {
 	channel->setVolume(volume);
+	postToNetwork(SoundNetworkData::soundState::SET_VOLUME, false, -1, volume);
 }
 
 void Sound::initFromConfig()
@@ -241,37 +247,76 @@ void Sound::deserializeAndApply(std::vector<char> bytes){
 	SoundNetworkData sind = structFromBytes<SoundNetworkData>(bytes);
 
 	switch (sind.ss){
-	case SoundNetworkData::soundState::CONSTRUCT:
-		assert(this->isConstructed == false);
-
-		name = std::string(sind.soundName);
-		this->volume = sind.volume;
-		this->looping = sind.looping;
-		this->is3D = sind.is3D;
-		playing = active = sind.playOnAwake;
-
-		//This basically initializes things based off the 
-		//old constructor
-		this->postConstructor();
-
-		isConstructed = true;
-		break;
 	case SoundNetworkData::soundState::PLAY:
+		this->play();
 		break;
 	case SoundNetworkData::soundState::TOGGLE:
+		this->toggle();
 		break;
 	case SoundNetworkData::soundState::STOP:
+		this->stop();
 		break;
 	case SoundNetworkData::soundState::PAUSE:
+		this->pause();
 		break;
 	case SoundNetworkData::soundState::SET_LOOPING:
+		this->setLooping(sind.loopingParam, sind.count);
 		break;
 	case SoundNetworkData::soundState::SET_VOLUME:
+		this->setVolume(sind.volumeParam);
 		break;
 	case SoundNetworkData::soundState::MUTATE:
 		std::runtime_error("I technically don't need a mutate state.");
 		break;
+	case SoundNetworkData::soundState::CONSTRUCT:
 	default:
+		assert(isConstructed == false);
+		name = std::string(sind.soundName);
+		this->volume = sind.volume;
+		this->looping = sind.looping;
+		this->is3D = sind.is3D;
+		this->playing = sind.playing;
+
+		//This basically initializes things based off the 
+		//old constructor
+		this->postConstructor();
+		this->isConstructed = true;
 		break;
 	}
 }
+
+std::vector<char> Sound::serialize(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam)
+{
+	SoundNetworkData snd = SoundNetworkData(
+		gameObject->getID(),
+		name,
+		volume,
+		active,
+		looping,
+		volume,
+		is3D,
+		ss,
+		loopingParam,
+		count,
+		volumeParam
+	);
+	return structToBytes(snd);
+}
+
+void Sound::postToNetwork(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam)
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		std::cerr << "Sound ain't got no attached game object modified??" << std::endl;
+		return;
+	}
+	NetworkManager::PostMessage(serialize(ss, loopingParam, count, volumeParam), SOUND_NETWORK_DATA, my->getID());
+}
+
+void Sound::setGameObject(GameObject* object) {
+	Component::setGameObject(object);
+	postToNetwork(SoundNetworkData::soundState::CONSTRUCT, false, -1, 0.0f);
+};

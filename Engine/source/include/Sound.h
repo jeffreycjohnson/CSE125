@@ -24,7 +24,7 @@ private:
 
 public:
 	Sound() {
-		isConstructed = true;
+		isConstructed = false;
 	};
 	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
 	void postConstructor();
@@ -44,7 +44,15 @@ public:
 	static void init();
 	static void updateFMOD();
 	static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
+	void Sound::initFromConfig();
+
 	void deserializeAndApply(std::vector<char> bytes) override;
+	void setGameObject(GameObject* object) override;
+
+
+	std::vector<char> serialize(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam);
+protected:
+	void postToNetwork(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam);
 };
 
 #endif
