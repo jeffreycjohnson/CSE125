@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\ForceField.cpp" />
     <ClCompile Include="source\KeyTarget.cpp" />
     <ClCompile Include="source\ChestActivator.cpp" />
     <ClCompile Include="source\ChestTarget.cpp" />
@@ -44,6 +45,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\ForceField.h" />
     <ClInclude Include="source\KeyTarget.h" />
     <ClInclude Include="source\ChestActivator.h" />
     <ClInclude Include="source\ChestTarget.h" />
