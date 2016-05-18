@@ -6,6 +6,8 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 #include <unordered_map>
+#include "NetworkManager.h"
+#include "NetworkUtility.h"
 
 typedef FMOD::Sound* SoundClass;
 
@@ -44,7 +46,6 @@ public:
 	static void init();
 	static void updateFMOD();
 	static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
-	void Sound::initFromConfig();
 
 	void deserializeAndApply(std::vector<char> bytes) override;
 	void setGameObject(GameObject* object) override;

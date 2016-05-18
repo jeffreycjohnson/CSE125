@@ -353,6 +353,9 @@
     <None Include="..\assets\particles\Default.particle.ini">
       <Filter>Particles</Filter>
     </None>
+    <None Include="..\config\sounds.ini">
+      <Filter>Configuration</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">
