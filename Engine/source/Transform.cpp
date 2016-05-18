@@ -1,5 +1,6 @@
 #include "Transform.h"
 #include <gtc/matrix_transform.hpp>
+#include <glm/glm/ext.hpp>
 
 #include "GameObject.h"
 #include "NetworkManager.h"
@@ -195,7 +196,7 @@ std::vector<char> Transform::serialize()
 void Transform::deserializeAndApply(std::vector<char> bytes)
 {
 	TransformNetworkData tnd = structFromBytes<TransformNetworkData>(bytes);
-
+	//std::cout << glm::to_string(glm::vec3(tnd.px, tnd.py, tnd.pz)) << std::endl;
 	setPosition(tnd.px, tnd.py, tnd.pz);
 	setRotate(glm::quat(tnd.qw, tnd.qx, tnd.qy, tnd.qz));
 	setScale(glm::vec3(tnd.sx, tnd.sy, tnd.sz));

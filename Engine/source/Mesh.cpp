@@ -158,7 +158,7 @@ void Mesh::postToNetwork()
 	GameObject *my = gameObject;
 	if (my == nullptr)
 	{
-		std::cerr << "Transform with no attached game object modified??" << std::endl;
+		//std::cerr << "Mesh with no attached game object modified??" << std::endl;
 		return;
 	}
 
