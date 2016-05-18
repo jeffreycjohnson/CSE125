@@ -45,7 +45,6 @@ public:
 	static void updateFMOD();
 	static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
 	void deserializeAndApply(std::vector<char> bytes) override;
-	void sendEvent(int sstate, bool looping, int count, float volume);
 };
 
 #endif

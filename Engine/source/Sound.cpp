@@ -225,69 +225,44 @@ void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 	{
 		throw std::runtime_error("From Sound.cpp/Dispatch: Nonexistant gameobject");
 	}
-
-	if (messageType == SOUND_INIT_NETWORK_DATA) {
-		Sound * s;
-		s = go->getComponent<Sound>();
-		if (s == nullptr) {
-			s->deserializeAndApply(bytes);
-		}
-		else {
-			s = new Sound();
-			go->addComponent(s);
-			s->deserializeAndApply(bytes);
-		}
-	}
-	else if (messageType == SOUND_EVENT_NETWORK_DATA) {
-		//YOooooOO
+	Sound * s;
+	s = go->getComponent<Sound>();
+	if (s == nullptr) {
+		s->deserializeAndApply(bytes);
 	}
 	else {
-		throw std::runtime_error("Sound Network Error!!!");
+		s = new Sound();
+		go->addComponent(s);
+		s->deserializeAndApply(bytes);
 	}
+
 }
 
 void Sound::deserializeAndApply(std::vector<char> bytes){
-	if ( bytes.size() == NetworkStruct::sizeOf(SOUND_INIT_NETWORK_DATA) ) {
-		//TODO Very hacky....
-		SoundInitNetworkData sind = structFromBytes<SoundInitNetworkData>(bytes);
+	SoundNetworkData sind = structFromBytes<SoundNetworkData>(bytes);
+
+	switch (sind.ss){
+	case SoundNetworkData::soundState::CONSTRUCT:
 		name = std::string(sind.soundName);
 		this->volume = sind.volume;
 		this->looping = sind.looping;
 		this->is3D = sind.is3D;
 		playing = active = sind.playOnAwake;
 		isConstructed = true;
+		break;
+	case SoundNetworkData::soundState::PLAY:
+		break;
+	case SoundNetworkData::soundState::TOGGLE:
+		break;
+	case SoundNetworkData::soundState::STOP:
+		break;
+	case SoundNetworkData::soundState::PAUSE:
+		break;
+	case SoundNetworkData::soundState::SET_LOOPING:
+		break;
+	case SoundNetworkData::soundState::SET_VOLUME:
+		break;
+	default:
+		break;
 	}
-	else if ( bytes.size() == NetworkStruct::sizeOf(SOUND_EVENT_NETWORK_DATA) ) {
-		SoundEventNetworkData sendata = structFromBytes<SoundEventNetworkData>(bytes);
-		switch (sendata.soundState) {
-		case playState:
-			play();
-			break;
-		case pauseState:
-			pause();
-			break;
-		case stopState:
-			stop();
-			break;
-		case toggleState:
-			toggle();
-			break;
-		case setLoopingState:
-			setLooping(sendata.looping, sendata.count);
-			break;
-		case setVolumeState:
-			setVolume(sendata.volume);
-			break;
-		default:
-			throw std::runtime_error("Something got goofed in sound");
-			break;
-		}
-	}
-	else {
-		throw std::runtime_error("NetworkStruct::sizeOf Has failed us!!!!!!! in Sound.cpp");
-	}
-}
-
-void Sound::sendEvent(int sstate, bool looping, int count, float volume) {
-
 }
