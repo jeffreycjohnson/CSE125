@@ -17,8 +17,7 @@ enum {
 	MESH_NETWORK_DATA,
 	CAMERA_NETWORK_DATA,
 	LIGHT_NETWORK_DATA,
-	SOUND_INIT_NETWORK_DATA,
-	SOUND_EVENT_NETWORK_DATA
+	SOUND_NETWORK_DATA
 };
 
 enum SoundState {
@@ -176,8 +175,19 @@ struct LightNetworkData
 
 #define MAX_SOUND_NAME 64
 #pragma pack(push, 1)
-struct SoundInitNetworkData
+struct SoundNetworkData
 {
+	enum soundState {
+		CONSTRUCT,
+		PLAY,
+		PAUSE,
+		STOP,
+		TOGGLE,
+		SET_LOOPING,
+		SET_VOLUME,
+		MUTATE
+	};
+
 	int objectID;
 
 	char soundName[MAX_SOUND_NAME];
@@ -186,29 +196,14 @@ struct SoundInitNetworkData
 	float volume;
 	bool is3D;
 
-	SoundInitNetworkData(
-		int objectID, std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D) :
-		objectID(objectID), playOnAwake(playOnAwake), looping(looping), volume(volume), is3D(is3D)
+	soundState ss;
+
+	SoundNetworkData(
+		int objectID, std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D, soundState ss ) :
+		objectID(objectID), playOnAwake(playOnAwake), looping(looping), volume(volume), is3D(is3D), ss(ss)
 	{
 		memset(this->soundName, 0, sizeof(char) * MAX_SOUND_NAME);
 		strncpy_s(this->soundName, soundName.c_str(), MAX_SOUND_NAME - 1);
-	}
-};
-#pragma pack(pop)
-
-#pragma pack(push, 1)
-struct SoundEventNetworkData
-{
-	int objectID;
-
-	SoundState soundState;
-	bool looping;
-	int count;
-	float volume;
-
-	SoundEventNetworkData(SoundState soundState, bool looping, int count, float volume) :
-		soundState(soundState), looping(looping), count(count), volume(volume)
-	{
 	}
 };
 #pragma pack(pop)
