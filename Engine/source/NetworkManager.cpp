@@ -126,7 +126,7 @@ void NetworkManager::SendServerMessages()
 		{
 			continue;
 		}
-
+		/*
 		int& msgType = response.messageType;
 
 		switch (msgType)
@@ -152,7 +152,7 @@ void NetworkManager::SendServerMessages()
 			break;
 		default:
 			std::cerr << numServerMessages++ << "Server send message of type " << msgType << ", don't know what to do with it..." << std::endl;
-		}
+		}*/
 
 		if (response.forClient == -1)
 		{
@@ -179,7 +179,7 @@ void NetworkManager::SendServerMessages()
 			continue;
 		}
 
-		int& msgType = response.messageType;
+		/*int& msgType = response.messageType;
 
 		switch (msgType)
 		{
@@ -205,7 +205,7 @@ void NetworkManager::SendServerMessages()
 		default:
 			std::cerr << numServerMessages++ << "Server sent message of type " << msgType << ", don't know what to do with it..." << std::endl;
 		}
-
+		*/
 		if (response.forClient == -1)
 		{
 			for (auto& cid : clientIDs)
@@ -306,27 +306,27 @@ void NetworkManager::ReceiveClientMessages()
 		switch (msgType)
 		{
 		case CLIENTS_CONN_NETWORK_DATA:
-			std::cerr << numClientMessages++ << "RECv ALL CLEAR MESSAGE AFTER SERVER INITIALIZATION" << std::endl;
+			//std::cerr << numClientMessages++ << "RECv ALL CLEAR MESSAGE AFTER SERVER INITIALIZATION" << std::endl;
 			break;
 		case TRANSFORM_NETWORK_DATA:
 			// std::cerr << numClientMessages++ << "RECV TRANSFORM DATA" << std::endl;
 			Transform::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case MESH_NETWORK_DATA:
-			std::cerr << numClientMessages++ << "RECV MESH DATA" << std::endl;
+			//std::cerr << numClientMessages++ << "RECV MESH DATA" << std::endl;
 			Mesh::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case CAMERA_NETWORK_DATA:
-			std::cerr << numClientMessages++ << "RECV CAMERA DATA" << std::endl;
+			//std::cerr << numClientMessages++ << "RECV CAMERA DATA" << std::endl;
 			Camera::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case LIGHT_NETWORK_DATA:
-			std::cerr << numClientMessages++ << "RECV LIGHT DATA" << std::endl;
+			//std::cerr << numClientMessages++ << "RECV LIGHT DATA" << std::endl;
 			Light::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
-			std::cerr << numClientMessages++ << "RECV OBJ DATA" << std::endl;
+			//std::cerr << numClientMessages++ << "RECV OBJ DATA" << std::endl;
 			GameObject::Dispatch(received.body, received.messageType, received.id);
 			break;
 		default:
