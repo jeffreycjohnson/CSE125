@@ -235,7 +235,6 @@ void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 		go->addComponent(s);
 		s->deserializeAndApply(bytes);
 	}
-
 }
 
 void Sound::deserializeAndApply(std::vector<char> bytes){
@@ -243,11 +242,18 @@ void Sound::deserializeAndApply(std::vector<char> bytes){
 
 	switch (sind.ss){
 	case SoundNetworkData::soundState::CONSTRUCT:
+		assert(this->isConstructed == false);
+
 		name = std::string(sind.soundName);
 		this->volume = sind.volume;
 		this->looping = sind.looping;
 		this->is3D = sind.is3D;
 		playing = active = sind.playOnAwake;
+
+		//This basically initializes things based off the 
+		//old constructor
+		this->postConstructor();
+
 		isConstructed = true;
 		break;
 	case SoundNetworkData::soundState::PLAY:
@@ -261,6 +267,9 @@ void Sound::deserializeAndApply(std::vector<char> bytes){
 	case SoundNetworkData::soundState::SET_LOOPING:
 		break;
 	case SoundNetworkData::soundState::SET_VOLUME:
+		break;
+	case SoundNetworkData::soundState::MUTATE:
+		std::runtime_error("I technically don't need a mutate state.");
 		break;
 	default:
 		break;
