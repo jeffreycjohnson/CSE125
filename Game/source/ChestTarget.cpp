@@ -28,10 +28,11 @@ void ChestTarget::create()
 
 void ChestTarget::fixedUpdate()
 {
-	if (isActivated()) {
+	if (isActivated() || isOpened) {
+		isOpened = true;
 		float deltaTime = Timer::fixedTimestep;
-
-		openness += (deltaTime) * (isActivated() ? 1 : -1);
+		
+		openness += (deltaTime) * (isOpened ? 1 : -1);
 		openness = std::min(1.0f, openness);
 		openness = std::max(0.0f, openness);
 
