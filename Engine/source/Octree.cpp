@@ -165,7 +165,7 @@ void Octree::rebuild()
 	}
 }
 
-RayHitInfo Octree::raycast(const Ray & ray, float t_min, float t_max, Collider* ignore)
+RayHitInfo Octree::raycast(const Ray & ray, float t_min, float t_max, const std::initializer_list<Collider*>& ignore)
 {
 
 	RayHitInfo hitInfo;

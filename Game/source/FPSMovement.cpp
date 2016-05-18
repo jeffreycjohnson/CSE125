@@ -27,8 +27,8 @@
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
 
-FPSMovement::FPSMovement(int clientID, GameObject* player, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
-	: clientID(clientID), player(player), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
+FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
+	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
 	this->front = glm::vec3(0, 0, -1);
 
@@ -37,12 +37,7 @@ FPSMovement::FPSMovement(int clientID, GameObject* player, float moveSpeed, floa
 	pastFirstTick = false;
 	raycastHit = false;
 	forward = glm::vec3(0);
-
-	assert(player != nullptr); // Player pointer is returned from "loadScene"
-	player = player->findChildByName("Player");
-	assert(player != nullptr); // You better have loaded a player model with a "Player" node
-	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider")->getComponent<BoxCollider>();
-
+	floor = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct == nullptr) {
 		throw "ERROR: Octree is a nullptr";
@@ -51,12 +46,17 @@ FPSMovement::FPSMovement(int clientID, GameObject* player, float moveSpeed, floa
 
 void FPSMovement::create()
 {
+
 	if (verticality) 
 	{
 		this->gameObject->addChild(verticality);
 		verticality->transform.translate(worldUp * 0.6f);
 		verticality->transform.translate(front * 0.35f);
 	}
+
+	auto player = this->gameObject->findChildByName("Player");
+	assert(player != nullptr); // You better have loaded a player model with a "Player" node
+	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider")->getComponent<BoxCollider>();
 
 	//Input::hideCursor();
 	recalculate();
@@ -116,7 +116,12 @@ void FPSMovement::fixedUpdate()
 void FPSMovement::getPlayerRadii() {
 	if (playerBoxCollider) {
 		//Then we access it's width and height, to set the player radii
-		playerRadius = playerBoxCollider->getWidth() / 2.0f;
+		//playerRadius = playerBoxCollider->getWidth() / 2.0f;
+		float w = playerBoxCollider->getWidth();
+		float d = playerBoxCollider->getDepth();
+		float theta = std::atanf(d / w);
+		playerRadius = std::sin(theta) * w / 2.0f; // Divide by two b/c this is radius
+
 		playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
 	}
 }
@@ -148,7 +153,16 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 
 		// OKAY (verified)
 		while (moveDirModified && failCount < 3) {
+			// raycasting directly from position is too high, we can jump above objects
 			moveDirModified = slideAgainstWall(position, moveDir, failCount);
+			if (!moveDirModified && playerBoxCollider) {
+				// Check our feet
+				moveDirModified = slideAgainstWall(position - glm::vec3(0, -playerBoxCollider->getHeight() / 2, 0), moveDir, failCount);
+			}
+			if (!moveDirModified && playerBoxCollider) {
+				// Check our head
+				moveDirModified = slideAgainstWall(position - glm::vec3(0, playerBoxCollider->getHeight() / 2, 0), moveDir, failCount);
+			}
 			failCount++;
 		}
 
@@ -166,7 +180,9 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 {
 	//We raycast in the given direction
 	Ray moveRay(position, castDirection);
-	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+
+	// We want to ignore the player's collider & the collider that we are standing on, if it exists
+	RayHitInfo moveHit = oct->raycast(moveRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider, floor });
 
 	//If we hit something in front of us, and it is within the player radius
 	if (moveHit.intersects && moveHit.hitTime <= playerRadius && moveHit.hitTime >= 0) {
@@ -196,7 +212,7 @@ void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction
 	// clip into walls when sliding.
 
 	Ray sideRay(position, direction);
-	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
 
 	//If the side raycast enters a wall, we force the player back along the sideray vector to keep them out of the wall
 	if (sideHit.intersects && sideHit.hitTime <= playerRadius && sideHit.hitTime >= 0) {
@@ -217,7 +233,7 @@ void FPSMovement::handleVerticalMovement(float dt) {
 
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
-	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
 	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
 
 	//After we release the jump button, we can not jump again
@@ -252,14 +268,18 @@ void FPSMovement::checkOnSurface(glm::vec3 position, glm::vec3 direction) {
 
 	//We raycast downwards from our position
 	Ray downRay(position, direction);
-	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, playerBoxCollider);
+	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
 
 	//If standingOnSurface is already true, or this downHit has determined that we are on a surface, then set standingOnSurface to true
 	standingOnSurface = standingOnSurface || (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f);
+	floor = newDownHit.collider;
 
 	//If we just found that we're standing on a surface, then the global downHit is set to this one
 	if (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f) {
 		downHit = newDownHit;
+	}
+	else {
+		floor = nullptr;
 	}
 }
 

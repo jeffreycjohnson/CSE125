@@ -41,7 +41,7 @@ OctreeNode::~OctreeNode() {
 	tree->removeNode(this->nodeId);
 }
 
-void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) {
+void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initializer_list<Collider*>& ignore) {
 
 	RayHitInfo againstMe = myAABB->raycast(ray);
 
@@ -55,7 +55,13 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, Collider* ignore) 
 	}
 
 	for (auto obj : colliders) {
-		if (obj == ignore) continue; // This is the ignored collider, so just skip it
+		bool skip = false;
+		for (auto ignored : ignore) {
+			if (obj == ignored) {
+				skip = true;
+			}
+		}
+		if (skip) continue;
 		if (obj->gameObject->getName().find("_trigger") != std::string::npos) {
 			continue;
 		}

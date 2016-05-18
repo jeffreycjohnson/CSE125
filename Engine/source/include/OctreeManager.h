@@ -27,7 +27,7 @@ public:
 	// t_min          - minimum t we will accept
 	// t_max          - maximum t we will accept
 	// ignoreCollider - raycast will ignore this object, even if it is the earliest collision
-	RayHitInfo raycast(const Ray& ray, Octree::BuildMode whichTree, float t_min = Octree::RAY_MIN, float t_max = Octree::RAY_MAX, Collider* ignore = nullptr);
+	RayHitInfo raycast(const Ray& ray, Octree::BuildMode whichTree, float t_min = Octree::RAY_MIN, float t_max = Octree::RAY_MAX, std::initializer_list<Collider*> ignore = {});
 
 	// Returns any collisions that occur against the axis-aligned bounding box defined by the two min & max points
 	CollisionInfo collisionBox(glm::vec3 min, glm::vec3 max, Octree::BuildMode whichTree);

@@ -26,7 +26,7 @@ OctreeManager::~OctreeManager()
 		delete dynamicObjects;
 }
 
-RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max, Collider* ignore)
+RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max, std::initializer_list<Collider*> ignore)
 {
 	if (glm::isnan(ray.direction).b) {
 		return RayHitInfo(); // No NaN(s) allowed.

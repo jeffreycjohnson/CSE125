@@ -13,8 +13,8 @@ private:
 	const float deathFloor = -20.0f;
 
 	OctreeManager* oct;
-	GameObject* player;
 	BoxCollider* playerBoxCollider;
+	Collider* floor;
 	GameObject* verticality;
 
 	float moveSpeed, mouseSensitivity;
@@ -45,7 +45,7 @@ private:
 
 public:
 	FPSMovement(
-		int clientID, GameObject* player, float moveSpeed, float mouseSensitivity,
+		int clientID, float moveSpeed, float mouseSensitivity,
 		glm::vec3 position, glm::vec3 up,
 		GameObject* verticality = nullptr);
 	~FPSMovement() {};

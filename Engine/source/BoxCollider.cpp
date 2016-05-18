@@ -643,15 +643,17 @@ RayHitInfo BoxCollider::raycast(const Ray & ray) const
 	return hit;
 };
 
-//TODO: Get working with OBBs
 float BoxCollider::getWidth() {
-	return std::sqrt((xmax - xmin)*(xmax - xmin) + (zmax - zmin)*(zmax - zmin));
+	// Distance between A & E
+	return glm::distance(transformPoints[0], transformPoints[4]);
 }
 
 float BoxCollider::getHeight() {
-	return ymax - ymin;
+	// Distance between A & C
+	return glm::distance(transformPoints[0], transformPoints[2]);
 }
 
 float BoxCollider::getDepth() {
-	return zmax - zmin;
+	// Distance between A & B
+	return glm::distance(transformPoints[0], transformPoints[1]);
 }
