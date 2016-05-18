@@ -118,6 +118,9 @@ static GameObject* parseColliderNode(const aiScene* scene, aiNode* currentNode, 
 		nodeObject->addComponent(capsule);
 		nodeObject->setName(name);
 	}
+	else {
+		nodeObject->setName(name); // Capture name of "Colliders" node
+	}
 
 	for (unsigned int c = 0; c < currentNode->mNumChildren; ++c) {
 		nodeObject->addChild(parseColliderNode(scene, currentNode->mChildren[c], isStatic));

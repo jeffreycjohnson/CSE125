@@ -27,8 +27,8 @@
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
 
-FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
-	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
+FPSMovement::FPSMovement(int clientID, GameObject* player, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
+	: clientID(clientID), player(player), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
 {
 	this->front = glm::vec3(0, 0, -1);
 
@@ -38,7 +38,11 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 	raycastHit = false;
 	forward = glm::vec3(0);
 
-	playerBoxCollider = nullptr;
+	assert(player != nullptr); // Player pointer is returned from "loadScene"
+	player = player->findChildByName("Player");
+	assert(player != nullptr); // You better have loaded a player model with a "Player" node
+	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider")->getComponent<BoxCollider>();
+
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	if (oct == nullptr) {
 		throw "ERROR: Octree is a nullptr";
@@ -93,13 +97,15 @@ void FPSMovement::fixedUpdate()
 		respawn();
 	}
 
+	// I'm so sorry, guys. Really, I am.
+
 	// Ray cast normal debug against OBBs
-	auto cameraRay = Renderer::mainCamera->getEyeRay();
-	auto box = GameObject::FindByName("Player")->transform.children[0]->children[0]->gameObject->getComponent<BoxCollider>();;
+	/*auto cameraRay = Renderer::mainCamera->getEyeRay();
+	auto box = playerBoxCollider;
 	auto camhit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(cameraRay, Octree::BOTH, 0, Octree::RAY_MAX, box);
 	raycastHit = camhit.intersects;
 	lastRayPoint = cameraRay.getPos(camhit.hitTime);
-	lastRayPointPlusN = lastRayPoint + camhit.normal;
+	lastRayPointPlusN = lastRayPoint + camhit.normal;*/
 	// end debug
 
 	recalculate();
@@ -108,14 +114,11 @@ void FPSMovement::fixedUpdate()
 }
 
 void FPSMovement::getPlayerRadii() {
-	//First we access the player's box collider
-	Transform playerTrans = GameObject::FindByName("Player")->transform;
-	GameObject * go = playerTrans.children[0]->children[0]->gameObject;
-	playerBoxCollider = go->getComponent<BoxCollider>();
-
-	//Then we access it's width and height, to set the player radii
-	playerRadius = playerBoxCollider->getWidth() / 2.0f;
-	playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
+	if (playerBoxCollider) {
+		//Then we access it's width and height, to set the player radii
+		playerRadius = playerBoxCollider->getWidth() / 2.0f;
+		playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
+	}
 }
 
 void FPSMovement::handleHorizontalMovement(float dt) {

@@ -47,11 +47,11 @@ int main(int argc, char** argv)
 	}*/
 
 	// cache all meshes
-	GameObject *scene = loadScene("assets/security.dae");
+	GameObject *scene = loadScene(file.getString("GameSettings", "level"));
 	scene->destroy();
 	delete scene;
 
-	GameObject *player = loadScene("assets/cubeman.dae");
+	GameObject *player = loadScene(file.getString("GameSettings", "player"));
 	player->destroy();
 	delete player;
 
