@@ -87,6 +87,7 @@ void PointShadowPass::render(Camera* camera)
     CHECK_ERROR();
 
     for (auto mesh : Renderer::renderBuffer.deferred) {
+        if (Mesh::meshMap[mesh->name].wireframe) continue;
         mesh->draw();
     }
     CHECK_ERROR();
@@ -106,6 +107,9 @@ void UIPass::render(Camera * camera)
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
 
@@ -118,6 +122,7 @@ void UIPass::render(Camera * camera)
 	shader["uColor"] = glm::vec4(1);
 	tex->bindTexture(0);
 	shader["tex"] = 0;
+	shader["scale"] = glm::vec2(1, Renderer::getWindowWidth() / Renderer::getWindowHeight()) * 0.02f;
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 	CHECK_ERROR();
 }
