@@ -197,7 +197,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 	int totalBytesRecvd = 0;
 
 	std::vector<NetworkResponse> msgs;
-	std::vector<char> msg;
+	std::vector<char> currMsg;
 
 	// enable nonblocking
 	u_long iMode = 1;
@@ -218,17 +218,18 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 
 	do
 	{
-		int iResult = recv(ConnectSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1, 0);
+		int bytesLastRecv = recv(ConnectSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1, 0);
 
 		// if there's nothing, just leave
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) break;
 
-		if (iResult > 0) // if there's data to fetch
+		int totalBytesProcd = 0;
+		if (bytesLastRecv > 0) 
 		{
-			totalBytesRecvd += iResult;
+			totalBytesRecvd += bytesLastRecv;
 			int msgLength = 0;
-			int totalBytesProcd = 0;
+			totalBytesProcd = 0;
 
 			do
 			{
@@ -259,10 +260,10 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 				int msgType = -1;
 				int msgId = -1;
 				int contentLength = -1;
-				msg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
+				currMsg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
 				totalBytesProcd += contentLength;
 
-				NetworkResponse response(msgType, msgId, msg);
+				NetworkResponse response(msgType, msgId, currMsg);
 				msgs.push_back(response);
 			}
 			while (totalBytesRecvd > totalBytesProcd);
@@ -270,8 +271,13 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 			//std::cout << ConnectSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
 		}
-		else if (iResult == 0) // there's fookin nothin
+		else if (bytesLastRecv == 0) // there's fookin nothin
 		{
+			if (totalBytesProcd != totalBytesRecvd)
+			{
+				std::cerr << "THROWING AWAY BYTES" << std::endl;
+			}
+
 			break;
 		}
 		else // error

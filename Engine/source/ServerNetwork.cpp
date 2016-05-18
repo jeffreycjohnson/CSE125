@@ -73,7 +73,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 	int totalBytesRecvd = 0;
 
 	std::vector<NetworkResponse> msgs;
-	std::vector<char> msg;
+	std::vector<char> currMsg;
 
 	// non-blocking mode is enabled.
 	u_long iMode = 1;
@@ -92,61 +92,67 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 	}
 
 	do {
-		int iResult = recv(clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
+		int bytesLastRecv = recv(clientSocket, recvbuf + totalBytesRecvd, DEFAULT_BUFLEN - totalBytesRecvd - 1 , 0);
 
 		int nError = WSAGetLastError();
 		if (nError == WSAEWOULDBLOCK) {
 			break;
 		}
 
-		if (iResult > 0) {
-			totalBytesRecvd += iResult;
+		int totalBytesProcd = 0;
+		if (bytesLastRecv > 0) {
+			totalBytesRecvd += bytesLastRecv;
 			int msgLength = 0;
-			int totalBytesProcd = 0;
+			totalBytesProcd = 0;
 
-		// only read a message once we've gotten enough bytes tbh
-		do
-		{
-			// what do if we don't even have enough for the message length
-			if ((totalBytesRecvd - totalBytesProcd) < sizeof(int))
+			// only read a message once we've gotten enough bytes tbh
+			do
 			{
-				memset(prevData.buffer, 0, DEFAULT_BUFLEN);
-				memcpy(prevData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
-				prevData.length = totalBytesRecvd - totalBytesProcd;
+				// what do if we don't even have enough for the message length
+				if ((totalBytesRecvd - totalBytesProcd) < sizeof(int))
+				{
+					memset(prevData.buffer, 0, DEFAULT_BUFLEN);
+					memcpy(prevData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+					prevData.length = totalBytesRecvd - totalBytesProcd;
 
-				break;
+					break;
+				}
+
+				// grab the message length to see if we have enough
+				msgLength = ntohl(*((int *)(recvbuf + totalBytesProcd)));
+
+				// what do if we don't have enough bytes for the whole message
+				if ((totalBytesRecvd - totalBytesProcd) < msgLength)
+				{
+					memset(prevData.buffer, 0, DEFAULT_BUFLEN);
+					memcpy(prevData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
+					prevData.length = totalBytesRecvd - totalBytesProcd;
+
+					break;
+				}
+
+				// parse the whole message
+				int msgType = -1;
+				int msgId = -1;
+				int contentLength = -1;
+				currMsg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
+				totalBytesProcd += contentLength;
+
+				NetworkResponse response(msgType, msgId, currMsg);
+				msgs.push_back(response);
 			}
-
-			// grab the message length to see if we have enough
-			msgLength = ntohl(*((int *)(recvbuf + totalBytesProcd)));
-
-			// what do if we don't have enough bytes for the whole message
-			if ((totalBytesRecvd - totalBytesProcd) < msgLength)
-			{
-				memset(prevData.buffer, 0, DEFAULT_BUFLEN);
-				memcpy(prevData.buffer, recvbuf + totalBytesProcd, DEFAULT_BUFLEN - totalBytesProcd);
-				prevData.length = totalBytesRecvd - totalBytesProcd;
-
-				break;
-			}
-
-			// parse the whole message
-			int msgType = -1;
-			int msgId = -1;
-			int contentLength = -1;
-			msg = decodeMessage(recvbuf + totalBytesProcd, DEFAULT_BUFLEN, &msgType, &msgId, &contentLength);
-			totalBytesProcd += contentLength;
-
-			NetworkResponse response(msgType, msgId, msg);
-			msgs.push_back(response);
-		}
-		while (totalBytesRecvd > totalBytesProcd);
+			while (totalBytesRecvd > totalBytesProcd);
 			
 			//std::cerr << clientSocket << ": We found " << msgs.size() << " messages" << std::endl;
 			break;
 		}
-		else if (iResult == 0) 
+		else if (bytesLastRecv == 0) 
 		{
+			if (totalBytesProcd != totalBytesRecvd)
+			{
+				std::cerr << "THROWING AWAY BYTES" << std::endl;
+			}
+
 			break;
 		}
 		else  
@@ -198,49 +204,9 @@ std::vector<std::vector<NetworkResponse>> ServerNetwork::selectClients()
 	std::vector<std::vector<NetworkResponse>> responses;
 	responses.resize(clients.size()); // size it to how it needs to be
 
-	// create and zero file descriptor set for select population
-	fd_set readfds;
-	FD_ZERO(&readfds);
-
-	// add clients to fd_set
-	for (int clientSock : clients)
-	{
-		FD_SET(clientSock, &readfds);
-	}
-
-	// 1ms timeout for detecting messages
-	// we dont got time for waiting!
-	timeval tv;
-    tv.tv_sec = 0;
-	tv.tv_usec = 1000;
-
-	/**
-	 * Realtalk: is doing select necessary? As the sockets are all nonblocking what's
-	 * the harm in just polling *all* of them to see if they have data?
-	 */
-#ifdef __SELECTIT
-	int selResult = select(clients.back() + 1, &readfds, NULL, NULL, &tv);
-	if (selResult < 0)
-	{
-		printf("select failed with error: %d\n", WSAGetLastError());
-# ifdef _EXCEPTIONAL
-		std::string message = "recv failed with error: ";
-		message += WSAGetLastError();
-		throw new std::runtime_error(message);
-# endif
-		WSACleanup();
-	}
-#endif
-
 	for (int client_id = 0; client_id < clients.size(); ++client_id){
 		int relevantSocket = clients[client_id];
 
-#ifdef __SELECTIT
-
-		if (!FD_ISSET(relevantSocket, &readfds)){
-			//std::cerr << client_id << " with socket " << relevantSocket << "is not ready to be read" << std::endl;
-		}
-#endif
 		std::vector<NetworkResponse> relevantResponse = ServerNetwork::handleClient(relevantSocket);
 		responses[client_id] = relevantResponse;
 	}
@@ -267,8 +233,17 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int 
 	}
 
 	std::vector<char> encodedMsg = encodeMessage(bytes, msgType, id, checksum);
+	ServerNetwork::sendBytes(clientID, encodedMsg);
+
+	return;
+}
+
+void ServerNetwork::sendBytes(int clientID, const std::vector<char>& bytes)
+{
+	int clientSock = ServerNetwork::clients[clientID];
+
 	//std::cout << "Sending " << encodedMsg.size() << " bytes to client " << clientID  << " with checksum " << checksum << std::endl;
-	int iSendResult = send(clientSock, encodedMsg.data(), encodedMsg.size(), 0);
+	int iSendResult = send(clientSock, bytes.data(), bytes.size(), 0);
 	if (iSendResult == SOCKET_ERROR) {
 		int wsaLastError = WSAGetLastError();
 		if (wsaLastError != WSAEWOULDBLOCK)
@@ -285,9 +260,28 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char> &bytes, int 
 		}
 		return;
 	}
-	NetworkStats::registerBytesSent(clientID, encodedMsg.size());
+	NetworkStats::registerBytesSent(clientID, bytes.size());
+}
 
-	return;
+void ServerNetwork::sendMessages(int clientID, const std::vector<NetworkResponse>& messages)
+{
+	int clientSock = ServerNetwork::clients[clientID];
+	std::vector<char> bytes;
+
+	for (auto& msg : messages)
+	{
+		NetworkStats::registerMsgType(clientID, msg.messageType);
+		// insert encoded type
+		int checksum = 0;
+		for (char c : msg.body) {
+			checksum += c;
+		}
+
+		std::vector<char> encodedMsg = encodeMessage(msg.body, msg.messageType, msg.id, checksum);
+		bytes.insert(bytes.end(), encodedMsg.begin(), encodedMsg.end());
+	}
+
+	ServerNetwork::sendBytes(clientID, bytes);
 }
 
 int ServerNetwork::acceptTCPConnection(int listenSocket) {

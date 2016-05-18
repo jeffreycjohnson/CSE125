@@ -143,6 +143,10 @@ void Renderer::init(int window_width, int window_height) {
 		"shaders/fbo.vert", "shaders/ssao_blur.frag"
 		);
 
+	shaderList[UI_SHADER] = new Shader(
+		"shaders/ui.vert", "shaders/ui.frag"
+	);
+
     mainCamera = new Camera(windowWidth, windowHeight, false);
     mainCamera->passes.push_back(std::make_unique<GBufferPass>());
 	mainCamera->passes.push_back(std::make_unique<LightingPass>());
@@ -151,7 +155,8 @@ void Renderer::init(int window_width, int window_height) {
     mainCamera->passes.push_back(std::make_unique<ForwardPass>());
     mainCamera->passes.push_back(std::make_unique<ParticlePass>());
     mainCamera->passes.push_back(std::make_unique<DebugPass>());
-    mainCamera->passes.push_back(std::make_unique<BloomPass>());
+    mainCamera->passes.push_back(std::make_unique<UIPass>());
+	mainCamera->passes.push_back(std::make_unique<BloomPass>());
 
     resize(windowWidth, windowHeight);
 }

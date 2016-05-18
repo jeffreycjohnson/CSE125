@@ -59,11 +59,11 @@ int main(int argc, char** argv)
 		player->addComponent(new FPSMovement(client, 4.0f, 0.5f, glm::vec3(client * 2, 5, -client * 2), glm::vec3(0, 1, 0), verticality));
 		player->addComponent(new Inventory());
 
-		if (!didSetCamera)
+		if (client == 0)
 		{
-			didSetCamera = true;
 			verticality->addComponent(Renderer::mainCamera);
 		}
+
 		NetworkManager::attachCameraTo(client, verticality->getID());
 		GameObject::SceneRoot.addChild(player);
 	}

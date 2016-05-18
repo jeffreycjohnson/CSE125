@@ -31,7 +31,7 @@ private:
 	static std::vector<ClientID> clientIDs;
 	static ClientID myClientID;
 
-	static std::map<std::pair<int, int>, NetworkResponse> postbox;
+	static std::vector<NetworkResponse> postbox;
 
 	static void ReceiveServerMessages();
 	static void SendServerMessages();
