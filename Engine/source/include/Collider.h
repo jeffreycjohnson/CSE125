@@ -90,6 +90,10 @@ public:
 	// Performs a raycast. Not full-blown ray intersection: t must be > 0
 	virtual RayHitInfo raycast(const Ray& ray) const = 0;
 
+	bool isColliding() const {
+		return this->colliding;
+	}
+
 	// Returns an axis-aligned bounding box defined for WORLD coordinates
 	virtual BoxCollider getAABB() const = 0;
 	virtual ColliderType getColliderType() {

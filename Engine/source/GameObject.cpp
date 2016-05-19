@@ -216,6 +216,17 @@ GameObject* GameObject::findChildByName(const std::string& name)
     return nullptr;
 }
 
+GameObject* GameObject::findChildByNameContains(const std::string& name)
+{
+	for (auto child : transform.children)
+	{
+		if (child->gameObject->name.find(name) != std::string::npos) {
+			return child->gameObject;
+		}
+	}
+	return nullptr;
+}
+
 void GameObject::debugDraw() {
     if (visible && active && !dead) {
         for (auto component : componentList) {

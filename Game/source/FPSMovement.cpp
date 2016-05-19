@@ -56,7 +56,12 @@ void FPSMovement::create()
 
 	auto player = this->gameObject->findChildByName("Player");
 	assert(player != nullptr); // You better have loaded a player model with a "Player" node
-	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider")->getComponent<BoxCollider>();
+	auto colliders = player->findChildByName("Colliders");
+	auto boxes = player->findChildByName("BoxCollider");
+
+	// Assimp turns spaces into underscores
+	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
+	feetCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_feet")->getComponent<BoxCollider>();
 
 	//Input::hideCursor();
 	recalculate();
@@ -121,7 +126,7 @@ void FPSMovement::getPlayerRadii() {
 		float w = playerBoxCollider->getWidth();
 		float d = playerBoxCollider->getDepth();
 		float theta = std::atanf(d / w);
-		playerRadius = std::sin(theta) * w / 2.0f; // Divide by two b/c this is radius
+		playerRadius = (d / std::sin(theta)) / 2.0f; // Divide by two b/c this is radius
 
 		playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
 	}
@@ -226,17 +231,86 @@ void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction
 
 void FPSMovement::handleVerticalMovement(float dt) {
 	
+	bool previouslyStandingOnSurface = standingOnSurface;
 	standingOnSurface = false;
 	//These rays goes downwards from the player, and IGNORES the player's collider
 	//Having 4 rays gives is more precision for knowing in the player is partially standing on a surface
-	checkOnSurface(position + glm::vec3(playerRadius / 3, 0, playerRadius / 3), -worldUp);
-	checkOnSurface(position + glm::vec3(playerRadius / 3, 0, -playerRadius / 3), -worldUp);
-	checkOnSurface(position + glm::vec3(-playerRadius / 3, 0, playerRadius / 3), -worldUp);
-	checkOnSurface(position + glm::vec3(-playerRadius / 3, 0, -playerRadius / 3), -worldUp);
+	checkOnSurface(position, -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(playerRadius, 0, playerRadius), -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(playerRadius, 0, -playerRadius), -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(-playerRadius, 0, playerRadius), -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(-playerRadius, 0, -playerRadius), -worldUp);
+
+	/*float step = 0;
+	float steps = 36;
+	while (step < steps && !standingOnSurface) {
+		float percent = step / steps;
+		float xOffset = playerRadius * glm::sin(glm::radians( percent / 360.0f ));
+		float zOffset = playerRadius * glm::cos(glm::radians( percent / 360.0f ));
+		checkOnSurface(position + glm::vec3(xOffset, 0, zOffset), -worldUp);
+		step++;
+	}*/
+
+	// If the raycasts against the floor failed, try one final thing (DANGEROUS)
+	/*if (!standingOnSurface) {
+
+		auto colInfo = oct->collisionBox(feetCollider, Octree::BOTH);
+		float yOffset = playerHeightRadius;
+		if (colInfo.collisionOccurred && vSpeed >= 0 ) {
+			for (auto go : colInfo.collidees) {
+				auto box = go->getComponent<BoxCollider>();
+				if (box) {
+					standingOnSurface = true;
+				}
+			}
+		}
+	}
+
+	/*if (!standingOnSurface) {
+		
+		auto colInfo = oct->collisionBox(playerBoxCollider, Octree::BOTH);
+		float yOffset = playerHeightRadius;
+		if (colInfo.collisionOccurred) {
+
+			// If we are colliding with an object, whose ymax is greater than our ymin,
+			// and its ymax is less than our ymax, we are likely standing on something.
+
+			for (auto go : colInfo.collidees) {
+				if (go != nullptr) {
+					BoxCollider* other = nullptr;
+					other = go->getComponent<BoxCollider>();
+					if (other != nullptr) {
+						/*if (playerBoxCollider->getYMax() >= other->getYMax() &&
+							other->getYMax() >= playerBoxCollider->getYMin() &&
+							other->getYMin() < playerBoxCollider->getYMax() &&
+
+							// It can't be a ceiling \/
+							position.y > other->getYMax() &&
+							
+							// Prevent us from "climbing walls" by jumping into them a mashing space
+							!previouslyStandingOnSurface &&
+
+							// We are falling
+							vSpeed <= 0
+							) {
+							standingOnSurface = true;
+							floor = other;
+							yOffset = std::min(yOffset, other->getYMax() - playerBoxCollider->getYMin());
+						}
+
+					}
+				}
+			}
+		}
+	}*/
 
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
-	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider });
 	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
 
 	//After we release the jump button, we can not jump again
@@ -245,7 +319,7 @@ void FPSMovement::handleVerticalMovement(float dt) {
 
 	//If we are currently on a surface, snap us to the player's standing height
 	if (standingOnSurface) {
-		vSpeed = baseVSpeed;
+		vSpeed = 0;//baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
 
 		//If nothin is on our head, and we try to jump, and we aren't holding space from a previous jump
@@ -271,7 +345,7 @@ void FPSMovement::checkOnSurface(glm::vec3 position, glm::vec3 direction) {
 
 	//We raycast downwards from our position
 	Ray downRay(position, direction);
-	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
+	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider });
 
 	//If standingOnSurface is already true, or this downHit has determined that we are on a surface, then set standingOnSurface to true
 	standingOnSurface = standingOnSurface || (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f);
@@ -298,11 +372,8 @@ void FPSMovement::debugDraw()
 	Renderer::drawSphere(position + front, 0.125f, glm::vec4(0, 1, 0, 1)); // lime green for (front)
 	Renderer::drawSphere(position, 0.25f, glm::vec4(1.000, 0.388, 0.278, 1)); // orange (position)
 
-
-	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
 }
 
-static int counter2 = 0;
 void FPSMovement::recalculate()
 {
 	// cache angles for front vector

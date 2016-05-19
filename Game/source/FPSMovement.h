@@ -13,7 +13,7 @@ private:
 	const float deathFloor = -20.0f;
 
 	OctreeManager* oct;
-	BoxCollider* playerBoxCollider;
+	BoxCollider* playerBoxCollider, *feetCollider;
 	Collider* floor;
 	GameObject* verticality;
 

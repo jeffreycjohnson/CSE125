@@ -657,3 +657,13 @@ float BoxCollider::getDepth() {
 	// Distance between A & B
 	return glm::distance(transformPoints[0], transformPoints[1]);
 }
+
+float BoxCollider::getYMax()
+{
+	return ymax;
+}
+
+float BoxCollider::getYMin()
+{
+	return ymin;
+}
