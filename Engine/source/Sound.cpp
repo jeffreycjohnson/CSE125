@@ -76,10 +76,13 @@ void Sound::update(float)
 
 void Sound::play()
 {
+	std::cout << "Hello, I am a sound whose name is " << name << std::endl;
 	if (playing)
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
 		result = system->playSound(soundMap[name], 0, false, &channel);
+		auto x = soundMap[name];
+		std::cout << "HEEEYOOOOOO" << soundMap[name] << std::endl;
 		channel->setVolume(volume);
 		if (looping)
 		{
@@ -167,6 +170,12 @@ void Sound::initFromConfig()
 		system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
 		soundMap.insert({*i, soundToAdd});
 	}
+	//Sanity check
+	std::cout << "Sound's initFromConfig Sanity Check" << std::endl;
+	for (auto i : soundMap) {
+		std::cout << i.first << std::endl;
+	}
+	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 }
 
 void Sound::init()
@@ -232,7 +241,7 @@ void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 	}
 	Sound * s;
 	s = go->getComponent<Sound>();
-	if (s == nullptr) {
+	if (s != nullptr) {
 		s->deserializeAndApply(bytes);
 	}
 	else {

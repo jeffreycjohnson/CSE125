@@ -20,6 +20,7 @@
 #include "BoxCollider.h"
 #include "ServerInput.h"
 #include "Config.h"
+#include "Sound.h"
 
 #include "PressButton.h"
 #include "KeyTarget.h"
@@ -56,7 +57,7 @@ void FPSMovement::create()
 
 	auto player = this->gameObject->findChildByName("Player");
 	assert(player != nullptr); // You better have loaded a player model with a "Player" node
-	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider")->getComponent<BoxCollider>();
+	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
 
 	//Input::hideCursor();
 	recalculate();
@@ -253,6 +254,12 @@ void FPSMovement::handleVerticalMovement(float dt) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
 			justJumped = true;
+
+			Sound * s = gameObject->getComponent<Sound>();
+			if (s) {
+				s->play();
+			}
+
 		}
 	}
 	//If we're falling or flying upwards, accellerate down

@@ -12,6 +12,7 @@
 #include "Config.h"
 #include "GodSummoner.h"
 #include "Inventory.h"
+#include "Sound.h"
 
 #include <iostream>
 #include "NetworkManager.h"
@@ -58,6 +59,7 @@ int main(int argc, char** argv)
 
 		player->addComponent(new FPSMovement(client, 4.0f, 0.5f, glm::vec3(client * 2, 5, -client * 2), glm::vec3(0, 1, 0), verticality));
 		player->addComponent(new Inventory());
+		player->addComponent(new Sound("mariojump", false, false, 1.0, false));
 
 		if (client == 0)
 		{

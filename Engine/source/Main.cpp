@@ -21,6 +21,7 @@ GLFWwindow * mainWindow;
 void LoadDebugOptions(ConfigFile&);
 void LoadOctreeOptionsAndInitialize(ConfigFile&);
 
+#include <iostream>
 void InitializeEngine(std::string windowName)
 {
     workerPool = new ThreadPool();
@@ -66,6 +67,7 @@ void InitializeEngine(std::string windowName)
     glewExperimental = GL_TRUE;
 	glewInit();
 	glfwSwapInterval(1);
+	std::cout << "SOUND" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	Sound::init();
 	Renderer::init(width, height);
     Input::init(window);

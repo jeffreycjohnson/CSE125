@@ -37,6 +37,7 @@ public:
 	NetworkStruct() {}
 	~NetworkStruct() {}
 
+	static int numberOfMessageTypes();
 	static size_t sizeOf(int structType);
 };
 
