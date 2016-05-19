@@ -27,9 +27,9 @@ void Laser::fixedUpdate()
 	if (isActivated() && !areLasersOff)
 	{
 		areLasersOff = true;
-		Sound * s = gameObject->getComponent<Sound>();
 		gameObject->setVisible(false);
-		s->play();
+		//Sound * s = gameObject->getComponent<Sound>();
+		//s->play();
 	}
 	else if (!isActivated() && areLasersOff && !isFixed)
 	{
