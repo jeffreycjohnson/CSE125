@@ -21,6 +21,7 @@
 
 #include "PressButton.h"
 #include "KeyTarget.h"
+#include "FixedKeyTarget.h"
 #include "KeyActivator.h"
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
@@ -54,7 +55,7 @@ void FPSMovement::create()
 
 	auto player = this->gameObject->findChildByName("Player");
 	assert(player != nullptr); // You better have loaded a player model with a "Player" node
-	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider")->getComponent<BoxCollider>();
+	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
 
 	//Input::hideCursor();
 	recalculate();
@@ -369,7 +370,8 @@ void FPSMovement::raycastMouse()
 		{
 			hit->getComponent<PressButton>()->trigger();
 		}
-		else if (hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp)) {
+		else if ((hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
+			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) {
 			// pick up key
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
