@@ -25,8 +25,14 @@
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
 
-FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
-	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
+FPSMovement::FPSMovement(
+	int clientID, Sensitivity sensitivites,
+	glm::vec3 initPosition, glm::vec3 upVector,
+	GameObject* verticality)
+	: clientID(clientID), 
+	  mouseSensitivity(sensitivites.mouseSensitivity), joystickSensitivity(sensitivites.joystickSensitivity), 
+	  position(initPosition), initialPosition(initPosition), up(upVector), worldUp(upVector),
+	  verticality(verticality)
 {
 	this->front = glm::vec3(0, 0, -1);
 
@@ -81,7 +87,7 @@ void FPSMovement::fixedUpdate()
 	glm::vec2 currMousePosition = Input::mousePosition(clientID);
 	
 	glm::vec2 mouseDelta = (currMousePosition - lastMousePosition) * mouseSensitivity;
-	glm::vec2 joyDelta = glm::vec2(Input::getAxis("lookright", clientID), Input::getAxis("lookforward", clientID));
+	glm::vec2 joyDelta = glm::vec2(Input::getAxis("lookright", clientID), Input::getAxis("lookforward", clientID)) * joystickSensitivity;
 	glm::vec2 lookDelta = mouseDelta + joyDelta;
 
 	yaw += lookDelta.x;
@@ -142,7 +148,7 @@ void FPSMovement::getPlayerRadii() {
 void FPSMovement::handleHorizontalMovement(float dt) {
 
 	// act on keyboard
-	float speed = moveSpeed * dt;
+	float speed = baseHSpeed * dt;
 	glm::vec3 normRight = glm::normalize(right);
 
 	glm::vec3 forwardComp = Input::getAxis("forward", clientID) * forward;

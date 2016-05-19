@@ -4,9 +4,25 @@
 #include "Component.h"
 #include "OctreeManager.h"
 
+struct Sensitivity
+{
+	float mouseSensitivity;
+	float joystickSensitivity;
+
+	Sensitivity(float mouseSensitivity, float joystickSensitivity)
+		: mouseSensitivity(mouseSensitivity), joystickSensitivity(joystickSensitivity)
+	{
+	}
+
+	~Sensitivity()
+	{
+	}
+};
+
 class FPSMovement : public Component
 {
 private:
+	const float baseHSpeed = 4.0f;
 	const float baseVSpeed = -0.2f;
 	const float startJumpSpeed = 0.25f;
 	const float vAccel = -0.015f;
@@ -17,7 +33,7 @@ private:
 	Collider* floor;
 	GameObject* verticality;
 
-	float moveSpeed, mouseSensitivity;
+	float mouseSensitivity, joystickSensitivity;
 
 	glm::vec3 position, forward, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
@@ -45,8 +61,8 @@ private:
 
 public:
 	FPSMovement(
-		int clientID, float moveSpeed, float mouseSensitivity,
-		glm::vec3 position, glm::vec3 up,
+		int clientID, Sensitivity sensitivites,
+		glm::vec3 initPosition, glm::vec3 upVector,
 		GameObject* verticality = nullptr);
 	~FPSMovement() {};
 
