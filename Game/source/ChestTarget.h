@@ -7,6 +7,7 @@ class ChestTarget :
 public:
 	float openness = 0.0f;
 	glm::vec3 initPosition;
+	bool isOpened;
 
 	ChestTarget();
 	ChestTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);

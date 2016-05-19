@@ -48,24 +48,3 @@ void Laser::collisionStay(GameObject *other)
 		}
 	}
 }
-
-Forcefield::Forcefield(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
-{
-	int targetID = std::stoi(tokens[1]);
-	int threshold = std::stoi(tokens[2]);
-
-	setThreshold(threshold);
-	(*idToTarget)[targetID] = this;
-}
-
-void Forcefield::fixedUpdate()
-{
-	if (isActivated())
-	{
-		gameObject->setVisible(false);
-	}
-	else if (!isActivated())
-	{
-		gameObject->setVisible(true);
-	}
-}
