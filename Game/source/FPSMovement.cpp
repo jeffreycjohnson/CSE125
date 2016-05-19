@@ -130,6 +130,12 @@ void FPSMovement::getPlayerRadii() {
 
 		playerHeightRadius = playerBoxCollider->getDepth() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
 	}
+	if (feetCollider) {
+		float fw = feetCollider->getWidth();
+		float fd = feetCollider->getHeight();
+		float ftheta = std::atanf(fd / fw);
+		footRadius = (fd / std::sin(ftheta)) / 2.0f; // Divide by two b/c this is radius
+	}
 }
 
 void FPSMovement::handleHorizontalMovement(float dt) {
@@ -236,14 +242,15 @@ void FPSMovement::handleVerticalMovement(float dt) {
 	//These rays goes downwards from the player, and IGNORES the player's collider
 	//Having 4 rays gives is more precision for knowing in the player is partially standing on a surface
 	checkOnSurface(position, -worldUp);
+
 	if (!standingOnSurface)
-		checkOnSurface(position + glm::vec3(playerRadius, 0, playerRadius), -worldUp);
+		checkOnSurface(position + glm::vec3(footRadius, 0, footRadius), -worldUp);
 	if (!standingOnSurface)
-		checkOnSurface(position + glm::vec3(playerRadius, 0, -playerRadius), -worldUp);
+		checkOnSurface(position + glm::vec3(footRadius, 0, -footRadius), -worldUp);
 	if (!standingOnSurface)
-		checkOnSurface(position + glm::vec3(-playerRadius, 0, playerRadius), -worldUp);
+		checkOnSurface(position + glm::vec3(-footRadius, 0, footRadius), -worldUp);
 	if (!standingOnSurface)
-		checkOnSurface(position + glm::vec3(-playerRadius, 0, -playerRadius), -worldUp);
+		checkOnSurface(position + glm::vec3(-footRadius, 0, -footRadius), -worldUp);
 
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);

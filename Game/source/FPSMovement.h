@@ -22,7 +22,7 @@ private:
 	glm::vec3 position, forward, front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
 	RayHitInfo downHit;
-	float playerRadius, playerHeightRadius, vSpeed;
+	float playerRadius, playerHeightRadius, vSpeed, footRadius;
 	bool hitWall, pastFirstTick, standingOnSurface, justJumped;
 	int clientID;
 
