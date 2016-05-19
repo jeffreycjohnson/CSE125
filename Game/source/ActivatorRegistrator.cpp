@@ -93,8 +93,8 @@ void ActivatorRegistrator::create()
 			Activator *activator = keyval.second(tokens, idToTargets);
 
 			act->addComponent(activator);
-			Sound *sound = new Sound("zeldasecret", false, false, 1.0f, true);
-			act->addComponent(sound);
+			//Sound *sound = new Sound("zeldasecret", false, false, 1.0f, true);
+			//act->addComponent(sound);
 		}
 	}
 }
