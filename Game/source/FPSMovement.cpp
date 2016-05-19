@@ -115,7 +115,7 @@ void FPSMovement::fixedUpdate()
 	// end debug
 
 	recalculate();
-	getPlayerRadii(); // Hmmm, suspicious
+	getPlayerRadii();
 	raycastMouse();
 }
 
@@ -124,11 +124,11 @@ void FPSMovement::getPlayerRadii() {
 		//Then we access it's width and height, to set the player radii
 		//playerRadius = playerBoxCollider->getWidth() / 2.0f;
 		float w = playerBoxCollider->getWidth();
-		float d = playerBoxCollider->getDepth();
+		float d = playerBoxCollider->getHeight();
 		float theta = std::atanf(d / w);
 		playerRadius = (d / std::sin(theta)) / 2.0f; // Divide by two b/c this is radius
 
-		playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
+		playerHeightRadius = playerBoxCollider->getDepth() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
 	}
 }
 
@@ -212,14 +212,14 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 	return false;
 }
 
-void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction) {
+void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 pos, glm::vec3 direction) {
 
 	// This function checks whether the player's bounding box overlaps a wall in the given direction,
 	// and if so, offsets the player's position along the negative of the ray direction, so that the
 	// player no longer intersects that wall. Done once before movement logic, so that we don't slowly
 	// clip into walls when sliding.
 
-	Ray sideRay(position, direction);
+	Ray sideRay(pos, direction);
 	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
 
 	//If the side raycast enters a wall, we force the player back along the sideray vector to keep them out of the wall
@@ -244,69 +244,6 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		checkOnSurface(position + glm::vec3(-playerRadius, 0, playerRadius), -worldUp);
 	if (!standingOnSurface)
 		checkOnSurface(position + glm::vec3(-playerRadius, 0, -playerRadius), -worldUp);
-
-	/*float step = 0;
-	float steps = 36;
-	while (step < steps && !standingOnSurface) {
-		float percent = step / steps;
-		float xOffset = playerRadius * glm::sin(glm::radians( percent / 360.0f ));
-		float zOffset = playerRadius * glm::cos(glm::radians( percent / 360.0f ));
-		checkOnSurface(position + glm::vec3(xOffset, 0, zOffset), -worldUp);
-		step++;
-	}*/
-
-	// If the raycasts against the floor failed, try one final thing (DANGEROUS)
-	/*if (!standingOnSurface) {
-
-		auto colInfo = oct->collisionBox(feetCollider, Octree::BOTH);
-		float yOffset = playerHeightRadius;
-		if (colInfo.collisionOccurred && vSpeed >= 0 ) {
-			for (auto go : colInfo.collidees) {
-				auto box = go->getComponent<BoxCollider>();
-				if (box) {
-					standingOnSurface = true;
-				}
-			}
-		}
-	}
-
-	/*if (!standingOnSurface) {
-		
-		auto colInfo = oct->collisionBox(playerBoxCollider, Octree::BOTH);
-		float yOffset = playerHeightRadius;
-		if (colInfo.collisionOccurred) {
-
-			// If we are colliding with an object, whose ymax is greater than our ymin,
-			// and its ymax is less than our ymax, we are likely standing on something.
-
-			for (auto go : colInfo.collidees) {
-				if (go != nullptr) {
-					BoxCollider* other = nullptr;
-					other = go->getComponent<BoxCollider>();
-					if (other != nullptr) {
-						/*if (playerBoxCollider->getYMax() >= other->getYMax() &&
-							other->getYMax() >= playerBoxCollider->getYMin() &&
-							other->getYMin() < playerBoxCollider->getYMax() &&
-
-							// It can't be a ceiling \/
-							position.y > other->getYMax() &&
-							
-							// Prevent us from "climbing walls" by jumping into them a mashing space
-							!previouslyStandingOnSurface &&
-
-							// We are falling
-							vSpeed <= 0
-							) {
-							standingOnSurface = true;
-							floor = other;
-							yOffset = std::min(yOffset, other->getYMax() - playerBoxCollider->getYMin());
-						}
-
-					}
-				}
-			}
-		}
-	}*/
 
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
@@ -345,7 +282,7 @@ void FPSMovement::checkOnSurface(glm::vec3 position, glm::vec3 direction) {
 
 	//We raycast downwards from our position
 	Ray downRay(position, direction);
-	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider });
+	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider, feetCollider });
 
 	//If standingOnSurface is already true, or this downHit has determined that we are on a surface, then set standingOnSurface to true
 	standingOnSurface = standingOnSurface || (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f);
