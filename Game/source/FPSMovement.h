@@ -24,7 +24,7 @@ class FPSMovement : public Component
 private:
 	const float baseHSpeed = 4.0f;
 	const float baseVSpeed = -0.2f;
-	const float startJumpSpeed = 0.25f;
+	const float startJumpSpeed = 0.20f;
 	const float vAccel = -0.015f;
 	const float deathFloor = -20.0f;
 
