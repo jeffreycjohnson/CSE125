@@ -23,7 +23,7 @@ ChestTarget::~ChestTarget()
 
 void ChestTarget::create()
 {
-	initPosition = gameObject->transform.children[0]->getPosition();
+	initPosition = gameObject->transform.getPosition();
 }
 
 void ChestTarget::fixedUpdate()
