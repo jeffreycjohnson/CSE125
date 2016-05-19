@@ -10,7 +10,6 @@
 #include "GameObject.h"
 #include "Input.h"
 #include "OctreeManager.h"
-#include "ServerInput.h"
 #include "Renderer.h"
 #include "Timer.h"
 #include "OctreeManager.h"
@@ -18,7 +17,6 @@
 #include "Collider.h"
 #include "Collision.h"
 #include "BoxCollider.h"
-#include "ServerInput.h"
 #include "Config.h"
 
 #include "PressButton.h"
@@ -75,16 +73,19 @@ void FPSMovement::fixedUpdate()
 	{
 		pastFirstTick = true;
 
-		glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
+		glm::vec2 currMousePosition = Input::mousePosition(clientID);
 		lastMousePosition = currMousePosition;
 		return;
 	}
 
-	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
-	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
+	glm::vec2 currMousePosition = Input::mousePosition(clientID);
+	
+	glm::vec2 mouseDelta = (currMousePosition - lastMousePosition) * mouseSensitivity;
+	glm::vec2 joyDelta = glm::vec2(Input::getAxis("lookright", clientID), Input::getAxis("lookforward", clientID));
+	glm::vec2 lookDelta = mouseDelta + joyDelta;
 
-	yaw += mouseDelta.x * mouseSensitivity;
-	pitch += -1 * mouseDelta.y * mouseSensitivity;
+	yaw += lookDelta.x;
+	pitch += -1 * lookDelta.y;
 
 	// can't look past certain angles
 	pitch = fmaxf(-89.0f, fminf(89.0f, pitch));
@@ -144,9 +145,9 @@ void FPSMovement::handleHorizontalMovement(float dt) {
 	float speed = moveSpeed * dt;
 	glm::vec3 normRight = glm::normalize(right);
 
-	glm::vec3 forwardComp = ServerInput::getAxis("pitch", clientID) * forward;
+	glm::vec3 forwardComp = Input::getAxis("forward", clientID) * forward;
 	forwardComp.y = 0; // there is no such thing as "y"
-	glm::vec3 sideComp = ServerInput::getAxis("roll", clientID) * right;
+	glm::vec3 sideComp = Input::getAxis("right", clientID) * right;
 
 	//moveDir = (position + (ServerInput::getAxis("pitch", clientID) * forward)) - position;
 	moveDir = forwardComp + sideComp;
@@ -258,7 +259,7 @@ void FPSMovement::handleVerticalMovement(float dt) {
 	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
 
 	//After we release the jump button, we can not jump again
-	if (ServerInput::getAxis("jump", clientID) == 0)
+	if (Input::getAxis("jump", clientID) == 0)
 		justJumped = false;
 
 	//If we are currently on a surface, snap us to the player's standing height
@@ -267,7 +268,7 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
 
 		//If nothin is on our head, and we try to jump, and we aren't holding space from a previous jump
-		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0 && !justJumped) {
+		if (!hitHead && Input::getAxis("jump", clientID) != 0 && !justJumped) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
 			justJumped = true;
@@ -373,7 +374,7 @@ void FPSMovement::raycastMouse()
 
 	if (!cast.intersects) return;
 
-	if (ServerInput::getAxis("aim", clientID))
+	if (Input::getAxis("click", clientID))
 	{
 		std::cout << "BUTTON TRIGGER" << std::endl;
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;

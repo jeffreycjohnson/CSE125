@@ -15,7 +15,7 @@ public:
 	static void init(float);
 	static void update();
 
-    static bool nextFixedStep();
+    static bool nextFixedStep(bool update=true);
 	static double deltaTime();
 	static double time();
 	static double unscaledDeltaTime();

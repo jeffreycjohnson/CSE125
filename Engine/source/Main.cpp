@@ -140,7 +140,7 @@ void RunEngine(NetworkState caller)
 	while (!glfwWindowShouldClose(mainWindow))
 	{
         Timer::update();
-        Input::update();
+        if (Timer::nextFixedStep(false)) Input::update();
 
 		/**
 		 * Note: Client/server managing is done within GameObject::UpdateScene

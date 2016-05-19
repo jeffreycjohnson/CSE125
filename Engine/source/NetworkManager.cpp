@@ -103,7 +103,7 @@ void NetworkManager::ReceiveServerMessages()
 		NetworkResponse final = clientResponses.back();
 		if (final.messageType == INPUT_NETWORK_DATA)
 		{
-			ServerInput::deserializeAndApply(final.body, final.id);
+			Input::deserializeAndApply(final.body);
 		}
 	}
 }
