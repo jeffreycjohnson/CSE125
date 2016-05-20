@@ -45,6 +45,6 @@ TriggerType strToTriggerType(const std::string & str)
 	}
 	else
 	{
-		throw std::runtime_error("Tried parsing unknown trigger type");
+		FATAL("Tried parsing unknown trigger type");
 	}
 }

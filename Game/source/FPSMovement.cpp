@@ -44,9 +44,7 @@ FPSMovement::FPSMovement(
 	forward = glm::vec3(0);
 	floor = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
-	if (oct == nullptr) {
-		throw "ERROR: Octree is a nullptr";
-	}
+	ASSERT(oct != nullptr, "ERROR: Octree is a nullptr");
 }
 
 void FPSMovement::create()
@@ -60,7 +58,7 @@ void FPSMovement::create()
 	}
 
 	auto player = this->gameObject->findChildByName("Player");
-	assert(player != nullptr); // You better have loaded a player model with a "Player" node
+	ASSERT(player != nullptr, "Could not locate 'Player' node from specified player model.");
 	auto colliders = player->findChildByName("Colliders");
 	auto boxes = player->findChildByName("BoxCollider");
 

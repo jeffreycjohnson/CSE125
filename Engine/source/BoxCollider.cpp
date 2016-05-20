@@ -282,7 +282,7 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 			float temp = glm::dot(transformPoints[vertex], axes[axis].direction);
 
 			// Debug assertion to make sure we don't dot against the 0 vector
-			assert(!std::isnan(temp));
+			ASSERT(!std::isnan(temp), "Separating Axis Theorem: projection onto OBB axis is NaN");
 
 			// Build the interval (e.g. the object's "shadow") along the axis over time
 			my_proj_min = std::min(my_proj_min, temp);
@@ -292,7 +292,7 @@ bool BoxCollider::separatingAxisExists(const BoxCollider& other) const {
 		// Now, project the other box's vertices onto the same axis
 		for (int otherVertex = 0; otherVertex < 8; ++otherVertex) {
 			float temp = glm::dot(other.transformPoints[otherVertex], axes[axis].direction);
-			assert(!std::isnan(temp));
+			ASSERT(!std::isnan(temp), "Separating Axis Theorem: projection onto OBB axis is NaN");
 			ot_proj_min = std::min(ot_proj_min, temp);
 			ot_proj_max = std::max(ot_proj_max, temp);
 		}

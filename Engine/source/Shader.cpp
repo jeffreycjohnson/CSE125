@@ -170,13 +170,13 @@ void Shader::reload()
     auto geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
     CHECK_ERROR();
 
-    if (compile(vertWatcher->file, vertexShader)) throw vertWatcher->file;
+    if (compile(vertWatcher->file, vertexShader)) FATAL(vertWatcher->file.c_str());
     glAttachShader(id, vertexShader);
-    if (compile(fragWatcher->file, fragmentShader)) throw fragWatcher->file;
+    if (compile(fragWatcher->file, fragmentShader)) FATAL(fragWatcher->file.c_str());
     glAttachShader(id, fragmentShader);
     if(geomWatcher)
     {
-        if (compile(geomWatcher->file, geometryShader)) throw geomWatcher->file;
+        if (compile(geomWatcher->file, geometryShader)) FATAL(geomWatcher->file.c_str());
         glAttachShader(id, geometryShader);
     }
 
@@ -192,8 +192,7 @@ void Shader::reload()
     {
         char errbuf[512];
         glGetProgramInfoLog(id, 512, nullptr, errbuf);
-        LOG(static_cast<const char *>(errbuf));
-        throw;
+        FATAL(static_cast<const char *>(errbuf));
     }
     CHECK_ERROR();
 }

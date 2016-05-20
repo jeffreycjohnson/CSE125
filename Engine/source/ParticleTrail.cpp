@@ -34,7 +34,7 @@ void ParticleTrail::uploadData() {
 		}
 	}
 
-	if (arrayIndex > 2 * (elementStride * maxPoints)) throw "Out of range";
+	if (arrayIndex > 2 * (elementStride * maxPoints)) FATAL("Out of range");
 
 		glBindVertexArray(vaoHandle);
 		glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
@@ -116,7 +116,9 @@ void ParticleTrail::addPoint(glm::vec3 point)
 			else {
 				normal = glm::normalize(normal);
 			}
-			if (isnan(normal.z)) throw;
+			if (isnan(normal.z)) {
+				FATAL("Z coordinate of normal is NaN");
+			}
 		}
 
 	

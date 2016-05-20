@@ -39,8 +39,7 @@ void Texture::loadFromFile(const std::string& file, bool reuseHandle)
     auto handle = reuseHandle ? textureHandle : SOIL_CREATE_NEW_ID;
     textureHandle = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_AUTO, handle, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | flags);
     if (textureHandle == 0) {
-        LOG(file + ": Error during loading -> " + SOIL_last_result());
-        throw;
+		FATAL((file + ": Error during loading -> " + SOIL_last_result()).c_str());
     }
 }
 

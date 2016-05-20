@@ -159,7 +159,7 @@ void GameObject::removeChild(GameObject * go)
 	auto child = std::find(transform.children.begin(), transform.children.end(), &go->transform);
 	if (child == transform.children.end())
 	{
-		throw std::runtime_error("Cannot remove child from gameobject parent if child is not child");
+		FATAL("Cannot remove child from gameobject parent if child is not child");
 	}
 
 	transform.children.erase(child);
@@ -447,7 +447,7 @@ void GameObject::Dispatch(const std::vector<char> &bytes, int messageType, int m
 		GameObject *toDestroy = GameObject::FindByID(messageID);
 		if (toDestroy == nullptr)
 		{
-			throw std::runtime_error("Cannot destroy gameobject that does not exist");
+			FATAL("Cannot destroy gameobject that does not exist");
 		}
 
 		toDestroy->destroy();

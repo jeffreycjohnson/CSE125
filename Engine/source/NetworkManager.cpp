@@ -50,7 +50,7 @@ std::vector<ClientID> NetworkManager::InitializeServer(std::string port, int num
 {
 	if (NetworkManager::state != UNINITIALIZED)
 	{
-		throw std::runtime_error("Cannot initialize initialized networking.");
+		FATAL("Cannot initialize initialized networking.");
 	}
 
 	NetworkManager::state = INITIALIZING;
@@ -86,7 +86,7 @@ void NetworkManager::ReceiveServerMessages()
 {
 	if (NetworkManager::state != SERVER_MODE)
 	{
-		throw std::runtime_error("Cannot receive messages on unitialized network");
+		FATAL("Cannot receive messages on unitialized network");
 	}
 
 	// for now, all received messages are client-side input
@@ -113,7 +113,7 @@ void NetworkManager::SendServerMessages()
 {
 	if (NetworkManager::state != SERVER_MODE)
 	{
-		throw std::runtime_error("Cannot send messages on unitialized network");
+		FATAL("Cannot send messages on unitialized network");
 	}
 
 	std::map<int, std::vector<NetworkResponse>> perClient;
@@ -245,7 +245,7 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 {
 	if (NetworkManager::state != UNINITIALIZED)
 	{
-		throw std::runtime_error("Cannot initialize initialized server");
+		FATAL("Cannot initialize initialized server");
 	}
 	NetworkManager::state = INITIALIZING;
 
@@ -295,7 +295,7 @@ void NetworkManager::ReceiveClientMessages()
 {
 	if (NetworkManager::state != CLIENT_MODE)
 	{
-		throw std::runtime_error("Cannot receive messages on unitialized network");
+		FATAL("Cannot receive messages on unitialized network");
 	}
 
 	std::vector<NetworkResponse> receivedMessages = ClientNetwork::receiveMessages();
@@ -339,7 +339,7 @@ void NetworkManager::SendClientMessages()
 {
 	if (NetworkManager::state != CLIENT_MODE)
 	{
-		throw std::runtime_error("Cannot send messages on unitialized network");
+		FATAL("Cannot send messages on unitialized network");
 	}
 
 	std::vector<char> bytes = Input::serialize(NetworkManager::myClientID);
@@ -357,7 +357,7 @@ void NetworkManager::InitializeOffline()
 {
 	if (NetworkManager::state != UNINITIALIZED)
 	{
-		throw std::runtime_error("Cannot initialize intialized server");
+		FATAL("Cannot initialize intialized server");
 	}
 
 	NetworkManager::state = OFFLINE;
