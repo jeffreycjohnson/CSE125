@@ -57,19 +57,25 @@
     <ClCompile Include="source\KeyHoleTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ChestTarget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\ChestActivator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\KeyActivator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\KeyTarget.cpp">
+    <ClCompile Include="source\ForceField.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\ForceField.cpp">
+    <ClCompile Include="source\FixedChestTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ChestTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\FixedKeyTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\KeyTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -113,19 +119,25 @@
     <ClInclude Include="source\KeyHoleTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\ChestTarget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\ChestActivator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\KeyActivator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\KeyTarget.h">
+    <ClInclude Include="source\ForceField.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\ForceField.h">
+    <ClInclude Include="source\FixedChestTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ChestTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\FixedKeyTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\KeyTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

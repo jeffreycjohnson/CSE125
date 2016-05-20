@@ -1,13 +1,13 @@
-#include "KeyTarget.h"
+#include "FixedKeyTarget.h"
 #include "KeyActivator.h"
 #include "Timer.h"
 #include <iostream>
 
-KeyTarget::KeyTarget()
+FixedKeyTarget::FixedKeyTarget()
 {
 }
 
-KeyTarget::KeyTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+FixedKeyTarget::FixedKeyTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
 {
 	if (tokens.size() > 4) { // Key is both a target and activator, so get info for target
 		int targetID = std::stoi(tokens[4]);
@@ -20,24 +20,23 @@ KeyTarget::KeyTarget(std::vector<std::string> tokens, std::map<int, Target*>* id
 		canBePickedUp = true;
 
 		// keys not in chests are never "activated". This prevents movement animation
-		applyTrigger(TriggerType::NEGATIVE);
+		applyTrigger(TriggerType::NEGATIVE); 
 	}
 }
 
-KeyTarget::~KeyTarget()
+FixedKeyTarget::~FixedKeyTarget()
 {
 }
 
-void KeyTarget::create()
+void FixedKeyTarget::create()
 {
 	initPosition = gameObject->transform.getPosition();
 }
 
-void KeyTarget::fixedUpdate()
+void FixedKeyTarget::fixedUpdate()
 {
-	
-	if (!pickedUp) {
 
+	if (isActivated() && !pickedUp) {
 		float deltaTime = Timer::fixedTimestep;
 
 		openness += (deltaTime) * (isActivated() ? 1 : -1);

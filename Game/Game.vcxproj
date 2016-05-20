@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\ForceField.cpp" />
     <ClCompile Include="source\KeyTarget.cpp" />
-    <ClCompile Include="source\ChestActivator.cpp" />
     <ClCompile Include="source\ChestTarget.cpp" />
+    <ClCompile Include="source\ForceField.cpp" />
+    <ClCompile Include="source\FixedKeyTarget.cpp" />
+    <ClCompile Include="source\ChestActivator.cpp" />
+    <ClCompile Include="source\FixedChestTarget.cpp" />
     <ClCompile Include="source\KeyActivator.cpp" />
     <ClCompile Include="source\KeyHoleActivator.cpp" />
     <ClCompile Include="source\KeyHoleTarget.cpp" />
@@ -45,10 +47,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\ForceField.h" />
     <ClInclude Include="source\KeyTarget.h" />
-    <ClInclude Include="source\ChestActivator.h" />
     <ClInclude Include="source\ChestTarget.h" />
+    <ClInclude Include="source\ForceField.h" />
+    <ClInclude Include="source\FixedKeyTarget.h" />
+    <ClInclude Include="source\ChestActivator.h" />
+    <ClInclude Include="source\FixedChestTarget.h" />
     <ClInclude Include="source\KeyActivator.h" />
     <ClInclude Include="source\KeyHoleActivator.h" />
     <ClInclude Include="source\KeyHoleTarget.h" />

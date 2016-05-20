@@ -21,6 +21,7 @@
 
 #include "PressButton.h"
 #include "KeyTarget.h"
+#include "FixedKeyTarget.h"
 #include "KeyActivator.h"
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
@@ -66,6 +67,7 @@ void FPSMovement::create()
 	// Assimp turns spaces into underscores
 	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
 	feetCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_feet")->getComponent<BoxCollider>();
+
 
 	//Input::hideCursor();
 	recalculate();
@@ -390,7 +392,8 @@ void FPSMovement::raycastMouse()
 		{
 			hit->getComponent<PressButton>()->trigger();
 		}
-		else if (hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp)) {
+		else if ((hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
+			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) {
 			// pick up key
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
