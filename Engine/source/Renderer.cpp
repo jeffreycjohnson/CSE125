@@ -6,6 +6,7 @@
 #include "Skybox.h"
 #include "Timer.h"
 #include "Light.h"
+#include "Texture.h"
 #include "GameObject.h"
 #include "ThreadPool.h"
 #include "RenderPass.h"
@@ -289,6 +290,29 @@ static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scal
     }
 
     glDrawElements(GL_LINES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color, Texture* image) {
+	// TODO: There is probably some sort of optimization to be done here or in UIPass (ForwardPass.cpp)
+
+	// TODO: Currently "pos" is in normalized device coordinates x -> [-1, 1]  y -> [-1, 1]
+	//       so we will need to do math here to use pixels but I'm too hungry to think rn.
+	auto& shader = Renderer::getShader(UI_SHADER);
+	auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
+
+	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+		glBindVertexArray(currentEntry.vaoHandle);
+		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+	}
+
+	shader.use();
+	shader["uColor"] = glm::vec4(1);
+	image->bindTexture(0);
+	shader["tex"] = 0;
+	shader["scale"] = scale;
+	shader["translation"] = pos;
+	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+	CHECK_ERROR();
 }
 
 void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)

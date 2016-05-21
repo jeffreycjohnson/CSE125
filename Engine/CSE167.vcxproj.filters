@@ -139,6 +139,9 @@
     <ClCompile Include="source\include\Collision.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="source\Crosshair.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\ForwardDecs.h">
@@ -257,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="source\include\NetworkStats.h">
       <Filter>Headers\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\Crosshair.h">
+      <Filter>Headers\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -402,6 +408,12 @@
     </Filter>
     <Filter Include="Particles">
       <UniqueIdentifier>{cc71d9ab-a878-44d7-b38b-d9154fee9f4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\UI">
+      <UniqueIdentifier>{127d3cd1-2b41-4b4e-b7c1-030129311b9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\UI">
+      <UniqueIdentifier>{05045c21-c1bb-4077-8813-7d1396957d60}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

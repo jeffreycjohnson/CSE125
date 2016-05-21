@@ -90,6 +90,7 @@ public:
 	void setID(const int ID);
 	int getID() const;
 
+	void drawUI();
 	void debugDraw();
     
 	void update(float deltaTime);

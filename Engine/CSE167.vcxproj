@@ -194,6 +194,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Crosshair.cpp" />
     <ClCompile Include="source\NetworkStats.cpp" />
     <ClCompile Include="source\Ray.cpp" />
     <ClCompile Include="source\NetworkManager.cpp" />
@@ -241,6 +242,7 @@
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\Crosshair.h" />
     <ClInclude Include="source\include\NetworkStats.h" />
     <ClInclude Include="source\include\NetworkManager.h" />
     <ClInclude Include="source\include\NetworkStruct.h" />

@@ -11,6 +11,7 @@
 #include "Config.h"
 #include "Input.h"
 #include "MainMenu.h"
+#include "Crosshair.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -44,6 +45,7 @@ int main(int argc, char** argv)
 	delete player;
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
+	GameObject::SceneRoot.addComponent(new Crosshair(file.getString("GameSettings", "crosshairSprite")));
 	if (!connectOnStart) {
 		GameObject::SceneRoot.addComponent(new MainMenu());
 	}

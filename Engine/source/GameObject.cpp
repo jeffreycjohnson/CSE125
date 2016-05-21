@@ -227,6 +227,18 @@ GameObject* GameObject::findChildByNameContains(const std::string& name)
 	return nullptr;
 }
 
+void GameObject::drawUI() {
+	if (visible && active && !dead) {
+		for (auto component : componentList) {
+			if (component->visible && component->active)
+				component->drawUI();
+		}
+		for (auto child : transform.children) {
+			(child->gameObject)->drawUI();
+		}
+	}
+}
+
 void GameObject::debugDraw() {
     if (visible && active && !dead) {
         for (auto component : componentList) {

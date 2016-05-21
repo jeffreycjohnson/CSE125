@@ -2,6 +2,7 @@
 
 void Component::update(float deltaTime){}
 void Component::draw() {}
+void Component::drawUI() {}
 void Component::setGameObject(GameObject* go) {
     gameObject = go;
 }
