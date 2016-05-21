@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\MainMenu.cpp" />
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
     <ClCompile Include="source\Main.cpp" />
   </ItemGroup>
@@ -28,6 +29,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\MainMenu.h" />
     <ClInclude Include="source\ActivatorRegistrator.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

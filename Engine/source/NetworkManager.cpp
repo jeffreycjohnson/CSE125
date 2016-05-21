@@ -244,9 +244,14 @@ void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType
 
 std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std::string serverIP, std::string port)
 {
-	if (NetworkManager::state != UNINITIALIZED)
+	if (NetworkManager::state == CLIENT_MODE)
 	{
-		FATAL("Cannot initialize initialized server");
+		ASSERT(!ClientNetwork::isConnected(), "Cannot reinitialize client with preexisting connection.");
+	}
+	else if (NetworkManager::state != UNINITIALIZED)
+	{
+		
+		FATAL("Cannot initialize initialized client");
 	}
 	NetworkManager::state = INITIALIZING;
 

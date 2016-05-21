@@ -10,6 +10,7 @@
 #include "NetworkManager.h"
 #include "Config.h"
 #include "Input.h"
+#include "MainMenu.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -24,27 +25,14 @@ int main(int argc, char** argv)
 
 	std::string serverip = file.getString("NetworkOptions", "serverip");
 	std::string port = file.getString("NetworkOptions", "port");
-	auto pair = NetworkManager::InitializeClient(serverip, port);
-	//NetworkManager::InitializeOffline();
+	bool connectOnStart = file.getBool("GameSettings", "skipMenu");
 
-	/*for (auto& skybox : Renderer::mainCamera->passes)
-	{
-		SkyboxPass* sp = dynamic_cast<SkyboxPass*>(skybox.get());
-		if (sp != nullptr)
-		{
-			std::string imgs[] = {
-				"assets/skyboxes/icyhell/icyhell_lf.tga",
-				"assets/skyboxes/icyhell/icyhell_rt.tga",
-				"assets/skyboxes/icyhell/icyhell_up.tga",
-				"assets/skyboxes/icyhell/icyhell_dn.tga",
-				"assets/skyboxes/icyhell/icyhell_ft.tga",
-				"assets/skyboxes/icyhell/icyhell_bk.tga",
-			};
-			sp->skybox = new Skybox(imgs);
-
-			break;
-		}
-	}*/
+	if (connectOnStart) {
+		auto pair = NetworkManager::InitializeClient(serverip, port);
+	}
+	else {
+		NetworkManager::InitializeOffline();
+	}
 
 	// cache all meshes
 	GameObject *scene = loadScene(file.getString("GameSettings", "level"));
@@ -56,6 +44,9 @@ int main(int argc, char** argv)
 	delete player;
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
+	if (!connectOnStart) {
+		GameObject::SceneRoot.addComponent(new MainMenu());
+	}
 
 	Input::hideCursor();
 

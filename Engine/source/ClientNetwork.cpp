@@ -307,5 +307,10 @@ void ClientNetwork::getStatus(std::string header)
 	std::cout << std::endl;
 }
 
+bool ClientNetwork::isConnected()
+{
+	return ClientNetwork::ConnectionEstablished;
+}
+
 
 

@@ -55,6 +55,8 @@ public:
             T* test = dynamic_cast<T*>(*component);
             if (test)
             {
+				if (deleteComponent)
+					test->destroy();
                 test->setGameObject(nullptr);
 				if (deleteComponent)
 					delete test;
@@ -112,6 +114,8 @@ protected:
     bool dead, newlyCreated;
 	bool visible, active;
 
+	// Because erasure invalidates all iterators after the deleted element in std::vectors,
+	// I'm making an executive decision to turn this into a list.
     std::vector<Component*> componentList;
     std::string name;
 	int ID = -1;
