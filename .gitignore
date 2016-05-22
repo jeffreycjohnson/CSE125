@@ -54,6 +54,7 @@ CMakeCache.txt
 *.png
 *.tga
 *.dds
+*.mp3
 *.wav
 *.ogg
 *.jpg

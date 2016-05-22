@@ -16,7 +16,17 @@ enum {
 	TRANSFORM_NETWORK_DATA,
 	MESH_NETWORK_DATA,
 	CAMERA_NETWORK_DATA,
-	LIGHT_NETWORK_DATA
+	LIGHT_NETWORK_DATA,
+	SOUND_NETWORK_DATA
+};
+
+enum SoundState {
+	playState,
+	pauseState,
+	stopState,
+	toggleState,
+	setLoopingState,
+	setVolumeState
 };
 
 class NetworkStruct
@@ -27,6 +37,7 @@ public:
 	NetworkStruct() {}
 	~NetworkStruct() {}
 
+	static int numberOfMessageTypes();
 	static size_t sizeOf(int structType);
 };
 
@@ -159,6 +170,50 @@ struct LightNetworkData
 			this->colorr = color.r;
 			this->colorg = color.g;
 			this->colorb = color.b;
+	}
+};
+#pragma pack(pop)
+
+#define MAX_SOUND_NAME 64
+#pragma pack(push, 1)
+struct SoundNetworkData
+{
+	enum soundState {
+		CONSTRUCT,
+		PLAY,
+		PAUSE,
+		STOP,
+		TOGGLE,
+		SET_LOOPING,
+		SET_VOLUME,
+		MUTATE
+	};
+
+	int objectID;
+
+	char soundName[MAX_SOUND_NAME];
+	bool playing;
+	bool active;
+	bool looping;
+	float volume;
+	bool is3D;
+
+	//For SetLooping
+	bool loopingParam;
+	int count;
+	//For SetVolume
+	float volumeParam;
+
+	soundState ss;
+
+	SoundNetworkData(
+		int objectID, std::string soundName, bool playing, bool active, bool looping, 
+		float volume, bool is3D, soundState ss, bool loopingParam, int count, float volumeParam) :
+		objectID(objectID), playing(playing), active(active), looping(looping),
+		volume(volume), is3D(is3D), ss(ss), loopingParam(loopingParam), count(count), volumeParam(volumeParam)
+	{
+		memset(this->soundName, 0, sizeof(char) * MAX_SOUND_NAME);
+		strncpy_s(this->soundName, soundName.c_str(), MAX_SOUND_NAME - 1);
 	}
 };
 #pragma pack(pop)

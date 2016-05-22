@@ -18,6 +18,7 @@
 #include "Collision.h"
 #include "BoxCollider.h"
 #include "Config.h"
+#include "Sound.h"
 
 #include "PressButton.h"
 #include "KeyTarget.h"
@@ -65,7 +66,6 @@ void FPSMovement::create()
 	// Assimp turns spaces into underscores
 	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
 	feetCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_feet")->getComponent<BoxCollider>();
-
 
 	//Input::hideCursor();
 	recalculate();
@@ -278,6 +278,12 @@ void FPSMovement::handleVerticalMovement(float dt) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
 			justJumped = true;
+
+			Sound * s = gameObject->getComponent<Sound>();
+			if (s) {
+				s->play();
+			}
+
 		}
 	}
 	//If we're falling or flying upwards, accellerate down

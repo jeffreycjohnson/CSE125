@@ -12,6 +12,7 @@
 #include "Config.h"
 #include "GodSummoner.h"
 #include "Inventory.h"
+#include "Sound.h"
 
 #include <iostream>
 #include "NetworkManager.h"
@@ -56,8 +57,8 @@ int main(int argc, char** argv)
 		player->addComponent(new FPSMovement(client, sens, spawnPosition, glm::vec3(0, 1, 0), verticality));
 		player->addComponent(new Inventory());
 
-
-		// attach camera for server debugging
+		//TODO!!!! REMOVE THIS!!!!!!!!!
+		player->addComponent(new Sound("mariojump", false, false, 1.0, false));
 		if (client == 0) verticality->addComponent(Renderer::mainCamera);
 
 		NetworkManager::attachCameraTo(client, verticality->getID());

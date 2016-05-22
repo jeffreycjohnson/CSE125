@@ -23,7 +23,11 @@ void NetworkStats::registerClients(std::vector<int> clientIDs)
 	GameObject::AddPostFixedUpdateCallback(NetworkStats::clearClientBytes);
 	for (int client : clientIDs) {
 		clientBytesSent[client] = 0;
-		clientMsgTypeSent[client] = { 0,0,0,0,0,0,0,0 };
+		std::vector<unsigned long> types;
+		for (int i = 0; i < NetworkStruct::numberOfMessageTypes(); ++i) {
+			types.push_back(0);
+		}
+		clientMsgTypeSent[client] = types;
 		clients.push_back(client);
 	}
 }
