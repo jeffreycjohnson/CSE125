@@ -87,8 +87,12 @@ class Renderer
 		static void resize(int width, int height);
 		static void focus(GLFWwindow* window, int focused);
 
+		// 2D Drawing (UI Pass)
 		// Draws a sprite centered at the given position (in pixels)
 		static void drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color, Texture* image);
+		static void drawSplash(Texture* image, bool stretch = true);
+
+		// 3D Drawing (Debug Pass)
         static void drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform = nullptr);
         static void drawBox(glm::vec3 pos, const glm::vec3& scale, const glm::vec4& color, Transform* transform = nullptr);
 		static void drawArrow(glm::vec3 pos, glm::vec3 dir, const glm::vec4& color, Transform* transform = nullptr);

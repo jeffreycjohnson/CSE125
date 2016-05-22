@@ -142,6 +142,9 @@
     <ClCompile Include="source\Crosshair.cpp">
       <Filter>Source\UI</Filter>
     </ClCompile>
+    <ClCompile Include="source\LoadingScreen.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\ForwardDecs.h">
@@ -262,6 +265,9 @@
       <Filter>Headers\Network</Filter>
     </ClInclude>
     <ClInclude Include="source\include\Crosshair.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\LoadingScreen.h">
       <Filter>Headers\UI</Filter>
     </ClInclude>
   </ItemGroup>

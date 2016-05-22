@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\ClientStartingScreen.cpp" />
     <ClCompile Include="source\MainMenu.cpp" />
     <ClCompile Include="source\ActivatorRegistrator.cpp" />
     <ClCompile Include="source\Main.cpp" />
@@ -29,6 +30,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\ClientStartingScreen.h" />
     <ClInclude Include="source\MainMenu.h" />
     <ClInclude Include="source\ActivatorRegistrator.h" />
   </ItemGroup>

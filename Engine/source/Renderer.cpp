@@ -321,6 +321,30 @@ void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color
 	CHECK_ERROR();
 }
 
+void Renderer::drawSplash(Texture * image, bool stretch)
+{
+	// Draws a splash screen image in the center of the screen. Set stretch to true to gurantee it fills the screen.
+	// Otherwise, it will be pixel perfect.
+	auto& shader = Renderer::getShader(UI_SHADER);
+	auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
+
+	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+		glBindVertexArray(currentEntry.vaoHandle);
+		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+	}
+
+	auto pixelPerfectScale = glm::vec2((float)image->getWidth() / Renderer::getWindowWidth(), (float)image->getHeight() / Renderer::getWindowHeight());
+
+	shader.use();
+	shader["uColor"] = glm::vec4(1);
+	image->bindTexture(0);
+	shader["tex"] = 0;
+	shader["scale"] = stretch ? glm::vec2(1,-1) : pixelPerfectScale;
+	shader["translation"] = glm::vec4(0);
+	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+	CHECK_ERROR();
+}
+
 void Renderer::drawSphere(glm::vec3 pos, float radius, const glm::vec4& color, Transform* transform)
 {
     drawWireframe("assets/Primatives.obj/Sphere_Outline", pos, glm::vec3(radius), color, transform ? transform->getTransformMatrix() : glm::mat4());

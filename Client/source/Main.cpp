@@ -10,6 +10,7 @@
 #include "NetworkManager.h"
 #include "Config.h"
 #include "Input.h"
+#include "ClientStartingScreen.h"
 #include "MainMenu.h"
 #include "Crosshair.h"
 
@@ -22,40 +23,15 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
     InitializeEngine("CLIENT");
-	ConfigFile file("config/options.ini");
-
-	std::string serverip = file.getString("NetworkOptions", "serverip");
-	std::string port = file.getString("NetworkOptions", "port");
-	bool connectOnStart = file.getBool("GameSettings", "skipMenu");
-
-	if (connectOnStart) {
-		auto pair = NetworkManager::InitializeClient(serverip, port);
-	}
-	else {
-		NetworkManager::InitializeOffline();
-	}
-
-	// cache all meshes
-	GameObject *scene = loadScene(file.getString("GameSettings", "level"));
-	scene->destroy();
-	delete scene;
-
-	GameObject *player = loadScene(file.getString("GameSettings", "player"));
-	player->destroy();
-	delete player;
 
 	GameObject::SceneRoot.addComponent(Renderer::mainCamera);
-	GameObject::SceneRoot.addComponent(new Crosshair(file.getString("GameSettings", "crosshairSprite")));
-	if (!connectOnStart) {
-		GameObject::SceneRoot.addComponent(new MainMenu());
-	}
+	GameObject::SceneRoot.addComponent(new ClientStartingScreen("assets/loading.png", ""));
 
 	Input::hideCursor();
 
-
 	try
 	{
-		RunEngine(NetworkState::CLIENT_MODE); // running engine as client
+		RunEngine(NetworkState::UNINITIALIZED); // let the loading screen code set up the networking
 	}
 	catch (...)
 	{

@@ -24,12 +24,18 @@
     <ClCompile Include="source\MainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\ClientStartingScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\ActivatorRegistrator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\MainMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ClientStartingScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
