@@ -39,7 +39,9 @@ public:
 	void toggle();
 	void setLooping(bool looping, int count);
 	void setVolume(float volume);
-	static void initFromConfig();
+
+	//initFromConfig is broken, Do not touch, just use the macro!!!
+	//static void initFromConfig();
 
 	static FMOD::System *system;
 	static std::unordered_map<std::string, FMOD::Sound*> soundMap;

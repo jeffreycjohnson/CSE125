@@ -7,11 +7,14 @@
 #include "Input.h"
 #include "Config.h"
 
-
-
 FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
 FMOD_RESULT Sound::result;
+
+#define REGISTER_SOUND(name, location, dimension)\
+SoundClass name;\
+system->createSound(location, dimension, NULL, &name);\
+soundMap.insert({#name, name});
 
 Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D)
 {
@@ -82,7 +85,6 @@ void Sound::play()
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
 		result = system->playSound(soundMap[name], 0, false, &channel);
 		auto x = soundMap[name];
-		std::cout << "HEEEYOOOOOO" << soundMap[name] << std::endl;
 		channel->setVolume(volume);
 		if (looping)
 		{
@@ -144,39 +146,7 @@ void Sound::setVolume(float volume)
 	postToNetwork(SoundNetworkData::soundState::SET_VOLUME, false, -1, volume);
 }
 
-void Sound::initFromConfig()
-{
-	ConfigFile file("config/sounds.ini");
-	std::string list = file.getString("SoundList", "soundlist");
-	std::vector<std::string> sounds;
 
-	//Split
-	size_t pos = 0;
-	std::string token;
-	while ((pos = list.find(";")) != std::string::npos) {
-		token = list.substr(0, pos);
-		sounds.push_back(token);
-		list.erase(0, pos + 1);
-	}
-
-	for (auto i = sounds.begin(); i != sounds.end(); ++i) {
-		SoundClass soundToAdd;
-		std::string fileName = file.getString(*i, "file");
-		std::string fmodMode = file.getString(*i, "fmodMode");
-		int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
-		//int exinfo = file.getInt(*i, "exinfo");
-		//TODO: Don't know what exinfo is
-		//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
-		system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
-		soundMap.insert({*i, soundToAdd});
-	}
-	//Sanity check
-	std::cout << "Sound's initFromConfig Sanity Check" << std::endl;
-	for (auto i : soundMap) {
-		std::cout << i.first << std::endl;
-	}
-	std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
-}
 
 void Sound::init()
 {
@@ -199,42 +169,15 @@ void Sound::init()
 	// Initialize our Instance with 128 channels
 	system->init(256, FMOD_INIT_NORMAL, NULL);
 
-#ifndef _SOUND_HARDCODE
 	// Generate sound map
-	/*
-	SoundClass cabin;
-	system->createSound("assets/sounds/ambience/cabin.wav", FMOD_2D, NULL, &cabin);
-	soundMap.insert({ "cabin", cabin });
-	SoundClass gun;
-	system->createSound("assets/sounds/gun.wav", FMOD_2D, NULL, &gun);
-	soundMap.insert({ "gun", gun });
-	SoundClass boost;
-	system->createSound("assets/sounds/boost.wav", FMOD_2D, NULL, &boost);
-	soundMap.insert({ "boost", boost });
-	SoundClass fighterEngine;
-	system->createSound("assets/sounds/engine.wav", FMOD_3D, NULL, &fighterEngine);
-	soundMap.insert({ "fighterEngine", fighterEngine });
-	SoundClass explosion;
-	system->createSound("assets/sounds/explosion.mp3", FMOD_3D, NULL, &explosion);
-	soundMap.insert({ "explosion", explosion });
-	SoundClass capital;
-	system->createSound("assets/sounds/capital.wav", FMOD_2D, NULL, &capital);
-	soundMap.insert({ "capital", capital });
-	SoundClass music;
-	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
-	soundMap.insert({ "music", music });
-	*/
-	SoundClass mariojump;
-	system->createSound("assets/sounds/effects/mariojump.wav", FMOD_3D, NULL, &mariojump);
-	soundMap.insert({ "mariojump", mariojump});
-	SoundClass zeldasecret;
-	system->createSound("assets/sounds/effects/zeldasecret.wav", FMOD_3D, NULL, &zeldasecret);
-	soundMap.insert({ "zeldasecret", zeldasecret });
+
+	// THIS MACRO ALLOWS US TO ADD SOUNDS!!! Cool huh?
+	// Usage: name/identifier, location of the sound as a string, 2d or 3d using FMOD_3D or FMOD_2D
+
+	REGISTER_SOUND(mariojump,   "assets/sounds/effects/mariojump.wav", FMOD_3D);
+	REGISTER_SOUND(zeldasecret, "assets/sounds/effects/zeldasecret.wav", FMOD_3D);
+
 	// Add more sounds as we need
-	// Add more sounds as we need
-#else
-	initFromConfig();
-#endif
 }
 
 void Sound::updateFMOD()
@@ -337,3 +280,48 @@ void Sound::setGameObject(GameObject* object) {
 	Component::setGameObject(object);
 	postToNetwork(SoundNetworkData::soundState::CONSTRUCT, false, -1, 0.0f);
 };
+
+
+
+
+
+
+
+
+
+/*
+BROKEN!!!! FOR NOW USE THE MACRO
+void Sound::initFromConfig()
+{
+ConfigFile file("config/sounds.ini");
+std::string list = file.getString("SoundList", "soundlist");
+std::vector<std::string> sounds;
+
+//Split
+size_t pos = 0;
+std::string token;
+while ((pos = list.find(";")) != std::string::npos) {
+token = list.substr(0, pos);
+sounds.push_back(token);
+list.erase(0, pos + 1);
+}
+
+for (auto i = sounds.begin(); i != sounds.end(); ++i) {
+SoundClass soundToAdd;
+std::string fileName = file.getString(*i, "file");
+std::string fmodMode = file.getString(*i, "fmodMode");
+int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
+//int exinfo = file.getInt(*i, "exinfo");
+//TODO: Don't know what exinfo is
+//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
+system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
+soundMap.insert({ *i, soundToAdd });
+}
+//Sanity check
+std::cout << "Sound's initFromConfig Sanity Check" << std::endl;
+for (auto i : soundMap) {
+std::cout << i.first << std::endl;
+}
+std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
+}
+*/
