@@ -32,10 +32,10 @@ void ServerNetwork::setup(std::string port)
 	ServerNetwork::listenSocket = setupSocket(port);
 
 	if (listenSocket == -1) {
-		printf("Error in setupSocket()");
+		std::cerr << "Error in setupSocket()" << std::endl;
 
 #ifdef _EXCEPTIONAL
-		throw new std::runtime_error("Error in setupSocket()");
+		FATAL("Error in setupSocket()");
 #endif
 	}
 }
@@ -55,7 +55,7 @@ void ServerNetwork::closeConnection()
 # ifdef _EXCEPTIONAL
 			std::string message = "shutdown failed with error: ";
 			message += WSAGetLastError();
-			throw new std::runtime_error(message);
+			FATAL(message.c_str());
 # endif
 			WSACleanup();
 
@@ -163,7 +163,7 @@ std::vector<NetworkResponse>ServerNetwork::handleClient(int clientSocket)
 # ifdef _EXCEPTIONAL
 			std::string message = "recv failed with error: ";
 			message += WSAGetLastError();
-			throw new std::runtime_error(message);
+			FATAL(message.c_str());
 # endif
 			WSACleanup();
 			return msgs;
@@ -253,7 +253,7 @@ void ServerNetwork::sendBytes(int clientID, const std::vector<char>& bytes)
 # ifdef _EXCEPTIONAL
 			std::string message = "send failed with error: ";
 			message += WSAGetLastError();
-			throw new std::runtime_error(message);
+			FATAL(message.c_str());
 # endif
 
 			WSACleanup();
@@ -295,7 +295,7 @@ int ServerNetwork::acceptTCPConnection(int listenSocket) {
 # ifdef _EXCEPTIONAL
 		std::string message = "accept failed with error: ";
 		message += WSAGetLastError();
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		WSACleanup();
@@ -334,7 +334,7 @@ int ServerNetwork::setupSocket(std::string port)
 # ifdef _EXCEPTIONAL
 		std::string message = "WSAStartup failed with error: ";
 		message += iResult;
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 		return -1;
 	}
@@ -352,7 +352,7 @@ int ServerNetwork::setupSocket(std::string port)
 # ifdef _EXCEPTIONAL
 		std::string message = "getaddrinfo failed with error: ";
 		message += iResult;
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		WSACleanup();
@@ -367,7 +367,7 @@ int ServerNetwork::setupSocket(std::string port)
 # ifdef _EXCEPTIONAL
 		std::string message = "socket failed with error: ";
 		message += WSAGetLastError();
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		WSACleanup();
@@ -383,7 +383,7 @@ int ServerNetwork::setupSocket(std::string port)
 # ifdef _EXCEPTIONAL
 		std::string message = "bind failed with error: ";
 		message += WSAGetLastError();
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		WSACleanup();
@@ -399,7 +399,7 @@ int ServerNetwork::setupSocket(std::string port)
 # ifdef _EXCEPTIONAL
 		std::string message = "listen failed with error: ";
 		message += WSAGetLastError();
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		WSACleanup();

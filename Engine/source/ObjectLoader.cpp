@@ -246,8 +246,7 @@ GameObject* loadScene(const std::string& filename, bool loadColliders, bool load
 		aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace | aiProcess_SortByPType);
 
 	if (!scene) {
-		LOG(importer.GetErrorString());
-		throw;
+		FATAL(importer.GetErrorString());
 	}
 
     std::map<std::string, Light*> lights;

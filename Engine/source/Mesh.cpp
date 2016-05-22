@@ -37,7 +37,7 @@ Mesh* Mesh::fromCachedMeshData(std::string name)
 	auto iter = Mesh::meshMap.find(name);
 	if (iter == Mesh::meshMap.end())
 	{
-		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+		FATAL("Can only create mesh from cached data if data in cache");
 	}
 
 	Mesh *created = new Mesh;
@@ -53,7 +53,7 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 	GameObject *go = GameObject::FindByID(messageId);
 	if (go == nullptr)
 	{
-		throw std::runtime_error("Cannot set mesh of nonexistant gameobject");
+		FATAL("Cannot set mesh of nonexistant gameobject");
 	}
 
 	Mesh *goMesh = go->getComponent<Mesh>();
@@ -76,7 +76,9 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 Mesh::Mesh() {}
 
 Mesh::Mesh(std::string name) : name(name) {
-    if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) throw;
+	if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
+		FATAL(name.c_str());
+	}
 }
 
 Mesh::~Mesh() {
@@ -145,7 +147,7 @@ void Mesh::deserializeAndApply(std::vector<char> bytes)
 	auto iter = Mesh::meshMap.find(mnd.meshName);
 	if (iter == Mesh::meshMap.end())
 	{
-		throw std::runtime_error("Can only create mesh from cached data if data in cache");
+		FATAL("Can only create mesh from cached data if data in cache");
 	}
 
 	this->name = std::string(mnd.meshName);

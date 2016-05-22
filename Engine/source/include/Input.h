@@ -3,12 +3,13 @@
 
 #include "ForwardDecs.h"
 #include <unordered_map>
+#include <map>
 #include <glfw3.h>
 #include "NetworkStruct.h"
 
 enum AxisType
 {
-	X, Y, SCROLL_X, SCROLL_Y
+	X, Y, Z, SCROLL_X, SCROLL_Y
 };
 
 enum Joystick // Wraps GLFW's Joystick enum, but adds JOYSTICK_ALL as an option
@@ -69,9 +70,13 @@ private:
 	static glm::vec2 mousePosBuff;
 	static glm::vec2 scrollBuff, scrollAmount;
 
+	static std::map<std::pair<int, std::string>, float> serverAxisMap;
+	static std::map<std::pair<int, std::string>, InputState> serverButtonMap;
+	static std::map<int, glm::vec2 > serverMousePos;
+
 	static void changeState(std::unordered_map<int, Button>::iterator, int);
 	static float getAxisHelper(GLFWinput, InputData);
-	static InputState getButtonHelper(std::string);
+	static InputState getButtonHelper(std::string, int clientID=-1);
 	static InputState GLFWInputToState(GLFWinput);
 
 public:
@@ -86,13 +91,13 @@ public:
 	static void addInputsFromConfig(std::string configfile);
 	static void addInput(InputData data);
 
-	static glm::vec2 mousePosition();
+	static glm::vec2 mousePosition(int clientID = -1);
 
-	static float getAxis(std::string name);
-	static bool getButtonDown(std::string name);
-	static bool getButton(std::string name);
-	static bool getButtonUp(std::string name);
-	static bool getButtonIdle(std::string name);
+	static float getAxis(std::string name, int clientID = -1);
+	static bool getButtonDown(std::string name, int clientID = -1);
+	static bool getButton(std::string name, int clientID = -1);
+	static bool getButtonUp(std::string name, int clientID = -1);
+	static bool getButtonIdle(std::string name, int clientID = -1);
 
 	static bool getKeyDown(std::string button);
 	static bool getKey(std::string button);
@@ -116,6 +121,8 @@ public:
 	/// serialization
 	static std::vector<char> Input::serialize();
 	static std::vector<char> Input::serialize(int playerID);
+
+	static void Input::deserializeAndApply(std::vector<char> bytes);
 };
 
 #endif

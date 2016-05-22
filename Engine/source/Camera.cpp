@@ -149,7 +149,7 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 	GameObject *go = GameObject::FindByID(messageId);
 	if (go == nullptr)
 	{
-		throw std::runtime_error("Cannot attach camera to nonexistant gameobject");
+		FATAL("Cannot attach camera to nonexistant gameobject");
 	}
 
 	// Remove Camera from SceneRoot if already there.

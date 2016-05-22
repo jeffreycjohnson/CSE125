@@ -71,7 +71,7 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 # ifdef _EXCEPTIONAL
 		std::string message = "WSAStartup failed with error: ";
 		message += iResult;
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		return -1;
@@ -89,7 +89,7 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 # ifdef _EXCEPTIONAL
 		std::string message = "getaddrinfo failed with error: ";
 		message += iResult;
-		throw new std::runtime_error(message);
+		FATAL(message.c_str());
 # endif
 
 		WSACleanup();
@@ -136,8 +136,7 @@ int ClientNetwork::setup(std::string serverIp, std::string port){
 	if (ConnectSocket == INVALID_SOCKET || !connected) {
 		printf("Unable to connect to server!\n");
 # ifdef _EXCEPTIONAL
-		std::string message = "Unable to connect to server!";
-		throw new std::runtime_error(message);
+		FATAL("Unable to connect to server!");
 # endif
 
 		WSACleanup();
@@ -180,7 +179,7 @@ int ClientNetwork::sendBytes(std::vector<char> bytes, int msgType, int id)
 # ifdef _EXCEPTIONAL
 			std::string message = "Send Failed with error: ";
 			message += wsaLastError;
-			throw new std::runtime_error(message);
+			FATAL(message.c_str());
 # endif
 			WSACleanup();
 		}
@@ -288,7 +287,7 @@ std::vector<NetworkResponse> ClientNetwork::receiveMessages()
 # ifdef _EXCEPTIONAL
 			std::string message = "recv failed with error: ";
 			message += WSAGetLastError();
-			throw new std::runtime_error(message);
+			FATAL(message.c_str());
 # endif
 			WSACleanup();
 			return msgs;

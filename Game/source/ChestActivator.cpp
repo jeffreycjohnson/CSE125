@@ -1,5 +1,5 @@
 #include "ChestActivator.h"
-
+#include <iostream>
 
 
 ChestActivator::ChestActivator()
@@ -20,8 +20,27 @@ ChestActivator::~ChestActivator()
 {
 }
 
-void ChestActivator::trigger()
+void ChestActivator::trigger(bool activated)
 {
-	// Chest has been opened so allow key to be picked up
-	activate(); // activates KeyTarget
+	// we're on the edge!!
+	if (!activated && !isNotActivated)
+	{
+		isNotActivated = true;
+		deactivate();
+	}
+
+	// we're on the edge!!
+	if (activated && isNotActivated)
+	{
+		isNotActivated = false;
+		activate();
+		std::cout << "chest is activating key" << std::endl;
+	}
+
+	
 }
+
+void ChestActivator::trigger() {
+	activate();
+}
+

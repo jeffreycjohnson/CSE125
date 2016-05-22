@@ -109,11 +109,11 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 	GameObject *go = GameObject::FindByID(messageId);
 	if (go == nullptr)
 	{
-		throw std::runtime_error("From Light.cpp/Dispatch: Nonexistant gameobject");
+		FATAL("From Light.cpp/Dispatch: Nonexistant gameobject");
 	}
 	switch (lnd.lightType) {
 	case is_light:
-		throw std::runtime_error("From Light.cpp/Dispatch: This should not happen!\n Lights need to be specified...");
+		FATAL("From Light.cpp/Dispatch: This should not happen!\n Lights need to be specified...");
 		break;
 	case is_pointlight:
 		gopointlight = go->getComponent<PointLight>();
@@ -138,7 +138,7 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 		}
 		break;
 	/*case is_spotlight:
-		throw std::runtime_error("From Light.cpp/Dispatch: SpotlightNotImplementd");
+		FATAL("From Light.cpp/Dispatch: SpotlightNotImplementd");
 		gospotlight = go->getComponent<SpotLight>();
 		if (gospotlight != nullptr) {
 			gospotlight->deserializeAndApply(bytes);
@@ -150,7 +150,7 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 		}
 		break;*/
 	default:
-		throw std::runtime_error("From Light.cpp/Dispatch: out of enum? Impossible");
+		FATAL("From Light.cpp/Dispatch: out of enum? Impossible");
 		break;
 	}
 }

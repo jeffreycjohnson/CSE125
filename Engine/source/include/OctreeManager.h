@@ -32,6 +32,9 @@ public:
 	// Returns any collisions that occur against the axis-aligned bounding box defined by the two min & max points
 	CollisionInfo collisionBox(glm::vec3 min, glm::vec3 max, Octree::BuildMode whichTree);
 
+	// Same thing as above, but allows checking an arbitrary boxes (including OBBs)
+	CollisionInfo collisionBox(BoxCollider* box, Octree::BuildMode whichTree);
+
 	// Adds or removes gameobjects (and all their colliders) to the
 	// apropriate octree. Will recursively add children as well.
 	void insertGameObject(GameObject*);

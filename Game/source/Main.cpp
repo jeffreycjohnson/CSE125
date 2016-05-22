@@ -23,55 +23,50 @@ extern void InitializeEngine(std::string windowName);
 int main(int argc, char** argv)
 {
     InitializeEngine("SERVER");
+
 	ConfigFile file("config/options.ini");
 	std::string port = file.getString("NetworkOptions", "port");
 	int numberOfClients = file.getInt("NetworkOptions", "numclients");
 
 	auto clientIDs = NetworkManager::InitializeServer(port, numberOfClients);
-
-	/*for (auto& skybox : Renderer::mainCamera->passes)
-	{
-		SkyboxPass* sp = dynamic_cast<SkyboxPass*>(skybox.get());
-		if (sp != nullptr)
-		{
-			std::string imgs[] = {
-				"assets/skyboxes/icyhell/icyhell_lf.tga",
-				"assets/skyboxes/icyhell/icyhell_rt.tga",
-				"assets/skyboxes/icyhell/icyhell_up.tga",
-				"assets/skyboxes/icyhell/icyhell_dn.tga",
-				"assets/skyboxes/icyhell/icyhell_ft.tga",
-				"assets/skyboxes/icyhell/icyhell_bk.tga",
-};
-			sp->skybox = new Skybox(imgs);
-
-			break;
-		}
-	}*/
 	
 	GameObject *scene = loadScene(file.getString("GameSettings","level"));
 	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
 
 	bool didSetCamera = false;
-	for (auto client : clientIDs) {
+	for (auto client : clientIDs) 
+	{
+		// load the player scene
 		GameObject *player = loadScene(file.getString("GameSettings", "player"));
+
+		Sensitivity sens(file.getFloat("GameSettings", "mouseSensitivity"), file.getFloat("GameSettings", "joystickSensitivity"));
+		
+		// see if we can find a designated spawn point, otherwise make one up
+		glm::vec3 spawnPosition = glm::vec3(client * 3, 3, -client * 3);
+		auto* realSpawn = GameObject::FindByName(std::string("spawn_") + std::to_string(client));
+		if (realSpawn)
+		{
+			spawnPosition = realSpawn->transform.getWorldPosition();
+		}
+
+		// create an object used to house the camera
 		GameObject *verticality = new GameObject;
 
-		player->addComponent(new FPSMovement(client, 4.0f, 0.5f, glm::vec3(client * 2, 5, -client * 2), glm::vec3(0, 1, 0), verticality));
+		// fully init player
+		player->addComponent(new FPSMovement(client, sens, spawnPosition, glm::vec3(0, 1, 0), verticality));
 		player->addComponent(new Inventory());
 
 		//TODO!!!! REMOVE THIS!!!!!!!!!
 		player->addComponent(new Sound("mariojump", false, false, 1.0, false));
-
-		if (client == 0)
-		{
-			verticality->addComponent(Renderer::mainCamera);
-		}
+		if (client == 0) verticality->addComponent(Renderer::mainCamera);
 
 		NetworkManager::attachCameraTo(client, verticality->getID());
 		GameObject::SceneRoot.addChild(player);
 	}
 
+	// register and activate the activator registrator
+	// the AR is created as a component just to take advantage of `create()`
 	ActivatorRegistrator ar;
 	GameObject::SceneRoot.addComponent(&ar);
 

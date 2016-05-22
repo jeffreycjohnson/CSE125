@@ -49,8 +49,7 @@ Framebuffer::Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, 
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG("Framebuffer not complete!");
-        throw;
+        FATAL("Framebuffer not complete!");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -59,8 +58,7 @@ Framebuffer::Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, 
 void Framebuffer::addColorTexture(int index) {
     if(cubeMap)
     {
-        LOG("Non Shadow Cubemap Framebuffers Not Implemented.");
-        throw;
+        FATAL("Non Shadow Cubemap Framebuffers Not Implemented.");
     }
 
 	glGenTextures(1, &(colorTex[index]) );

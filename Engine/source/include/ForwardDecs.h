@@ -77,6 +77,18 @@ void _logHelper<glm::mat4>(const char * file, int line, const char * func, glm::
 #define LOG(X) _logHelper(__FILE__, __LINE__, __func__, X)
 #endif
 
+void _fatal(const char * file, int line, const char * func, const char * s);
+
+#ifndef FATAL
+#define FATAL(X) _fatal(__FILE__, __LINE__, __func__, X)
+#endif
+
+void _assert(const char * file, int line, const char * func, bool expr, const char * s);
+
+#ifndef ASSERT
+#define ASSERT(EXPR, X) _assert(__FILE__, __LINE__, __func__, EXPR, X);
+#endif
+
 bool _checkError(const char * file, int line, const char * func);
 #ifndef CHECK_ERROR
 #define CHECK_ERROR() _checkError(__FILE__, __LINE__, __func__)

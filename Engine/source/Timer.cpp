@@ -44,11 +44,11 @@ void Timer::update()
 	}
 }
 
-bool Timer::nextFixedStep()
+bool Timer::nextFixedStep(bool update)
 {
     if(fixedTimeChange > fixedTimestep)
     {
-        fixedTimeChange -= fixedTimestep;
+        if (update) fixedTimeChange -= fixedTimestep;
         return true;
     }
     return false;

@@ -13,10 +13,12 @@
 #include "PressButton.h"
 #include "Door.h"
 #include "KeyTarget.h"
+#include "FixedKeyTarget.h"
 #include "KeyActivator.h"
 #include "KeyHoleActivator.h"
 #include "KeyHoleTarget.h"
 #include "ChestActivator.h"
+#include "FixedChestTarget.h"
 #include "ChestTarget.h"
 #include "ForceField.h"
 
@@ -27,8 +29,10 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 	{ "forcefield_",   [](auto args, auto idToTarget) {return new ForceField(args, idToTarget); } },
 	{ "vddoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, DOWN); } },
 	{ "keyhole_",  [](auto args, auto idToTarget) {return new KeyHoleTarget(args, idToTarget); } },
-	{ "chest_",  [](auto args, auto idToTarget) {return new ChestTarget(args, idToTarget); } },
+	{ "fixedchest_",  [](auto args, auto idToTarget) {return new FixedChestTarget(args, idToTarget); } },
+	{ "chest",  [](auto args, auto idToTarget) {return new ChestTarget(args, idToTarget); } },
 	{ "key_",  [](auto args, auto idToTarget) {return new KeyTarget(args, idToTarget); } },
+	{ "fixedkey_",  [](auto args, auto idToTarget) {return new FixedKeyTarget(args, idToTarget); } },
 };
 
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
@@ -37,6 +41,8 @@ std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 	{ "timebutton_" ,  [](auto args, auto idToTarget) {return new PressButton(args, idToTarget); } },
 	{ "keyhole_" ,  [](auto args, auto idToTarget) {return new KeyHoleActivator(args, idToTarget); } },
 	{ "key_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },
+	{ "fixedkey_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },
+	{ "fixedchest_" ,  [](auto args, auto idToTarget) {return new ChestActivator(args, idToTarget); } },
 	{ "chest_" ,  [](auto args, auto idToTarget) {return new ChestActivator(args, idToTarget); } },
 };
 

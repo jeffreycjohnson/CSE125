@@ -3,6 +3,7 @@
 #include <iostream>
 #include "KeyActivator.h"
 #include "KeyTarget.h"
+#include "FixedKeyTarget.h"
 
 Inventory::Inventory()
 {
@@ -31,7 +32,14 @@ void Inventory::setKey(GameObject * key)
 		GameObject * hand = this->gameObject->transform.children[0]->children[1]->gameObject;
 		hand->addChild(key);
 		key->transform.setPosition(0.0f, 0.0f, 0.0f);
-		key->getComponent<KeyTarget>()->pickedUp = true;
+		FixedKeyTarget * fixedKeyTarget = key->getComponent<FixedKeyTarget>();
+		KeyTarget * keyTarget = key->getComponent<KeyTarget>();
+		if (fixedKeyTarget != nullptr) {
+			fixedKeyTarget->pickedUp = true;
+		}
+		else if (keyTarget != nullptr) {
+			keyTarget->pickedUp = true;
+		}
 
 	}
 }

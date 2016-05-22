@@ -82,7 +82,8 @@ public:
 	void hideAll();
     bool isChildOf(GameObject* go) const;
     GameObject* findChildByName(const std::string& name);
-    void setName(const std::string& name);
+	GameObject* findChildByNameContains(const std::string& name);
+	void setName(const std::string& name);
     std::string getName() const;
 	void setID(const int ID);
 	int getID() const;

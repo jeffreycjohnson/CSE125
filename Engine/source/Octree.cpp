@@ -189,7 +189,10 @@ CollisionInfo Octree::collidesWith(Collider* ptr) { // TODO: There is either a b
 
 	if (root && ptr != nullptr) {
 		BoxCollider aabb = ptr->getAABB(); // Avoid having to recompute this over and over and over...
-		return root->collidesWith(ptr, aabb, colInfo);
+		if (ptr->active) {
+			return root->collidesWith(ptr, aabb, colInfo);
+		}
+		return colInfo;
 	}
 	else {
 		return colInfo;

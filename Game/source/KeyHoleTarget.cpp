@@ -23,9 +23,10 @@ KeyHoleTarget::~KeyHoleTarget()
 
 void KeyHoleTarget::fixedUpdate()
 {
-	if (isActivated()) {
+	if (isActivated() && !keyUsed) {
 		// Do whatever Keyhole model changes and then 
 		// call KeyHoleActivator->activate() to open door/chest
 		this->gameObject->getComponent<KeyHoleActivator>()->trigger();
+		keyUsed = true;
 	}
 }

@@ -79,6 +79,22 @@ CollisionInfo OctreeManager::collisionBox(glm::vec3 min, glm::vec3 max, Octree::
 	}
 }
 
+CollisionInfo OctreeManager::collisionBox(BoxCollider * box, Octree::BuildMode whichTree)
+{
+	if (whichTree == Octree::BuildMode::STATIC_ONLY) {
+		return staticObjects->collidesWith(box);
+	}
+	else if (whichTree == Octree::BuildMode::DYNAMIC_ONLY) {
+		return dynamicObjects->collidesWith(box);
+	}
+	else {
+		auto s_cols = staticObjects->collidesWith(box);
+		auto d_cols = dynamicObjects->collidesWith(box);
+		s_cols.merge(d_cols);
+		return s_cols;
+	}
+}
+
 void OctreeManager::insertGameObject(GameObject *gameObject)
 {
 

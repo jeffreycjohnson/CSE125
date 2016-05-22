@@ -62,6 +62,9 @@ public:
 	float getHeight();
 	float getDepth();
 
+	float getYMax();
+	float getYMin();
+
 	bool insideOrIntersects(const glm::vec3& point) const override;
 
 	bool intersects(const BoxCollider& other) const;

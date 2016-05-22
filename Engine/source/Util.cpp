@@ -1,5 +1,6 @@
 #include "ForwardDecs.h"
 #include <iostream>
+#include <glfw3.h>
 
 template<>
 void _logHelper<std::string>(const char * file, int line, const char * func, std::string val)
@@ -61,6 +62,34 @@ void _log(const char * file, int line, const char * func, const std::string& s)
 {
     std::cerr << s << " in" << std::endl;
     std::cerr << file << " in function " << func << " on line " << line << std::endl;
+}
+
+// Fatal
+
+void _fatal(const char * file, int line, const char * func, const char * s) {
+	std::cerr << "================================================" << std::endl;
+	std::cerr << "  /!\   FATAL Engine Error!" << std::endl;
+	std::cerr << "================================================" << std::endl; 
+	std::cerr << "File: " << file << " line " << line << std::endl; 
+	std::cerr << "Function: " << func << std::endl;
+	std::cerr << "Message: " << s << std::endl;
+	glfwTerminate();
+	while (true) {};
+}
+
+// Assert
+
+void _assert(const char * file, int line, const char * func, bool expr, const char * s) {
+	if (!expr) {
+		std::cerr << "================================================" << std::endl;
+		std::cerr << "  /?\   Engine Assertion Failed!" << std::endl;
+		std::cerr << "================================================" << std::endl;
+		std::cerr << "File: " << file << " line " << line << std::endl;
+		std::cerr << "Function: " << func << std::endl;
+		std::cerr << "Message: " << s << std::endl;
+		glfwTerminate();
+		while (true) {};
+	}
 }
 
 

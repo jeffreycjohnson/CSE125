@@ -57,8 +57,8 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initial
 	for (auto obj : colliders) {
 		bool skip = false;
 		for (auto ignored : ignore) {
-			if (obj == ignored) {
-				skip = true;
+			if (obj == ignored || !obj->active) {
+				skip = true; // Skip ignored or inactive colliders
 			}
 		}
 		if (skip) continue;
@@ -87,6 +87,7 @@ CollisionInfo OctreeNode::collidesWith(Collider* collider, const BoxCollider& aa
 	if (intersects(aabb)) {
 		for (auto colliderPtr : colliders) {
 			if (colliderPtr == collider) continue; // Don't check colliders against themselves
+			if (!colliderPtr->active)    continue; // Skip inactive colliders
 			switch (colliderPtr->getColliderType()) {
 
 				case ColliderType::BOX:

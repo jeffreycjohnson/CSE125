@@ -10,7 +10,6 @@
 #include "GameObject.h"
 #include "Input.h"
 #include "OctreeManager.h"
-#include "ServerInput.h"
 #include "Renderer.h"
 #include "Timer.h"
 #include "OctreeManager.h"
@@ -18,18 +17,24 @@
 #include "Collider.h"
 #include "Collision.h"
 #include "BoxCollider.h"
-#include "ServerInput.h"
 #include "Config.h"
 #include "Sound.h"
 
 #include "PressButton.h"
 #include "KeyTarget.h"
+#include "FixedKeyTarget.h"
 #include "KeyActivator.h"
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
 
-FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, glm::vec3 position, glm::vec3 up, GameObject* verticality)
-	: clientID(clientID), moveSpeed(moveSpeed), mouseSensitivity(mouseSensitivity), position(position), up(up), worldUp(up), verticality(verticality)
+FPSMovement::FPSMovement(
+	int clientID, Sensitivity sensitivites,
+	glm::vec3 initPosition, glm::vec3 upVector,
+	GameObject* verticality)
+	: clientID(clientID), 
+	  mouseSensitivity(sensitivites.mouseSensitivity), joystickSensitivity(sensitivites.joystickSensitivity), 
+	  position(initPosition), initialPosition(initPosition), up(upVector), worldUp(upVector),
+	  verticality(verticality)
 {
 	this->front = glm::vec3(0, 0, -1);
 
@@ -40,9 +45,7 @@ FPSMovement::FPSMovement(int clientID, float moveSpeed, float mouseSensitivity, 
 	forward = glm::vec3(0);
 	floor = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
-	if (oct == nullptr) {
-		throw "ERROR: Octree is a nullptr";
-	}
+	ASSERT(oct != nullptr, "ERROR: Octree is a nullptr");
 }
 
 void FPSMovement::create()
@@ -56,8 +59,13 @@ void FPSMovement::create()
 	}
 
 	auto player = this->gameObject->findChildByName("Player");
-	assert(player != nullptr); // You better have loaded a player model with a "Player" node
+	ASSERT(player != nullptr, "Could not locate 'Player' node from specified player model.");
+	auto colliders = player->findChildByName("Colliders");
+	auto boxes = player->findChildByName("BoxCollider");
+
+	// Assimp turns spaces into underscores
 	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
+	feetCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_feet")->getComponent<BoxCollider>();
 
 	//Input::hideCursor();
 	recalculate();
@@ -71,16 +79,19 @@ void FPSMovement::fixedUpdate()
 	{
 		pastFirstTick = true;
 
-		glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
+		glm::vec2 currMousePosition = Input::mousePosition(clientID);
 		lastMousePosition = currMousePosition;
 		return;
 	}
 
-	glm::vec2 currMousePosition = ServerInput::mousePosition(clientID);
-	glm::vec2 mouseDelta = currMousePosition - lastMousePosition;
+	glm::vec2 currMousePosition = Input::mousePosition(clientID);
+	
+	glm::vec2 mouseDelta = (currMousePosition - lastMousePosition) * mouseSensitivity;
+	glm::vec2 joyDelta = glm::vec2(Input::getAxis("lookright", clientID), Input::getAxis("lookforward", clientID)) * joystickSensitivity;
+	glm::vec2 lookDelta = mouseDelta + joyDelta;
 
-	yaw += mouseDelta.x * mouseSensitivity;
-	pitch += -1 * mouseDelta.y * mouseSensitivity;
+	yaw += lookDelta.x;
+	pitch += -1 * lookDelta.y;
 
 	// can't look past certain angles
 	pitch = fmaxf(-89.0f, fminf(89.0f, pitch));
@@ -111,7 +122,7 @@ void FPSMovement::fixedUpdate()
 	// end debug
 
 	recalculate();
-	getPlayerRadii(); // Hmmm, suspicious
+	getPlayerRadii();
 	raycastMouse();
 }
 
@@ -120,23 +131,29 @@ void FPSMovement::getPlayerRadii() {
 		//Then we access it's width and height, to set the player radii
 		//playerRadius = playerBoxCollider->getWidth() / 2.0f;
 		float w = playerBoxCollider->getWidth();
-		float d = playerBoxCollider->getDepth();
+		float d = playerBoxCollider->getHeight();
 		float theta = std::atanf(d / w);
-		playerRadius = std::sin(theta) * w / 2.0f; // Divide by two b/c this is radius
+		playerRadius = (d / std::sin(theta)) / 2.0f; // Divide by two b/c this is radius
 
-		playerHeightRadius = playerBoxCollider->getHeight() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
+		playerHeightRadius = playerBoxCollider->getDepth() / 2.0f; // TODO: Modify the internals of BoxCollider to return correct values if OBB
+	}
+	if (feetCollider) {
+		float fw = feetCollider->getWidth();
+		float fd = feetCollider->getHeight();
+		float ftheta = std::atanf(fd / fw);
+		footRadius = (fd / std::sin(ftheta)) / 2.0f; // Divide by two b/c this is radius
 	}
 }
 
 void FPSMovement::handleHorizontalMovement(float dt) {
 
 	// act on keyboard
-	float speed = moveSpeed * dt;
+	float speed = baseHSpeed * dt;
 	glm::vec3 normRight = glm::normalize(right);
 
-	glm::vec3 forwardComp = ServerInput::getAxis("pitch", clientID) * forward;
+	glm::vec3 forwardComp = Input::getAxis("forward", clientID) * forward;
 	forwardComp.y = 0; // there is no such thing as "y"
-	glm::vec3 sideComp = ServerInput::getAxis("roll", clientID) * right;
+	glm::vec3 sideComp = Input::getAxis("right", clientID) * right;
 
 	//moveDir = (position + (ServerInput::getAxis("pitch", clientID) * forward)) - position;
 	moveDir = forwardComp + sideComp;
@@ -208,14 +225,14 @@ bool FPSMovement::slideAgainstWall(glm::vec3 position, glm::vec3 castDirection, 
 	return false;
 }
 
-void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction) {
+void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 pos, glm::vec3 direction) {
 
 	// This function checks whether the player's bounding box overlaps a wall in the given direction,
 	// and if so, offsets the player's position along the negative of the ray direction, so that the
 	// player no longer intersects that wall. Done once before movement logic, so that we don't slowly
 	// clip into walls when sliding.
 
-	Ray sideRay(position, direction);
+	Ray sideRay(pos, direction);
 	RayHitInfo sideHit = oct->raycast(sideRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
 
 	//If the side raycast enters a wall, we force the player back along the sideray vector to keep them out of the wall
@@ -227,30 +244,37 @@ void FPSMovement::pushOutOfAdjacentWalls(glm::vec3 position, glm::vec3 direction
 
 void FPSMovement::handleVerticalMovement(float dt) {
 	
+	bool previouslyStandingOnSurface = standingOnSurface;
 	standingOnSurface = false;
 	//These rays goes downwards from the player, and IGNORES the player's collider
 	//Having 4 rays gives is more precision for knowing in the player is partially standing on a surface
-	checkOnSurface(position + glm::vec3(playerRadius / 3, 0, playerRadius / 3), -worldUp);
-	checkOnSurface(position + glm::vec3(playerRadius / 3, 0, -playerRadius / 3), -worldUp);
-	checkOnSurface(position + glm::vec3(-playerRadius / 3, 0, playerRadius / 3), -worldUp);
-	checkOnSurface(position + glm::vec3(-playerRadius / 3, 0, -playerRadius / 3), -worldUp);
+	checkOnSurface(position, -worldUp);
+
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(footRadius, 0, footRadius), -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(footRadius, 0, -footRadius), -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(-footRadius, 0, footRadius), -worldUp);
+	if (!standingOnSurface)
+		checkOnSurface(position + glm::vec3(-footRadius, 0, -footRadius), -worldUp);
 
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
-	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
+	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider });
 	bool hitHead = upHit.intersects && upHit.hitTime < playerHeightRadius + 0.1f;
 
 	//After we release the jump button, we can not jump again
-	if (ServerInput::getAxis("jump", clientID) == 0)
+	if (Input::getAxis("jump", clientID) == 0)
 		justJumped = false;
 
 	//If we are currently on a surface, snap us to the player's standing height
 	if (standingOnSurface) {
-		vSpeed = baseVSpeed;
+		vSpeed = 0;//baseVSpeed;
 		position.y = position.y - downHit.hitTime + playerHeightRadius;
 
 		//If nothin is on our head, and we try to jump, and we aren't holding space from a previous jump
-		if (!hitHead && ServerInput::getAxis("jump", clientID) != 0 && !justJumped) {
+		if (!hitHead && Input::getAxis("jump", clientID) != 0 && !justJumped) {
 			vSpeed = startJumpSpeed;
 			position.y += vSpeed;
 			justJumped = true;
@@ -278,7 +302,7 @@ void FPSMovement::checkOnSurface(glm::vec3 position, glm::vec3 direction) {
 
 	//We raycast downwards from our position
 	Ray downRay(position, direction);
-	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, Octree::RAY_MAX, { playerBoxCollider });
+	RayHitInfo newDownHit = oct->raycast(downRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider, feetCollider });
 
 	//If standingOnSurface is already true, or this downHit has determined that we are on a surface, then set standingOnSurface to true
 	standingOnSurface = standingOnSurface || (newDownHit.intersects && newDownHit.hitTime < playerHeightRadius + 0.1f);
@@ -305,11 +329,8 @@ void FPSMovement::debugDraw()
 	Renderer::drawSphere(position + front, 0.125f, glm::vec4(0, 1, 0, 1)); // lime green for (front)
 	Renderer::drawSphere(position, 0.25f, glm::vec4(1.000, 0.388, 0.278, 1)); // orange (position)
 
-
-	Renderer::drawSphere(Renderer::mainCamera->getEyeRay().origin, 0.02f, glm::vec4(1, 1, 0, 1));
 }
 
-static int counter2 = 0;
 void FPSMovement::recalculate()
 {
 	// cache angles for front vector
@@ -365,7 +386,7 @@ void FPSMovement::raycastMouse()
 
 	if (!cast.intersects) return;
 
-	if (ServerInput::getAxis("aim", clientID))
+	if (Input::getAxis("click", clientID))
 	{
 		std::cout << "BUTTON TRIGGER" << std::endl;
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
@@ -375,7 +396,8 @@ void FPSMovement::raycastMouse()
 		{
 			hit->getComponent<PressButton>()->trigger();
 		}
-		else if (hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp)) {
+		else if ((hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
+			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) {
 			// pick up key
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}

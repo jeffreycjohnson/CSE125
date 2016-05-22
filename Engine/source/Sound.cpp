@@ -153,8 +153,7 @@ void Sound::init()
 	result = FMOD::System_Create(&system);
 	if (result != FMOD_OK)
 	{
-		std::cout << "FMOD Error " << result << std::endl;
-		throw;
+		FATAL("FMOD::System_Create failed");
 	}
 
 	int driverCount = 0;
@@ -162,8 +161,7 @@ void Sound::init()
 
 	if (driverCount == 0 || result != FMOD_OK)
 	{
-		std::cout << "FMOD Error " << result << std::endl;
-		throw;
+		FATAL("FMOD failed to find sound drivers (or worse.)");
 	}
 
 	// Initialize our Instance with 128 channels
