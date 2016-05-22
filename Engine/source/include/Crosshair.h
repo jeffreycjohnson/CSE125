@@ -8,5 +8,5 @@ private:
 public:
 	Crosshair(const std::string& texture);
 
-	void drawUI() override;
+	bool drawUI() override;
 };

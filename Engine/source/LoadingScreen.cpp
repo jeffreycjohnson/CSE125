@@ -1,7 +1,7 @@
 #include "LoadingScreen.h"
 #include "Renderer.h"
 
-LoadingScreen::LoadingScreen(const std::string& splashScreen, const std::string& title) : job(nullptr), state(BEFORE_LOADING)
+LoadingScreen::LoadingScreen(const std::string& splashScreen, const std::string& title) : state(BEFORE_LOAD)
 {
 	splashImage = std::make_unique<Texture>(splashScreen, false);
 }
@@ -10,57 +10,48 @@ LoadingScreen::~LoadingScreen()
 {
 }
 
-void LoadingScreen::load()
+bool LoadingScreen::load()
 {
 	// Override me :D
+	return false;
 }
 
-void LoadingScreen::finished()
+bool LoadingScreen::finished()
 {
 	// Override me :D
-}
-
-void LoadingScreen::create()
-{
-	// Since load() is a virtual function, the std::bind here will bind to the overridden
-	// versions of load in any and all subclasses of LoadingScreen.
-	auto jobFuncPtr = std::bind(&LoadingScreen::load, this);
-	job = workerPool->createJob(jobFuncPtr)->queue();
+	return false;
 }
 
 void LoadingScreen::fixedUpdate()
 {
-	if (job != nullptr) {
-		bool complete = workerPool->completed(job);
-	}
-
-	switch (state) {
-	case BEFORE_LOADING:
-		{
-			if (job == nullptr) return; // Loading hasn't started
-			if (!workerPool->completed(job)) {
-				state = LOADING;
-			}
-		}
-	case LOADING:
-		{
-			if (workerPool->completed(job)) {
-				state = FINISHED_LOADING;
-				finished();
-			}
-		}
-		break;
-	case FINISHED_LOADING:
-		{
-			this->active = false; // TODO: Destroy the object
-		}
-		break;
+	// Be wary of adding anything else here, as you may cause a data race
+	if (state == AFTER_FINISH) {
+		this->active = false;
 	}
 }
 
-void LoadingScreen::drawUI()
+bool LoadingScreen::drawUI()
 {
-	if (state != FINISHED_LOADING) {
+	// this is called on the main thread trolololool
+
+	if (state != AFTER_FINISH) {
 		Renderer::drawSplash(splashImage.get(), true);
 	}
+
+	if (state == BEFORE_LOAD) {
+		state = LOADING;
+	}
+	else if (state == LOADING) {
+		bool validity = load();
+		state = AFTER_LOAD;
+		return validity; // Iterator may have been invalidated
+	}
+	else if (state == AFTER_LOAD) {
+		bool validity = finished();
+		state = AFTER_FINISH;
+		return validity;
+	}
+
+	return false;
+
 }

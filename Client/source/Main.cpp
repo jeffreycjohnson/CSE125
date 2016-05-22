@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 	try
 	{
-		RunEngine(NetworkState::UNINITIALIZED); // let the loading screen code set up the networking
+		RunEngine(NetworkState::CLIENT_MODE); // let the loading screen code set up the networking
 	}
 	catch (...)
 	{

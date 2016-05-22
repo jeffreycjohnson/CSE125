@@ -68,7 +68,7 @@ void _log(const char * file, int line, const char * func, const std::string& s)
 
 void _fatal(const char * file, int line, const char * func, const char * s) {
 	std::cerr << "================================================" << std::endl;
-	std::cerr << "  /!\   FATAL Engine Error!" << std::endl;
+	std::cerr << "  /!\\   FATAL Engine Error!" << std::endl;
 	std::cerr << "================================================" << std::endl; 
 	std::cerr << "File: " << file << " line " << line << std::endl; 
 	std::cerr << "Function: " << func << std::endl;
@@ -82,7 +82,7 @@ void _fatal(const char * file, int line, const char * func, const char * s) {
 void _assert(const char * file, int line, const char * func, bool expr, const char * s) {
 	if (!expr) {
 		std::cerr << "================================================" << std::endl;
-		std::cerr << "  /?\   Engine Assertion Failed!" << std::endl;
+		std::cerr << "  /?\\   Engine Assertion Failed!" << std::endl;
 		std::cerr << "================================================" << std::endl;
 		std::cerr << "File: " << file << " line " << line << std::endl;
 		std::cerr << "Function: " << func << std::endl;

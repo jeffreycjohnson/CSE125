@@ -6,6 +6,6 @@ public:
 	// C++11 constructor inheritance
 	using LoadingScreen::LoadingScreen;
 
-	void load() override;
-	void finished() override;
+	bool load() override;
+	//bool finished() override;
 };

@@ -23,7 +23,7 @@ public:
 	virtual void fixedUpdate();
 
 	virtual void draw();
-	virtual void drawUI();
+	virtual bool drawUI();
 	virtual void debugDraw();
 	virtual void create(); // (called on first update after fully constructed)
 	virtual void destroy(); // (called before any components, children, parents, or siblings are actually destroyed)

@@ -1,34 +1,36 @@
 #pragma once
 #include "Component.h"
-#include "ThreadPool.h"
 #include "Texture.h"
+#include <atomic>
 
 class LoadingScreen :
 	public Component
 {
 private:
 	enum LoadingState {
-		BEFORE_LOADING,
+		BEFORE_LOAD,
 		LOADING,
-		FINISHED_LOADING
+		AFTER_LOAD,
+		BEFORE_FINISH,
+		AFTER_FINISH
 	};
 
-	ThreadPool::Job* job;
-	LoadingState state;
+	std::atomic<LoadingState> state;
 	std::unique_ptr<Texture> splashImage;
 
 public:
 	explicit LoadingScreen(const std::string& splashScreen, const std::string& title);
 	~LoadingScreen();
 
-	// This function is passed into a separate thread (what's actually doing the loading)
-	virtual void load();
+	// Called on the main thread from drawUI(), this function returns true if the gameObject's
+	// component list has been modified (therefore invalidating the iterator)
+	virtual bool load();
 
-	// Called when loading is finished
-	virtual void finished();
+	// Called the frame after load() finishes executing, also on the main thread. Return value
+	// semantics are the same as load() & drawUI().
+	virtual bool finished();
 
-	virtual void create() override;
 	virtual void fixedUpdate() override;
-	virtual void drawUI() override;
+	virtual bool drawUI() override;
 
 };

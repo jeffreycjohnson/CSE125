@@ -228,10 +228,16 @@ GameObject* GameObject::findChildByNameContains(const std::string& name)
 }
 
 void GameObject::drawUI() {
+	// TODO: A similar hack could be implemented in fixedUpdate/update/debugDraw,
+	//   but I think this will require further discussion. Generally displeased
+	//   with having to return a bool. Will try making this function a little smarter
+	//   later, but for now it works as intended.
 	if (visible && active && !dead) {
 		for (auto component : componentList) {
 			if (component->visible && component->active)
-				component->drawUI();
+				if (component->drawUI()) {
+					break; // Iterator invalidated
+				}
 		}
 		for (auto child : transform.children) {
 			(child->gameObject)->drawUI();

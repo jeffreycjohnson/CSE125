@@ -8,8 +8,10 @@
 #include "Renderer.h"
 #include <iostream>
 
-void ClientStartingScreen::load()
+bool ClientStartingScreen::load()
 {
+	// Called on mian thread (GL calls do not fail)
+
 	std::cerr << "Did we get into there?" << std::endl;
 	ConfigFile file("config/options.ini");
 
@@ -21,17 +23,17 @@ void ClientStartingScreen::load()
 		auto pair = NetworkManager::InitializeClient(serverip, port);
 	}
 	else {
-		NetworkManager::InitializeOffline();
+		//NetworkManager::InitializeOffline(); // this doesn't do anything anyway
 	}
 
 	// cache all meshes
-	/*GameObject *scene = loadScene(file.getString("GameSettings", "level"));
+	GameObject *scene = loadScene(file.getString("GameSettings", "level"), false, false);
 	scene->destroy();
 	delete scene;
 
-	GameObject *player = loadScene(file.getString("GameSettings", "player"));
+	GameObject *player = loadScene(file.getString("GameSettings", "player"), false, false);
 	player->destroy();
-	delete player;*/ // WARNING!!! OpenGL is NOT THREAD-SAFE!!!
+	delete player; // WARNING!!! OpenGL is NOT THREAD-SAFE!!!
 
 	GameObject::SceneRoot.addComponent(new Crosshair(file.getString("GameSettings", "crosshairSprite")));
 	if (!connectOnStart) {
@@ -39,9 +41,6 @@ void ClientStartingScreen::load()
 	}
 
 	std::cerr << "LOADING COMPLETE" << std::endl;
-}
 
-void ClientStartingScreen::finished()
-{
-	std::cerr << "[ClientStartingScreen] Finished loading." << std::endl;
+	return true; // This object is added to SceneRoot, and modifies component list of SceneRoot, so iter is invalidated
 }
