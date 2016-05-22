@@ -24,6 +24,10 @@ Texture::Texture(const std::string& filename, bool srgb, GLenum wrap) : srgb(srg
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoAmt);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoAmt);
 
+	// OpenGL >= 4 get texture sizes at base mipmap level
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texWidth);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
     CHECK_ERROR();
 
@@ -57,6 +61,7 @@ Texture::Texture(glm::vec4 color)
     glGenTextures(1, &textureHandle);
 
     char buffer[4] = { static_cast<char>(color.r * 255), static_cast<char>(color.g * 255), static_cast<char>(color.b * 255), static_cast<char>(color.a * 255) };
+	texWidth = texHeight = 1; // looks like this is just one pixel
 
     glBindTexture(GL_TEXTURE_2D, textureHandle);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA,
@@ -80,10 +85,17 @@ Texture::Texture(unsigned char buf[], size_t width, size_t height, GLenum format
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	// OpenGL >= 4 get texture sizes at base mipmap level
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texWidth);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight);
     glGenerateMipmap(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	CHECK_ERROR();
+
+	texWidth = width;
+	texHeight = height;
 }
 
 Texture::~Texture()
@@ -98,4 +110,14 @@ void Texture::bindTexture(int slot) {
 	glActiveTexture(textureSlot);
 	glBindTexture(GL_TEXTURE_2D, textureHandle);
     CHECK_ERROR();
+}
+
+int Texture::getWidth() const
+{
+	return texWidth;
+}
+
+int Texture::getHeight() const
+{
+	return texHeight;
 }

@@ -295,8 +295,6 @@ static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scal
 void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color, Texture* image) {
 	// TODO: There is probably some sort of optimization to be done here or in UIPass (ForwardPass.cpp)
 
-	// TODO: Currently "pos" is in normalized device coordinates x -> [-1, 1]  y -> [-1, 1]
-	//       so we will need to do math here to use pixels but I'm too hungry to think rn.
 	auto& shader = Renderer::getShader(UI_SHADER);
 	auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
 
@@ -305,12 +303,20 @@ void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color
 		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
 	}
 
+	// "pos" is in pixels.
+	float t1 = pos.x / Renderer::getWindowWidth();
+	float t2 = pos.y / Renderer::getWindowHeight();
+	float screenSpaceX = (-1.0 * (1.0 - t1)) + t1;
+	float screenSpaceY = (1.0 * (1.0 - t2)) - t2; // invert Y axis
+
+	auto pixelPerfectScale = glm::vec2((float)image->getWidth() / Renderer::getWindowWidth(), (float)image->getHeight() / Renderer::getWindowHeight());
+
 	shader.use();
 	shader["uColor"] = glm::vec4(1);
 	image->bindTexture(0);
 	shader["tex"] = 0;
-	shader["scale"] = scale;
-	shader["translation"] = pos;
+	shader["scale"] = pixelPerfectScale * scale;
+	shader["translation"] = glm::vec4(glm::vec2(screenSpaceX, screenSpaceY), 0, 0);
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 	CHECK_ERROR();
 }

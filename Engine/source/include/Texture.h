@@ -8,6 +8,7 @@ class Texture
     bool autoreload = false;
     std::unique_ptr<FileWatcher> watcher;
     bool srgb = false;
+	int texWidth, texHeight;
 
     void loadFromFile(const std::string& file, bool reuseHandle = false);
 
@@ -21,6 +22,8 @@ class Texture
 		~Texture();
 
 		void bindTexture(int slot);
+		int getWidth() const;
+		int getHeight() const;
 };
 
 #endif
