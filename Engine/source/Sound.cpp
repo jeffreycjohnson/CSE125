@@ -199,8 +199,9 @@ void Sound::init()
 	// Initialize our Instance with 128 channels
 	system->init(256, FMOD_INIT_NORMAL, NULL);
 
-#ifdef _SOUND_HARDCODE
+#ifndef _SOUND_HARDCODE
 	// Generate sound map
+	/*
 	SoundClass cabin;
 	system->createSound("assets/sounds/ambience/cabin.wav", FMOD_2D, NULL, &cabin);
 	soundMap.insert({ "cabin", cabin });
@@ -222,6 +223,14 @@ void Sound::init()
 	SoundClass music;
 	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
 	soundMap.insert({ "music", music });
+	*/
+	SoundClass mariojump;
+	system->createSound("assets/sounds/effects/mariojump.wav", FMOD_3D, NULL, &mariojump);
+	soundMap.insert({ "mariojump", mariojump});
+	SoundClass zeldasecret;
+	system->createSound("assets/sounds/effects/zeldasecret.wav", FMOD_3D, NULL, &zeldasecret);
+	soundMap.insert({ "zeldasecret", zeldasecret });
+	// Add more sounds as we need
 	// Add more sounds as we need
 #else
 	initFromConfig();
