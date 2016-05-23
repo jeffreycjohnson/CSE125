@@ -41,7 +41,7 @@ public:
 	void setVolume(float volume);
 
 	//initFromConfig is broken, Do not touch, just use the macro!!!
-	//static void initFromConfig();
+	static void initFromConfig();
 
 	static FMOD::System *system;
 	static std::unordered_map<std::string, FMOD::Sound*> soundMap;
@@ -51,7 +51,6 @@ public:
 
 	void deserializeAndApply(std::vector<char> bytes) override;
 	void setGameObject(GameObject* object) override;
-
 
 	std::vector<char> serialize(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam);
 protected:

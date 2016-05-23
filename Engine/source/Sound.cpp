@@ -172,9 +172,12 @@ void Sound::init()
 	// THIS MACRO ALLOWS US TO ADD SOUNDS!!! Cool huh?
 	// Usage: name/identifier, location of the sound as a string, 2d or 3d using FMOD_3D or FMOD_2D
 
+#ifdef _hardcoded
 	REGISTER_SOUND(mariojump,   "assets/sounds/effects/mariojump.wav", FMOD_2D);
 	REGISTER_SOUND(zeldasecret, "assets/sounds/effects/zeldasecret.wav", FMOD_3D);
-
+#else
+	initFromConfig();
+#endif
 	// Add more sounds as we need
 }
 
@@ -280,46 +283,37 @@ void Sound::setGameObject(GameObject* object) {
 };
 
 
-
-
-
-
-
-
-
-/*
-BROKEN!!!! FOR NOW USE THE MACRO
 void Sound::initFromConfig()
 {
-ConfigFile file("config/sounds.ini");
-std::string list = file.getString("SoundList", "soundlist");
-std::vector<std::string> sounds;
+	ConfigFile file("config/sounds.ini");
+	std::string list = file.getString("SoundList", "soundlist");
+	std::vector<std::string> sounds;
 
-//Split
-size_t pos = 0;
-std::string token;
-while ((pos = list.find(";")) != std::string::npos) {
-token = list.substr(0, pos);
-sounds.push_back(token);
-list.erase(0, pos + 1);
-}
+	//Split
+	size_t pos = 0;
+	std::string token;
+	while ((pos = list.find(";")) != std::string::npos) {
+		token = list.substr(0, pos);
+		sounds.push_back(token);
+		list.erase(0, pos + 1);
+	}
 
-for (auto i = sounds.begin(); i != sounds.end(); ++i) {
-SoundClass soundToAdd;
-std::string fileName = file.getString(*i, "file");
-std::string fmodMode = file.getString(*i, "fmodMode");
-int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
-//int exinfo = file.getInt(*i, "exinfo");
-//TODO: Don't know what exinfo is
-//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
-system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
-soundMap.insert({ *i, soundToAdd });
+	for (auto i = sounds.begin(); i != sounds.end(); ++i) {
+		SoundClass soundToAdd;
+		std::string fileName = file.getString(*i, "file");
+		std::string fmodMode = file.getString(*i, "fmodMode");
+		int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
+		//int exinfo = file.getInt(*i, "exinfo");
+		//TODO: Don't know what exinfo is
+		//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
+		system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
+		soundMap.insert({ *i, soundToAdd });
+	}
+	//Sanity check
+	std::cout << "Sound's initFromConfig Sanity Check" << std::endl;
+	for (auto i : soundMap) {
+		std::cout << i.first << std::endl;
+		std::cout << i.second << std::endl;
+	}
+	std::cout << std::endl << std::endl;
 }
-//Sanity check
-std::cout << "Sound's initFromConfig Sanity Check" << std::endl;
-for (auto i : soundMap) {
-std::cout << i.first << std::endl;
-}
-std::cout << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
-}
-*/
