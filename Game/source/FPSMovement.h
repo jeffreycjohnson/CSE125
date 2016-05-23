@@ -42,6 +42,8 @@ private:
 	bool hitWall, pastFirstTick, standingOnSurface, justJumped;
 	int clientID;
 
+	bool justClicked;
+
 	glm::vec2 lastMousePosition;
 	glm::vec3 initialPosition;
 

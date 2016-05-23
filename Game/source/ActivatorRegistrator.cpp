@@ -25,7 +25,8 @@
 std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 {
 	{ "rotate_" , [](auto args, auto idToTarget) {return new Rotating(args, idToTarget);}},
-	{ "laser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget); } },
+	{ "laser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget, false); } },
+	{ "fixedlaser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget, true); } },
 	{ "forcefield_",   [](auto args, auto idToTarget) {return new ForceField(args, idToTarget); } },
 	{ "vddoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, DOWN); } },
 	{ "keyhole_",  [](auto args, auto idToTarget) {return new KeyHoleTarget(args, idToTarget); } },
@@ -38,7 +39,7 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 {
 	{ "plate_" ,  [](auto args, auto idToTarget) {return new Plate(args, idToTarget); } },
-	{ "timebutton_" ,  [](auto args, auto idToTarget) {return new PressButton(args, idToTarget); } },
+	{ "pressbutton_" ,  [](auto args, auto idToTarget) {return new PressButton(args, idToTarget); } },
 	{ "keyhole_" ,  [](auto args, auto idToTarget) {return new KeyHoleActivator(args, idToTarget); } },
 	{ "key_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },
 	{ "fixedkey_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },

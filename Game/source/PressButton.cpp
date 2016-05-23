@@ -9,7 +9,9 @@ PressButton::PressButton()
 PressButton::PressButton(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets)
 	: isActivated(isActivated), timeLeft(0.0f)
 {
-	for (int i = 1; i < tokens.size(); i += 3)
+	timeLimit = std::stof(tokens[1]);
+
+	for (int i = 2; i < tokens.size(); i += 3)
 	{
 		int targetID = std::stoi(tokens[i + 0]);
 		TriggerType triggerType = strToTriggerType(tokens[i + 1]);
@@ -27,10 +29,8 @@ void PressButton::fixedUpdate()
 {
 	float deltaTime = Timer::fixedTimestep;
 
-	if (isActivated)
+	if (isActivated && timeLimit > 0)
 	{
-		timeLeft -= deltaTime;
-
 		if (timeLeft < 0)
 		{
 			isActivated = false;
@@ -46,7 +46,7 @@ void PressButton::trigger()
 	if (!isActivated)
 	{
 		isActivated = true;
-		timeLeft = buttonTime;
+		timeLeft = timeLimit == 0 ? 123456 : timeLimit;
 
 		activate();
 	}

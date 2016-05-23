@@ -8,8 +8,8 @@ Laser::Laser()
 {
 }
 
-Laser::Laser(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
-	: isFixed(true), areLasersOff(false)
+Laser::Laser(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget, bool isFixed)
+	: isFixed(isFixed), areLasersOff(false)
 {
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);

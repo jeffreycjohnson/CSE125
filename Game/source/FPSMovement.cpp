@@ -386,22 +386,31 @@ void FPSMovement::raycastMouse()
 
 	if (!cast.intersects) return;
 
-	if (Input::getAxis("click", clientID))
+	float clickf = Input::getAxis("click", clientID);
+
+	if (clickf && !justClicked)
 	{
-		std::cout << "BUTTON TRIGGER" << std::endl;
+		justClicked = true;
+
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
-		std::cout << hit->getName() << std::endl;
+		GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;\
 
 		if (hit->getComponent<PressButton>())
 		{
 			hit->getComponent<PressButton>()->trigger();
 		}
+		else if (phit->getComponent<PressButton>())
+		{
+			phit->getComponent<PressButton>()->trigger();
+		}
 		else if ((hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
-			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) {
+			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) 
+		{
 			// pick up key
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
-		else if (hit->getComponent<KeyHoleTarget>() && this->gameObject->getComponent<Inventory>()->hasKey() ) {
+		else if (hit->getComponent<KeyHoleTarget>() && this->gameObject->getComponent<Inventory>()->hasKey() ) 
+		{
 			// if KeyHoleTarget matches key currently in inventory
 			if (hit->getComponent<KeyHoleTarget>()->keyHoleID == this->gameObject->getComponent<Inventory>()->getKey()->getComponent<KeyActivator>()->keyHoleID) {
 				std::cout << "Key matches keyHole " << hit->getComponent<KeyHoleTarget>()->keyHoleID << std::endl;
@@ -409,5 +418,9 @@ void FPSMovement::raycastMouse()
 				this->gameObject->getComponent<Inventory>()->removeKey();
 			}
 		}
+	}
+	else if (clickf <= 0.01 && justClicked)
+	{
+		justClicked = false;
 	}
 }
