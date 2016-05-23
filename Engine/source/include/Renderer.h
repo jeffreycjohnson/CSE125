@@ -89,7 +89,8 @@ class Renderer
 
 		// 2D Drawing (UI Pass)
 		// Draws a sprite centered at the given position (in pixels)
-		static void drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color, Texture* image);
+		static void drawSprite(glm::vec2 centerPos, glm::vec2 scale, const glm::vec4& color, Texture* image);
+		static void drawSpriteStretched(glm::vec2 topLeft, glm::vec2 botRight, const glm::vec4& color, Texture* image);
 		static void drawSplash(Texture* image, bool stretch = true);
 
 		// 3D Drawing (Debug Pass)

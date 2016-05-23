@@ -292,7 +292,7 @@ static void drawWireframe(const std::string& name, glm::vec3 pos, glm::vec3 scal
     glDrawElements(GL_LINES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 }
 
-void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color, Texture* image) {
+void Renderer::drawSprite(glm::vec2 centerPos, glm::vec2 scale, const glm::vec4& color, Texture* image) {
 	// TODO: There is probably some sort of optimization to be done here or in UIPass (ForwardPass.cpp)
 
 	auto& shader = Renderer::getShader(UI_SHADER);
@@ -304,8 +304,8 @@ void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color
 	}
 
 	// "pos" is in pixels.
-	float t1 = pos.x / Renderer::getWindowWidth();
-	float t2 = pos.y / Renderer::getWindowHeight();
+	float t1 = centerPos.x / Renderer::getWindowWidth();
+	float t2 = centerPos.y / Renderer::getWindowHeight();
 	float screenSpaceX = (-1.0 * (1.0 - t1)) + t1;
 	float screenSpaceY = (1.0 * (1.0 - t2)) - t2; // invert Y axis
 
@@ -320,6 +320,47 @@ void Renderer::drawSprite(glm::vec2 pos, glm::vec2 scale, const glm::vec4& color
 	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
 	CHECK_ERROR();
 }
+
+void Renderer::drawSpriteStretched(glm::vec2 topLeft, glm::vec2 botRight, const glm::vec4& color, Texture* image) {
+	auto& shader = Renderer::getShader(UI_SHADER);
+	auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
+
+	if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
+		glBindVertexArray(currentEntry.vaoHandle);
+		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
+	}
+
+	glm::vec2 centerPos = (topLeft + botRight);
+	centerPos /= 2;
+
+	// I don't want to deal with this
+	ASSERT(botRight.x >= topLeft.x, "Bottom right x coordinate less than top left x coordinate.");
+	ASSERT(botRight.y >= topLeft.y, "Bottom right y coordinate less than top left y coordinate.");
+
+	float desiredW = botRight.x - topLeft.x;
+	float desiredH = botRight.y - topLeft.y;
+	float imageW = image->getWidth();
+	float imageH = image->getHeight();
+
+	// "pos" is in pixels.
+	float t1 = centerPos.x / Renderer::getWindowWidth();
+	float t2 = centerPos.y / Renderer::getWindowHeight();
+	float screenSpaceX = (-1.0 * (1.0 - t1)) + t1;
+	float screenSpaceY = (1.0 * (1.0 - t2)) - t2; // invert Y axis
+
+	auto pixelPerfectScale = glm::vec2( imageW / (float)Renderer::getWindowWidth(), -imageH / (float)Renderer::getWindowHeight());
+	auto scale = glm::vec2(desiredW / imageW, desiredH / imageH);
+
+	shader.use();
+	shader["uColor"] = glm::vec4(1);
+	image->bindTexture(0);
+	shader["tex"] = 0;
+	shader["scale"] = pixelPerfectScale * scale;
+	shader["translation"] = glm::vec4(glm::vec2(screenSpaceX, screenSpaceY), 0, 0);
+	glDrawElements(GL_TRIANGLES, currentEntry.indexSize, GL_UNSIGNED_INT, 0);
+	CHECK_ERROR();
+}
+
 
 void Renderer::drawSplash(Texture * image, bool stretch)
 {

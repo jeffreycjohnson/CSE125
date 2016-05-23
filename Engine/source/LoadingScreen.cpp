@@ -36,6 +36,7 @@ bool LoadingScreen::drawUI()
 
 	if (state != AFTER_FINISH) {
 		Renderer::drawSplash(splashImage.get(), true);
+		//Renderer::drawSpriteStretched(glm::vec2(0), glm::vec2(Renderer::getWindowWidth(), Renderer::getWindowHeight()), glm::vec4(0), splashImage.get()); // equivalent, just used for testing
 	}
 
 	if (state == BEFORE_LOAD) {
