@@ -28,6 +28,7 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 	{ "laser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget); } },
 	{ "forcefield_",   [](auto args, auto idToTarget) {return new ForceField(args, idToTarget); } },
 	{ "vddoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, DOWN); } },
+	{ "vbdoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, BOTH); } },
 	{ "keyhole_",  [](auto args, auto idToTarget) {return new KeyHoleTarget(args, idToTarget); } },
 	{ "fixedchest_",  [](auto args, auto idToTarget) {return new FixedChestTarget(args, idToTarget); } },
 	{ "chest",  [](auto args, auto idToTarget) {return new ChestTarget(args, idToTarget); } },
