@@ -326,7 +326,7 @@ void NetworkManager::ReceiveClientMessages()
 			Light::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case SOUND_NETWORK_DATA:
-			std::cerr << "Init Sound" << std::endl;
+			//std::cerr << "Sound MAKE!" << std::endl;
 			Sound::Dispatch(received.body, received.messageType, received.id);
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:

@@ -79,7 +79,7 @@ void Sound::update(float)
 
 void Sound::play()
 {
-	std::cout << "Hello, I am a sound whose name is " << name << std::endl;
+	std::cout << "SOUND: " << name << std::endl;
 	if (playing)
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
@@ -172,7 +172,7 @@ void Sound::init()
 	// THIS MACRO ALLOWS US TO ADD SOUNDS!!! Cool huh?
 	// Usage: name/identifier, location of the sound as a string, 2d or 3d using FMOD_3D or FMOD_2D
 
-	REGISTER_SOUND(mariojump,   "assets/sounds/effects/mariojump.wav", FMOD_3D);
+	REGISTER_SOUND(mariojump,   "assets/sounds/effects/mariojump.wav", FMOD_2D);
 	REGISTER_SOUND(zeldasecret, "assets/sounds/effects/zeldasecret.wav", FMOD_3D);
 
 	// Add more sounds as we need
