@@ -11,7 +11,8 @@ enum DoorMovement
 	UP,
 	DOWN,
 	LEFT,
-	RIGHT
+	RIGHT,
+	BOTH
 };
 
 class Door : public Target
