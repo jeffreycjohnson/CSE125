@@ -359,9 +359,6 @@
     <None Include="..\shaders\ui.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\config\sounds.ini">
-      <Filter>Configuration</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Configuration">

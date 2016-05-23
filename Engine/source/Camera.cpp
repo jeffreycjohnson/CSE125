@@ -82,8 +82,8 @@ void Camera::update(float deltaTime)
 		}
 	}
 
-	forward = { Renderer::view[0][2], Renderer::view[1][2], Renderer::view[2][2] };
-	position = { matrix[3][0], matrix[3][1], matrix[3][2] }; // Has to be world space to work with forward vector
+	forward = glm::vec3(gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0));
+	position = gameObject->transform.getWorldPosition(); // Has to be world space to work with forward vector
 	velocity = position - prevPosition;
 	prevPosition = position;
 
