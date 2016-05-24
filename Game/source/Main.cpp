@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 		Sensitivity sens(file.getFloat("GameSettings", "mouseSensitivity"), file.getFloat("GameSettings", "joystickSensitivity"));
 		
 		// see if we can find a designated spawn point, otherwise make one up
-		glm::vec3 spawnPosition = glm::vec3(client * 3, 3, -client * 3);
+		glm::vec3 spawnPosition = glm::vec3(client, 3, -client);
 		std::vector<GameObject*> realSpawn = GameObject::FindAllByPrefix(std::string("spawn_") + std::to_string(client));
 		if (realSpawn.size() > 0)
 		{

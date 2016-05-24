@@ -62,6 +62,11 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initial
 			}
 		}
 		if (skip || !obj->active) continue;
+		if (obj->gameObject) {
+			if (!obj->gameObject->getActive()) {
+				continue;
+			}
+		}
 		if (obj->gameObject->getName().find("_trigger") != std::string::npos) {
 			continue;
 		}

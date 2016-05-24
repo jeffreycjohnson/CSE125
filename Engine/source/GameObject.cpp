@@ -493,6 +493,11 @@ void GameObject::setVisible(bool visible)
 
 void GameObject::setActive(bool active) {
 	this->active = active;
+	if (!active) {
+		for (auto child : transform.children) {
+			child->gameObject->setActive(false);
+		}
+	}
 	postToNetwork();
 }
 
