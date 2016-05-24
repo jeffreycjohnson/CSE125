@@ -1,17 +1,17 @@
 #pragma once
-#include "Component.h"
+#include "UI.h"
 
 class MainMenu :
-	public Component
+	public UIMenu
 {
 public:
 	MainMenu();
 	~MainMenu();
 
-	bool connect();
+	// Event Listeners
+	void connect();
 
-	// Inherited from Component
+	// Inherited from UIMenu
 	void create() override;
-	void fixedUpdate() override;
 };
 

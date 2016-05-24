@@ -240,6 +240,10 @@
     <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
+    <ClCompile Include="source\UIButton.cpp" />
+    <ClCompile Include="source\UIComponent.cpp" />
+    <ClCompile Include="source\UIList.cpp" />
+    <ClCompile Include="source\UIMenu.cpp" />
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -283,6 +287,8 @@
     <ClInclude Include="source\include\Texture.h" />
     <ClInclude Include="source\include\Timer.h" />
     <ClInclude Include="source\include\Transform.h" />
+    <ClInclude Include="source\include\UI.h" />
+    <ClInclude Include="source\include\UIButton.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\particles\Default.particle.ini" />

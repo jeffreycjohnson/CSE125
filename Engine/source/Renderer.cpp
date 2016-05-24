@@ -309,7 +309,7 @@ void Renderer::drawSprite(glm::vec2 centerPos, glm::vec2 scale, const glm::vec4&
 	float screenSpaceX = (-1.0 * (1.0 - t1)) + t1;
 	float screenSpaceY = (1.0 * (1.0 - t2)) - t2; // invert Y axis
 
-	auto pixelPerfectScale = glm::vec2((float)image->getWidth() / Renderer::getWindowWidth(), (float)image->getHeight() / Renderer::getWindowHeight());
+	auto pixelPerfectScale = glm::vec2((float)image->getWidth() / Renderer::getWindowWidth(), (float)-image->getHeight() / Renderer::getWindowHeight());
 
 	shader.use();
 	shader["uColor"] = glm::vec4(1);
@@ -374,7 +374,7 @@ void Renderer::drawSplash(Texture * image, bool stretch)
 		Renderer::gpuData.vaoHandle = currentEntry.vaoHandle;
 	}
 
-	auto pixelPerfectScale = glm::vec2((float)image->getWidth() / Renderer::getWindowWidth(), (float)image->getHeight() / Renderer::getWindowHeight());
+	auto pixelPerfectScale = glm::vec2((float)image->getWidth() / Renderer::getWindowWidth(), (float)-image->getHeight() / Renderer::getWindowHeight());
 
 	shader.use();
 	shader["uColor"] = glm::vec4(1);

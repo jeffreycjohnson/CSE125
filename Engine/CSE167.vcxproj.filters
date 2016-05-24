@@ -145,6 +145,18 @@
     <ClCompile Include="source\LoadingScreen.cpp">
       <Filter>Source\UI</Filter>
     </ClCompile>
+    <ClCompile Include="source\UIMenu.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UIList.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UIComponent.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UIButton.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\ForwardDecs.h">
@@ -268,6 +280,12 @@
       <Filter>Headers\UI</Filter>
     </ClInclude>
     <ClInclude Include="source\include\LoadingScreen.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\UI.h">
+      <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\UIButton.h">
       <Filter>Headers\UI</Filter>
     </ClInclude>
   </ItemGroup>
