@@ -9,7 +9,8 @@ class UIComponent {
 protected:
 	bool texturesLoaded;
 public:
-	UIComponent() : texturesLoaded(false) {};
+	bool active;
+	UIComponent() : texturesLoaded(false), active(true) {};
 
 	virtual void loadTextures();
 	virtual void drawUI();

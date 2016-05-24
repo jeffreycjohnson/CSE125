@@ -3,7 +3,9 @@
 #include "Input.h"
 #include "Renderer.h"
 
-UIButton::UIButton(const std::string & textureName, int x, int y) : centerPosX(x), centerPosY(y)
+#include <iostream>
+
+UIButton::UIButton(const std::string & textureName, int x, int y, int w, int h) : centerPosX(x), centerPosY(y), spriteWidth(w), spriteHeight(h)
 {
 	defaultStateName = textureName;
 	defaultState = nullptr;
@@ -32,8 +34,8 @@ void UIButton::drawUI()
 	if (!texturesLoaded)
 		loadTextures();
 
-	int wHalf = defaultState->getWidth() / 2;
-	int hHalf = defaultState->getHeight() / 2;
+	int wHalf = spriteWidth / 2;
+	int hHalf = spriteHeight / 2;
 	int minX = centerPosX - wHalf;
 	int maxX = centerPosX + wHalf;
 	int minY = centerPosY - hHalf;
@@ -43,15 +45,17 @@ void UIButton::drawUI()
 	int cursor_x = Input::mousePosition().x;
 	int cursor_y = Input::mousePosition().y;
 
+	//std::cerr << "mouse x,y: " << cursor_x << ", " << cursor_y << std::endl;
+
 	if (cursor_x >= minX && cursor_x <= maxX &&
-		cursor_y >= minY && cursor_y <= maxY) {
-		if (Input::getButtonDown("mouse 1") && click) {
+		cursor_y >= minY && cursor_y <= maxY && active) {
+		if (Input::getMouseDown("mouse 0") && click != nullptr) {
 			click();
 			// TODO: draw click state instead of hover state or default, if we ever do that
 		}
 		Renderer::drawSprite(glm::vec2(centerPosX, centerPosY), glm::vec2(1), glm::vec4(1), defaultState); // TODO: draw hover state instead if we ever do that
 	}
-	else {
+	else if (active) {
 		Renderer::drawSprite(glm::vec2(centerPosX, centerPosY), glm::vec2(1), glm::vec4(1), defaultState);
 	}
 

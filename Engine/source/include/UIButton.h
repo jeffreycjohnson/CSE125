@@ -4,6 +4,7 @@
 class UIButton : public UIComponent {
 private:
 	int centerPosX, centerPosY;
+	int spriteWidth, spriteHeight;
 
 	std::string defaultStateName;
 	Texture* defaultState;
@@ -13,7 +14,7 @@ private:
 
 public:
 
-	UIButton(const std::string&, int x, int y);
+	UIButton(const std::string&, int x, int y, int w, int h);
 	~UIButton();
 
 	void loadTextures() override;
