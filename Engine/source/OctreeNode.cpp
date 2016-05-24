@@ -57,11 +57,11 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initial
 	for (auto obj : colliders) {
 		bool skip = false;
 		for (auto ignored : ignore) {
-			if (obj == ignored || !obj->active) {
+			if (obj == ignored) {
 				skip = true; // Skip ignored or inactive colliders
 			}
 		}
-		if (skip) continue;
+		if (skip || !obj->active) continue;
 		if (obj->gameObject->getName().find("_trigger") != std::string::npos) {
 			continue;
 		}
