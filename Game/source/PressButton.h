@@ -15,7 +15,7 @@ private:
 	float timeLimit;
 public:
 	PressButton();
-	PressButton(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets);
+	PressButton(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName);
 
 	~PressButton();
 

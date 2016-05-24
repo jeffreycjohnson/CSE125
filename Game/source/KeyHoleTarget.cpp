@@ -7,13 +7,13 @@ KeyHoleTarget::KeyHoleTarget()
 {
 }
 
-KeyHoleTarget::KeyHoleTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+KeyHoleTarget::KeyHoleTarget(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
 {
 	keyHoleID = std::stoi(tokens[4]);
 	int threshold = std::stoi(tokens[5]);
 
 	setThreshold(threshold);
-	(*idToTarget)[keyHoleID] = this;
+	(*idToTarget)[groupName + std::to_string(keyHoleID)] = this;
 }
 
 

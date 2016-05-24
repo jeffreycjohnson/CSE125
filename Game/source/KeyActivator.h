@@ -9,7 +9,7 @@ public:
 	int keyHoleID;
 
 	KeyActivator();
-	KeyActivator(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets);
+	KeyActivator(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName);
 
 	~KeyActivator();
 

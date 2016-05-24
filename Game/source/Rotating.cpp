@@ -6,13 +6,13 @@ Rotating::Rotating()
 {
 }
 
-Rotating::Rotating(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+Rotating::Rotating(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
 {
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);
 
 	setThreshold(threshold);
-	(*idToTarget)[targetID] = this;
+	(*idToTarget)[groupName+std::to_string(targetID)] = this;
 }
 
 Rotating::Rotating(int activationThreshold)

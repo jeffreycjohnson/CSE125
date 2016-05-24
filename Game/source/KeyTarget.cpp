@@ -7,14 +7,14 @@ KeyTarget::KeyTarget()
 {
 }
 
-KeyTarget::KeyTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+KeyTarget::KeyTarget(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
 {
 	if (tokens.size() > 4) { // Key is both a target and activator, so get info for target
 		int targetID = std::stoi(tokens[4]);
 		int threshold = std::stoi(tokens[5]);
 
 		setThreshold(threshold);
-		(*idToTarget)[targetID] = this;
+		(*idToTarget)[groupName + std::to_string(targetID)] = this;
 	}
 	else { // key is only activator so allow it to be picked up
 		canBePickedUp = true;

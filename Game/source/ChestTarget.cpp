@@ -7,13 +7,13 @@ ChestTarget::ChestTarget()
 {
 }
 
-ChestTarget::ChestTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+ChestTarget::ChestTarget(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
 {
 	int targetID = std::stoi(tokens[4]);
 	int threshold = std::stoi(tokens[5]);
 
 	setThreshold(threshold);
-	(*idToTarget)[targetID] = this;
+	(*idToTarget)[groupName + std::to_string(targetID)] = this;
 
 }
 

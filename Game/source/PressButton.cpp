@@ -6,7 +6,7 @@ PressButton::PressButton()
 {
 }
 
-PressButton::PressButton(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets)
+PressButton::PressButton(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName)
 	: isActivated(isActivated), timeLeft(0.0f)
 {
 	timeLimit = std::stof(tokens[1]);
@@ -26,7 +26,7 @@ PressButton::PressButton(std::vector<std::string> tokens, const std::map<int, Ta
 		TriggerType triggerType = strToTriggerType(tokens[i + 1]);
 		int activatorID = std::stoi(tokens[i + 2]);
 
-		this->addConnection(Connection(idToTargets.at(targetID), triggerType));
+		this->addConnection(Connection(idToTargets.at(groupName + std::to_string(targetID)), triggerType));
 	}
 }
 
