@@ -55,7 +55,7 @@ void FPSMovement::create()
 	{
 		this->gameObject->addChild(verticality);
 		verticality->transform.translate(worldUp * 0.6f);
-		verticality->transform.translate(front * 0.35f);
+		verticality->transform.translate(front * 0.25f);
 	}
 
 	auto player = this->gameObject->findChildByName("Player");
