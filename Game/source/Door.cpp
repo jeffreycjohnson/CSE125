@@ -31,6 +31,8 @@ glm::vec3 Door::moveDirectionVec()
 		return glm::vec3(0, 0, 1);
 	case DOWN:
 		return glm::vec3(0, 0, -1);
+	case BOTH:
+		return glm::vec3(1, 0, 0);
 	}
 }
 
@@ -44,8 +46,12 @@ void Door::fixedUpdate()
 	float deltaTime = Timer::fixedTimestep;
 
 	openness += (deltaTime) * (isActivated() ? 1 : -1);
-	openness = std::min(1.0f, openness);
+	openness = std::min(0.5f, openness);
 	openness = std::max(0.0f, openness);
 
-	gameObject->transform.setPosition(initPosit + moveDirectionVec() * openness * 2.5f);
+	if (moveDirection == BOTH) {
+		gameObject->transform.children[0]->setPosition(moveDirectionVec() * openness * 2.5f);
+		gameObject->transform.children[1]->setPosition(moveDirectionVec() * -openness * 2.5f);
+	}
+	else gameObject->transform.setPosition(initPosit + moveDirectionVec() * openness * 2.5f);
 }
