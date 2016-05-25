@@ -85,16 +85,11 @@ void ActivatorRegistrator::create()
 			auto tokens = split(targ->getName(), '_');
 			
 			Transform * parent = targ->transform.getParent();
-			std::string parentName = parent->gameObject->getName();
 
-			do {
-				parentName = parent->gameObject->getName();
+			while (parent && parent->getParent() && parent->getParent()->getParent() && parent->getParent()->getParent()->getParent()) {
 				parent = parent->getParent();
-			} while (!std::equal(
-				parentName.begin(),
-				parentName.begin() + std::string("Group").size(),
-				std::string("Group").begin()
-			));
+			}
+			std::string parentName = parent ? parent->gameObject->getName() : "";
 
 			//MAGIC LAMBA. ASK ME ELTON FOR THE DETAILS
 			Target *t = keyval.second(tokens, &idToTargets, parentName);
@@ -114,16 +109,11 @@ void ActivatorRegistrator::create()
 			auto tokens = split(act->getName(), '_');
 
 			Transform * parent = act->transform.getParent();
-			std::string parentName = parent->gameObject->getName();
 
-			do {
-				parentName = parent->gameObject->getName();
+			while (parent && parent->getParent() && parent->getParent()->getParent() && parent->getParent()->getParent()->getParent()) {
 				parent = parent->getParent();
-			} while (!std::equal(
-				parentName.begin(),
-				parentName.begin() + std::string("Group").size(),
-				std::string("Group").begin()
-			));
+			}
+			std::string parentName = parent ? parent->gameObject->getName() : "";
 
 			Activator *activator = keyval.second(tokens, idToTargets, parentName);
 
