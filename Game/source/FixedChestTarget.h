@@ -10,7 +10,7 @@ public:
 	bool isOpened;
 
 	FixedChestTarget();
-	FixedChestTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
+	FixedChestTarget(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName);
 	~FixedChestTarget();
 
 	void create() override;

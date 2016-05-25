@@ -11,7 +11,7 @@ private:
 	bool isColliding;
 	bool isNotColliding;
 public:
-	Plate(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets);
+	Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName);
 
 	~Plate();
 

@@ -12,7 +12,7 @@ public:
 	bool pickedUp; // stops movement animation when chest opened
 
 	FixedKeyTarget();
-	FixedKeyTarget(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
+	FixedKeyTarget(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName);
 	~FixedKeyTarget();
 
 	void fixedUpdate() override;

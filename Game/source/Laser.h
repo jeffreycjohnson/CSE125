@@ -13,7 +13,7 @@ private:
 
 public:
 	Laser();
-	Laser(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget, bool isFixed);
+	Laser(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, bool isFixed, std::string groupName);
 
 	~Laser();
 

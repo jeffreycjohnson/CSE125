@@ -26,7 +26,7 @@ private:
 	glm::vec3 moveDirectionVec();
 public:
 	Door();
-	Door(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget, DoorMovement moveDirection);
+	Door(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, DoorMovement moveDirection, std::string groupName);
 	
 	~Door();
 

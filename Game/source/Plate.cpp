@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Plate::Plate(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets)
+Plate::Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName)
 	: isNotColliding(true), isColliding(false)
 {
 	// get around the fact that blender names things xxxx.001, xxxx.002 etc
@@ -19,7 +19,7 @@ Plate::Plate(std::vector<std::string> tokens, const std::map<int, Target*>& idTo
 		TriggerType triggerType = strToTriggerType(tokens[i + 1]);
 		int activatorID = std::stoi(tokens[i + 2]);
 
-		this->addConnection(Connection(idToTargets.at(targetID), triggerType));
+		this->addConnection(Connection(idToTargets.at(groupName + std::to_string(targetID)), triggerType));
 	}
 }
 

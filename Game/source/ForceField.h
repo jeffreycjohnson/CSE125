@@ -9,7 +9,7 @@ public:
 	ForceField();
 	~ForceField();
 
-	ForceField(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
+	ForceField(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName);
 	void fixedUpdate() override;
 };
 

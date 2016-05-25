@@ -7,7 +7,7 @@ public:
 	bool isActivated;
 	bool isNotActivated;
 	ChestActivator();
-	ChestActivator(std::vector<std::string> tokens, const std::map<int, Target*>& idToTargets);
+	ChestActivator(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName);
 	~ChestActivator();
 
 	void trigger(bool activated);

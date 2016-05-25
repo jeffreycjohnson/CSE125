@@ -10,8 +10,8 @@
 #include <functional>
 #include <string>
 
-typedef std::function<Target*(std::vector<std::string>, std::map<int, Target*>*)> targFun;
-typedef std::function<Activator*(std::vector<std::string>, const std::map<int, Target*>&)> actvFun;
+typedef std::function<Target*(std::vector<std::string>, std::map<std::string, Target*>*, std::string)> targFun;
+typedef std::function<Activator*(std::vector<std::string>, const std::map<std::string, Target*>&, std::string)> actvFun;
 
 class ActivatorRegistrator : public Component
 {

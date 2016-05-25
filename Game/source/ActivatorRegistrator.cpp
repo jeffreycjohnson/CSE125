@@ -24,28 +24,28 @@
 
 std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 {
-	{ "rotate_" , [](auto args, auto idToTarget) {return new Rotating(args, idToTarget);}},
-	{ "laser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget, false); } },
-	{ "fixedlaser_",   [](auto args, auto idToTarget) {return new Laser(args, idToTarget, true); } },
-	{ "forcefield_",   [](auto args, auto idToTarget) {return new ForceField(args, idToTarget); } },
-	//{ "vddoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, DOWN); } },
-	{ "splitdoor_",  [](auto args, auto idToTarget) {return new Door(args, idToTarget, BOTH); } },
-	{ "keyhole_",  [](auto args, auto idToTarget) {return new KeyHoleTarget(args, idToTarget); } },
-	{ "fixedchest_",  [](auto args, auto idToTarget) {return new FixedChestTarget(args, idToTarget); } },
-	{ "chest",  [](auto args, auto idToTarget) {return new ChestTarget(args, idToTarget); } },
-	{ "key_",  [](auto args, auto idToTarget) {return new KeyTarget(args, idToTarget); } },
-	{ "fixedkey_",  [](auto args, auto idToTarget) {return new FixedKeyTarget(args, idToTarget); } },
+	{ "rotate_" , [](auto args, auto idToTarget, auto groupName) {return new Rotating(args, idToTarget, groupName);}},
+	{ "laser_",   [](auto args, auto idToTarget, auto groupName) {return new Laser(args, idToTarget, false, groupName); } },
+	{ "fixedlaser_",   [](auto args, auto idToTarget, auto groupName) {return new Laser(args, idToTarget, true, groupName); } },
+	{ "forcefield_",   [](auto args, auto idToTarget, auto groupName) {return new ForceField(args, idToTarget, groupName); } },
+	//{ "vddoor_",  [](auto args, auto idToTarget, auto groupName) {return new Door(args, idToTarget, DOWN, groupName); } },
+	{ "splitdoor_",  [](auto args, auto idToTarget, auto groupName) {return new Door(args, idToTarget, BOTH, groupName); } },
+	{ "keyhole_",  [](auto args, auto idToTarget, auto groupName) {return new KeyHoleTarget(args, idToTarget, groupName); } },
+	{ "fixedchest_",  [](auto args, auto idToTarget, auto groupName) {return new FixedChestTarget(args, idToTarget, groupName); } },
+	{ "chest",  [](auto args, auto idToTarget, auto groupName) {return new ChestTarget(args, idToTarget, groupName); } },
+	{ "key_",  [](auto args, auto idToTarget, auto groupName) {return new KeyTarget(args, idToTarget, groupName); } },
+	{ "fixedkey_",  [](auto args, auto idToTarget, auto groupName) {return new FixedKeyTarget(args, idToTarget, groupName); } },
 };
 
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 {
-	{ "plate_" ,  [](auto args, auto idToTarget) {return new Plate(args, idToTarget); } },
-	{ "pressbutton_" ,  [](auto args, auto idToTarget) {return new PressButton(args, idToTarget); } },
-	{ "keyhole_" ,  [](auto args, auto idToTarget) {return new KeyHoleActivator(args, idToTarget); } },
-	{ "key_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },
-	{ "fixedkey_" ,  [](auto args, auto idToTarget) {return new KeyActivator(args, idToTarget); } },
-	{ "fixedchest_" ,  [](auto args, auto idToTarget) {return new ChestActivator(args, idToTarget); } },
-	{ "chest_" ,  [](auto args, auto idToTarget) {return new ChestActivator(args, idToTarget); } },
+	{ "plate_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName); } },
+	{ "pressbutton_" ,  [](auto args, auto idToTarget, auto groupName) {return new PressButton(args, idToTarget, groupName); } },
+	{ "keyhole_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyHoleActivator(args, idToTarget, groupName); } },
+	{ "key_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyActivator(args, idToTarget, groupName); } },
+	{ "fixedkey_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyActivator(args, idToTarget, groupName); } },
+	{ "fixedchest_" ,  [](auto args, auto idToTarget, auto groupName) {return new ChestActivator(args, idToTarget, groupName); } },
+	{ "chest_" ,  [](auto args, auto idToTarget, auto groupName) {return new ChestActivator(args, idToTarget, groupName); } },
 };
 
 std::vector<std::string> split(const std::string &s, char delim) 
@@ -74,7 +74,7 @@ ActivatorRegistrator::~ActivatorRegistrator()
 void ActivatorRegistrator::create()
 {
 	std::cout << "Registering activators..." << std::endl;
-	std::map<int, Target*> idToTargets;
+	std::map<std::string, Target*> idToTargets;
 
 	// REGISTER TARGETS
 	for (auto keyval : prefixToTarget) 
@@ -83,9 +83,16 @@ void ActivatorRegistrator::create()
 		for (auto targ : targs) 
 		{
 			auto tokens = split(targ->getName(), '_');
+			
+			Transform * parent = targ->transform.getParent();
+
+			while (parent && parent->getParent() && parent->getParent()->getParent() && parent->getParent()->getParent()->getParent()) {
+				parent = parent->getParent();
+			}
+			std::string parentName = parent ? parent->gameObject->getName() : "";
 
 			//MAGIC LAMBA. ASK ME ELTON FOR THE DETAILS
-			Target *t = keyval.second(tokens, &idToTargets);
+			Target *t = keyval.second(tokens, &idToTargets, parentName);
 			targ->addComponent(t);
 
 			//Sound Testing
@@ -100,7 +107,15 @@ void ActivatorRegistrator::create()
 		for (auto act : activators) 
 		{
 			auto tokens = split(act->getName(), '_');
-			Activator *activator = keyval.second(tokens, idToTargets);
+
+			Transform * parent = act->transform.getParent();
+
+			while (parent && parent->getParent() && parent->getParent()->getParent() && parent->getParent()->getParent()->getParent()) {
+				parent = parent->getParent();
+			}
+			std::string parentName = parent ? parent->gameObject->getName() : "";
+
+			Activator *activator = keyval.second(tokens, idToTargets, parentName);
 
 			act->addComponent(activator);
 			//Sound *sound = new Sound("zeldasecret", false, false, 1.0f, true);

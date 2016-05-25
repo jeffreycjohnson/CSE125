@@ -5,14 +5,14 @@
 
 Door::Door() {}
 
-Door::Door(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget, DoorMovement moveDirection)
+Door::Door(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, DoorMovement moveDirection, std::string groupName)
 	: moveDirection(moveDirection)
 {
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);
 
 	setThreshold(threshold);
-	(*idToTarget)[targetID] = this;
+	(*idToTarget)[groupName + std::to_string(targetID)] = this;
 }
 
 Door::~Door()

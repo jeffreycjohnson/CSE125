@@ -8,7 +8,7 @@ class Rotating :
 {
 public:
 	Rotating();
-	Rotating(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget);
+	Rotating(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName);
 
 	Rotating(int activationThreshold);
 	~Rotating();

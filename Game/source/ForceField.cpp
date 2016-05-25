@@ -11,13 +11,13 @@ ForceField::~ForceField()
 {
 }
 
-ForceField::ForceField(std::vector<std::string> tokens, std::map<int, Target*>* idToTarget)
+ForceField::ForceField(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
 {
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);
 
 	setThreshold(threshold);
-	(*idToTarget)[targetID] = this;
+	(*idToTarget)[groupName + std::to_string(targetID)] = this;
 }
 
 void ForceField::fixedUpdate()
