@@ -32,6 +32,8 @@ public:
 	void postConstructor();
 	~Sound();
 
+	static void setListenerPosition(GameObject *listener);
+
 	void update(float);
 	void play();
 	void pause();

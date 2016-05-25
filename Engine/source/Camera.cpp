@@ -9,10 +9,12 @@
 #include <iostream>
 #include "GameObject.h"
 #include "Sound.h"
+#include "SoundListener.h"
 #include "Framebuffer.h"
 #include "RenderPass.h"
 #include "Collision.h"
 #include "NetworkManager.h"
+
 
 Camera::Camera()
 {
@@ -175,6 +177,7 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 		go->addComponent(Renderer::mainCamera);
 	}
 
+	go->addComponent(new SoundListener());
 }
 
 SpericalCamera::SpericalCamera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats)

@@ -157,6 +157,9 @@
     <ClCompile Include="source\UIButton.cpp">
       <Filter>Source\UI</Filter>
     </ClCompile>
+    <ClCompile Include="source\SoundListener.cpp">
+      <Filter>Source\General</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\include\ForwardDecs.h">
@@ -287,6 +290,9 @@
     </ClInclude>
     <ClInclude Include="source\include\UIButton.h">
       <Filter>Headers\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\include\SoundListener.h">
+      <Filter>Headers\General</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
