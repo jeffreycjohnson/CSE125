@@ -7,6 +7,8 @@
 #include "Material.h"
 #include "Collision.h"
 
+#include "NetworkManager.h" // It's just for UI drawing, I swear
+
 void ForwardPass::render(Camera* camera) {
 	unsigned int lightIndex = 0;
 	//TODO sort lights by importance?
@@ -110,4 +112,5 @@ void UIPass::render(Camera * camera)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GameObject::SceneRoot.drawUI();
+	NetworkManager::drawUI();
 }

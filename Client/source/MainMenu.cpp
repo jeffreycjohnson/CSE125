@@ -29,14 +29,13 @@ void MainMenu::connect()
 }
 
 void MainMenu::create()
-{
-	std::cerr << "INIT: menu. Press <ENTER> to connect to server specified in options.ini" << std::endl;
-	
+{	
 	auto button = new UIButton("assets/connect_button.png", 320, 240, 397, 44);
 	// Screw it, use a lamba. Fuck you std::bind
 	button->onClick() = [this, button]() {
 		this->connect();
 		button->active = false;
+		std::cerr << "Connected?" << std::endl;
 	};
 	elements.add("Play", button);
 	Input::showCursor();

@@ -31,6 +31,7 @@ NetworkManager::~NetworkManager()
 NetworkState NetworkManager::state;
 std::vector<ClientID> NetworkManager::clientIDs;
 ClientID NetworkManager::myClientID;
+Texture* NetworkManager::connectingScreen = nullptr;
 
 std::vector<NetworkResponse> NetworkManager::postbox;
 std::vector<char> NetworkManager::lastBytesSent;
@@ -242,6 +243,7 @@ void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType
 
 // --- CLIENT FUNC --- //
 
+static bool firstReceivedMessages = false;
 std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std::string serverIP, std::string port)
 {
 	// Allows us to connect/reconnect to a server if an existing connection hasn't been established
@@ -262,6 +264,7 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 	bool isConnected = false;
 	while (!isConnected)
 	{
+		firstReceivedMessages = true;
 		std::vector<NetworkResponse> messages = ClientNetwork::receiveMessages();
 
 		for (auto& response : messages)
@@ -297,6 +300,7 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 }
 
 static int numClientMessages = 0;
+static bool fullyDownloadedMap = false;
 void NetworkManager::ReceiveClientMessages()
 {
 	if (NetworkManager::state != CLIENT_MODE)
@@ -308,6 +312,11 @@ void NetworkManager::ReceiveClientMessages()
 	for (auto& received : receivedMessages)
 	{
 		int& msgType = received.messageType;
+
+		// If these are the first few messages we've received, try to figure out if we've fully downloaded the map yet
+		if (firstReceivedMessages && !fullyDownloadedMap) {
+			fullyDownloadedMap = true && !(msgType == CREATE_OBJECT_NETWORK_DATA || msgType == MESH_NETWORK_DATA);
+		}
 
 		switch (msgType)
 		{
@@ -343,6 +352,13 @@ void NetworkManager::ReceiveClientMessages()
 			std::cerr << numClientMessages++ << "Client received message of type " << msgType << ", don't know what to do with it..." << std::endl;
 		}
 	}
+
+	// Change the state after fully downloading the map, so that we can not hide the loading screen
+	if (fullyDownloadedMap && firstReceivedMessages) {
+		fullyDownloadedMap = true;
+		firstReceivedMessages = false;
+		std::cerr << "Fully downloaded the map!" << std::endl;
+	}
 }
 
 void NetworkManager::SendClientMessages()
@@ -358,6 +374,24 @@ void NetworkManager::SendClientMessages()
 		NetworkManager::lastBytesSent.resize(bytes.size());
 		std::copy(bytes.begin(), bytes.end(), NetworkManager::lastBytesSent.begin());
 		ClientNetwork::sendBytes(bytes, INPUT_NETWORK_DATA, NetworkManager::myClientID);
+	}
+}
+
+// (We're only going to be drawing UI on the Client side)
+void NetworkManager::drawUI()
+{
+	if (state == CLIENT_MODE) {
+		if (!NetworkManager::connectingScreen) {
+			NetworkManager::connectingScreen = new Texture("assets/konnekting.png", true);
+		}
+		if (firstReceivedMessages && !fullyDownloadedMap) {
+			// Draw "connecting" screen
+			Renderer::drawSplash(NetworkManager::connectingScreen, true);
+		}
+		if (fullyDownloadedMap && NetworkManager::connectingScreen != nullptr) {
+			delete NetworkManager::connectingScreen;
+			NetworkManager::connectingScreen = nullptr;
+		}
 	}
 }
 

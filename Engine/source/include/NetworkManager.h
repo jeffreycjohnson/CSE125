@@ -4,6 +4,7 @@
 #include "ForwardDecs.h"
 #include "NetworkUtility.h"
 #include "NetworkStruct.h"
+#include "Texture.h"
 
 #include <map>
 #include <utility>
@@ -27,6 +28,7 @@ class NetworkManager
 {
 private:
 	static NetworkState state;
+	static Texture* connectingScreen;
 
 	static std::vector<ClientID> clientIDs;
 	static ClientID myClientID;
@@ -53,6 +55,8 @@ public:
 
 	static NetworkState getState();
 	static void setState(NetworkState newState);
+
+	static void drawUI();
 };
 
 #endif // NETWORK_MANAGER_H

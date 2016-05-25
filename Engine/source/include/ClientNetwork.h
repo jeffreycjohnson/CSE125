@@ -32,5 +32,6 @@ public:
 	//Status
 	static void getStatus(std::string header = std::string());
 	static bool isConnected();
+
 };
 
