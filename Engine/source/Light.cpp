@@ -216,10 +216,7 @@ void PointLight::deferredPass()
         shadowMap->fbo->bindDepthTexture(4);
     }
     (*Renderer::currentShader)["uLightType"] = 0;
-    auto max = std::max(std::max(color.r, color.g), color.b);
-    float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
-        / (2.0f * exponentialFalloff);
-    (*Renderer::currentShader)["uScale"] = scale;
+    (*Renderer::currentShader)["uScale"] = getLightVolume();
     gradient->bindTexture(5);
     CHECK_ERROR();
     deferredHelper("assets/Primatives.obj/Sphere");
@@ -230,11 +227,7 @@ void PointLight::deferredPass()
 void PointLight::debugDraw()
 {
 	if (DebugPass::drawLights == true) {
-		LOG("WE SHOULD NOT BE HERE WE SHOULD NOT BE HERE WE SHOULD NOT BE HERE BAD BAD BAD");
-		auto max = std::max(std::max(color.r, color.g), color.b);
-		float scale = (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max) * exponentialFalloff))
-			/ (2.0f * exponentialFalloff);
-		Renderer::drawSphere(glm::vec3(0), scale, glm::vec4(color, 1), &gameObject->transform);
+		Renderer::drawSphere(gameObject->transform.getWorldPosition(), getLightVolume(), glm::vec4(color, 1));
 	}
 }
 
@@ -352,6 +345,13 @@ void PointLight::bindShadowMap()
         shader["uVP_Matrices[5]"] = shadowMatrix * glm::lookAt(pos, pos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0));
         shader["uLightPos"] = pos;
     }
+}
+
+float PointLight::getLightVolume()
+{
+	auto max = std::max(std::max(color.r, color.g), color.b);
+	return (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max / 10.0f) * exponentialFalloff))
+		/ (2.0f * exponentialFalloff);
 }
 
 void DirectionalLight::update(float)

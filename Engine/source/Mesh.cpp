@@ -249,9 +249,9 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 			xmin = std::fminf(vertex.x, xmin);
 			ymin = std::fminf(vertex.y, ymin);
 			zmin = std::fminf(vertex.z, zmin);
-			xmax = std::fminf(vertex.x, xmax);
-			ymax = std::fminf(vertex.y, ymax);
-			zmax = std::fminf(vertex.z, zmax);
+			xmax = std::fmaxf(vertex.x, xmax);
+			ymax = std::fmaxf(vertex.y, ymax);
+			zmax = std::fmaxf(vertex.z, zmax);
 			megaArray.push_back(vertex[p]);
 		}
         if (hasNormals) {
@@ -348,6 +348,7 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
     meshData.wireframe = mesh->mPrimitiveTypes == aiPrimitiveType_LINE;
 	meshData.min = glm::vec3(xmin, ymin, zmin);
 	meshData.max = glm::vec3(xmax, ymax, zmax);
+	meshData.radius = glm::length(glm::vec3(fmaxf(fabsf(xmin), fabsf(xmax)), fmaxf(fabsf(ymin), fabsf(ymax)), fmaxf(fabsf(zmin), fabsf(zmax))));
 
 	Mesh::meshMap[name] = meshData;
 

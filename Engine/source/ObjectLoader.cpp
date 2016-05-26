@@ -273,7 +273,7 @@ GameObject* loadScene(const std::string& filename, bool loadColliders, bool load
 		light->setColor(glm::vec3(l->mColorDiffuse.r, l->mColorDiffuse.g, l->mColorDiffuse.b));
 		light->setConstantFalloff(l->mAttenuationConstant);
         light->setLinearFalloff(l->mAttenuationLinear);
-		light->setExponentialFalloff(l->mAttenuationQuadratic);
+		light->setExponentialFalloff(l->mAttenuationQuadratic*15);
         light->setShadowCaster(true);
 
         lights[l->mName.C_Str()] = light;

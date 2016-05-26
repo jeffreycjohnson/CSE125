@@ -82,19 +82,23 @@ void PointShadowPass::render(Camera* camera)
     auto l = camera->gameObject->getComponent<PointLight>();
     if (!l || !l->getShadowCaster()) return;
     l->bindShadowMap();
+	float radius = l->getLightVolume();
+	auto pos = camera->gameObject->transform.getWorldPosition();
     Renderer::getShader(SHADOW_CUBE_SHADER).use();
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    glDisable(GL_CULL_FACE);
     glDisable(GL_STENCIL_TEST);
     glDrawBuffer(GL_NONE);
     CHECK_ERROR();
 
     for (auto mesh : Renderer::renderBuffer.deferred) {
-        if (Mesh::meshMap[mesh->name].wireframe) continue;
+		volatile auto m = Mesh::meshMap[mesh->name];
+        if (m.wireframe) continue;
+		volatile float meshDist = glm::distance(pos, mesh->gameObject->transform.getWorldPosition());
+		if (meshDist > m.radius + radius) continue;
         mesh->draw();
     }
     CHECK_ERROR();

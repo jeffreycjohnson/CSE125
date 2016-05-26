@@ -65,6 +65,7 @@ public:
     void debugDraw() override;
     void setGameObject(GameObject* object) override;
     void bindShadowMap() override;
+	float getLightVolume();
 
     Texture * gradient = nullptr;
     static glm::mat4 shadowMatrix;

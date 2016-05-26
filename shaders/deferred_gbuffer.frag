@@ -27,7 +27,7 @@ void main()
 	vec2 UV = POM(vTexCoord, normalize(transpose(TBN) * (vWorldPosition.xyz/vWorldPosition.w - cameraPos)));
 	float height = uParallax ? texture(heightTex, UV).r * uDepthScale : 0.0;
 	
-	float roughness = texture(roughnessTex, UV).r;
+	float roughness = pow(texture(roughnessTex, UV).r, 0.5);
 	float metalness = texture(metalnessTex, UV).r;
 
     NormOut = vec4(normalMap(UV, TBN) * 0.5 + 0.5, 1.0);

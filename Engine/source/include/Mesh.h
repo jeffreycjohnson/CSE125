@@ -11,6 +11,7 @@ struct MeshData {
     GLsizei indexSize;
     bool wireframe;
 	glm::vec3 min, max; // Local min & max
+	float radius;
 	//BoundingBox boundingBox;
 };
 
