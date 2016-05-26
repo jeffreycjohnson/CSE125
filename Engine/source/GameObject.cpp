@@ -305,7 +305,7 @@ void GameObject::fixedUpdate()
 	}
 	newlyCreated = false;
 
-    if (dead || !active) return;
+    if (dead/* || !active*/) return;
     for (unsigned int i = 0; i < transform.children.size(); i++)
     {
         transform.children[i]->gameObject->fixedUpdate();

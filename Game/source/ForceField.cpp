@@ -11,8 +11,10 @@ ForceField::~ForceField()
 {
 }
 
-ForceField::ForceField(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
+ForceField::ForceField(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName, bool turnsBackOn)
 {
+	canTurnBackOn = turnsBackOn;
+
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);
 
@@ -26,5 +28,9 @@ void ForceField::fixedUpdate()
 	{
 		gameObject->setVisible(false);
 		gameObject->setActive(false);
+	}
+	else if (canTurnBackOn && !isActivated() && !gameObject->getVisible()) {
+		gameObject->setVisible(true);
+		gameObject->setActive(true);
 	}
 }
