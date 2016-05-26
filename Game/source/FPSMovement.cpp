@@ -88,7 +88,7 @@ void FPSMovement::fixedUpdate()
 	
 	glm::vec2 mouseDelta = (currMousePosition - lastMousePosition) * mouseSensitivity;
 	glm::vec2 joyDelta = glm::vec2(Input::getAxis("lookright", clientID), Input::getAxis("lookforward", clientID)) * joystickSensitivity;
-	glm::vec2 lookDelta = mouseDelta + joyDelta;
+	glm::vec2 lookDelta = (mouseDelta + joyDelta) * dt;
 
 	yaw += lookDelta.x;
 	pitch += -1 * lookDelta.y;
@@ -393,7 +393,7 @@ void FPSMovement::raycastMouse()
 		justClicked = true;
 
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
-		GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;\
+		GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;
 
 		if (hit->getComponent<PressButton>())
 		{

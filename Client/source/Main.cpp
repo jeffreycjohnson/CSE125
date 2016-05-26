@@ -13,6 +13,7 @@
 #include "ClientStartingScreen.h"
 #include "MainMenu.h"
 #include "Crosshair.h"
+#include "ClientSidePredictor.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -28,6 +29,15 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addComponent(new ClientStartingScreen("assets/loading.png", ""));
 
 	Input::hideCursor();
+
+	// gotta get that CLIENT SIDE PREDICTION
+	auto callback = [](GameObject *go) 
+	{
+		Sensitivity sens(9.0f, 8.5);
+		// go->addComponent(new ClientSidePredictor(sens));
+	};
+
+	Camera::RegisterCameraAssignmentCallback(callback);
 
 	try
 	{

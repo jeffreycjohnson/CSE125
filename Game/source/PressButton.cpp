@@ -40,6 +40,8 @@ void PressButton::fixedUpdate()
 
 	if (isActivated && timeLimit > 0)
 	{
+		timeLeft -= deltaTime;
+
 		if (timeLeft < 0)
 		{
 			isActivated = false;

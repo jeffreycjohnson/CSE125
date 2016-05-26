@@ -15,6 +15,7 @@
 #include "Collision.h"
 #include "NetworkManager.h"
 
+std::vector<std::function<void(GameObject*)>> Camera::cameraAssignmentCallbacks;
 
 Camera::Camera()
 {
@@ -178,6 +179,16 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 	}
 
 	go->addComponent(new SoundListener());
+
+	for (const auto& callback : cameraAssignmentCallbacks)
+	{
+		callback(go);
+	}
+}
+
+void Camera::RegisterCameraAssignmentCallback(std::function<void(GameObject*)> callback)
+{
+	cameraAssignmentCallbacks.push_back(callback);
 }
 
 SpericalCamera::SpericalCamera(int w, int h, bool defaultPasses, const std::vector<GLenum>& colorFormats)

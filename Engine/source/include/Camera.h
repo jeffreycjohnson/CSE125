@@ -5,6 +5,8 @@
 #include "Transform.h"
 #include "Renderer.h"
 
+#include <functional>
+
 const std::vector<GLenum> defaultFormats{ GL_RGBA8, GL_RGBA16, GL_RGBA16F, GL_RGBA16F };
 
 class Camera : public Component
@@ -17,6 +19,8 @@ class Camera : public Component
 		glm::mat4 matrix;
 
         Camera();
+
+		static std::vector<std::function<void(GameObject*)>> cameraAssignmentCallbacks;
 
 	public:
         std::unique_ptr<Framebuffer> fbo;
@@ -44,6 +48,8 @@ class Camera : public Component
 		void deserializeAndApply(int messageId);
 
 		static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
+
+		static void RegisterCameraAssignmentCallback(std::function<void(GameObject*)> callback);
 };
 
 class SpericalCamera : public Camera
