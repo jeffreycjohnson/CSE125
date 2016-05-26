@@ -54,6 +54,8 @@ class PointShadowPass : public RenderPass
 {
 public:
     void render(Camera* camera) override;
+private:
+    int frames = 0;
 };
 
 class DebugPass : public RenderPass

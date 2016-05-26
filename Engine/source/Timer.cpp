@@ -38,7 +38,7 @@ void Timer::update()
 
 	if (cycleTime > count)
 	{
-		//cout << cycleTime / frames * 1000 << " ms (" << frames / cycleTime << " fps)" << endl;
+		cout << cycleTime / frames * 1000 << " ms (" << frames / cycleTime << " fps)" << endl;
 		cycleTime = 0;
 		frames = 0;
 	}

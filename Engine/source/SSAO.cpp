@@ -9,7 +9,7 @@ SSAOPass::SSAOPass(unsigned int samples, float radius) : samples(samples), radiu
 {
 	// make_unique wasn't working???
 	std::vector<GLenum> format = { GL_RGB8 };
-	aoBuffer = std::make_unique<Framebuffer>(Renderer::getWindowWidth(), Renderer::getWindowHeight(), format, false);
+	aoBuffer = std::make_unique<Framebuffer>(Renderer::getWindowWidth()/2, Renderer::getWindowHeight()/2, format, false);
     // use the following if there are performance or vram problems (runs at 1/2 resolution)
     //aoBuffer = std::make_unique<Framebuffer>(Renderer::getWindowWidth()/2, Renderer::getWindowHeight()/2, format, false);
 
