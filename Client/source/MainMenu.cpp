@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "UIButton.h"
 #include "Input.h"
+#include "Renderer.h"
 
 #include "GameObject.h"
 #include "Crosshair.h"
@@ -33,11 +34,16 @@ void MainMenu::connect()
 void MainMenu::create()
 {	
 	auto button = new UIButton("assets/connect_button.png", 320, 240, 397, 44);
+	Renderer::crosshair->hide();
+
 	// Screw it, use a lambda. Fuck you std::bind
 	button->onClick() = [this, button]() {
 		this->connect();
 		button->active = false;
 		Input::hideCursor();
+		if (Renderer::crosshair != nullptr) {
+			Renderer::crosshair->show();
+		}
 	};
 	elements.add("Play", button);
 	Input::showCursor();

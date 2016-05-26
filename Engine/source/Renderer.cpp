@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Crosshair.h"
 #include "Mesh.h"
 #include "Camera.h"
 #include <gtc/matrix_transform.hpp>
@@ -20,6 +21,7 @@ bool Renderer::shutdown = false;
 int Renderer::windowWidth = 0;
 int Renderer::windowHeight = 0;
 bool Renderer::drawDebug = false;
+Crosshair* Renderer::crosshair = nullptr;
 
 glm::mat4 Renderer::view, Renderer::perspective;
 

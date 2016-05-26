@@ -12,6 +12,7 @@
 #include "Config.h"
 #include "BoxCollider.h"
 #include "NetworkManager.h"
+#include "Crosshair.h"
 
 #include <glfw3.h>
 #include <chrono>
@@ -68,6 +69,16 @@ void InitializeEngine(std::string windowName)
 	glewInit();
 	glfwSwapInterval(1);
 	std::cout << "SOUND" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
+	
+	// Init crosshair
+	Renderer::crosshair = new Crosshair(file.getString("GraphicsOptions", "crosshairSprite"));
+	if (file.getBool("GraphicsOptions", "showCrosshair")) {
+		Renderer::crosshair->show();
+	}
+	else {
+		Renderer::crosshair->hide();
+	}
+	
 	Sound::init();
 	Renderer::init(width, height);
     Input::init(window);

@@ -3,6 +3,7 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "Renderer.h"
+#include "Crosshair.h"
 #include "Camera.h"
 #include "Material.h"
 #include "Collision.h"
@@ -115,4 +116,9 @@ void UIPass::render(Camera * camera)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GameObject::SceneRoot.drawUI();
 	NetworkManager::drawUI();
+	if (NetworkManager::getState() == CLIENT_MODE) {
+		if (Renderer::crosshair) {
+			Renderer::crosshair->drawUI();
+		}
+	}
 }

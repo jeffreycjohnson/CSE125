@@ -35,7 +35,6 @@ bool ClientStartingScreen::load()
 	player->destroy();
 	delete player; // WARNING!!! OpenGL is NOT THREAD-SAFE!!!
 
-	GameObject::SceneRoot.addComponent(new Crosshair(file.getString("GameSettings", "crosshairSprite")));
 	if (!connectOnStart) {
 		GameObject::SceneRoot.addComponent(new MainMenu());
 	}
