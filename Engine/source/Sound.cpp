@@ -55,11 +55,25 @@ void Sound::postConstructor() {
 	{
 		channel->setMode(FMOD_LOOP_OFF);
 	}
+
+	system->set3DNumListeners(1);
 }
 
 Sound::~Sound()
 {
 	
+}
+
+void Sound::setListenerPosition(GameObject *listener)
+{
+	auto position = listener->transform.getPosition();
+
+	FMOD_VECTOR pos = { position.x, position.y, position.z };
+	FMOD_VECTOR vel = { 0, 0, 0 };
+	FMOD_VECTOR fro = { .01, 0, 0 };
+	FMOD_VECTOR up = { 0, .01, 0 };
+
+	system->set3DListenerAttributes(0, &pos, &vel, &fro, &up);
 }
 
 void Sound::update(float)
@@ -69,6 +83,7 @@ void Sound::update(float)
         velocity = position - prevPosition;
         FMOD_VECTOR pos = { position.x, position.y, position.z };
         FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+
         channel->set3DAttributes(&pos, &vel, 0);
 
         prevPosition = gameObject->transform.getWorldPosition();
@@ -84,6 +99,7 @@ void Sound::play()
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
 		result = system->playSound(soundMap[name], 0, false, &channel);
+
 		auto x = soundMap[name];
 		channel->setVolume(volume);
 		if (looping)
