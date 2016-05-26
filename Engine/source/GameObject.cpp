@@ -305,7 +305,7 @@ void GameObject::fixedUpdate()
 	}
 	newlyCreated = false;
 
-    if (dead/* || !active*/) return;
+    if (dead || !active) return;
     for (unsigned int i = 0; i < transform.children.size(); i++)
     {
         transform.children[i]->gameObject->fixedUpdate();
@@ -509,13 +509,17 @@ void GameObject::setVisible(bool visible)
 	postToNetwork();
 }
 
-void GameObject::setActive(bool active) {
+void GameObject::setActive(bool active, ActiveChildren flag) {
 	this->active = active;
-	if (!active) {
+
+	if (flag != OnlySetParent &&
+		!(flag == SetChildrenIfInactive && active))
+	{
 		for (auto child : transform.children) {
-			child->gameObject->setActive(false);
+			child->gameObject->setActive(active, flag);
 		}
 	}
+
 	postToNetwork();
 }
 

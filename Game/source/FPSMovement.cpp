@@ -50,7 +50,6 @@ FPSMovement::FPSMovement(
 
 void FPSMovement::create()
 {
-
 	if (verticality) 
 	{
 		this->gameObject->addChild(verticality);

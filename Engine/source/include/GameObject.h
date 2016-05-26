@@ -8,6 +8,13 @@
 #include <vector>
 #include <map>
 
+enum ActiveChildren
+{
+	OnlySetParent,
+	SetChildrenIfInactive,
+	SetAllChildren
+};
+
 class GameObject
 {
 private:
@@ -107,7 +114,7 @@ public:
 	std::vector<char> serialize();
 	static bool deserializeAndCreate(std::vector<char> bytes);
 	void setVisible(bool visible);
-	void setActive(bool active);
+	void setActive(bool active, ActiveChildren flag = SetChildrenIfInactive);
 	bool getVisible();
 	bool getActive();
 

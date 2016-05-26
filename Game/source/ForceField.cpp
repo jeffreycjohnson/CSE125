@@ -27,10 +27,12 @@ void ForceField::fixedUpdate()
 	if (isActivated() && gameObject->getVisible())
 	{
 		gameObject->setVisible(false);
-		gameObject->setActive(false);
+		gameObject->findChildByNameContains("StaticColliders")->setActive(false, SetAllChildren);
 	}
-	else if (canTurnBackOn && !isActivated() && !gameObject->getVisible()) {
+	else if (!isActivated() && canTurnBackOn && !gameObject->getVisible()) {
 		gameObject->setVisible(true);
-		gameObject->setActive(true);
+		gameObject->findChildByNameContains("StaticColliders")->setActive(true, SetAllChildren);
+		gameObject->setVisible(true);
+
 	}
 }
