@@ -7,7 +7,7 @@
 #include "Camera.h"
 #include "Material.h"
 #include "Collision.h"
-
+#include <iostream>
 #include "NetworkManager.h" // It's just for UI drawing, I swear
 
 void ForwardPass::render(Camera* camera) {
@@ -124,7 +124,8 @@ void UIPass::render(Camera * camera)
 	NetworkManager::drawUI();
 	if (NetworkManager::getState() == CLIENT_MODE) {
 		if (Renderer::crosshair) {
-			Renderer::crosshair->drawUI();
+			Renderer::crosshair->drawUI(CrosshairNetworkData::CrosshairState::DEFAULT);
+			std::cout << "UIPASS crosshair" << std::endl;
 		}
 	}
 }

@@ -19,6 +19,7 @@
 #include "BoxCollider.h"
 #include "Config.h"
 #include "Sound.h"
+#include "Crosshair.h"
 
 #include "PressButton.h"
 #include "KeyTarget.h"
@@ -393,23 +394,28 @@ void FPSMovement::raycastMouse()
 
 		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
 		GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;
+		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
 
 		if (hit->getComponent<PressButton>())
 		{
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			hit->getComponent<PressButton>()->trigger();
 		}
 		else if (phit->getComponent<PressButton>())
 		{
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			phit->getComponent<PressButton>()->trigger();
 		}
 		else if ((hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
 			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) 
 		{
 			// pick up key
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
 		else if (hit->getComponent<KeyHoleTarget>() && this->gameObject->getComponent<Inventory>()->hasKey() ) 
 		{
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			// if KeyHoleTarget matches key currently in inventory
 			if (hit->getComponent<KeyHoleTarget>()->keyHoleID == this->gameObject->getComponent<Inventory>()->getKey()->getComponent<KeyActivator>()->keyHoleID) {
 				std::cout << "Key matches keyHole " << hit->getComponent<KeyHoleTarget>()->keyHoleID << std::endl;

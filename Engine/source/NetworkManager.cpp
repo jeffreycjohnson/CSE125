@@ -10,6 +10,7 @@
 #include "Transform.h"
 #include "Light.h"
 #include "Sound.h"
+#include "Crosshair.h"
 
 #include "NetworkStats.h"
 #include "ClientNetwork.h"
@@ -342,6 +343,10 @@ void NetworkManager::ReceiveClientMessages()
 		case SOUND_NETWORK_DATA:
 			//std::cerr << "Sound MAKE!" << std::endl;
 			Sound::Dispatch(received.body, received.messageType, received.id);
+			break;		
+		case CROSSHAIR_NETWORK_DATA:
+			//std::cerr << "Sound MAKE!" << std::endl;
+			Renderer::crosshair->Dispatch(received.body, received.messageType, received.id);
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:

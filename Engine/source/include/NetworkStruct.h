@@ -17,7 +17,8 @@ enum {
 	MESH_NETWORK_DATA,
 	CAMERA_NETWORK_DATA,
 	LIGHT_NETWORK_DATA,
-	SOUND_NETWORK_DATA
+	SOUND_NETWORK_DATA,
+	CROSSHAIR_NETWORK_DATA
 };
 
 enum SoundState {
@@ -147,6 +148,19 @@ struct CameraNetworkData
 	int objectID;
 	int clientID;
 	CameraNetworkData(int objectID) : objectID(objectID) {}
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct CrosshairNetworkData
+{
+	enum CrosshairState {
+		DEFAULT,
+		INTERACTIVE
+	};
+
+	CrosshairState state;
+	CrosshairNetworkData(CrosshairState state) : state(state) {}
 };
 #pragma pack(pop)
 
