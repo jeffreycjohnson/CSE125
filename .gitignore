@@ -61,6 +61,7 @@ CMakeCache.txt
 *.hdr
 *.xcf
 Assets/*.zip
+Assets/*.ini
 
 # 3D Models
 *.blend

@@ -53,6 +53,7 @@ class Renderer
         static struct RenderBuffer renderBuffer;
 
 		static bool shutdown;
+		static Crosshair* crosshair;
 
 		static Shader* currentShader;
         static Camera* mainCamera;

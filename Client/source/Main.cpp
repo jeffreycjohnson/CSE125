@@ -37,4 +37,5 @@ int main(int argc, char** argv)
 	{
 		const auto& eptr = std::current_exception();
 	}
+
 }

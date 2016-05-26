@@ -17,6 +17,7 @@ class Component;
 class Collider;
 class CollisionInfo;
 class ConfigFile;
+class Crosshair;
 class FileWatcher;
 class Framebuffer;
 class GameObject;
