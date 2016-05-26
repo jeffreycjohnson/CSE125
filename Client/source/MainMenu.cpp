@@ -3,6 +3,8 @@
 #include "UIButton.h"
 #include "Input.h"
 
+#include "GameObject.h"
+#include "Crosshair.h"
 #include "ClientNetwork.h"
 #include "NetworkManager.h"
 #include "NetworkUtility.h"
@@ -31,11 +33,11 @@ void MainMenu::connect()
 void MainMenu::create()
 {	
 	auto button = new UIButton("assets/connect_button.png", 320, 240, 397, 44);
-	// Screw it, use a lamba. Fuck you std::bind
+	// Screw it, use a lambda. Fuck you std::bind
 	button->onClick() = [this, button]() {
 		this->connect();
 		button->active = false;
-		std::cerr << "Connected?" << std::endl;
+		Input::hideCursor();
 	};
 	elements.add("Play", button);
 	Input::showCursor();

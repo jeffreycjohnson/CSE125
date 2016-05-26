@@ -50,8 +50,8 @@ void Door::fixedUpdate()
 	openness = std::max(0.0f, openness);
 
 	if (moveDirection == BOTH) {
-		gameObject->transform.children[0]->setPosition(moveDirectionVec() * openness * 2.5f);
-		gameObject->transform.children[1]->setPosition(moveDirectionVec() * -openness * 2.5f);
+		gameObject->findChildByNameContains("Door_Left")->transform.setPosition(moveDirectionVec() * -openness * 2.5f);
+		gameObject->findChildByNameContains("Door_Right")->transform.setPosition(moveDirectionVec() * openness * 2.5f);
 	}
 	else gameObject->transform.setPosition(initPosit + moveDirectionVec() * openness * 2.5f);
 }
