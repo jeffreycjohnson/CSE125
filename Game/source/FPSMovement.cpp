@@ -276,7 +276,7 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		//If nothin is on our head, and we try to jump, and we aren't holding space from a previous jump
 		if (!hitHead && Input::getAxis("jump", clientID) != 0 && !justJumped) {
 			vSpeed = startJumpSpeed;
-			position.y += vSpeed;
+			position.y += vSpeed * dt * 2;
 			justJumped = true;
 
 			Sound * s = gameObject->getComponent<Sound>();
@@ -292,8 +292,8 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		if (hitHead && vSpeed > 0)
 			vSpeed = 0;
 
-		vSpeed += vAccel;
-		position.y += vSpeed;
+		vSpeed += vAccel * dt;
+		position.y += vSpeed * dt;
 	}
 
 }

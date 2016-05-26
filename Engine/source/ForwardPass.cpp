@@ -75,8 +75,10 @@ void DirectionalShadowPass::render(Camera* camera)
 
 void PointShadowPass::render(Camera* camera)
 {
-    if (frames++ < glm::distance(camera->gameObject->transform.getWorldPosition(), Renderer::mainCamera->gameObject->transform.getWorldPosition()) / 10.0f) return;
-    frames = rand() % 2 - 1; // so that lights at the same distance don't always render at the same time and cause stuttering
+    float dist = glm::distance(camera->gameObject->transform.getWorldPosition(), Renderer::mainCamera->gameObject->transform.getWorldPosition());
+    frames++;
+    if (dist > 30.f || (dist > 24.f && frames < 5) || (dist > 18.f && frames < 4) || (dist > 14.f && frames < 3) || (dist > 10.f && frames < 2)) return;
+    frames = 0;
     auto l = camera->gameObject->getComponent<PointLight>();
     if (!l || !l->getShadowCaster()) return;
     l->bindShadowMap();
