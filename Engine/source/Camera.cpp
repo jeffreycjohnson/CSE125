@@ -9,7 +9,6 @@
 #include <iostream>
 #include "GameObject.h"
 #include "Sound.h"
-#include "SoundListener.h"
 #include "Framebuffer.h"
 #include "RenderPass.h"
 #include "Collision.h"
@@ -178,7 +177,7 @@ void Camera::Dispatch(const std::vector<char> &bytes, int messageType, int messa
 		go->addComponent(Renderer::mainCamera);
 	}
 
-	go->addComponent(new SoundListener());
+	// go->addComponent(new SoundListener());
 
 	for (const auto& callback : cameraAssignmentCallbacks)
 	{

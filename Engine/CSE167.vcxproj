@@ -234,7 +234,6 @@
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
-    <ClCompile Include="source\SoundListener.cpp" />
     <ClCompile Include="source\SSAO.cpp" />
     <ClCompile Include="source\SphereCollider.cpp" />
     <ClCompile Include="source\Texture.cpp" />
@@ -267,7 +266,6 @@
     <ClInclude Include="source\include\NetworkUtility.h" />
     <ClInclude Include="source\include\ServerNetwork.h" />
     <ClInclude Include="source\include\Plane.h" />
-    <ClInclude Include="source\include\SoundListener.h" />
     <ClInclude Include="source\include\SphereCollider.h" />
     <ClInclude Include="source\include\ThreadPool.h" />
     <ClInclude Include="source\include\FileWatcher.h" />

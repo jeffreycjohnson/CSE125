@@ -64,18 +64,6 @@ Sound::~Sound()
 	
 }
 
-void Sound::setListenerPosition(GameObject *listener)
-{
-	auto position = listener->transform.getPosition();
-
-	FMOD_VECTOR pos = { position.x, position.y, position.z };
-	FMOD_VECTOR vel = { 0, 0, 0 };
-	FMOD_VECTOR fro = { .01, 0, 0 };
-	FMOD_VECTOR up = { 0, .01, 0 };
-
-	system->set3DListenerAttributes(0, &pos, &vel, &fro, &up);
-}
-
 void Sound::update(float)
 {
     if (playing) {
