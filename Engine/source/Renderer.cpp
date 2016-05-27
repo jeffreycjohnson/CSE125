@@ -22,8 +22,6 @@ int Renderer::windowWidth = 0;
 int Renderer::windowHeight = 0;
 bool Renderer::drawDebug = false;
 bool Renderer::enableShadows = true;
-bool Renderer::enableBloom = true;
-bool Renderer::enableSSAO = true;
 Crosshair* Renderer::crosshair = nullptr;
 
 glm::mat4 Renderer::view, Renderer::perspective;
