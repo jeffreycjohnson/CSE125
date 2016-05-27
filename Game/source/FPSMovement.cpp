@@ -28,6 +28,13 @@
 #include "KeyHoleTarget.h"
 #include "Inventory.h"
 
+float FPSMovement::baseHSpeed = 4.0f;
+float FPSMovement::baseVSpeed = -0.2f;
+float FPSMovement::startJumpSpeed = 10.f;
+float FPSMovement::vAccel = -37.5f;
+float FPSMovement::deathFloor = -20.0f;
+float FPSMovement::interactDistance = 5.0f;
+
 FPSMovement::FPSMovement(
 	int clientID, Sensitivity sensitivites,
 	glm::vec3 initPosition, glm::vec3 upVector,
@@ -47,6 +54,18 @@ FPSMovement::FPSMovement(
 	floor = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	ASSERT(oct != nullptr, "ERROR: Octree is a nullptr");
+}
+
+void FPSMovement::loadGameSettings(ConfigFile & file)
+{
+	if (file.getBool("GameSettings", "enableOverride")) {
+		baseHSpeed = file.getFloat("GameSettings", "baseHSpeed");
+		baseVSpeed = file.getFloat("GameSettings", "baseVSpeed");
+		startJumpSpeed = file.getFloat("GameSettings", "startJumpSpeed");
+		vAccel = file.getFloat("GameSettings", "vAccel");
+		deathFloor = file.getFloat("GameSettings", "deathFloor");
+		interactDistance = file.getFloat("GameSettings", "interactDistance");
+	}
 }
 
 void FPSMovement::create()
@@ -108,18 +127,6 @@ void FPSMovement::fixedUpdate()
 	if (position.y < deathFloor) {
 		respawn();
 	}
-
-	// I'm so sorry, guys. Really, I am.
-
-	// Ray cast normal debug against OBBs
-	/*auto cameraRay = Renderer::mainCamera->getEyeRay();
-	auto box = playerBoxCollider;
-	auto camhit = GameObject::SceneRoot.getComponent<OctreeManager>()->raycast(cameraRay, Octree::BOTH, 0, Octree::RAY_MAX, box);
-	raycastHit = camhit.intersects;
-	lastRayPoint = cameraRay.getPos(camhit.hitTime);
-	lastRayPointPlusN = lastRayPoint + camhit.normal;*/
-
-	// end debug
 
 	recalculate();
 	getPlayerRadii();
@@ -326,7 +333,9 @@ void FPSMovement::debugDraw()
 
 	// visualizing various vectors of importance for movement
 	Renderer::drawSphere(position + forward, 0.25f, glm::vec4(1, 1, 0, 1)); // yellow
-	Renderer::drawSphere(position + front, 0.125f, glm::vec4(0, 1, 0, 1)); // lime green for (front)
+	Renderer::drawSphere(verticality->transform.getWorldPosition(), 0.5f, glm::vec4(1, 0.25, 1, 1)); // purplish - verticality pos
+
+	Renderer::drawSphere(verticality->transform.getWorldPosition() + front, 0.125f, glm::vec4(0, 1, 0, 1)); // lime green for (front)
 	Renderer::drawSphere(position, 0.25f, glm::vec4(1.000, 0.388, 0.278, 1)); // orange (position)
 
 }
@@ -381,8 +390,8 @@ void FPSMovement::raycastMouse()
 {
 	if (!oct) return;
 
-	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
-	auto cast = oct->raycast(ray, Octree::BuildMode::BOTH, 0, 5, { playerBoxCollider });
+	Ray ray(verticality->transform.getWorldPosition(), glm::vec3(front));
+	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider });
 
 	if (!cast.intersects) {
 		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);

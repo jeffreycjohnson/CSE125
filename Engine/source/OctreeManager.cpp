@@ -45,6 +45,7 @@ RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, 
 			if (dynaHit.hitTime < statHit.hitTime) {
 				return dynaHit;
 			}
+			// TODO: Handle the "tie" case more gracefully. Add more detailed info to RayHitInfo instead of lazily giving up and picking one?
 			else {
 				return statHit;
 			}

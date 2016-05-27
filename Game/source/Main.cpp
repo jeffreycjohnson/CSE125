@@ -33,6 +33,7 @@ int main(int argc, char** argv)
 	GameObject *scene = loadScene(file.getString("GameSettings","level"));
 	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
+	FPSMovement::loadGameSettings(file); // enable cheats
 
 	bool didSetCamera = false;
 	for (auto client : clientIDs) 

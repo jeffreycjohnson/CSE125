@@ -22,11 +22,13 @@ struct Sensitivity
 class FPSMovement : public Component
 {
 private:
-	const float baseHSpeed = 4.0f;
-	const float baseVSpeed = -0.2f;
-	const float startJumpSpeed = 10.f;
-	const float vAccel = -37.5f;
-	const float deathFloor = -20.0f;
+	// These have been moved to FPSMovement::loadGameSettings()
+	static float baseHSpeed;
+	static float baseVSpeed;
+	static float startJumpSpeed;
+	static float vAccel;
+	static float deathFloor;
+	static float interactDistance;
 
 	OctreeManager* oct;
 	BoxCollider* playerBoxCollider, *feetCollider;
@@ -35,7 +37,7 @@ private:
 
 	float mouseSensitivity, joystickSensitivity;
 
-	glm::vec3 position, forward, front, up, right, worldUp, moveDir;
+	glm::vec3 position, forward, volatile front, up, right, worldUp, moveDir;
 	GLfloat yaw, pitch;
 	RayHitInfo downHit;
 	float playerRadius, playerHeightRadius, vSpeed, footRadius;
@@ -67,6 +69,8 @@ public:
 		glm::vec3 initPosition, glm::vec3 upVector,
 		GameObject* verticality = nullptr);
 	~FPSMovement() {};
+
+	static void loadGameSettings(ConfigFile&);
 
 	void create() override;
 	void fixedUpdate() override;
