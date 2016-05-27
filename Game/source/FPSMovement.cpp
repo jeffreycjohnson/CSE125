@@ -382,7 +382,7 @@ void FPSMovement::raycastMouse()
 	if (!oct) return;
 
 	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
-	auto cast = oct->raycast(ray, Octree::BuildMode::BOTH);
+	auto cast = oct->raycast(ray, Octree::BuildMode::BOTH, 0, 5, { playerBoxCollider });
 
 	if (!cast.intersects) {
 		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
