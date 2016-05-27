@@ -2,16 +2,27 @@
 #include "Renderer.h"
 #include <iostream>
 
-Crosshair::Crosshair(const std::string& texture) : draw(true) {
-	crosshairImage = std::make_unique<Texture>(texture, true);
+Crosshair::Crosshair(const std::string& defaultTexture, const std::string& interactiveTexture) : draw(true) {
+	defaultCrosshairImage = std::make_unique<Texture>(defaultTexture, true);
+	interactiveCrosshairImage = std::make_unique<Texture>(interactiveTexture, true);
+	currentState = CrosshairNetworkData::CrosshairState::DEFAULT;
 }
 
-bool Crosshair::drawUI(CrosshairNetworkData::CrosshairState state)
+bool Crosshair::drawUI()
 {
 	if (draw == true) {
 		auto center = glm::vec2(Renderer::getWindowWidth() / 2.0f, Renderer::getWindowHeight() / 2.0f);
-		Renderer::drawSprite(center, glm::vec2(0.44, 0.25), glm::vec4(1), crosshairImage.get());
-		std::cout << "Crosshair state changed to " << state << std::endl;
+		
+		switch (currentState) {
+
+		case CrosshairNetworkData::CrosshairState::DEFAULT:
+			Renderer::drawSprite(center, glm::vec2(0.44, 0.25), glm::vec4(1), defaultCrosshairImage.get());
+			break;
+		case CrosshairNetworkData::CrosshairState::INTERACTIVE:
+			Renderer::drawSprite(center, glm::vec2(0.44, 0.25), glm::vec4(1), interactiveCrosshairImage.get());
+			break;
+		}
+
 	}
 	return false;
 }
@@ -35,15 +46,10 @@ void Crosshair::setState(CrosshairNetworkData::CrosshairState state, int clientI
 	NetworkManager::PostMessage(bytes, CROSSHAIR_NETWORK_DATA, clientID, clientID);
 }
 
-CrosshairNetworkData::CrosshairState Crosshair::getState()
-{
-	return currentState;
-}
-
 
 void Crosshair::Dispatch(const std::vector<char> &bytes, int messageType, int messageId) {
 	// decode struct
 	CrosshairNetworkData cnd = structFromBytes<CrosshairNetworkData>(bytes);
-	drawUI(cnd.state);
+	currentState = cnd.state;
 }
 

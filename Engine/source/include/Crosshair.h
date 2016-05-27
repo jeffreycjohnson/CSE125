@@ -6,19 +6,19 @@
 class Crosshair {
 
 private:
-	std::unique_ptr<Texture> crosshairImage;
+	std::unique_ptr<Texture> defaultCrosshairImage;
+	std::unique_ptr<Texture> interactiveCrosshairImage;
 	bool draw;
-	CrosshairNetworkData::CrosshairState currentState = CrosshairNetworkData::CrosshairState::DEFAULT;
+	CrosshairNetworkData::CrosshairState currentState;
 
 public:
-	Crosshair(const std::string& texture);
+	Crosshair(const std::string& texture, const std::string& interactiveTexture);
 
-	bool drawUI(CrosshairNetworkData::CrosshairState state);
+	bool drawUI();
 	void show();
 	void hide();
 
 	static void setState(CrosshairNetworkData::CrosshairState state, int clientID);
-	CrosshairNetworkData::CrosshairState getState();
 	void Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
 
 };

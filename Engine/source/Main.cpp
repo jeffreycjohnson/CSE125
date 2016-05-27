@@ -71,7 +71,7 @@ void InitializeEngine(std::string windowName)
 	std::cout << "SOUND" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	
 	// Init crosshair
-	Renderer::crosshair = new Crosshair(file.getString("GraphicsOptions", "crosshairSprite"));
+	Renderer::crosshair = new Crosshair(file.getString("GraphicsOptions", "defaultCrosshairSprite"), file.getString("GraphicsOptions", "interactiveCrosshairSprite"));
 	if (file.getBool("GraphicsOptions", "showCrosshair")) {
 		Renderer::crosshair->show();
 	}

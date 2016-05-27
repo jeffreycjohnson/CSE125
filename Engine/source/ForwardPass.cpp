@@ -124,8 +124,7 @@ void UIPass::render(Camera * camera)
 	NetworkManager::drawUI();
 	if (NetworkManager::getState() == CLIENT_MODE) {
 		if (Renderer::crosshair) {
-			Renderer::crosshair->drawUI(CrosshairNetworkData::CrosshairState::DEFAULT);
-			std::cout << "UIPASS crosshair" << std::endl;
+			Renderer::crosshair->drawUI();
 		}
 	}
 }

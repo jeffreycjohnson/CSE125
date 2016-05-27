@@ -386,36 +386,43 @@ void FPSMovement::raycastMouse()
 
 	if (!cast.intersects) return;
 
+	GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
+	GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;
+
+	// Handle crosshair changes if looking at objects of interest
+	if (hit->getComponent<PressButton>() || phit->getComponent<PressButton>() ||
+		(hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
+		(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))
+		|| hit->getComponent<KeyHoleTarget>())
+	{
+		Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
+	}
+	else {
+		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
+	}
 	float clickf = Input::getAxis("click", clientID);
 
 	if (clickf && !justClicked)
 	{
 		justClicked = true;
-
-		GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
-		GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;
-		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
-
+		std::cout << "hit " << hit->getName() << std::endl;
+		std::cout << "phit " << phit->getName() << std::endl;
 		if (hit->getComponent<PressButton>())
 		{
-			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			hit->getComponent<PressButton>()->trigger();
 		}
 		else if (phit->getComponent<PressButton>())
 		{
-			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			phit->getComponent<PressButton>()->trigger();
 		}
 		else if ((hit->getComponent<FixedKeyTarget>() && (hit->getComponent<FixedKeyTarget>()->isActivated() || hit->getComponent<FixedKeyTarget>()->canBePickedUp)) ||
 			(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))) 
 		{
 			// pick up key
-			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			this->gameObject->getComponent<Inventory>()->setKey(hit);
 		}
 		else if (hit->getComponent<KeyHoleTarget>() && this->gameObject->getComponent<Inventory>()->hasKey() ) 
 		{
-			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
 			// if KeyHoleTarget matches key currently in inventory
 			if (hit->getComponent<KeyHoleTarget>()->keyHoleID == this->gameObject->getComponent<Inventory>()->getKey()->getComponent<KeyActivator>()->keyHoleID) {
 				std::cout << "Key matches keyHole " << hit->getComponent<KeyHoleTarget>()->keyHoleID << std::endl;
