@@ -384,7 +384,10 @@ void FPSMovement::raycastMouse()
 	Ray ray(verticality->transform.getWorldPosition() + front, glm::vec3(front));
 	auto cast = oct->raycast(ray, Octree::BuildMode::BOTH);
 
-	if (!cast.intersects) return;
+	if (!cast.intersects) {
+		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
+		return; // ^ Doubt this has anything to do with it, but it could help with frame-rate lag?
+	}
 
 	GameObject *hit = cast.collider->gameObject->transform.getParent()->getParent()->gameObject;
 	GameObject *phit = hit->transform.getParent() ? hit->transform.getParent()->gameObject : hit;

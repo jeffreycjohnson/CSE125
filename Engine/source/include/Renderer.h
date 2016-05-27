@@ -53,6 +53,9 @@ class Renderer
         static struct RenderBuffer renderBuffer;
 
 		static bool shutdown;
+
+		// Configurable
+		static bool enableShadows;
 		static Crosshair* crosshair;
 
 		static Shader* currentShader;

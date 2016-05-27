@@ -70,6 +70,7 @@ void InitializeEngine(std::string windowName)
 	glfwSwapInterval(1);
 	std::cout << "SOUND" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	
+	// TODO: LoadGraphicsOptions
 	// Init crosshair
 	Renderer::crosshair = new Crosshair(file.getString("GraphicsOptions", "defaultCrosshairSprite"), file.getString("GraphicsOptions", "interactiveCrosshairSprite"));
 	if (file.getBool("GraphicsOptions", "showCrosshair")) {
@@ -78,6 +79,7 @@ void InitializeEngine(std::string windowName)
 	else {
 		Renderer::crosshair->hide();
 	}
+	Renderer::enableShadows = file.getBool("GraphicsOptions", "enableShadows");
 	
 	Sound::init();
 	Renderer::init(width, height);

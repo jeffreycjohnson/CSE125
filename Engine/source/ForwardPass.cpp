@@ -48,6 +48,8 @@ void DebugPass::render(Camera* camera) {
 
 void DirectionalShadowPass::render(Camera* camera)
 {
+	if (!Renderer::enableShadows) return;
+
     auto l = camera->gameObject->getComponent<DirectionalLight>();
     if (!l || !l->getShadowCaster()) return;
     l->bindShadowMap();
@@ -75,6 +77,8 @@ void DirectionalShadowPass::render(Camera* camera)
 
 void PointShadowPass::render(Camera* camera)
 {
+	if (!Renderer::enableShadows) return;
+
     float dist = glm::distance(camera->gameObject->transform.getWorldPosition(), Renderer::mainCamera->gameObject->transform.getWorldPosition());
     frames++;
     if (dist > 30.f || (dist > 24.f && frames < 5) || (dist > 18.f && frames < 4) || (dist > 14.f && frames < 3) || (dist > 10.f && frames < 2)) return;
