@@ -89,12 +89,15 @@ void Camera::update(float deltaTime)
 	velocity = position - prevPosition;
 	prevPosition = position;
 
+#ifdef __THIS_IS_NOW_UPDATED_IN_SOUND_CPP
 	// Update info for FMOD
 	FMOD_VECTOR pos = { position.x, position.y, position.z };
 	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
 	FMOD_VECTOR fwd = { forward.x, forward.y, forward.z };
 	FMOD_VECTOR upv = { up.x, up.y, up.z };
 	if(this == Renderer::mainCamera) Sound::system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv);
+#endif
+
 }
 
 void Camera::screenShake(float amount, float duration)

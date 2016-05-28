@@ -6,6 +6,8 @@
 #include <iostream>
 #include "Input.h"
 #include "Config.h"
+#include "Renderer.h"
+#include "Camera.h"
 
 FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
@@ -187,6 +189,22 @@ void Sound::init()
 
 void Sound::updateFMOD()
 {
+	// Listener information is now updated in here as opposed in Camera
+	// Apparently this is more consistent. Hopefully.
+
+	glm::vec3 position = Renderer::mainCamera->gameObject->transform.getWorldPosition();
+	// Velocity is 0 for now. If doppler effect desired, please calculate in terms of meters per second
+	glm::vec3 velocity = { 0.0, 0.0, 0.0 };
+	glm::vec3 forward  = glm::vec3(Renderer::mainCamera->gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0));
+	glm::vec3 up = { 0.0, 1.0, 0.0 };
+
+	FMOD_VECTOR pos = { position.x, position.y, position.z };
+	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+	FMOD_VECTOR fwd = { forward.x, forward.y, forward.z };
+	FMOD_VECTOR upv = { up.x, up.y, up.z };
+
+	system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv);
+
 	system->update();
 }
 
