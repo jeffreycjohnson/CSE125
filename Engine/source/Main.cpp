@@ -46,12 +46,28 @@ void InitializeEngine(std::string windowName)
 	ConfigFile file("config/options.ini");
 	width  = file.getInt("GraphicsOptions", "width");
 	height = file.getInt("GraphicsOptions", "height");
+	bool borderless = file.getBool("GraphicsOptions", "borderless");
 
 	LoadDebugOptions(file);
 	LoadOctreeOptionsAndInitialize(file);
 
-    //zconst GLFWvidmode* mode = glfwGetVideoMode(monitor);
-	GLFWwindow* window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+	GLFWwindow* window = nullptr;
+	
+	if (windowName == "CLIENT" && borderless) {
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const volatile GLFWvidmode* volatile mode = glfwGetVideoMode(monitor);
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		// Get video dimensions & pass to outer vars for Renderer::init
+		width = mode->width;
+		height = mode->height;
+		window = glfwCreateWindow(width, height, windowName.c_str(), monitor, nullptr);
+	}
+	else {
+		window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+	}
 
     //set callbacks
     glfwSetWindowFocusCallback(window, Renderer::focus);

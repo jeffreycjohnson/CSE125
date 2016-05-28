@@ -33,7 +33,7 @@ void MainMenu::connect()
 
 void MainMenu::create()
 {	
-	auto button = new UIButton("assets/connect_button.png", 320, 240, 397, 44);
+	auto button = new UIButton("assets/connect_button.png", Renderer::getWindowWidth() / 2, Renderer::getWindowHeight() / 2, 397, 44);
 	Renderer::crosshair->hide();
 
 	// Screw it, use a lambda. Fuck you std::bind

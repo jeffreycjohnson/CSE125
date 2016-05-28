@@ -169,7 +169,7 @@ void Sound::init()
 	}
 
 	// Initialize our Instance with 128 channels
-	system->init(256, FMOD_INIT_NORMAL, NULL);
+	system->init(256, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, NULL);
 
 	// Generate sound map
 

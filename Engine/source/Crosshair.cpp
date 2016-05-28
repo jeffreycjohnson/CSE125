@@ -1,6 +1,9 @@
 #include "Crosshair.h"
 #include "Renderer.h"
+#include "Input.h"
 #include <iostream>
+
+static bool cursorOverride = false;
 
 Crosshair::Crosshair(const std::string& defaultTexture, const std::string& interactiveTexture) : draw(true) {
 	defaultCrosshairImage = std::make_unique<Texture>(defaultTexture, true);
@@ -10,7 +13,11 @@ Crosshair::Crosshair(const std::string& defaultTexture, const std::string& inter
 
 bool Crosshair::drawUI()
 {
-	if (draw == true) {
+	if (Input::getKeyDown("`")) {
+		cursorOverride = !cursorOverride;
+	}
+
+	if (draw == true && !cursorOverride) {
 		auto center = glm::vec2(Renderer::getWindowWidth() / 2.0f, Renderer::getWindowHeight() / 2.0f);
 		
 		switch (currentState) {
