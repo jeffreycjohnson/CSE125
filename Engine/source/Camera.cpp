@@ -88,13 +88,6 @@ void Camera::update(float deltaTime)
 	position = gameObject->transform.getWorldPosition(); // Has to be world space to work with forward vector
 	velocity = position - prevPosition;
 	prevPosition = position;
-
-	// Update info for FMOD
-	FMOD_VECTOR pos = { position.x, position.y, position.z };
-	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
-	FMOD_VECTOR fwd = { forward.x, forward.y, forward.z };
-	FMOD_VECTOR upv = { up.x, up.y, up.z };
-	if(this == Renderer::mainCamera) Sound::system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv);
 }
 
 void Camera::screenShake(float amount, float duration)

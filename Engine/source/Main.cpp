@@ -84,7 +84,6 @@ void InitializeEngine(std::string windowName)
     glewExperimental = GL_TRUE;
 	glewInit();
 	glfwSwapInterval(1);
-	std::cout << "SOUND" << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl;
 	
 	// TODO: LoadGraphicsOptions
 	// Init crosshair
