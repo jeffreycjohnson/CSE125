@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 		player->addComponent(new Inventory());
 
 		//TODO!!!! REMOVE THIS!!!!!!!!!
-		player->addComponent(new Sound("mariojump", false, false, 1.0, true));
+		player->addComponent(new Sound("mariojump", false, true, 1.0, true));
 		if (client == 0) verticality->addComponent(Renderer::mainCamera);
 
 		NetworkManager::attachCameraTo(client, verticality->getID());
