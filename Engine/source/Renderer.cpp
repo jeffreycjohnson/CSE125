@@ -166,7 +166,12 @@ void Renderer::init(int window_width, int window_height) {
 }
 
 void Renderer::loop(NetworkState caller) {
-    if (caller == NetworkState::SERVER_MODE && !drawDebug) return GameObject::UpdateScene(caller);
+	if (caller == NetworkState::SERVER_MODE && !drawDebug) {
+		std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
+		auto job = workerPool->createJob(updateScene)->queue();
+		workerPool->wait(job);
+		return;
+	}
     extractObjects();
 
     for(auto camera : cameras)
