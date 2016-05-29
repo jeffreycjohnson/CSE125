@@ -13,11 +13,6 @@ FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
 FMOD_RESULT Sound::result;
 
-#define REGISTER_SOUND(name, location, dimension)\
-SoundClass name;\
-system->createSound(location, dimension, NULL, &name);\
-soundMap.insert({#name, name});
-
 Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D)
 {
 	isConstructed = true;
@@ -28,19 +23,7 @@ Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume
 	this->is3D = is3D;
 	playing = active = playOnAwake;
 
-	result = system->playSound(soundMap[name], 0, true, &channel);
-	channel->setVolume(volume);
-	if (!is3D)
-		channel->setPriority(0);
-	if (looping)
-	{
-		channel->setMode(FMOD_LOOP_NORMAL);
-		channel->setLoopCount(-1);
-	}
-	else
-	{
-		channel->setMode(FMOD_LOOP_OFF);
-	}
+	this->postConstructor();
 }
 
 void Sound::postConstructor() {
@@ -58,7 +41,6 @@ void Sound::postConstructor() {
 		channel->setMode(FMOD_LOOP_OFF);
 	}
 
-	system->set3DNumListeners(1);
 }
 
 Sound::~Sound()
@@ -68,17 +50,16 @@ Sound::~Sound()
 
 void Sound::update(float)
 {
-    if (playing) {
-        position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
-        velocity = position - prevPosition;
-        FMOD_VECTOR pos = { position.x, position.y, position.z };
-        FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+	if (playing) {
+		position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
+		velocity = position - prevPosition;
 
-        channel->set3DAttributes(&pos, &vel, 0);
+		FMOD_VECTOR pos = { position.x, position.y, position.z };
+		FMOD_VECTOR vel = { 0.0, 0.0, 0.0 };
 
-        prevPosition = gameObject->transform.getWorldPosition();
-    }
-
+		channel->set3DAttributes(&pos, &vel, 0);
+		prevPosition = gameObject->transform.getWorldPosition();
+	}
 	channel->setPaused(!playing); // Used at the end of update to prevent inconsistent initial volume
 }
 
@@ -88,7 +69,15 @@ void Sound::play()
 	if (playing)
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
-		result = system->playSound(soundMap[name], 0, false, &channel);
+		result = system->playSound(soundMap[name], 0, true, &channel);
+
+		position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
+		velocity = position - prevPosition;
+		FMOD_VECTOR pos = { position.x, position.y, position.z };
+		FMOD_VECTOR vel = { 0.0, 0.0, 0.0 };
+		channel->set3DAttributes(&pos, &vel, 0);
+
+		prevPosition = gameObject->transform.getWorldPosition();
 
 		auto x = soundMap[name];
 		channel->setVolume(volume);
@@ -102,13 +91,16 @@ void Sound::play()
 			channel->setMode(FMOD_LOOP_OFF);
 		}
 
-		if (!is3D)
+		if (!is3D) {
 			channel->setPriority(0);
+		}
+		channel->setPaused(!playing); // play the sound
 	}
 	else // Paused
 	{
 		playing = true;
 	}
+
 	active = true;
 	postToNetwork(SoundNetworkData::soundState::PLAY, false, -1, 0.0f);
 }
@@ -172,18 +164,11 @@ void Sound::init()
 
 	// Initialize our Instance with 128 channels
 	system->init(256, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, NULL);
+	system->set3DNumListeners(1);
 
 	// Generate sound map
-
-	// THIS MACRO ALLOWS US TO ADD SOUNDS!!! Cool huh?
-	// Usage: name/identifier, location of the sound as a string, 2d or 3d using FMOD_3D or FMOD_2D
-
-#ifdef _hardcoded
-	REGISTER_SOUND(mariojump,   "assets/sounds/effects/mariojump.wav", FMOD_2D);
-	REGISTER_SOUND(zeldasecret, "assets/sounds/effects/zeldasecret.wav", FMOD_3D);
-#else
 	initFromConfig();
-#endif
+
 	// Add more sounds as we need
 }
 
