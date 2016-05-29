@@ -47,6 +47,7 @@ public:
 	static std::unordered_map<std::string, FMOD::Sound*> soundMap;
 	static void init();
 	static void updateFMOD();
+	static void FMODErrorCheck(FMOD_RESULT result, const std::string& msg);
 	static void Dispatch(const std::vector<char>& bytes, int messageType, int messageId);
 
 	void deserializeAndApply(std::vector<char> bytes) override;

@@ -3,11 +3,13 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_dsp.h"
 #include "fmod/fmod_errors.h"
-#include <iostream>
 #include "Input.h"
 #include "Config.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Timer.h"
+
+#include <iostream>
 
 FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
@@ -52,12 +54,14 @@ void Sound::update(float)
 {
 	if (playing) {
 		position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
-		velocity = position - prevPosition;
+		velocity = (position - prevPosition) * Timer::fixedTimestep;
 
 		FMOD_VECTOR pos = { position.x, position.y, position.z };
-		FMOD_VECTOR vel = { 0.0, 0.0, 0.0 };
+		FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
 
-		channel->set3DAttributes(&pos, &vel, 0);
+		if (is3D) {
+			channel->set3DAttributes(&pos, &vel, 0);
+		}
 		prevPosition = gameObject->transform.getWorldPosition();
 	}
 	channel->setPaused(!playing); // Used at the end of update to prevent inconsistent initial volume
@@ -72,14 +76,15 @@ void Sound::play()
 		result = system->playSound(soundMap[name], 0, true, &channel);
 
 		position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
-		velocity = position - prevPosition;
+		velocity = (position - prevPosition) * Timer::fixedTimestep;
 		FMOD_VECTOR pos = { position.x, position.y, position.z };
-		FMOD_VECTOR vel = { 0.0, 0.0, 0.0 };
-		channel->set3DAttributes(&pos, &vel, 0);
-
+		FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+		
+		if (is3D) {
+			channel->set3DAttributes(&pos, &vel, 0);
+		}
 		prevPosition = gameObject->transform.getWorldPosition();
 
-		auto x = soundMap[name];
 		channel->setVolume(volume);
 		if (looping)
 		{
@@ -140,7 +145,9 @@ void Sound::setLooping(bool looping, int count = -1)
 
 void Sound::setVolume(float volume)
 {
-	channel->setVolume(volume);
+	if (channel != nullptr) {
+		FMODErrorCheck(channel->setVolume(volume), "FMOD set volume failed.");
+	}
 	postToNetwork(SoundNetworkData::soundState::SET_VOLUME, false, -1, volume);
 }
 
@@ -148,12 +155,8 @@ void Sound::setVolume(float volume)
 
 void Sound::init()
 {
-	result = FMOD::System_Create(&system);
-	if (result != FMOD_OK)
-	{
-		FATAL("FMOD::System_Create failed");
-	}
-
+	FMODErrorCheck(FMOD::System_Create(&system), "FMOD::System_Create failed");
+	
 	int driverCount = 0;
 	result = system->getNumDrivers(&driverCount);
 
@@ -163,8 +166,8 @@ void Sound::init()
 	}
 
 	// Initialize our Instance with 128 channels
-	system->init(256, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, NULL);
-	system->set3DNumListeners(1);
+	FMODErrorCheck( system->init(256, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, NULL), "FMOD system->init() failed.");
+	FMODErrorCheck( system->set3DNumListeners(1), "Failed to set # of 3D listeners");
 
 	// Generate sound map
 	initFromConfig();
@@ -178,19 +181,27 @@ void Sound::updateFMOD()
 	// Apparently this is more consistent. Hopefully.
 
 	glm::vec3 position = Renderer::mainCamera->gameObject->transform.getWorldPosition();
+	
 	// Velocity is 0 for now. If doppler effect desired, please calculate in terms of meters per second
 	glm::vec3 velocity = { 0.0, 0.0, 0.0 };
-	glm::vec3 forward  = glm::vec3(Renderer::mainCamera->gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0));
-	glm::vec3 up = { 0.0, 1.0, 0.0 };
+	glm::vec3 forward  = glm::normalize(glm::vec3(Renderer::mainCamera->gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0)));
+	glm::vec3 up = glm::normalize(glm::cross({-1, 0, 0}, forward));
 
 	FMOD_VECTOR pos = { position.x, position.y, position.z };
 	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
 	FMOD_VECTOR fwd = { forward.x, forward.y, forward.z };
 	FMOD_VECTOR upv = { up.x, up.y, up.z };
 
-	system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv);
+	FMODErrorCheck(system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv), "FMOD Error while updating 3D listener attrs.");
 
-	system->update();
+	FMODErrorCheck(system->update(), "FMOD failure in system->update()");
+}
+
+void Sound::FMODErrorCheck(FMOD_RESULT result, const std::string& msg)
+{
+	if (result != FMOD_OK) {
+		FATAL(msg.c_str());
+	}
 }
 
 void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messageId) {
@@ -234,7 +245,7 @@ void Sound::deserializeAndApply(std::vector<char> bytes){
 		this->setVolume(sind.volumeParam);
 		break;
 	case SoundNetworkData::soundState::MUTATE:
-		std::runtime_error("I technically don't need a mutate state.");
+		FATAL("I technically don't need a mutate state.");
 		break;
 	case SoundNetworkData::soundState::CONSTRUCT:
 	default:
