@@ -11,8 +11,6 @@
 bool ClientStartingScreen::load()
 {
 	// Called on mian thread (GL calls do not fail)
-
-	std::cerr << "Did we get into there?" << std::endl;
 	ConfigFile file("config/options.ini");
 
 	std::string serverip = file.getString("NetworkOptions", "serverip");
@@ -38,8 +36,6 @@ bool ClientStartingScreen::load()
 	if (!connectOnStart) {
 		GameObject::SceneRoot.addComponent(new MainMenu());
 	}
-
-	std::cerr << "LOADING COMPLETE" << std::endl;
 
 	return true; // This object is added to SceneRoot, and modifies component list of SceneRoot, so iter is invalidated
 }

@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Material.h"
 #include "Config.h"
+#include "Sound.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
@@ -171,7 +172,9 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
 
     if (lights.count(name))
     {
+		ConfigFile file("config/sounds.ini");
         nodeObject->addComponent(lights[name]);
+		Sound::affixSoundToDummy(nodeObject, new Sound("light", true, true, file.getFloat("light","volume"), true));
     }
 
 	for (unsigned int i = 0; i < currentNode->mNumMeshes; i++) {
