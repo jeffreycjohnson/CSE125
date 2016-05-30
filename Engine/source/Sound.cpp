@@ -314,7 +314,14 @@ bool Sound::isPlaying()
 	FMOD::Sound* ptr;
 	if (channel != nullptr) {
 		channel->getCurrentSound(&ptr);
-		return (ptr == soundMap[name]);
+		if (ptr == soundMap[name]) {
+			bool paused;
+			channel->getPaused(&paused);
+			return paused;
+		}
+		else {
+			return false;
+		}
 	}
 	else
 		return false;

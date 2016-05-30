@@ -7,7 +7,7 @@ class ForceField :
 {
 public:
 	bool canTurnBackOn;
-	Sound *turnOn, *turnOff, *passiveHum;
+	std::vector<Sound*> turnOn, turnOff, passiveHum;
 
 	ForceField();
 	~ForceField();
