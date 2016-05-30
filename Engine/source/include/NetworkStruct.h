@@ -212,6 +212,9 @@ struct SoundNetworkData
 	float volume;
 	bool is3D;
 
+	// See "Sound.h"
+	int channelType;
+
 	//For SetLooping
 	bool loopingParam;
 	int count;
@@ -222,9 +225,9 @@ struct SoundNetworkData
 
 	SoundNetworkData(
 		int objectID, std::string soundName, bool playing, bool active, bool looping, 
-		float volume, bool is3D, soundState ss, bool loopingParam, int count, float volumeParam) :
+		float volume, bool is3D, soundState ss, bool loopingParam, int count, float volumeParam, int channelType) :
 		objectID(objectID), playing(playing), active(active), looping(looping),
-		volume(volume), is3D(is3D), ss(ss), loopingParam(loopingParam), count(count), volumeParam(volumeParam)
+		volume(volume), is3D(is3D), ss(ss), loopingParam(loopingParam), count(count), volumeParam(volumeParam), channelType(channelType)
 	{
 		memset(this->soundName, 0, sizeof(char) * MAX_SOUND_NAME);
 		strncpy_s(this->soundName, soundName.c_str(), MAX_SOUND_NAME - 1);

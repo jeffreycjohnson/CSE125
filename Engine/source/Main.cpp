@@ -166,6 +166,7 @@ void RunEngine(NetworkState caller)
     auto update = workerPool->createJob(updateScene)->queue();
     workerPool->wait(update);
 	bool debugToggle = Renderer::drawDebug;
+	GameObject::AddPostFixedUpdateCallback(Sound::updateFMOD); // avoid race conditions
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
@@ -177,7 +178,7 @@ void RunEngine(NetworkState caller)
 		 *       to guarantee synchronization with fixed tick rate or variable tick rate
 		 */
 
-		workerPool->createJob(Sound::updateFMOD)->queue();
+		//workerPool->createJob(Sound::updateFMOD)->queue();
 		if (Input::getKeyDown("escape")) {
 			Renderer::drawDebug = !Renderer::drawDebug;
 		}

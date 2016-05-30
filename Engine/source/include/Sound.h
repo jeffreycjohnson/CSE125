@@ -5,9 +5,10 @@
 #include "Component.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#include <unordered_map>
 #include "NetworkManager.h"
 #include "NetworkUtility.h"
+#include <unordered_map>
+#include <queue>
 
 typedef FMOD::Sound* SoundClass;
 
@@ -19,10 +20,12 @@ private:
 	float volume;
 	glm::vec3 position, prevPosition, velocity;
 	bool looping, playing, active, is3D;
-
+	int channelType;
 	bool isConstructed;
 
 	static FMOD_RESULT result; // For debugging
+	static bool broadcasting;
+	static std::queue<Sound*> broadcastQueue;
 
 	// Do not allow use of this constructor outside of Sound
 	// (you can crash the game this way)
@@ -31,7 +34,18 @@ private:
 	};
 
 public:
-	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
+	// Channel group for sound effects
+	static const int SOUND_EFFECT = 0;
+
+	// Channel group for music
+	static const int MUSIC = 1; 
+
+	// Special channel group that lowers master gain (except for on itself) of everything else
+	static const int BROADCAST = 2;
+
+	static FMOD::ChannelGroup *cgEffects, *cgMusic, *cgBroadcast, *cgGame, *masterChannelGroup;
+
+	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D, int type = SOUND_EFFECT);
 	void postConstructor();
 	~Sound();
 

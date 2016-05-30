@@ -52,6 +52,7 @@ FPSMovement::FPSMovement(
 	raycastHit = false;
 	forward = glm::vec3(0);
 	floor = nullptr;
+	jumpSound = nullptr;
 	oct = GameObject::SceneRoot.getComponent<OctreeManager>();
 	ASSERT(oct != nullptr, "ERROR: Octree is a nullptr");
 }
@@ -85,6 +86,10 @@ void FPSMovement::create()
 	// Assimp turns spaces into underscores
 	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
 	feetCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_feet")->getComponent<BoxCollider>();
+
+	// Add sounds
+	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("mariojump", false, false, 1.0, true, Sound::SOUND_EFFECT));
+	testBroadcastSound = Sound::affixSoundToDummy(gameObject, new Sound("voice_windows_10", false, false, 1.0, true, Sound::BROADCAST));
 
 	//Input::hideCursor();
 	recalculate();
@@ -126,6 +131,11 @@ void FPSMovement::fixedUpdate()
 	//If they fall below the "death floor", they die and respawn
 	if (position.y < deathFloor) {
 		respawn();
+	}
+
+	if ( Input::getButtonDown("enter", clientID) ) {
+		std::cerr << "should queue broadcast sound" << std::endl;
+		testBroadcastSound->play();
 	}
 
 	recalculate();
@@ -286,9 +296,8 @@ void FPSMovement::handleVerticalMovement(float dt) {
 			position.y += vSpeed * dt * 2;
 			justJumped = true;
 
-			Sound * s = gameObject->getComponent<Sound>();
-			if (s) {
-				s->play();
+			if (jumpSound) {
+				jumpSound->play();
 			}
 
 		}
