@@ -1,6 +1,6 @@
 #include "PressButton.h"
-
 #include "Timer.h"
+#include "Config.h"
 
 PressButton::PressButton()
 {
@@ -48,8 +48,20 @@ void PressButton::fixedUpdate()
 			timeLeft = 0.0f;
 
 			deactivate();
+			snd_deactivate->play();
 		}
 	}
+}
+
+void PressButton::create()
+{
+	GameObject* go;
+	if ((go = gameObject->findChildByNameContains("Colliders")) == nullptr) {
+		go = gameObject;
+	}
+	ConfigFile file("config/sounds.ini");
+	snd_activate = Sound::affixSoundToDummy(go, new Sound("button_activate", false, false, file.getFloat("button_activate", "volume"), true));
+	snd_deactivate = Sound::affixSoundToDummy(go, new Sound("button_deactivate", false, false, file.getFloat("button_deactivate", "volume"), true));
 }
 
 void PressButton::trigger()
@@ -60,5 +72,6 @@ void PressButton::trigger()
 		timeLeft = timeLimit == 0 ? 123456 : timeLimit;
 
 		activate();
+		snd_activate->play();
 	}
 }
