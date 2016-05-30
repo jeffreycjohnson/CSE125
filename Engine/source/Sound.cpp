@@ -172,7 +172,6 @@ void Sound::init()
 	// Generate sound map
 	initFromConfig();
 
-	// Add more sounds as we need
 }
 
 void Sound::updateFMOD()
@@ -300,26 +299,37 @@ void Sound::setGameObject(GameObject* object) {
 	postToNetwork(SoundNetworkData::soundState::CONSTRUCT, false, -1, 0.0f);
 };
 
+Sound* Sound::affixSoundToDummy(GameObject* parent, Sound * sound)
+{
+	auto dummy = new GameObject;
+	dummy->setName(sound->name);
+	dummy->addComponent(sound);
+	return sound;
+}
+
+bool Sound::isPlaying()
+{
+	// Detect if the sound is still playing
+	FMOD::Sound* ptr;
+	if (channel != nullptr) {
+		channel->getCurrentSound(&ptr);
+		return (ptr == soundMap[name]);
+	}
+	else
+		return false;
+}
 
 void Sound::initFromConfig()
 {
 	ConfigFile file("config/sounds.ini");
 	std::string list = file.getString("SoundList", "soundlist");
-	std::vector<std::string> sounds;
-
-	//Split
-	size_t pos = 0;
-	std::string token;
-	while ((pos = list.find(";")) != std::string::npos) {
-		token = list.substr(0, pos);
-		sounds.push_back(token);
-		list.erase(0, pos + 1);
-	}
+	std::vector<std::string> sounds = file.allSections();
 
 	for (auto i = sounds.begin(); i != sounds.end(); ++i) {
 		SoundClass soundToAdd;
 		std::string fileName = file.getString(*i, "file");
 		std::string fmodMode = file.getString(*i, "fmodMode");
+
 		int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
 		//int exinfo = file.getInt(*i, "exinfo");
 		//TODO: Don't know what exinfo is

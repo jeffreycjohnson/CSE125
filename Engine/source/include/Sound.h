@@ -24,10 +24,13 @@ private:
 
 	static FMOD_RESULT result; // For debugging
 
-public:
+	// Do not allow use of this constructor outside of Sound
+	// (you can crash the game this way)
 	Sound() {
 		isConstructed = false;
 	};
+
+public:
 	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
 	void postConstructor();
 	~Sound();
@@ -40,8 +43,15 @@ public:
 	void setLooping(bool looping, int count);
 	void setVolume(float volume);
 
+	// This checks if the sound is actually being played on a channel in FMOD
+	// It does NOT check the FMOD flag!
+	bool isPlaying();
+
 	//initFromConfig is broken, Do not touch, just use the macro!!!
 	static void initFromConfig();
+
+	// Useful for holding multiple sound components in one gameobject
+	static Sound* affixSoundToDummy(GameObject*, Sound*);
 
 	static FMOD::System *system;
 	static std::unordered_map<std::string, FMOD::Sound*> soundMap;

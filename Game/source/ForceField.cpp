@@ -22,17 +22,32 @@ ForceField::ForceField(std::vector<std::string> tokens, std::map<std::string, Ta
 	(*idToTarget)[groupName + std::to_string(targetID)] = this;
 }
 
+void ForceField::create()
+{
+	turnOn = Sound::affixSoundToDummy(gameObject, new Sound("ff_on", false, false, 1.0f, true));
+	turnOff = Sound::affixSoundToDummy(gameObject, new Sound("ff_off", false, false, 1.0f, true));
+	passiveHum = Sound::affixSoundToDummy(gameObject, new Sound("ff_passive", false, true, 1.0f, true));// new Sound("ff_passive", true, true, 1.0f, true));
+}
+
 void ForceField::fixedUpdate()
 {
 	if (isActivated() && gameObject->getVisible())
 	{
 		gameObject->setVisible(false);
 		gameObject->findChildByNameContains("StaticColliders")->setActive(false, SetAllChildren);
+		passiveHum->pause();
+		turnOff->play();
 	}
 	else if (!isActivated() && canTurnBackOn && !gameObject->getVisible()) {
 		gameObject->setVisible(true);
 		gameObject->findChildByNameContains("StaticColliders")->setActive(true, SetAllChildren);
 		gameObject->setVisible(true);
-
+		passiveHum->pause();
+		turnOn->play();
+	}
+	else {
+		if (!turnOn->isPlaying() && !turnOff->isPlaying()) {
+			passiveHum->play();
+		}
 	}
 }
