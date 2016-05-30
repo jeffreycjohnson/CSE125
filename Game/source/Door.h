@@ -2,6 +2,7 @@
 #define DOOR_H
 
 #include "Target.h"
+#include "Sound.h"
 
 #include <map>
 #include <vector>
@@ -19,7 +20,9 @@ class Door : public Target
 {
 private:
 	DoorMovement moveDirection;
+	Sound* unlockSound;
 	glm::vec3 initPosit;
+	bool locked;
 
 	float openness = 0.0;
 

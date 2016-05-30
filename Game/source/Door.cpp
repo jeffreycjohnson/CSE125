@@ -6,7 +6,7 @@
 Door::Door() {}
 
 Door::Door(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, DoorMovement moveDirection, std::string groupName)
-	: moveDirection(moveDirection)
+	: moveDirection(moveDirection), locked(true)
 {
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);
@@ -38,6 +38,8 @@ glm::vec3 Door::moveDirectionVec()
 
 void Door::create()
 {
+	// Seems like doors in master.blend have positions that work well enough
+	unlockSound = Sound::affixSoundToDummy(gameObject, new Sound("zeldasecret", false, false, 1.0f, true));
 	initPosit = gameObject->transform.getPosition();
 }
 
@@ -48,6 +50,11 @@ void Door::fixedUpdate()
 	openness += (deltaTime) * (isActivated() ? 1 : -1);
 	openness = std::min(0.5f, openness);
 	openness = std::max(0.0f, openness);
+
+	if (locked && isActivated()) {
+		locked = false;
+		unlockSound->play();
+	}
 
 	if (moveDirection == BOTH) {
 		gameObject->findChildByNameContains("Door_Left")->transform.setPosition(moveDirectionVec() * -openness * 2.5f);
