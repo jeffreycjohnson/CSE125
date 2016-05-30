@@ -24,9 +24,9 @@ ForceField::ForceField(std::vector<std::string> tokens, std::map<std::string, Ta
 
 void ForceField::create()
 {
-	turnOn = Sound::affixSoundToDummy(gameObject, new Sound("ff_on", false, false, 1.0f, true));
-	turnOff = Sound::affixSoundToDummy(gameObject, new Sound("ff_off", false, false, 1.0f, true));
-	passiveHum = Sound::affixSoundToDummy(gameObject, new Sound("ff_passive", false, true, 1.0f, true));// new Sound("ff_passive", true, true, 1.0f, true));
+	turnOn = Sound::affixSoundToDummy(gameObject, new Sound("ff_on", false, false, 0.25f, true));
+	turnOff = Sound::affixSoundToDummy(gameObject, new Sound("ff_off", false, false, 0.25f, true));
+	passiveHum = Sound::affixSoundToDummy(gameObject, new Sound("ff_passive", true, true, 0.25f, true));
 }
 
 void ForceField::fixedUpdate()

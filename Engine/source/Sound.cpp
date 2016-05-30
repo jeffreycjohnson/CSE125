@@ -69,7 +69,7 @@ void Sound::update(float)
 
 void Sound::play()
 {
-	std::cout << "SOUND: " << name << std::endl;
+	//std::cout << "SOUND: " << name << std::endl;
 	if (playing)
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
@@ -304,6 +304,7 @@ Sound* Sound::affixSoundToDummy(GameObject* parent, Sound * sound)
 	auto dummy = new GameObject;
 	dummy->setName(sound->name);
 	dummy->addComponent(sound);
+	parent->addChild(dummy);
 	return sound;
 }
 
@@ -334,7 +335,7 @@ void Sound::initFromConfig()
 		//int exinfo = file.getInt(*i, "exinfo");
 		//TODO: Don't know what exinfo is
 		//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
-		system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd);
+		FMODErrorCheck( system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd), fileName );
 		soundMap.insert({ *i, soundToAdd });
 	}
 	//Sanity check
