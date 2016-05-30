@@ -5,11 +5,12 @@
 
 Door::Door() {}
 
-Door::Door(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, DoorMovement moveDirection, std::string groupName)
+Door::Door(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, DoorMovement moveDirection, std::string groupName, bool canReopen)
 	: moveDirection(moveDirection)
 {
 	int targetID = std::stoi(tokens[1]);
 	int threshold = std::stoi(tokens[2]);
+	reopen = canReopen;
 
 	setThreshold(threshold);
 	(*idToTarget)[groupName + std::to_string(targetID)] = this;
@@ -45,7 +46,11 @@ void Door::fixedUpdate()
 {
 	float deltaTime = Timer::fixedTimestep;
 
-	openness += (deltaTime) * (isActivated() ? 1 : -1);
+	if (reopen) {
+		openness += (deltaTime) * (isActivated() ? 1 : -1);
+	}
+	else openness += (deltaTime) * (isActivated() ? 1 : 0);
+
 	openness = std::min(0.5f, openness);
 	openness = std::max(0.0f, openness);
 

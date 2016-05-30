@@ -131,6 +131,9 @@ void FPSMovement::fixedUpdate()
 	recalculate();
 	getPlayerRadii();
 	raycastMouse();
+
+	if(Input::getAxis("respawn", clientID) > 0.0f)
+		respawn();
 }
 
 void FPSMovement::getPlayerRadii() {

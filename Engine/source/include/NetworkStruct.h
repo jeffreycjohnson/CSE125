@@ -82,7 +82,7 @@ struct InputNetworkData
 
 	float yaw, pitch, roll;
 	float mouseX, mouseY;
-	float jump;
+	float jump, respawn;
 
 	float aim;
 };
