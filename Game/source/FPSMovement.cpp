@@ -32,7 +32,7 @@
 float FPSMovement::baseHSpeed = 4.0f;
 float FPSMovement::baseVSpeed = -0.2f;
 float FPSMovement::startJumpSpeed = 10.f;
-float FPSMovement::vAccel = -37.5f;
+float FPSMovement::vAccel = -27.5f;
 float FPSMovement::deathFloor = -20.0f;
 float FPSMovement::interactDistance = 5.0f;
 
