@@ -401,6 +401,7 @@ void Sound::setGameObject(GameObject* object) {
 Sound* Sound::affixSoundToDummy(GameObject* parent, Sound * sound)
 {
 	auto dummy = new GameObject;
+	ASSERT(parent != nullptr, "Failed to affix dummy sound game object. Parent gameObject is null.");
 	dummy->setName(sound->name);
 	dummy->addComponent(sound);
 	parent->addChild(dummy);
