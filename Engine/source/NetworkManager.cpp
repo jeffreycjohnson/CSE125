@@ -32,10 +32,13 @@ NetworkManager::~NetworkManager()
 NetworkState NetworkManager::state;
 std::vector<ClientID> NetworkManager::clientIDs;
 ClientID NetworkManager::myClientID;
-Texture* NetworkManager::connectingScreen = nullptr;
+Texture* NetworkManager::loadingScreen = nullptr;
+//Texture* NetworkManager::waitingScreen = nullptr;
 
 std::vector<NetworkResponse> NetworkManager::postbox;
 std::vector<char> NetworkManager::lastBytesSent;
+bool NetworkManager::gameStarted = false;
+bool NetworkManager::waiting = false;
 
 NetworkState NetworkManager::getState()
 {
@@ -234,7 +237,7 @@ void NetworkManager::SendServerMessages()
 }
 
 // TODO allow the sender to force all messages to be resolved, not just the latest one
-void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType, int messageID, int forClient)
+void NetworkManager::PostMessage(const std::vector<char>& bytes, MessageType messageType, int messageID, int forClient)
 {
 	if (NetworkManager::state != SERVER_MODE) return;
 
@@ -244,7 +247,6 @@ void NetworkManager::PostMessage(const std::vector<char>& bytes, int messageType
 
 // --- CLIENT FUNC --- //
 
-static bool firstReceivedMessages = false;
 std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std::string serverIP, std::string port)
 {
 	// Allows us to connect/reconnect to a server if an existing connection hasn't been established
@@ -265,7 +267,6 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 	bool isConnected = false;
 	while (!isConnected)
 	{
-		firstReceivedMessages = true;
 		std::vector<NetworkResponse> messages = ClientNetwork::receiveMessages();
 
 		for (auto& response : messages)
@@ -301,7 +302,6 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 }
 
 static int numClientMessages = 0;
-static bool fullyDownloadedMap = false;
 void NetworkManager::ReceiveClientMessages()
 {
 	if (NetworkManager::state != CLIENT_MODE)
@@ -313,11 +313,6 @@ void NetworkManager::ReceiveClientMessages()
 	for (auto& received : receivedMessages)
 	{
 		int& msgType = received.messageType;
-
-		// If these are the first few messages we've received, try to figure out if we've fully downloaded the map yet
-		if (firstReceivedMessages && !fullyDownloadedMap) {
-			fullyDownloadedMap = true && !(msgType == CREATE_OBJECT_NETWORK_DATA || msgType == MESH_NETWORK_DATA);
-		}
 
 		switch (msgType)
 		{
@@ -348,6 +343,9 @@ void NetworkManager::ReceiveClientMessages()
 			//std::cerr << "Sound MAKE!" << std::endl;
 			Renderer::crosshair->Dispatch(received.body, received.messageType, received.id);
 			break;
+		case GAME_START_EVENT:
+			NetworkManager::gameStarted = true;
+			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
 			//std::cerr << numClientMessages++ << "RECV OBJ DATA" << std::endl;
@@ -356,13 +354,6 @@ void NetworkManager::ReceiveClientMessages()
 		default:
 			std::cerr << numClientMessages++ << "Client received message of type " << msgType << ", don't know what to do with it..." << std::endl;
 		}
-	}
-
-	// Change the state after fully downloading the map, so that we can not hide the loading screen
-	if (fullyDownloadedMap && firstReceivedMessages) {
-		fullyDownloadedMap = true;
-		firstReceivedMessages = false;
-		std::cerr << "Fully downloaded the map!" << std::endl;
 	}
 }
 
@@ -386,16 +377,20 @@ void NetworkManager::SendClientMessages()
 void NetworkManager::drawUI()
 {
 	if (state == CLIENT_MODE) {
-		if (!NetworkManager::connectingScreen) {
-			NetworkManager::connectingScreen = new Texture("assets/konnekting.png", true);
+		bool connected = ClientNetwork::isConnected();
+		if (!NetworkManager::loadingScreen) {
+//			NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
+			NetworkManager::loadingScreen = new Texture("assets/konnekting.png", true);
 		}
-		if (firstReceivedMessages && !fullyDownloadedMap) {
+		if (connected && !gameStarted) {
 			// Draw "connecting" screen
-			Renderer::drawSplash(NetworkManager::connectingScreen, true);
+			Renderer::drawSplash(NetworkManager::loadingScreen, true);
 		}
-		if (fullyDownloadedMap && NetworkManager::connectingScreen != nullptr) {
-			delete NetworkManager::connectingScreen;
-			NetworkManager::connectingScreen = nullptr;
+		if (gameStarted && NetworkManager::loadingScreen != nullptr) {
+			delete NetworkManager::loadingScreen;
+			NetworkManager::loadingScreen = nullptr;
+//			delete NetworkManager::waitingScreen;
+//			NetworkManager::waitingScreen = nullptr;
 		}
 	}
 }

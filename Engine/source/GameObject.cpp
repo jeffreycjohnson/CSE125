@@ -25,6 +25,7 @@ int GameObject::objectIDCounter = 1;
 std::multimap<std::string, GameObject*> GameObject::nameMap;
 std::map<int, GameObject*> GameObject::idMap;
 GameObject GameObject::SceneRoot(0, "SceneRoot");
+long GameObject::updateCalled = 0;
 
 GameObject * GameObject::FindByName(const std::string& name)
 {
@@ -69,6 +70,9 @@ std::vector<GameObject*> GameObject::FindAllByPrefix(const std::string & name)
 
 void GameObject::UpdateScene(NetworkState caller)
 {
+	// Prevent overflow
+	updateCalled = std::max(updateCalled, updateCalled + 1);
+
 	while (Timer::nextFixedStep()) {
 		for (auto& callback : preFixedCallbacks) callback();
 
@@ -439,6 +443,11 @@ void GameObject::postToNetwork()
 	}
 
 	NetworkManager::PostMessage(serialize(), CREATE_OBJECT_NETWORK_DATA, getID());
+}
+
+long GameObject::GetUpdateCalled()
+{
+	return GameObject::updateCalled;
 }
 
 void GameObject::DestroyObjectByID(int objectID) {

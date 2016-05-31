@@ -69,6 +69,14 @@ int main(int argc, char** argv)
 	// the AR is created as a component just to take advantage of `create()`
 	ActivatorRegistrator ar;
 	GameObject::SceneRoot.addComponent(&ar);
+	GameObject::AddPostFixedUpdateCallback([]() {
+		// Wait for 3 server updates before alerting clients that "loading" is complete
+		if (GameObject::GetUpdateCalled() == 3)
+		{
+			auto data = std::vector<char>();
+			NetworkManager::PostMessage(data, GAME_START_EVENT, 0);
+		}
+	});
 
 	try
 	{

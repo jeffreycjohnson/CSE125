@@ -28,7 +28,7 @@ class NetworkManager
 {
 private:
 	static NetworkState state;
-	static Texture* connectingScreen;
+	static Texture *loadingScreen;
 
 	static std::vector<ClientID> clientIDs;
 	static ClientID myClientID;
@@ -41,6 +41,8 @@ private:
 	static void ReceiveClientMessages();
 	static void SendClientMessages();
 	static std::vector<char> lastBytesSent;
+	static bool gameStarted, waiting;
+
 public:
 	NetworkManager();
 	~NetworkManager();
@@ -51,7 +53,7 @@ public:
 
 	static void attachCameraTo(ClientID client, int gameObjectID);
 
-	static void PostMessage(const std::vector<char>& bytes, int messageType, int messageID, int forClient = -1);
+	static void PostMessage(const std::vector<char>& bytes, MessageType messageType, int messageID, int forClient = -1);
 
 	static NetworkState getState();
 	static void setState(NetworkState newState);

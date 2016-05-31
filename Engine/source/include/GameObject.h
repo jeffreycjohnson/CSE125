@@ -22,6 +22,7 @@ private:
 	static std::vector<void (*)(void)> postFixedCallbacks;
 	static std::vector<void (*)(void)> preVarCallbacks;
 	static std::vector<void (*)(void)> postVarCallbacks;
+	static long updateCalled;
 
 public:
 	Transform transform;
@@ -39,6 +40,7 @@ public:
 	static void AddPreUpdateCallback(void(*callback)(void));
 	static void AddPostUpdateCallback(void(*callback)(void));
 
+	static long GetUpdateCalled();
 	static void DestroyObjectByID(int objectID);
 
 	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageID);
