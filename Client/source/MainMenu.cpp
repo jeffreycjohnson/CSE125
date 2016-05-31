@@ -38,12 +38,12 @@ void MainMenu::create()
 
 	// Screw it, use a lambda. Fuck you std::bind
 	button->onClick() = [this, button]() {
-		this->connect();
 		button->active = false;
 		Input::hideCursor();
 		if (Renderer::crosshair != nullptr) {
 			Renderer::crosshair->show();
 		}
+		this->connect();
 	};
 	elements.add("Play", button);
 	Input::showCursor();

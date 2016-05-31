@@ -1,5 +1,6 @@
 #include "LoadingScreen.h"
 #include "Renderer.h"
+#include "Crosshair.h"
 
 LoadingScreen::LoadingScreen(const std::string& splashScreen, const std::string& title) : state(BEFORE_LOAD)
 {
@@ -41,6 +42,7 @@ bool LoadingScreen::drawUI()
 
 	if (state == BEFORE_LOAD) {
 		state = LOADING;
+		Renderer::crosshair->hide();
 	}
 	else if (state == LOADING) {
 		bool validity = load();

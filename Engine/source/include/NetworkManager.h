@@ -28,7 +28,7 @@ class NetworkManager
 {
 private:
 	static NetworkState state;
-	static Texture *loadingScreen;
+	static Texture *loadingScreen, *waitingScreen;
 
 	static std::vector<ClientID> clientIDs;
 	static ClientID myClientID;

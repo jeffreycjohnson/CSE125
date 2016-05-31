@@ -33,7 +33,7 @@ NetworkState NetworkManager::state;
 std::vector<ClientID> NetworkManager::clientIDs;
 ClientID NetworkManager::myClientID;
 Texture* NetworkManager::loadingScreen = nullptr;
-//Texture* NetworkManager::waitingScreen = nullptr;
+Texture* NetworkManager::waitingScreen = nullptr;
 
 std::vector<NetworkResponse> NetworkManager::postbox;
 std::vector<char> NetworkManager::lastBytesSent;
@@ -265,6 +265,11 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 
 	// WAIT FOR THE ALL CLEAR
 	bool isConnected = false;
+
+	// Slightly dangerous: we need to make sure this is only called on the main thread
+	NetworkManager::waiting = true;
+	drawUI(); // force waiting screen
+
 	while (!isConnected)
 	{
 		std::vector<NetworkResponse> messages = ClientNetwork::receiveMessages();
@@ -292,6 +297,7 @@ std::tuple<std::vector<ClientID>, ClientID> NetworkManager::InitializeClient(std
 			}
 		}
 	}
+	NetworkManager::waiting = false;
 
 	// and when we're all done
 	GameObject::AddPreFixedUpdateCallback(NetworkManager::ReceiveClientMessages);
@@ -345,6 +351,7 @@ void NetworkManager::ReceiveClientMessages()
 			break;
 		case GAME_START_EVENT:
 			NetworkManager::gameStarted = true;
+			Renderer::crosshair->show();
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
@@ -379,18 +386,21 @@ void NetworkManager::drawUI()
 	if (state == CLIENT_MODE) {
 		bool connected = ClientNetwork::isConnected();
 		if (!NetworkManager::loadingScreen) {
-//			NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
+			NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
 			NetworkManager::loadingScreen = new Texture("assets/konnekting.png", true);
 		}
-		if (connected && !gameStarted) {
+		if (waiting) {
+			Renderer::drawSplash(NetworkManager::waitingScreen, true);
+		}
+		else if (connected && !gameStarted) {
 			// Draw "connecting" screen
 			Renderer::drawSplash(NetworkManager::loadingScreen, true);
 		}
 		if (gameStarted && NetworkManager::loadingScreen != nullptr) {
 			delete NetworkManager::loadingScreen;
 			NetworkManager::loadingScreen = nullptr;
-//			delete NetworkManager::waitingScreen;
-//			NetworkManager::waitingScreen = nullptr;
+			delete NetworkManager::waitingScreen;
+			NetworkManager::waitingScreen = nullptr;
 		}
 	}
 }

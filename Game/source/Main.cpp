@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addComponent(&ar);
 	GameObject::AddPostFixedUpdateCallback([]() {
 		// Wait for 3 server updates before alerting clients that "loading" is complete
-		if (GameObject::GetUpdateCalled() == 3)
+		if (GameObject::GetUpdateCalled() == 5)
 		{
 			auto data = std::vector<char>();
 			NetworkManager::PostMessage(data, GAME_START_EVENT, 0);
