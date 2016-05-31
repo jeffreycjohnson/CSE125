@@ -166,6 +166,8 @@ void Sound::play()
 void Sound::pause()
 {
 	playing = false;
+	channel->setPaused(true);
+	std::cout << "Sound is being paused" << std::endl;
 	postToNetwork(SoundNetworkData::soundState::PAUSE, false, -1, 0.0f);
 }
 
