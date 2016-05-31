@@ -1,4 +1,5 @@
 #include "Plate.h"
+#include "Config.h"
 
 #include <iostream>
 
@@ -27,12 +28,22 @@ Plate::~Plate()
 {
 }
 
+void Plate::create()
+{
+	ConfigFile file("config/sounds.ini");
+	auto colNode = gameObject->findChildByNameContains("Colliders");
+	auto boxCollider = colNode != nullptr ? colNode->findChildByNameContains("BoxCollider") : nullptr;
+	stepOn = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOn", false, false, file.getFloat("plate_stepOn", "volume"), true));
+	stepOff = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOff", false, false, file.getFloat("plate_stepOn", "volume"), true));
+}
+
 void Plate::fixedUpdate()
 {
 	// we're on the edge!!
 	if (!isColliding && !isNotColliding)
 	{
 		isNotColliding = true;
+		stepOff->play();
 		deactivate();
 	}
 
@@ -41,6 +52,7 @@ void Plate::fixedUpdate()
 	{
 		isNotColliding = false;
 		activate();
+		stepOn->play();
 		std::cout << "activated plate" << std::endl;
 	}
 

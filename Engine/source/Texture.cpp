@@ -44,7 +44,7 @@ void Texture::loadFromFile(const std::string& file, bool reuseHandle)
     textureHandle = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_AUTO, handle, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | flags);
     if (textureHandle == 0) {
 		FATAL((file + ": Error during loading -> " + SOIL_last_result()).c_str());
-    }
+	}
 }
 
 Texture::Texture(GLuint handle) : textureHandle(handle) {

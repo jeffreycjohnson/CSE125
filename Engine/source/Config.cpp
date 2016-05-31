@@ -189,6 +189,15 @@ bool ConfigFile::hasSection(const std::string& section) const {
 	return ( iter != sections.end() );
 }
 
+std::vector<std::string> ConfigFile::allSections() const
+{
+	std::vector<std::string> vector;
+	for (auto section : sections) {
+		vector.push_back(section.first);
+	}
+	return vector;
+}
+
 /**
  * This function returns a vector of strings, where every string is a valid
  * token in the INI file. Since INI files have different kinds of lines, this

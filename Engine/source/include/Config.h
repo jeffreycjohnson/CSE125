@@ -52,7 +52,7 @@ public:
 
     bool hasKey(const std::string& section, const std::string& key) const;
     bool hasSection(const std::string& section) const;
-
+	std::vector<std::string> allSections() const;
 
 	const std::string configFilePath;
 

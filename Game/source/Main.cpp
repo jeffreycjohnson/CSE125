@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
 	FPSMovement::loadGameSettings(file); // enable cheats
+	Sound::affixSoundToDummy(&GameObject::SceneRoot, new Sound("music", true, true, 0.8f, false, Sound::MUSIC));
 
 	bool didSetCamera = false;
 	for (auto client : clientIDs) 
@@ -58,8 +59,6 @@ int main(int argc, char** argv)
 		player->addComponent(new FPSMovement(client, sens, spawnPosition, glm::vec3(0, 1, 0), verticality));
 		player->addComponent(new Inventory());
 
-		//TODO!!!! REMOVE THIS!!!!!!!!!
-		player->addComponent(new Sound("mariojump", false, false, 1.0, true));
 		if (client == 0) verticality->addComponent(Renderer::mainCamera);
 
 		NetworkManager::attachCameraTo(client, verticality->getID());

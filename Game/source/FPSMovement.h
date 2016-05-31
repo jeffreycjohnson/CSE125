@@ -3,6 +3,7 @@
 
 #include "Component.h"
 #include "OctreeManager.h"
+#include "Sound.h"
 
 struct Sensitivity
 {
@@ -34,6 +35,10 @@ private:
 	BoxCollider* playerBoxCollider, *feetCollider;
 	Collider* floor;
 	GameObject* verticality;
+
+	// NOTE: We don't actually want broadcasts to start from FPSMovement since there's 4 of them...
+	Sound* jumpSound;
+	Sound* testBroadcastSound;
 
 	float mouseSensitivity, joystickSensitivity;
 

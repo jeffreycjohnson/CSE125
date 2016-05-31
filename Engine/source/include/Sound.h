@@ -5,9 +5,10 @@
 #include "Component.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#include <unordered_map>
 #include "NetworkManager.h"
 #include "NetworkUtility.h"
+#include <unordered_map>
+#include <queue>
 
 typedef FMOD::Sound* SoundClass;
 
@@ -16,19 +17,36 @@ class Sound : public Component
 private:
 	std::string name;
 	FMOD::Channel* channel;
-	float volume;
+	float volume, minDist, maxDist;
 	glm::vec3 position, prevPosition, velocity;
 	bool looping, playing, active, is3D;
-
+	int channelType;
 	bool isConstructed;
 
 	static FMOD_RESULT result; // For debugging
+	static bool broadcasting;
+	static std::queue<Sound*> broadcastQueue;
 
-public:
+	// Do not allow use of this constructor outside of Sound
+	// (you can crash the game this way)
 	Sound() {
 		isConstructed = false;
 	};
-	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D);
+
+public:
+	// Channel group for sound effects
+	static const int SOUND_EFFECT = 0;
+
+	// Channel group for music
+	static const int MUSIC = 1; 
+
+	// Special channel group that lowers master gain (except for on itself) of everything else
+	static const int BROADCAST = 2;
+
+	static FMOD::ChannelGroup *cgEffects, *cgMusic, *cgBroadcast, *cgGame, *masterChannelGroup;
+	static Sound* currentMusic;
+
+	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D, int type = SOUND_EFFECT);
 	void postConstructor();
 	~Sound();
 
@@ -40,8 +58,18 @@ public:
 	void setLooping(bool looping, int count);
 	void setVolume(float volume);
 
+	// Default parameter for min & max taken straight from FMOD Reference manual
+	void set3DMinMaxDistance(float min = 1.0f, float max = 10000.0f); 
+
+	// This checks if the sound is actually being played on a channel in FMOD
+	// It does NOT check the FMOD flag!
+	bool isPlaying();
+
 	//initFromConfig is broken, Do not touch, just use the macro!!!
 	static void initFromConfig();
+
+	// Useful for holding multiple sound components in one gameobject
+	static Sound* affixSoundToDummy(GameObject*, Sound*);
 
 	static FMOD::System *system;
 	static std::unordered_map<std::string, FMOD::Sound*> soundMap;
