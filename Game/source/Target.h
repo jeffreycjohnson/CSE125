@@ -19,6 +19,8 @@ private:
 
 	int positives;
 	int negatives;
+
+	bool isHacked = false;
 	
 public:
 	Target();
@@ -34,6 +36,8 @@ public:
 
 	void setThreshold(int threshold) { activationThreshold = threshold; }
 
+	void hack();
+	void unhack();
 };
 
 #endif // TARGET_H

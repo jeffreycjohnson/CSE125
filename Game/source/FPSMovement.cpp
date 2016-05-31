@@ -1,6 +1,7 @@
 #include "FPSMovement.h"
 
 #include <iostream>
+#include <typeinfo>
 
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtx/string_cast.hpp>
@@ -458,5 +459,22 @@ void FPSMovement::raycastMouse()
 	else if (clickf <= 0.01 && justClicked)
 	{
 		justClicked = false;
+	}
+
+	bool pressHack = Input::getButtonDown("hack", clientID);
+	bool pressUnhack = Input::getButtonDown("unhack", clientID);
+
+	Target* targ = hit->getComponent<Target>() ? hit->getComponent<Target>() : phit->getComponent<Target>();
+	if (targ)
+	{
+		if (pressHack)
+		{
+			targ->hack();
+			std::cerr << "target is " << typeid(targ).name() << std::endl;
+		}
+		else if (pressUnhack)
+		{
+			targ->unhack();
+		}
 	}
 }

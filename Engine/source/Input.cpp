@@ -226,18 +226,10 @@ void Input::init(GLFWwindow* win)
 
 void Input::addInputsFromConfig(std::string configfile){
 	ConfigFile file("config/buttons.ini");
-	std::string list = file.getString("ButtonList", "buttonlist");
-	std::vector<std::string> buttonsname;
-	
-	//Split
-	size_t pos = 0;
-	std::string token;
-	while ((pos = list.find(";")) != std::string::npos){
-		token = list.substr(0, pos);
-		buttonsname.push_back(token);
-		list.erase(0, pos + 1);
-	}
-	for (auto i = buttonsname.begin(); i != buttonsname.end(); ++i){
+	std::vector<std::string> buttonsname = file.allSections();
+
+	for (auto i = buttonsname.begin(); i != buttonsname.end(); ++i)
+	{
 		InputData data;
 		data.name = *i;
 		data.negativeButton = file.getString(*i, "negativeButton");
