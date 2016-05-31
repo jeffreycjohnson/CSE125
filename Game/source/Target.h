@@ -29,6 +29,8 @@ public:
 	void releaseTrigger(TriggerType triggerType);
 
 	bool isActivated();
+	int activationLevel();
+	bool isZeroedOut();
 
 	void setThreshold(int threshold) { activationThreshold = threshold; }
 

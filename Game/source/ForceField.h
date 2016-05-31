@@ -4,6 +4,8 @@
 class ForceField :
 	public Target
 {
+private:
+	int fixedThreshold = 300;
 public:
 	bool canTurnBackOn;
 

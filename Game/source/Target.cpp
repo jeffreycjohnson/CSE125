@@ -50,5 +50,15 @@ void Target::releaseTrigger(TriggerType triggerType)
 
 bool Target::isActivated()
 {
-	return ((positives - negatives) >= activationThreshold) && !isZeroed;
+	return (activationLevel() >= activationThreshold) && !isZeroedOut();
+}
+
+int Target::activationLevel()
+{
+	return positives - negatives;
+}
+
+bool Target::isZeroedOut()
+{
+	return isZeroed;
 }
