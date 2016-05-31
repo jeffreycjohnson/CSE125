@@ -37,7 +37,6 @@ void ForceField::create()
 	}
 }
 
-#include <iostream>
 void ForceField::fixedUpdate()
 {
 	if (isActivated() && gameObject->getVisible())
@@ -46,7 +45,6 @@ void ForceField::fixedUpdate()
 		gameObject->findChildByNameContains("Colliders")->setActive(false, SetAllChildren);
 		for (auto hum : passiveHum) {
 			hum->pause();
-			std::cout << "GET IN HERE PASSIVE HUM!!!!" << std::endl;
 		}
 		for (auto off : turnOff) {
 			off->play();
