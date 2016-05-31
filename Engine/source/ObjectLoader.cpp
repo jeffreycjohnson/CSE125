@@ -174,7 +174,13 @@ static GameObject* parseNode(const aiScene* scene, aiNode* currentNode, std::str
     {
 		ConfigFile file("config/sounds.ini");
         nodeObject->addComponent(lights[name]);
-		Sound::affixSoundToDummy(nodeObject, new Sound("light", true, true, file.getFloat("light","volume"), true));
+		PointLight* point = dynamic_cast<PointLight*>(lights[name]);
+		if (point != nullptr) {
+			// Only point lights can have "hums"
+			auto hum = Sound::affixSoundToDummy(nodeObject, new Sound("light", true, true, file.getFloat("light", "volume"), true));
+			// Originally wanted to set point->getVolume() to max distance, but that's not actually how FMOD works.
+			hum->set3DMinMaxDistance(point->getLightVolume ());
+		}
     }
 
 	for (unsigned int i = 0; i < currentNode->mNumMeshes; i++) {

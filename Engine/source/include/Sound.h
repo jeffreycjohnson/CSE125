@@ -17,7 +17,7 @@ class Sound : public Component
 private:
 	std::string name;
 	FMOD::Channel* channel;
-	float volume;
+	float volume, minDist, maxDist;
 	glm::vec3 position, prevPosition, velocity;
 	bool looping, playing, active, is3D;
 	int channelType;
@@ -44,6 +44,7 @@ public:
 	static const int BROADCAST = 2;
 
 	static FMOD::ChannelGroup *cgEffects, *cgMusic, *cgBroadcast, *cgGame, *masterChannelGroup;
+	static Sound* currentMusic;
 
 	Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D, int type = SOUND_EFFECT);
 	void postConstructor();
@@ -56,6 +57,9 @@ public:
 	void toggle();
 	void setLooping(bool looping, int count);
 	void setVolume(float volume);
+
+	// Default parameter for min & max taken straight from FMOD Reference manual
+	void set3DMinMaxDistance(float min = 1.0f, float max = 10000.0f); 
 
 	// This checks if the sound is actually being played on a channel in FMOD
 	// It does NOT check the FMOD flag!

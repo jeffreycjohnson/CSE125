@@ -20,6 +20,7 @@ FMOD::ChannelGroup* Sound::cgBroadcast = nullptr;
 FMOD::ChannelGroup* Sound::cgGame = nullptr;
 FMOD::ChannelGroup* Sound::cgEffects = nullptr;
 FMOD::ChannelGroup* Sound::cgMusic = nullptr;
+Sound* Sound::currentMusic = nullptr;
 bool Sound::broadcasting = false;
 
 Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D, int type)
@@ -34,14 +35,19 @@ Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume
 	this->channelType = type;
 	playing = active = playOnAwake;
 	this->postConstructor();
+	minDist = 1.0f;
+	maxDist = 10000.0f;
 }
 
 void Sound::postConstructor() {
 	result = system->playSound(soundMap[name], 0, true, &channel);
 	channel->setVolume(volume);
-	
-	if (!is3D)
+
+	if (!is3D) {
 		channel->setPriority(0);
+		channel->set3DMinMaxDistance(minDist, maxDist);
+	}
+
 	if (looping)
 	{
 		channel->setMode(FMOD_LOOP_NORMAL);
@@ -101,6 +107,9 @@ void Sound::update(float)
 
 void Sound::play()
 {
+	if (channelType == MUSIC) {
+		Sound::currentMusic = this;
+	}
 
 	// If we've played the sound once AND this instance of it is not being played again, play it
 	if (playing && !isPlaying())
@@ -204,6 +213,17 @@ void Sound::setVolume(float volume)
 		FMODErrorCheck(channel->setVolume(volume), "FMOD set volume failed.");
 	}
 	postToNetwork(SoundNetworkData::soundState::SET_VOLUME, false, -1, volume);
+}
+
+void Sound::set3DMinMaxDistance(float min, float max)
+{
+	if (!is3D) return; // Only applicable for 3D sounds
+	minDist = min;
+	maxDist = max;
+	if (channel != nullptr) {
+		FMODErrorCheck(channel->set3DMinMaxDistance(min, max), "FMOD set 3D min/max distance failed.");
+	}
+	postToNetwork(SoundNetworkData::soundState::SET_MIN_MAX, false, -1, volume);
 }
 
 
@@ -381,7 +401,9 @@ std::vector<char> Sound::serialize(SoundNetworkData::soundState ss, bool looping
 		loopingParam,
 		count,
 		volumeParam,
-		channelType
+		channelType,
+		minDist,
+		maxDist
 	);
 	return structToBytes(snd);
 }
