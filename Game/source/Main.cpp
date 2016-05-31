@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 	scene->transform.setPosition(0, -0.3f, 0);
 	GameObject::SceneRoot.addChild(scene);
 	FPSMovement::loadGameSettings(file); // enable cheats
+	Sound::affixSoundToDummy(&GameObject::SceneRoot, new Sound("music", true, true, 0.8f, false, Sound::MUSIC));
 
 	bool didSetCamera = false;
 	for (auto client : clientIDs) 

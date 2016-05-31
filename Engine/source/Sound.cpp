@@ -260,7 +260,9 @@ void Sound::updateFMOD()
 		auto snd = broadcastQueue.front();
 		Sound::broadcasting = true;
 		snd->play();
-		FMODErrorCheck(cgGame->setVolume(0.15f), "Failure lowering other channel group volume");
+		//FMODErrorCheck(cgGame->setVolume(0.15f), "Failure lowering other channel group volume");
+		FMODErrorCheck(cgEffects->setVolume(0.15f), "Failure lowering other channel group volume");
+		FMODErrorCheck(cgMusic->setVolume(0.75f), "Failure lowering other channel group volume");
 	}
 	else if (!broadcastQueue.empty() && broadcasting) {
 		auto snd = broadcastQueue.front();
@@ -270,7 +272,9 @@ void Sound::updateFMOD()
 		}
 	}
 	else if (broadcastQueue.empty()) {
-		FMODErrorCheck(cgGame->setVolume(1.0f), "Failure resetting game audio volume.");
+		//FMODErrorCheck(cgGame->setVolume(1.0f), "Failure resetting game audio volume.");
+		FMODErrorCheck(cgMusic->setVolume(1.0f), "Failure resetting game audio volume.");
+		FMODErrorCheck(cgEffects->setVolume(1.0f), "Failure resetting game audio volume.");
 	}
 
 	// Listener information is now updated in here as opposed in Camera
