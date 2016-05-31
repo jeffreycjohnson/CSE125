@@ -404,7 +404,7 @@ void FPSMovement::raycastMouse()
 	if (!oct) return;
 
 	Ray ray(verticality->transform.getWorldPosition(), glm::vec3(front));
-	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider });
+	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider }, false);
 
 	if (!cast.intersects) {
 		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
@@ -464,13 +464,13 @@ void FPSMovement::raycastMouse()
 	bool pressHack = Input::getButtonDown("hack", clientID);
 	bool pressUnhack = Input::getButtonDown("unhack", clientID);
 
+
 	Target* targ = hit->getComponent<Target>() ? hit->getComponent<Target>() : phit->getComponent<Target>();
 	if (targ)
 	{
 		if (pressHack)
 		{
 			targ->hack();
-			std::cerr << "target is " << typeid(targ).name() << std::endl;
 		}
 		else if (pressUnhack)
 		{

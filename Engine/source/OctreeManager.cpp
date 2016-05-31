@@ -26,21 +26,21 @@ OctreeManager::~OctreeManager()
 		delete dynamicObjects;
 }
 
-RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max, std::initializer_list<Collider*> ignore)
+RayHitInfo OctreeManager::raycast(const Ray & ray, Octree::BuildMode whichTree, float t_min, float t_max, std::initializer_list<Collider*> ignore, bool ignoreTriggers)
 {
 	if (glm::isnan(ray.direction).b) {
 		return RayHitInfo(); // No NaN(s) allowed.
 	}
 
 	if (whichTree == Octree::DYNAMIC_ONLY) {
-		return dynamicObjects->raycast(ray, t_min, t_max, ignore);
+		return dynamicObjects->raycast(ray, t_min, t_max, ignore, ignoreTriggers);
 	}
 	else if (whichTree == Octree::STATIC_ONLY) {
-		return staticObjects->raycast(ray, t_min, t_max, ignore);
+		return staticObjects->raycast(ray, t_min, t_max, ignore, ignoreTriggers);
 	}
 	else {
-		auto dynaHit = dynamicObjects->raycast(ray, t_min, t_max, ignore);
-		auto statHit = staticObjects->raycast(ray, t_min, t_max, ignore);
+		auto dynaHit = dynamicObjects->raycast(ray, t_min, t_max, ignore, ignoreTriggers);
+		auto statHit = staticObjects->raycast(ray, t_min, t_max, ignore, ignoreTriggers);
 		if (dynaHit.intersects && statHit.intersects) {
 			if (dynaHit.hitTime < statHit.hitTime) {
 				return dynaHit;

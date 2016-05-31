@@ -41,7 +41,7 @@ OctreeNode::~OctreeNode() {
 	tree->removeNode(this->nodeId);
 }
 
-void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initializer_list<Collider*>& ignore) {
+void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initializer_list<Collider*>& ignore, bool ignoreTriggers) {
 
 	RayHitInfo againstMe = myAABB->raycast(ray);
 
@@ -67,7 +67,7 @@ void OctreeNode::raycast(const Ray& ray, RayHitInfo& hitInfo, const std::initial
 				continue;
 			}
 		}
-		if (obj->gameObject->getName().find("_trigger") != std::string::npos) {
+		if (obj->gameObject->getName().find("_trigger") != std::string::npos && ignoreTriggers) {
 			continue;
 		}
 		auto temphit = obj->raycast(ray);
