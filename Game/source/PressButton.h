@@ -13,6 +13,7 @@ private:
 	bool isActivated;
 	float timeLeft;
 	float timeLimit;
+
 public:
 	PressButton();
 	PressButton(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName);

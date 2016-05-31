@@ -11,6 +11,7 @@
 #include "NetworkUtility.h"
 #include <iostream>
 #include "Texture.h"
+#include "Timer.h"
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 glm::mat4 PointLight::shadowMatrix = glm::perspective<float>(glm::radians(90.0f), 1.f, 0.2f, 25.f);
@@ -98,6 +99,18 @@ void Light::setGameObject(GameObject * object)
 {
 	Component::setGameObject(object);
 	postToNetwork();
+}
+
+void Light::DispatchFlashingLights(const std::vector<char>& bytes, int messageType, int messageId)
+{
+	FlashingLightsNetworkData flnd = structFromBytes<FlashingLightsNetworkData>(bytes);
+	auto go = GameObject::FindByID(flnd.objectID);
+	Light * light = go->getComponent<Light>();
+	if (light != nullptr) {
+		light->alternateLightColor = glm::vec3(flnd.colorr, flnd.colorg, flnd.colorb);
+		light->alternating = true;
+
+	}
 }
 
 void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messageId) {
@@ -352,6 +365,20 @@ float PointLight::getLightVolume()
 	auto max = std::max(std::max(color.r, color.g), color.b);
 	return (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max / 10.0f) * exponentialFalloff))
 		/ (2.0f * exponentialFalloff);
+}
+
+void PointLight::update(float)
+{
+	if (alternating) {
+		
+		glm::vec3 tmpColor;
+		tmpColor = this->color;
+		this->color = alternateLightColor;
+		this->alternateLightColor = tmpColor;
+		
+		std::cout << alternateLightColor.r << " " << alternateLightColor.g << " " << alternateLightColor.b << std::endl;
+		alternateTime = 9000;
+	}
 }
 
 void DirectionalLight::update(float)

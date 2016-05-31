@@ -30,10 +30,14 @@ public:
 	float getConstantFalloff();
 	float getLinearFalloff();
 	float getExponentialFalloff();
+	glm::vec3 alternateLightColor;
+	bool alternating;
+	int alternateTime;
 
 	void setGameObject(GameObject* object) override;
 
 	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
+	static void DispatchFlashingLights (const std::vector<char> &bytes, int messageType, int messageId);
 
     virtual void forwardPass(int index) = 0;
     virtual void deferredPass() = 0;
@@ -66,6 +70,7 @@ public:
     void setGameObject(GameObject* object) override;
     void bindShadowMap() override;
 	float getLightVolume();
+	void update(float) override;
 
     Texture * gradient = nullptr;
     static glm::mat4 shadowMatrix;
