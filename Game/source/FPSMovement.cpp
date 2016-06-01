@@ -91,6 +91,7 @@ void FPSMovement::create()
 	// Add sounds
 	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("mariojump", false, false, 1.0, true, Sound::SOUND_EFFECT));
 	testBroadcastSound = Sound::affixSoundToDummy(gameObject, new Sound("voice_windows_10", false, false, 1.0, true, Sound::BROADCAST));
+	deathRattle = Sound::affixSoundToDummy(gameObject, new Sound("doomdeath", false, false, 1.0, true, Sound::SOUND_EFFECT));
 
 	//Input::hideCursor();
 	recalculate();
@@ -395,6 +396,7 @@ void FPSMovement::recalculate()
 }
 
 void FPSMovement::respawn() {
+	deathRattle->play();
 	position = initialPosition;
 	vSpeed = 0;
 }

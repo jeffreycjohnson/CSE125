@@ -2,7 +2,8 @@
 #include "Input.h"
 #include "FPSMovement.h"
 #include <iostream>
-#include "Sound.h"
+#include "Config.h"
+
 
 Laser::Laser()
 {
@@ -24,17 +25,24 @@ Laser::~Laser()
 
 void Laser::fixedUpdate()
 {
+	// Turn The Lasers off for the first time
 	if (isActivated() && !areLasersOff)
 	{
 		areLasersOff = true;
 		gameObject->setVisible(false);
-		//Sound * s = gameObject->getComponent<Sound>();
-		//s->play();
+		for (auto hum : passiveHum) {
+			hum->pause();
+		}
 	}
+	// Lasers are back on
 	else if (!isActivated() && areLasersOff && !isFixed)
 	{
 		areLasersOff = false;
 		gameObject->setVisible(true);
+
+		for (auto hum : passiveHum) {
+			hum->play();
+		}
 	}
 }
 
@@ -48,6 +56,22 @@ void Laser::collisionStay(GameObject *other)
 		FPSMovement * fps = go->getComponent<FPSMovement>();
 		if (fps != nullptr) {
 			fps->respawn();
+		}
+	}
+}
+
+void Laser::create()
+{
+	auto colNode = gameObject->findChildByNameContains("Colliders");
+	ConfigFile file("config/sounds.ini");
+	if (colNode) {
+		for (auto collider : colNode->transform.children) {
+			if (collider->gameObject) {
+				passiveHum.push_back(
+					Sound::affixSoundToDummy(
+						collider->gameObject, 
+						new Sound("ff_passive", true, true, file.getFloat("laser_passive", "volume"), true)));
+			}
 		}
 	}
 }
