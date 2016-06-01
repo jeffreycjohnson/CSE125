@@ -41,6 +41,7 @@ void PressButton::fixedUpdate()
 	if (isActivated && timeLimit > 0)
 	{
 		timeLeft -= deltaTime;
+		snd_activate->play();
 
 		if (timeLeft < 0)
 		{
@@ -72,6 +73,5 @@ void PressButton::trigger()
 		timeLeft = timeLimit == 0 ? 123456 : timeLimit;
 
 		activate();
-		snd_activate->play();
 	}
 }

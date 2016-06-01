@@ -9,7 +9,7 @@ private:
 	int fixedThreshold = 300;
 public:
 	bool canTurnBackOn;
-	std::vector<Sound*> turnOn, turnOff, passiveHum;
+	std::vector<Sound*> passiveHum;
 
 	ForceField();
 	~ForceField();

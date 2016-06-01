@@ -1,6 +1,7 @@
 #include "FPSMovement.h"
 
 #include <iostream>
+#include <typeinfo>
 
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtx/string_cast.hpp>
@@ -31,7 +32,7 @@
 float FPSMovement::baseHSpeed = 4.0f;
 float FPSMovement::baseVSpeed = -0.2f;
 float FPSMovement::startJumpSpeed = 10.f;
-float FPSMovement::vAccel = -37.5f;
+float FPSMovement::vAccel = -27.5f;
 float FPSMovement::deathFloor = -20.0f;
 float FPSMovement::interactDistance = 5.0f;
 
@@ -403,7 +404,7 @@ void FPSMovement::raycastMouse()
 	if (!oct) return;
 
 	Ray ray(verticality->transform.getWorldPosition(), glm::vec3(front));
-	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider });
+	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider }, false);
 
 	if (!cast.intersects) {
 		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
@@ -458,5 +459,22 @@ void FPSMovement::raycastMouse()
 	else if (clickf <= 0.01 && justClicked)
 	{
 		justClicked = false;
+	}
+
+	bool pressHack = Input::getButtonDown("hack", clientID);
+	bool pressUnhack = Input::getButtonDown("unhack", clientID);
+
+
+	Target* targ = hit->getComponent<Target>() ? hit->getComponent<Target>() : phit->getComponent<Target>();
+	if (targ)
+	{
+		if (pressHack)
+		{
+			targ->hack();
+		}
+		else if (pressUnhack)
+		{
+			targ->unhack();
+		}
 	}
 }

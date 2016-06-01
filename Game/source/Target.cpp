@@ -50,7 +50,7 @@ void Target::releaseTrigger(TriggerType triggerType)
 
 bool Target::isActivated()
 {
-	return (activationLevel() >= activationThreshold) && !isZeroedOut();
+	return isHacked || ((activationLevel() >= activationThreshold) && !isZeroedOut());
 }
 
 int Target::activationLevel()
@@ -61,4 +61,14 @@ int Target::activationLevel()
 bool Target::isZeroedOut()
 {
 	return isZeroed;
+}
+
+void Target::hack()
+{
+	isHacked = true;
+}
+
+void Target::unhack()
+{
+	isHacked = false;
 }
