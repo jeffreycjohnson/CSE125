@@ -70,7 +70,7 @@ void Laser::create()
 				passiveHum.push_back(
 					Sound::affixSoundToDummy(
 						collider->gameObject, 
-						new Sound("light_passive", true, true, file.getFloat("laser_passive", "volume"), true)));
+						new Sound("laser_passive", true, true, file.getFloat("laser_passive", "volume"), true)));
 			}
 		}
 	}
