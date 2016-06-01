@@ -28,7 +28,6 @@ class NetworkManager
 {
 private:
 	static NetworkState state;
-	static Texture *loadingScreen, *waitingScreen;
 
 	static std::vector<ClientID> clientIDs;
 	static ClientID myClientID;
@@ -41,7 +40,10 @@ private:
 	static void ReceiveClientMessages();
 	static void SendClientMessages();
 	static std::vector<char> lastBytesSent;
-	static bool gameStarted, waiting;
+
+	// Client Side UI rendering, only
+	static Texture *loadingScreen, *waitingScreen, *deadScreen;
+	static bool gameStarted, waiting, myClientIsDead;
 
 public:
 	NetworkManager();

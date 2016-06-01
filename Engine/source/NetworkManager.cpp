@@ -27,18 +27,25 @@ NetworkManager::~NetworkManager()
 	NetworkManager::state = SHUTDOWN;
 }
 
-// --- GENERAL FUNC -- //
+// --- STATIC VAR DECLS ---
 
 NetworkState NetworkManager::state;
 std::vector<ClientID> NetworkManager::clientIDs;
 ClientID NetworkManager::myClientID;
-Texture* NetworkManager::loadingScreen = nullptr;
-Texture* NetworkManager::waitingScreen = nullptr;
 
 std::vector<NetworkResponse> NetworkManager::postbox;
 std::vector<char> NetworkManager::lastBytesSent;
+
+// --- STATIC VAR DECLS FOR CLIENT UI RENDERING --
+
 bool NetworkManager::gameStarted = false;
 bool NetworkManager::waiting = false;
+bool NetworkManager::myClientIsDead = false;
+Texture* NetworkManager::loadingScreen = nullptr;
+Texture* NetworkManager::waitingScreen = nullptr;
+Texture* NetworkManager::deadScreen = nullptr;
+
+// --- GENERAL FUNC -- //
 
 NetworkState NetworkManager::getState()
 {
@@ -353,6 +360,12 @@ void NetworkManager::ReceiveClientMessages()
 			NetworkManager::gameStarted = true;
 			Renderer::crosshair->show();
 			break;
+		case PLAYER_HAS_DIED_EVENT:
+			myClientIsDead = true;
+			break;
+		case PLAYER_HAS_RESPAWNED_EVENT:
+			myClientIsDead = false;
+			break;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
 			//std::cerr << numClientMessages++ << "RECV OBJ DATA" << std::endl;
@@ -388,8 +401,12 @@ void NetworkManager::drawUI()
 		if (!NetworkManager::loadingScreen) {
 			NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
 			NetworkManager::loadingScreen = new Texture("assets/konnekting.png", true);
+			NetworkManager::deadScreen = new Texture("assets/getgood.png", true);
 		}
-		if (waiting) {
+		if (myClientIsDead && gameStarted) {
+			Renderer::drawSplash(NetworkManager::deadScreen, true);
+		}
+		else if (waiting) {
 			Renderer::drawSplash(NetworkManager::waitingScreen, true);
 		}
 		else if (connected && !gameStarted) {
@@ -400,7 +417,9 @@ void NetworkManager::drawUI()
 			delete NetworkManager::loadingScreen;
 			NetworkManager::loadingScreen = nullptr;
 			delete NetworkManager::waitingScreen;
+			delete NetworkManager::deadScreen;
 			NetworkManager::waitingScreen = nullptr;
+			NetworkManager::deadScreen = nullptr;
 		}
 	}
 }
