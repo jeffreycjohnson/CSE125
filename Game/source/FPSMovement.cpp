@@ -88,10 +88,14 @@ void FPSMovement::create()
 	playerBoxCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_body")->getComponent<BoxCollider>();
 	feetCollider = player->findChildByName("Colliders")->findChildByName("BoxCollider_feet")->getComponent<BoxCollider>();
 
+	ConfigFile soundConfig("config/sounds.ini");
 	// Add sounds
-	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("mariojump", false, false, 1.0, true, Sound::SOUND_EFFECT));
 	testBroadcastSound = Sound::affixSoundToDummy(gameObject, new Sound("voice_windows_10", false, false, 1.0, true, Sound::BROADCAST));
-	deathRattle = Sound::affixSoundToDummy(gameObject, new Sound("doomdeath", false, false, 1.0, true, Sound::SOUND_EFFECT));
+	float jumpVol = soundConfig.getFloat("jumpsound", "volume");
+	float deathVol = soundConfig.getFloat("deathsound", "volume");
+
+	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("jumpsound", false, false, jumpVol, true, Sound::SOUND_EFFECT));
+	deathRattle = Sound::affixSoundToDummy(gameObject, new Sound("deathsound", false, false, deathVol, true, Sound::SOUND_EFFECT));
 
 	//Input::hideCursor();
 	recalculate();
