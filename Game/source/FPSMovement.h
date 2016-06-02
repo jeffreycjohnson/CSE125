@@ -39,6 +39,7 @@ private:
 	// NOTE: We don't actually want broadcasts to start from FPSMovement since there's 4 of them...
 	Sound* jumpSound;
 	Sound* testBroadcastSound;
+	Sound* deathRattle;
 
 	float mouseSensitivity, joystickSensitivity;
 
