@@ -44,6 +44,11 @@ void Crosshair::hide()
 	draw = false;
 }
 
+CrosshairNetworkData::CrosshairState Crosshair::getState()
+{
+	return currentState;
+}
+
 // Called by FPSMovement to set State based on what you are looking at
 void Crosshair::setState(CrosshairNetworkData::CrosshairState state, int clientID)
 {

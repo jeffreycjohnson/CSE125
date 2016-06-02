@@ -165,6 +165,7 @@ void Renderer::init(int window_width, int window_height) {
     resize(windowWidth, windowHeight);
 }
 
+#include <iostream>
 void Renderer::loop(NetworkState caller) {
 	if (caller == NetworkState::SERVER_MODE && !drawDebug) {
 		std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);

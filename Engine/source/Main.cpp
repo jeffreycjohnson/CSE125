@@ -72,12 +72,8 @@ void InitializeEngine(std::string windowName)
     //set callbacks
     glfwSetWindowFocusCallback(window, Renderer::focus);
 
-    if (!window)
-    {
-        LOG("Window creation failed");
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
+	ASSERT(window != nullptr, "Window creation failed.");
+    
     glfwMakeContextCurrent(window);
     mainWindow = window;
 

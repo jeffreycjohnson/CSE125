@@ -35,8 +35,6 @@ Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume
 	this->channelType = type;
 	playing = active = playOnAwake;
 	this->postConstructor();
-	minDist = 1.0f;
-	maxDist = 10000.0f;
 }
 
 void Sound::postConstructor() {
@@ -45,7 +43,6 @@ void Sound::postConstructor() {
 
 	if (!is3D) {
 		channel->setPriority(0);
-		channel->set3DMinMaxDistance(minDist, maxDist);
 	}
 
 	if (looping)
@@ -214,19 +211,6 @@ void Sound::setVolume(float volume)
 	}
 	postToNetwork(SoundNetworkData::soundState::SET_VOLUME, false, -1, volume);
 }
-
-void Sound::set3DMinMaxDistance(float min, float max)
-{
-	if (!is3D) return; // Only applicable for 3D sounds
-	minDist = min;
-	maxDist = max;
-	if (channel != nullptr) {
-		FMODErrorCheck(channel->set3DMinMaxDistance(min, max), "FMOD set 3D min/max distance failed.");
-	}
-	postToNetwork(SoundNetworkData::soundState::SET_MIN_MAX, false, -1, volume);
-}
-
-
 
 void Sound::init()
 {
@@ -401,9 +385,7 @@ std::vector<char> Sound::serialize(SoundNetworkData::soundState ss, bool looping
 		loopingParam,
 		count,
 		volumeParam,
-		channelType,
-		minDist,
-		maxDist
+		channelType
 	);
 	return structToBytes(snd);
 }

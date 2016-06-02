@@ -407,7 +407,9 @@ void FPSMovement::raycastMouse()
 	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider }, false);
 
 	if (!cast.intersects) {
-		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
+		if (Renderer::crosshair->getState() != CrosshairNetworkData::CrosshairState::DEFAULT) {
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
+		}
 		return; // ^ Doubt this has anything to do with it, but it could help with frame-rate lag?
 	}
 

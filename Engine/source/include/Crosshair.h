@@ -17,6 +17,7 @@ public:
 	bool drawUI();
 	void show();
 	void hide();
+	CrosshairNetworkData::CrosshairState getState();
 
 	static void setState(CrosshairNetworkData::CrosshairState state, int clientID);
 	void Dispatch(const std::vector<char> &bytes, int messageType, int messageId);

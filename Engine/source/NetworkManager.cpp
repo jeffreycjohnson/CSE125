@@ -399,7 +399,8 @@ void NetworkManager::drawUI()
 	if (state == CLIENT_MODE) {
 		bool connected = ClientNetwork::isConnected();
 		if (!NetworkManager::loadingScreen) {
-			NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
+			// Load all the textures at once
+			//NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
 			NetworkManager::loadingScreen = new Texture("assets/konnekting.png", true);
 			NetworkManager::deadScreen = new Texture("assets/getgood.png", true);
 		}
@@ -407,7 +408,7 @@ void NetworkManager::drawUI()
 			Renderer::drawSplash(NetworkManager::deadScreen, true);
 		}
 		else if (waiting) {
-			Renderer::drawSplash(NetworkManager::waitingScreen, true);
+			//Renderer::drawSplash(NetworkManager::waitingScreen, true); // this doesn't actually work
 		}
 		else if (connected && !gameStarted) {
 			// Draw "connecting" screen
@@ -416,9 +417,9 @@ void NetworkManager::drawUI()
 		if (gameStarted && NetworkManager::loadingScreen != nullptr) {
 			delete NetworkManager::loadingScreen;
 			NetworkManager::loadingScreen = nullptr;
-			delete NetworkManager::waitingScreen;
+			//delete NetworkManager::waitingScreen;
+			//NetworkManager::waitingScreen = nullptr;
 			delete NetworkManager::deadScreen;
-			NetworkManager::waitingScreen = nullptr;
 			NetworkManager::deadScreen = nullptr;
 		}
 	}

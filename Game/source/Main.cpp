@@ -20,6 +20,9 @@
 extern void RunEngine(NetworkState caller);
 extern void InitializeEngine(std::string windowName);
 
+bool gameStarted = false; // ugh, fuck it
+int waitTicks = 0;
+
 int main(int argc, char** argv)
 {
     InitializeEngine("SERVER");
@@ -69,12 +72,16 @@ int main(int argc, char** argv)
 	// the AR is created as a component just to take advantage of `create()`
 	ActivatorRegistrator ar;
 	GameObject::SceneRoot.addComponent(&ar);
+	waitTicks = file.getInt("GameSettings", "serverExtraWaitTicks");
+
 	GameObject::AddPostFixedUpdateCallback([]() {
-		// Wait for 3 server updates before alerting clients that "loading" is complete
-		if (GameObject::GetUpdateCalled() == 5)
+		// Wait for N server updates before alerting clients that "loading" is complete
+		if (GameObject::GetUpdateCalled() >= waitTicks && !gameStarted)
 		{
 			auto data = std::vector<char>();
 			NetworkManager::PostMessage(data, GAME_START_EVENT, 0);
+			std::cerr << "GAME STARTED!" << std::endl;
+			gameStarted = true;
 		}
 	});
 
