@@ -70,14 +70,14 @@ std::vector<GameObject*> GameObject::FindAllByPrefix(const std::string & name)
 
 void GameObject::UpdateScene(NetworkState caller)
 {
-	// Prevent overflow
-	updateCalled = std::max(updateCalled, updateCalled + 1);
-
 	while (Timer::nextFixedStep()) {
 		for (auto& callback : preFixedCallbacks) callback();
 
 		// server or offline
 		SceneRoot.fixedUpdate();
+
+		// Prevent overflow
+		updateCalled = std::max(updateCalled, updateCalled + 1);
 
 		for (auto& callback : postFixedCallbacks) callback();
 	}
