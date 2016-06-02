@@ -39,6 +39,7 @@
     <ClCompile Include="source\GodSummoner.cpp" />
     <ClCompile Include="source\Main.cpp" />
     <ClCompile Include="source\FPSMovement.cpp" />
+    <ClCompile Include="source\SoundTrigger.cpp" />
     <ClCompile Include="source\Target.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -66,6 +67,7 @@
     <ClInclude Include="source\ActivatorRegistrator.h" />
     <ClInclude Include="source\FPSMovement.h" />
     <ClInclude Include="source\GodSummoner.h" />
+    <ClInclude Include="source\SoundTrigger.h" />
     <ClInclude Include="source\Target.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -21,6 +21,7 @@
 #include "FixedChestTarget.h"
 #include "ChestTarget.h"
 #include "ForceField.h"
+#include "SoundTrigger.h"
 
 std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 {
@@ -48,6 +49,7 @@ std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 	{ "fixedkey_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyActivator(args, idToTarget, groupName); } },
 	{ "fixedchest_" ,  [](auto args, auto idToTarget, auto groupName) {return new ChestActivator(args, idToTarget, groupName); } },
 	{ "chest_" ,  [](auto args, auto idToTarget, auto groupName) {return new ChestActivator(args, idToTarget, groupName); } },
+	{ "sndtrig_" ,  [](auto args, auto idToTarget, auto groupName) {return new SoundTrigger(args); } },
 };
 
 std::vector<std::string> split(const std::string &s, char delim) 
