@@ -367,8 +367,10 @@ void NetworkManager::ReceiveClientMessages()
 			break;
 		case PLAYER_HAS_DIED_EVENT:
 			myClientIsDead = true;
+			std::cerr << "Received PLAYER_HAS_DIED_EVENT" << std::endl;
 			break;
 		case PLAYER_HAS_RESPAWNED_EVENT:
+			std::cerr << "Received PLAYER_HAS_RESPAWNED_EVENT" << std::endl;
 			myClientIsDead = false;
 			break;
 		case CREATE_OBJECT_NETWORK_DATA:

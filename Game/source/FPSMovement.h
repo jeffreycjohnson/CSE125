@@ -5,6 +5,9 @@
 #include "OctreeManager.h"
 #include "Sound.h"
 
+#include "NetworkManager.h"
+#include "NetworkStruct.h"
+
 struct Sensitivity
 {
 	float mouseSensitivity;
@@ -31,6 +34,10 @@ private:
 	static float deathFloor;
 	static float interactDistance;
 
+	// DeathSplash(tm)
+	float deathTimer, deathDefaultTime;
+	bool  deaded, justDeaded;
+
 	OctreeManager* oct;
 	BoxCollider* playerBoxCollider, *feetCollider;
 	Collider* floor;
@@ -38,6 +45,7 @@ private:
 
 	// NOTE: We don't actually want broadcasts to start from FPSMovement since there's 4 of them...
 	Sound* jumpSound;
+	Sound* landSound;
 	Sound* testBroadcastSound;
 	Sound* deathRattle;
 

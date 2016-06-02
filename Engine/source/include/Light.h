@@ -53,7 +53,6 @@ protected:
 	glm::vec3 alternateLightColor;
 	bool alternating = false;
 	int alternateFrequency = 0;
-	Material * alternateMaterial;
 
 	// For now I'm ignoring this and hardcoding it to use the defaults
 	float constantFalloff = 1, linearFalloff = 0, exponentialFalloff = 1;

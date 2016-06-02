@@ -47,6 +47,13 @@ FPSMovement::FPSMovement(
 {
 	this->front = glm::vec3(0, 0, -1);
 
+	this->deathTimer = 0.0;
+	this->deaded = false;
+	this->justDeaded = false;
+
+	ConfigFile file("config/options.ini");
+	this->deathDefaultTime = file.getFloat("GameSettings", "deathDefaultTime");
+
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
 	pastFirstTick = false;
@@ -93,9 +100,11 @@ void FPSMovement::create()
 	testBroadcastSound = Sound::affixSoundToDummy(gameObject, new Sound("voice_windows_10", false, false, 1.0, true, Sound::BROADCAST));
 	float jumpVol = soundConfig.getFloat("jumpsound", "volume");
 	float deathVol = soundConfig.getFloat("deathsound", "volume");
+	float landVol = soundConfig.getFloat("landsound", "volume");
 
 	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("jumpsound", false, false, jumpVol, true, Sound::SOUND_EFFECT));
 	deathRattle = Sound::affixSoundToDummy(gameObject, new Sound("deathsound", false, false, deathVol, true, Sound::SOUND_EFFECT));
+	landSound = Sound::affixSoundToDummy(gameObject, new Sound("landsound", false, false, landVol, true));
 
 	//Input::hideCursor();
 	recalculate();
@@ -112,6 +121,22 @@ void FPSMovement::fixedUpdate()
 		glm::vec2 currMousePosition = Input::mousePosition(clientID);
 		lastMousePosition = currMousePosition;
 		return;
+	}
+
+	if (deaded) {
+		deathTimer -= dt;
+		auto data = std::vector<char>();
+		if (justDeaded) {
+			justDeaded = false;
+			std::cout << "Sending DEATH to " << clientID << std::endl;
+			NetworkManager::PostMessage(data, PLAYER_HAS_DIED_EVENT, clientID, clientID);
+		}
+		else if (deathTimer <= 0.0f) {
+			std::cout << "Sending LIFE to " << clientID << std::endl;
+			NetworkManager::PostMessage(data, PLAYER_HAS_RESPAWNED_EVENT, clientID, clientID);
+			deaded = false;
+			deathTimer = 0.0f;
+		}
 	}
 
 	glm::vec2 currMousePosition = Input::mousePosition(clientID);
@@ -285,6 +310,10 @@ void FPSMovement::handleVerticalMovement(float dt) {
 	if (!standingOnSurface)
 		checkOnSurface(position + glm::vec3(-footRadius, 0, -footRadius), -worldUp);
 
+	if (!previouslyStandingOnSurface && standingOnSurface) {
+		landSound->play();
+	}
+
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
 	RayHitInfo upHit = oct->raycast(upRay, Octree::BOTH, 0, playerBoxCollider->getHeight(), { playerBoxCollider });
@@ -401,6 +430,11 @@ void FPSMovement::recalculate()
 
 void FPSMovement::respawn() {
 	deathRattle->play();
+	deaded = true;
+	justDeaded = true;
+
+	deathTimer = deathDefaultTime;
+	std::cout << "deathTimer set " << deathTimer << std::endl;
 	position = initialPosition;
 	vSpeed = 0;
 }
