@@ -7,7 +7,7 @@ class KeyTarget :
 private:
 public:
 	glm::vec3 initPosition;
-	float openness = 0.0f;
+	float openness = -0.1f;
 	bool canBePickedUp; // allows keys not contained in chests if proper blender label
 	bool pickedUp; // stops movement animation when chest opened
 

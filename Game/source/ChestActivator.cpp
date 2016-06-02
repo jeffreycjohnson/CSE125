@@ -36,8 +36,6 @@ void ChestActivator::trigger(bool activated)
 		activate();
 		std::cout << "chest is activating key" << std::endl;
 	}
-
-	
 }
 
 void ChestActivator::trigger() {

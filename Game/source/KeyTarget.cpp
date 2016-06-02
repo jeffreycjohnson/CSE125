@@ -35,14 +35,16 @@ void KeyTarget::create()
 
 void KeyTarget::fixedUpdate()
 {
-	
 	if (!pickedUp) {
 
 		float deltaTime = Timer::fixedTimestep;
 
 		openness += (deltaTime) * (isActivated() ? 1 : -1);
-		openness = std::min(1.0f, openness);
-		openness = std::max(0.0f, openness);
+		openness = std::min(1.1f, openness);
+		openness = std::max(-0.1f, openness);
+
+		if (openness > 1.0f || openness < 0.0f) 
+			return;
 
 		gameObject->transform.setPosition(initPosition + glm::vec3(0, 0, 1) * openness * 1.2f);
 	}
