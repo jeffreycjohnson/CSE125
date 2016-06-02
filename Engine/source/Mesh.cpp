@@ -69,6 +69,7 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 		// assign it the correct one
 		Mesh * cachedMesh = Mesh::fromCachedMeshData(std::string(mnd.meshName));
 		cachedMesh->setMaterial(new Material(mnd.materialName, mnd.hasAnimations));
+		std::cout << mnd.materialName << std::endl;
 		go->addComponent(cachedMesh);
 	}
 }
@@ -151,6 +152,13 @@ void Mesh::deserializeAndApply(std::vector<char> bytes)
 	}
 
 	this->name = std::string(mnd.meshName);
+}
+
+void Mesh::toggleMaterial()
+{
+	Material * tmpMat = this->getMaterial();
+	this->setMaterial(alternateMaterial);
+	this->alternateMaterial = tmpMat;
 }
 
 void Mesh::postToNetwork()
