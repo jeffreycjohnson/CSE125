@@ -11,6 +11,8 @@
 #include "NetworkUtility.h"
 #include <iostream>
 #include "Texture.h"
+#include "Timer.h"
+#include "Material.h"
 
 glm::mat4 DirectionalLight::shadowMatrix = glm::ortho<float>(-25, 25, -25, 25, -50, 50);
 glm::mat4 PointLight::shadowMatrix = glm::perspective<float>(glm::radians(90.0f), 1.f, 0.2f, 25.f);
@@ -105,7 +107,7 @@ void Light::Dispatch(const std::vector<char> &bytes, int messageType, int messag
 	PointLight *gopointlight;
 	DirectionalLight *godirectionallight;
 	//SpotLight *gospotlight;
-
+	
 	GameObject *go = GameObject::FindByID(messageId);
 	if (go == nullptr)
 	{
@@ -352,6 +354,46 @@ float PointLight::getLightVolume()
 	auto max = std::max(std::max(color.r, color.g), color.b);
 	return (-linearFalloff + sqrtf(linearFalloff * linearFalloff - 4.0f * (constantFalloff - 256.0f * max / 10.0f) * exponentialFalloff))
 		/ (2.0f * exponentialFalloff);
+}
+
+void Light::DispatchFlashingLights(const std::vector<char>& bytes, int messageType, int messageId)
+{
+	FlashingLightsNetworkData flnd = structFromBytes<FlashingLightsNetworkData>(bytes);
+	auto go = GameObject::FindByID(flnd.objectID);
+
+	Light * light = go->getComponent<Light>();
+	if (light != nullptr) {
+		light->alternateLightColor = glm::vec3(flnd.colorr, flnd.colorg, flnd.colorb);
+		light->alternating = true;
+		light->setColor(glm::vec3(0, 0, 0));
+	}
+	Mesh * mesh = go->getComponent<Mesh>();
+	if (mesh != nullptr) {
+		mesh->alternateMaterial = new Material("assets/RedLight.mat.ini", false);
+		mesh->setMaterial(nullptr);
+	}
+
+
+}
+
+void PointLight::update(float)
+{
+	if (alternating) {
+
+		if (alternateFrequency == 0)
+			std::cout << "light " << this->gameObject->getID() << " starts flashing" << std::endl;
+		if (alternateFrequency % 25 == 0) {
+			glm::vec3 tmpColor = this->color;
+			this->color = alternateLightColor;
+			this->alternateLightColor = tmpColor;
+			Mesh * lightFixture = this->gameObject->transform.getParent()->gameObject->getComponent<Mesh>();
+			if (lightFixture != nullptr) {
+				lightFixture->toggleMaterial();
+			}
+		}
+		
+		alternateFrequency++;
+	}
 }
 
 void DirectionalLight::update(float)

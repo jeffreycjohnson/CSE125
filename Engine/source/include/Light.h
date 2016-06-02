@@ -31,9 +31,11 @@ public:
 	float getLinearFalloff();
 	float getExponentialFalloff();
 
+
 	void setGameObject(GameObject* object) override;
 
 	static void Dispatch(const std::vector<char> &bytes, int messageType, int messageId);
+	static void DispatchFlashingLights(const std::vector<char> &bytes, int messageType, int messageId);
 
     virtual void forwardPass(int index) = 0;
     virtual void deferredPass() = 0;
@@ -47,6 +49,12 @@ protected:
 	glm::vec3 color;
 	bool shadowCaster = false;
 	float radius = 0.02f;
+
+	glm::vec3 alternateLightColor;
+	bool alternating = false;
+	int alternateFrequency = 0;
+	Material * alternateMaterial;
+
 	// For now I'm ignoring this and hardcoding it to use the defaults
 	float constantFalloff = 1, linearFalloff = 0, exponentialFalloff = 1;
 
@@ -66,6 +74,7 @@ public:
     void setGameObject(GameObject* object) override;
     void bindShadowMap() override;
 	float getLightVolume();
+	void update(float) override;
 
     Texture * gradient = nullptr;
     static glm::mat4 shadowMatrix;

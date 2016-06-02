@@ -19,6 +19,7 @@ enum MessageType {
 	LIGHT_NETWORK_DATA,
 	SOUND_NETWORK_DATA,
 	CROSSHAIR_NETWORK_DATA,
+	FLASHING_LIGHTS_NETWORK_DATA,
 
 	// No struct event types
 	GAME_START_EVENT,
@@ -237,6 +238,23 @@ struct SoundNetworkData
 	{
 		memset(this->soundName, 0, sizeof(char) * MAX_SOUND_NAME);
 		strncpy_s(this->soundName, soundName.c_str(), MAX_SOUND_NAME - 1);
+
+	}
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct FlashingLightsNetworkData
+{
+
+	float colorr, colorg, colorb;
+	int objectID;
+
+	FlashingLightsNetworkData(glm::vec3 color, int objectID) {
+		this->colorr = color.r;
+		this->colorg = color.g;
+		this->colorb = color.b;
+		this->objectID = objectID;
 	}
 };
 #pragma pack(pop)
