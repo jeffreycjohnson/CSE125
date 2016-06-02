@@ -355,7 +355,7 @@ void Sound::deserializeAndApply(std::vector<char> bytes){
 		break;
 	case SoundNetworkData::soundState::CONSTRUCT:
 	default:
-		assert(isConstructed == false);
+		//assert(isConstructed == false);
 		name = std::string(sind.soundName);
 		this->volume = sind.volume;
 		this->looping = sind.looping;
