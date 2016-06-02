@@ -81,7 +81,7 @@ void PressButton::trigger()
 
 			std::vector<GameObject *> goVec = GameObject::FindAllByPrefix("PrisonLight");
 			for (auto go : goVec) {
-				FlashingLightsNetworkData flnd = FlashingLightsNetworkData(glm::vec3(150, 0, 0), go->getID());
+				FlashingLightsNetworkData flnd = FlashingLightsNetworkData(glm::vec3(10, 0, 0), go->getID());
 				NetworkManager::PostMessage(structToBytes(flnd), FLASHING_LIGHTS_NETWORK_DATA, 0);
 			}
 		}
