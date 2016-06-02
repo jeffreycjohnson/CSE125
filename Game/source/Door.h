@@ -23,7 +23,7 @@ private:
 	Sound* unlockSound;
 	glm::vec3 initPosit;
 	bool reopen, locked;
-	float openness = 0.0;
+	float openness = -0.1f;
 
 	glm::vec3 moveDirectionVec();
 public:

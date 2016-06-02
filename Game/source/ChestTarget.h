@@ -5,7 +5,7 @@ class ChestTarget :
 	public Target
 {
 public:
-	float openness = 0.0f;
+	float openness = -0.1f;
 	glm::vec3 initPosition;
 	bool isOpen;
 

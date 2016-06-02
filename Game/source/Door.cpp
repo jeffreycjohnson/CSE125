@@ -53,13 +53,15 @@ void Door::fixedUpdate()
 	}
 	else openness += (deltaTime) * (isActivated() ? 1 : 0);
 
-	openness = std::min(0.5f, openness);
-	openness = std::max(0.0f, openness);
-
+	openness = std::min(0.6f, openness);
+	openness = std::max(-0.1f, openness);
+	
 	if (locked && isActivated()) {
 		locked = false;
 		unlockSound->play();
 	}
+	
+	if (openness < 0.0 || openness > 0.5) return; 
 
 	if (moveDirection == BOTH) {
 		gameObject->findChildByNameContains("Door_Left")->transform.setPosition(moveDirectionVec() * -openness * 2.5f);
