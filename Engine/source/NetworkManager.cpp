@@ -358,6 +358,7 @@ void NetworkManager::ReceiveClientMessages()
 			break;
 		case GAME_START_EVENT:
 			NetworkManager::gameStarted = true;
+			std::cerr << "Received GAME_START_EVENT" << std::endl;
 			Renderer::crosshair->show();
 			break;
 		case PLAYER_HAS_DIED_EVENT:

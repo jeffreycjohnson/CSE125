@@ -407,9 +407,9 @@ void FPSMovement::raycastMouse()
 	auto cast = oct->raycast(ray, Octree::DYNAMIC_ONLY, 0, FPSMovement::interactDistance, { playerBoxCollider }, false);
 
 	if (!cast.intersects) {
-		if (Renderer::crosshair->getState() != CrosshairNetworkData::CrosshairState::DEFAULT) {
+		//if (Renderer::crosshair->getState() != CrosshairNetworkData::CrosshairState::DEFAULT) {
 			Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
-		}
+		//}
 		return; // ^ Doubt this has anything to do with it, but it could help with frame-rate lag?
 	}
 
@@ -422,10 +422,14 @@ void FPSMovement::raycastMouse()
 		(hit->getComponent<KeyTarget>() && (hit->getComponent<KeyTarget>()->isActivated() || hit->getComponent<KeyTarget>()->canBePickedUp))
 		|| hit->getComponent<KeyHoleTarget>())
 	{
-		Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
+		//if (Renderer::crosshair->getState() != CrosshairNetworkData::CrosshairState::INTERACTIVE) {
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::INTERACTIVE, clientID);
+		//}
 	}
 	else {
-		Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
+		//if (Renderer::crosshair->getState() != CrosshairNetworkData::CrosshairState::DEFAULT) {
+			Crosshair::setState(CrosshairNetworkData::CrosshairState::DEFAULT, clientID);
+		//}
 	}
 	float clickf = Input::getAxis("click", clientID);
 

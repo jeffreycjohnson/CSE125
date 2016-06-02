@@ -55,6 +55,7 @@ void Crosshair::setState(CrosshairNetworkData::CrosshairState state, int clientI
 	// Send network message to client to set crosshair state
 	CrosshairNetworkData c = CrosshairNetworkData(state);
 	std::vector<char> bytes = structToBytes(c);
+	Renderer::crosshair->currentState = state;
 	NetworkManager::PostMessage(bytes, CROSSHAIR_NETWORK_DATA, clientID, clientID);
 }
 
