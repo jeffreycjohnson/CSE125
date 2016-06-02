@@ -42,7 +42,7 @@ void PressButton::fixedUpdate()
 	if (isActivated && timeLimit > 0)
 	{
 		timeLeft -= deltaTime;
-		snd_activate->play();
+		snd_tick->play();
 
 		if (timeLeft < 0)
 		{
@@ -50,7 +50,6 @@ void PressButton::fixedUpdate()
 			timeLeft = 0.0f;
 
 			deactivate();
-			snd_deactivate->play();
 		}
 	}
 }
@@ -63,7 +62,7 @@ void PressButton::create()
 	}
 	ConfigFile file("config/sounds.ini");
 	snd_activate = Sound::affixSoundToDummy(go, new Sound("button_activate", false, false, file.getFloat("button_activate", "volume"), true));
-	snd_deactivate = Sound::affixSoundToDummy(go, new Sound("button_deactivate", false, false, file.getFloat("button_deactivate", "volume"), true));
+	snd_tick = Sound::affixSoundToDummy(go, new Sound("button_tick", false, false, file.getFloat("button_tick", "volume"), true));
 }
 
 void PressButton::trigger()
@@ -81,7 +80,7 @@ void PressButton::trigger()
 
 			std::vector<GameObject *> goVec = GameObject::FindAllByPrefix("PrisonLight");
 			for (auto go : goVec) {
-				FlashingLightsNetworkData flnd = FlashingLightsNetworkData(glm::vec3(10, 0, 0), go->getID());
+				FlashingLightsNetworkData flnd = FlashingLightsNetworkData(glm::vec3(0.5, 0, 0), go->getID());
 				NetworkManager::PostMessage(structToBytes(flnd), FLASHING_LIGHTS_NETWORK_DATA, 0);
 			}
 		}

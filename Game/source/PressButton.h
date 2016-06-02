@@ -9,7 +9,7 @@ class PressButton :
 {
 private:
 	const float buttonTime = 3.0f;
-	Sound *snd_activate, *snd_deactivate;
+	Sound *snd_activate, *snd_tick;
 	bool isActivated;
 	float timeLeft;
 	float timeLimit;

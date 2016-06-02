@@ -360,20 +360,19 @@ void Light::DispatchFlashingLights(const std::vector<char>& bytes, int messageTy
 {
 	FlashingLightsNetworkData flnd = structFromBytes<FlashingLightsNetworkData>(bytes);
 	auto go = GameObject::FindByID(flnd.objectID);
-
+	
 	Light * light = go->getComponent<Light>();
+	Mesh * mesh = go->getComponent<Mesh>();
+	
 	if (light != nullptr) {
 		light->alternateLightColor = glm::vec3(flnd.colorr, flnd.colorg, flnd.colorb);
 		light->alternating = true;
-		light->setColor(glm::vec3(0, 0, 0));
+		light->setColor(glm::vec3(0.1, 0.1, 0.1));
 	}
-	Mesh * mesh = go->getComponent<Mesh>();
 	if (mesh != nullptr) {
 		mesh->alternateMaterial = new Material("assets/RedLight.mat.ini", false);
 		mesh->setMaterial(nullptr);
 	}
-
-
 }
 
 void PointLight::update(float)

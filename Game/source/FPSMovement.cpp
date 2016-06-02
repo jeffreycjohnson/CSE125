@@ -100,9 +100,11 @@ void FPSMovement::create()
 	testBroadcastSound = Sound::affixSoundToDummy(gameObject, new Sound("voice_windows_10", false, false, 1.0, true, Sound::BROADCAST));
 	float jumpVol = soundConfig.getFloat("jumpsound", "volume");
 	float deathVol = soundConfig.getFloat("deathsound", "volume");
+	float landVol = soundConfig.getFloat("landsound", "volume");
 
 	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("jumpsound", false, false, jumpVol, true, Sound::SOUND_EFFECT));
 	deathRattle = Sound::affixSoundToDummy(gameObject, new Sound("deathsound", false, false, deathVol, true, Sound::SOUND_EFFECT));
+	landSound = Sound::affixSoundToDummy(gameObject, new Sound("landsound", false, false, landVol, true));
 
 	//Input::hideCursor();
 	recalculate();
@@ -307,6 +309,10 @@ void FPSMovement::handleVerticalMovement(float dt) {
 		checkOnSurface(position + glm::vec3(-footRadius, 0, footRadius), -worldUp);
 	if (!standingOnSurface)
 		checkOnSurface(position + glm::vec3(-footRadius, 0, -footRadius), -worldUp);
+
+	if (!previouslyStandingOnSurface && standingOnSurface) {
+		landSound->play();
+	}
 
 	//This ray goes straight up from the player's center
 	Ray upRay(position, worldUp);
