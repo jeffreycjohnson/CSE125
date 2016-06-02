@@ -47,6 +47,13 @@ FPSMovement::FPSMovement(
 {
 	this->front = glm::vec3(0, 0, -1);
 
+	this->deathTimer = 0.0;
+	this->deaded = false;
+	this->justDeaded = false;
+
+	ConfigFile file("config/options.ini");
+	this->deathDefaultTime = file.getFloat("GameSettings", "deathDefaultTime");
+
 	this->yaw = 0.0f;
 	this->pitch = 0.0f;
 	pastFirstTick = false;
@@ -112,6 +119,22 @@ void FPSMovement::fixedUpdate()
 		glm::vec2 currMousePosition = Input::mousePosition(clientID);
 		lastMousePosition = currMousePosition;
 		return;
+	}
+
+	if (deaded) {
+		deathTimer -= dt;
+		auto data = std::vector<char>();
+		if (justDeaded) {
+			justDeaded = false;
+			std::cout << "Sending DEATH to " << clientID << std::endl;
+			NetworkManager::PostMessage(data, PLAYER_HAS_DIED_EVENT, clientID, clientID);
+		}
+		else if (deathTimer <= 0.0f) {
+			std::cout << "Sending LIFE to " << clientID << std::endl;
+			NetworkManager::PostMessage(data, PLAYER_HAS_RESPAWNED_EVENT, clientID, clientID);
+			deaded = false;
+			deathTimer = 0.0f;
+		}
 	}
 
 	glm::vec2 currMousePosition = Input::mousePosition(clientID);
@@ -401,6 +424,11 @@ void FPSMovement::recalculate()
 
 void FPSMovement::respawn() {
 	deathRattle->play();
+	deaded = true;
+	justDeaded = true;
+
+	deathTimer = deathDefaultTime;
+	std::cout << "deathTimer set " << deathTimer << std::endl;
 	position = initialPosition;
 	vSpeed = 0;
 }

@@ -5,6 +5,9 @@
 #include "OctreeManager.h"
 #include "Sound.h"
 
+#include "NetworkManager.h"
+#include "NetworkStruct.h"
+
 struct Sensitivity
 {
 	float mouseSensitivity;
@@ -30,6 +33,10 @@ private:
 	static float vAccel;
 	static float deathFloor;
 	static float interactDistance;
+
+	// DeathSplash(tm)
+	float deathTimer, deathDefaultTime;
+	bool  deaded, justDeaded;
 
 	OctreeManager* oct;
 	BoxCollider* playerBoxCollider, *feetCollider;
