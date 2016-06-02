@@ -348,6 +348,10 @@ void NetworkManager::ReceiveClientMessages()
 			//std::cerr << numClientMessages++ << "RECV LIGHT DATA" << std::endl;
 			Light::Dispatch(received.body, received.messageType, received.id);
 			break;
+		case FLASHING_LIGHTS_NETWORK_DATA:
+			// Server tells clients once the prison doors have been opened so that they can start flashing prison lights
+			Light::DispatchFlashingLights(received.body, received.messageType, received.id);
+			break;
 		case SOUND_NETWORK_DATA:
 			//std::cerr << "Sound MAKE!" << std::endl;
 			Sound::Dispatch(received.body, received.messageType, received.id);

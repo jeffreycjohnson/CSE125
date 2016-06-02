@@ -1,6 +1,7 @@
 #include "PressButton.h"
 #include "Timer.h"
 #include "Config.h"
+#include "Light.h"
 
 PressButton::PressButton()
 {
@@ -73,5 +74,16 @@ void PressButton::trigger()
 		timeLeft = timeLimit == 0 ? 123456 : timeLimit;
 
 		activate();
+
+		// Hack to make prison lights flash when prison button is pressed
+		if (timeLimit == 0) {
+			snd_activate->play();
+
+			std::vector<GameObject *> goVec = GameObject::FindAllByPrefix("PrisonLight");
+			for (auto go : goVec) {
+				FlashingLightsNetworkData flnd = FlashingLightsNetworkData(glm::vec3(10, 0, 0), go->getID());
+				NetworkManager::PostMessage(structToBytes(flnd), FLASHING_LIGHTS_NETWORK_DATA, 0);
+			}
+		}
 	}
 }

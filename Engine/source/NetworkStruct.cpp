@@ -11,6 +11,7 @@ std::unordered_map<int, size_t> NetworkStruct::structSizes = {
 	{ LIGHT_NETWORK_DATA,          sizeof(LightNetworkData)},
 	{ SOUND_NETWORK_DATA,          sizeof(SoundNetworkData) },
 	{ CROSSHAIR_NETWORK_DATA,          sizeof(CrosshairNetworkData) },
+	{ FLASHING_LIGHTS_NETWORK_DATA,		sizeof(FlashingLightsNetworkData) }
 };
 
 int NetworkStruct::numberOfMessageTypes()

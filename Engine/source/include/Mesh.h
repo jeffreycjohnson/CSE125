@@ -39,7 +39,8 @@ public:
 
     std::string name;
 	Animation* animationRoot;
-    
+	Material* alternateMaterial = nullptr;
+
     explicit Mesh(std::string);
 	~Mesh();
 
@@ -51,6 +52,7 @@ public:
 
 	std::vector<char> serialize() override;
 	void deserializeAndApply(std::vector<char> bytes) override;
+	void toggleMaterial();
 };
 
 #endif
