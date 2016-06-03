@@ -13,6 +13,7 @@
 #include "GodSummoner.h"
 #include "Inventory.h"
 #include "Sound.h"
+#include "KeyHoleTarget.h"
 
 #include <iostream>
 #include "NetworkManager.h"
@@ -67,6 +68,7 @@ int main(int argc, char** argv)
 		NetworkManager::attachCameraTo(client, verticality->getID());
 		GameObject::SceneRoot.addChild(player);
 	}
+	KeyHoleTarget::loadKeyHoleMaterials();
 
 	// register and activate the activator registrator
 	// the AR is created as a component just to take advantage of `create()`

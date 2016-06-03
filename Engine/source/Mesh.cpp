@@ -56,22 +56,10 @@ void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int message
 		FATAL("Cannot set mesh of nonexistant gameobject");
 	}
 
-	Mesh *goMesh = go->getComponent<Mesh>();
-	if (goMesh != nullptr)
-	{
-		// it already has a mesh
-		// change what it points to
-		goMesh->deserializeAndApply(bytes);
-	}
-	else
-	{
-		// it doesn't have a mesh
-		// assign it the correct one
-		Mesh * cachedMesh = Mesh::fromCachedMeshData(std::string(mnd.meshName));
-		cachedMesh->setMaterial(new Material(mnd.materialName, mnd.hasAnimations));
-		std::cout << mnd.materialName << std::endl;
-		go->addComponent(cachedMesh);
-	}
+	Mesh * cachedMesh = Mesh::fromCachedMeshData(std::string(mnd.meshName));
+	cachedMesh->setMaterial(new Material(mnd.materialName, mnd.hasAnimations));
+	std::cout << mnd.materialName << std::endl;
+	go->addComponent(cachedMesh);
 }
 
 Mesh::Mesh() {}

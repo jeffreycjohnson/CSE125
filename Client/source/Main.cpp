@@ -14,7 +14,7 @@
 #include "MainMenu.h"
 #include "Crosshair.h"
 #include "ClientSidePredictor.h"
-
+#include "Material.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -29,6 +29,13 @@ int main(int argc, char** argv)
 	GameObject::SceneRoot.addComponent(new ClientStartingScreen("assets/loading.png", ""));
 
 	Input::hideCursor();
+	
+	auto * r = new Material("assets/TerminalRedUnlocked.mat.ini", false);
+	auto * o = new Material("assets/TerminalOrangeUnlocked.mat.ini", false);
+	auto * y = new Material("assets/TerminalYellowUnlocked.mat.ini", false);
+	auto * g = new Material("assets/TerminalGreenUnlocked.mat.ini", false);
+	auto * b = new Material("assets/TerminalBlueUnlocked.mat.ini", false);
+	auto * v = new Material("assets/TerminalVioletUnlocked.mat.ini", false);
 
 	// gotta get that CLIENT SIDE PREDICTION
 	auto callback = [](GameObject *go) 

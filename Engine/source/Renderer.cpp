@@ -171,6 +171,7 @@ void Renderer::loop(NetworkState caller) {
 		std::function<void()> updateScene = std::bind(GameObject::UpdateScene, caller);
 		auto job = workerPool->createJob(updateScene)->queue();
 		workerPool->wait(job);
+		GameObject::SceneRoot.drawUI();
 		return;
 	}
     extractObjects();

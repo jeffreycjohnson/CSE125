@@ -14,9 +14,9 @@ public:
 
 	KeyHoleTarget();
 	KeyHoleTarget(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName);
-
+	
+	static void loadKeyHoleMaterials();
 	~KeyHoleTarget();
-
 	void fixedUpdate() override;
 	void create() override;
 };
