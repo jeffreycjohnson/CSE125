@@ -4,9 +4,13 @@
 #include "GameObject.h"
 #include "Timer.h"
 
-GodSummoner::GodSummoner(GameObject *toRotate)
-	: toRotate(toRotate)
+GodSummoner::GodSummoner(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName)
 {
+	int targetID = std::stoi(tokens[1]);
+	int threshold = std::stoi(tokens[2]);
+
+	setThreshold(1);
+	(*idToTarget)[groupName + std::to_string(targetID)] = this;
 }
 
 
@@ -14,38 +18,16 @@ GodSummoner::~GodSummoner()
 {
 }
 
+void GodSummoner::create()
+{
+}
+
 void GodSummoner::fixedUpdate()
 {
 	float deltaTime = Timer::fixedTimestep;
-	if (rotating)
+
+	if (isActivated())
 	{
-		toRotate->transform.rotate(glm::quat(glm::vec3(deltaTime * 2.0f, deltaTime * 2.5f, deltaTime * 2.1f)));
-		std::cerr << toRotate->transform.getRotation().w << ", " << toRotate->transform.getRotation().x << ", " << toRotate->transform.getRotation().y << ", " << toRotate->transform.getRotation().z << ", " << std::endl;
-	}
-
-	rotating = false;
-}
-
-void GodSummoner::collisionEnter(GameObject * other)
-{
-	std::cout << "start colliding" << std::endl;
-}
-
-void GodSummoner::collisionStay(GameObject * other)
-{
-	std::cout << other->getName() << std::endl;
-	rotating = true;
-}
-
-void GodSummoner::collisionExit(GameObject * other)
-{
-	std::cout << "end colliding" << std::endl;
-}
-
-void GodSummoner::setTarget(GameObject * target)
-{
-	if (target != nullptr)
-	{
-		this->toRotate = target;
+		gameObject->transform.rotate(glm::quat(glm::vec3(0.0f, 0.0f, deltaTime * 0.25f)));
 	}
 }

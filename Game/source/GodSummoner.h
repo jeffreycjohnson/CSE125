@@ -1,23 +1,17 @@
 #ifndef GOD_SUMMONER_H
 #define GOD_SUMMONER_H
 
-#include "Component.h"
+#include "Target.h"
 
-class GodSummoner : public Component
+class GodSummoner : public Target
 {
 private:
-	bool rotating;
-	GameObject *toRotate;
 public:
-	GodSummoner(GameObject *toRotate);
+	GodSummoner(std::vector<std::string> tokens, std::map<std::string, Target*>* idToTarget, std::string groupName);
 	~GodSummoner();
 
+	void create() override;
 	void fixedUpdate() override;
-	void collisionEnter(GameObject *other) override;
-	void collisionStay(GameObject *other) override;
-	void collisionExit(GameObject *other) override;
-
-	void setTarget(GameObject *target);
 };
 
 #endif
