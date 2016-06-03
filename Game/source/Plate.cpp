@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-Plate::Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName)
-	: isNotColliding(true), isColliding(false)
+Plate::Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName, bool electro)
+	: isNotColliding(true), isColliding(false), isElectro(electro)
 {
 	// get around the fact that blender names things xxxx.001, xxxx.002 etc
 	int size = 0;
@@ -35,6 +35,7 @@ void Plate::create()
 	auto boxCollider = colNode != nullptr ? colNode->findChildByNameContains("BoxCollider") : nullptr;
 	stepOn = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOn", true, false, file.getFloat("plate_stepOn", "volume"), true));
 	stepOff = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOff", true, false, file.getFloat("plate_stepOn", "volume"), true));
+	plateElectric = Sound::affixSoundToDummy(boxCollider, new Sound("plate_electric", true, false, file.getFloat("plate_electric", "volume"), true));
 }
 
 void Plate::fixedUpdate()
@@ -43,7 +44,8 @@ void Plate::fixedUpdate()
 	if (!isColliding && !isNotColliding)
 	{
 		isNotColliding = true;
-		stepOff->play();
+		if(!isElectro)
+			stepOff->play();
 		deactivate();
 	}
 
@@ -52,8 +54,11 @@ void Plate::fixedUpdate()
 	{
 		isNotColliding = false;
 		activate();
-		stepOn->play();
-		std::cout << "activated plate" << std::endl;
+		if (isElectro) {
+			plateElectric->play();
+		}
+		else stepOn->play();
+		//std::cout << "activated plate" << std::endl;
 	}
 
 	isColliding = false;
