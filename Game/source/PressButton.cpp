@@ -10,7 +10,7 @@ PressButton::PressButton()
 PressButton::PressButton(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName)
 	: isActivated(isActivated), timeLeft(0.0f)
 {
-	timeLimit = std::stof(tokens[1]);
+	timeLimit = ((float) std::stoi(tokens[1])) / 1000.0f;
 	
 	// get around the fact that blender names things xxxx.001, xxxx.002 etc
 	int size = 0;
