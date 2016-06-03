@@ -440,7 +440,6 @@ bool Sound::isPlaying()
 void Sound::initFromConfig()
 {
 	ConfigFile file("config/sounds.ini");
-	std::string list = file.getString("SoundList", "soundlist");
 	std::vector<std::string> sounds = file.allSections();
 
 	for (auto i = sounds.begin(); i != sounds.end(); ++i) {

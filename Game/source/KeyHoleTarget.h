@@ -1,9 +1,13 @@
 #pragma once
 #include "Target.h"
+#include "Sound.h"
+#include "Config.h"
 
 class KeyHoleTarget :
 	public Target
 {
+private:
+	Sound* keyinsert;
 public:
 	int keyHoleID;
 	bool keyUsed;
@@ -14,5 +18,6 @@ public:
 	~KeyHoleTarget();
 
 	void fixedUpdate() override;
+	void create() override;
 };
 
