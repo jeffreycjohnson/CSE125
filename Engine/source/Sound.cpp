@@ -99,13 +99,23 @@ void Sound::update(float)
 		channel->setChannelGroup(Sound::cgEffects); break;
 	}
 
-	channel->setPaused(!playing); // Used at the end of update to prevent inconsistent initial volume
+	// All BROADCAST sounds are handled in updateFMOD to prevent race conditions
+	if (channelType != BROADCAST) {
+		// Used at the end of update to prevent inconsistent initial volume
+		channel->setPaused(!playing);
+	}
 }
 
 void Sound::play()
 {
 	if (channelType == MUSIC) {
 		Sound::currentMusic = this;
+	}
+	else if (channelType == BROADCAST) {
+		// enqueue the broadcast message
+		Sound::broadcastQueue.push(this);
+		postToNetwork(SoundNetworkData::soundState::PLAY, false, -1, 0.0f);
+		return;
 	}
 
 	// If we've played the sound once AND this instance of it is not being played again, play it
@@ -154,10 +164,7 @@ void Sound::play()
 			// play the sound, unless it's a broadcast message
 			channel->setPaused(!playing);
 		}
-		else {
-			// enqueue the broadcast message
-			Sound::broadcastQueue.push(this);
-		}
+
 	}
 	else
 	{
@@ -265,7 +272,7 @@ void Sound::updateFMOD()
 	if (!Sound::broadcastQueue.empty() && !broadcasting) {
 		auto snd = broadcastQueue.front();
 		Sound::broadcasting = true;
-		snd->play();
+		FMODErrorCheck(system->playSound(soundMap[snd->name], cgBroadcast, false, &snd->channel), "Broadcast sound couldn't be played.");
 		//FMODErrorCheck(cgGame->setVolume(0.15f), "Failure lowering other channel group volume");
 		FMODErrorCheck(cgEffects->setVolume(0.15f), "Failure lowering other channel group volume");
 		FMODErrorCheck(cgMusic->setVolume(0.75f), "Failure lowering other channel group volume");
@@ -275,6 +282,7 @@ void Sound::updateFMOD()
 		if (!snd->isPlaying()) {
 			broadcastQueue.pop();
 			broadcasting = false;
+			snd->channel->stop();
 		}
 	}
 	else if (broadcastQueue.empty()) {
