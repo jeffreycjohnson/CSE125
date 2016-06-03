@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-Plate::Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName, bool electro)
-	: isNotColliding(true), isColliding(false), isElectro(electro)
+Plate::Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName, bool electro, bool isFixed)
+	: isNotColliding(true), isColliding(false), isElectro(electro), isFixed(isFixed)
 {
 	// get around the fact that blender names things xxxx.001, xxxx.002 etc
 	int size = 0;
@@ -41,11 +41,12 @@ void Plate::create()
 void Plate::fixedUpdate()
 {
 	// we're on the edge!!
-	if (!isColliding && !isNotColliding)
+	if (!isColliding && !isNotColliding && !isFixed)
 	{
-		isNotColliding = true;
 		if(!isElectro)
 			stepOff->play();
+
+		isNotColliding = true;
 		deactivate();
 	}
 
@@ -54,10 +55,14 @@ void Plate::fixedUpdate()
 	{
 		isNotColliding = false;
 		activate();
-		if (isElectro) {
-			plateElectric->play();
+		
+		if (!isFixed)
+		{
+			if (isElectro) {
+				plateElectric->play();
+			}
+			else stepOn->play();
 		}
-		else stepOn->play();
 		//std::cout << "activated plate" << std::endl;
 	}
 

@@ -12,9 +12,10 @@ private:
 	bool isColliding;
 	bool isNotColliding;
 	bool isElectro;
+	bool isFixed;
 	Sound *stepOn, *stepOff, *plateElectric;
 public:
-	Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName, bool electro);
+	Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName, bool electro, bool isFixed = false);
 
 	~Plate();
 

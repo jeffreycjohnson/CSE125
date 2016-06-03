@@ -23,6 +23,7 @@
 #include "ForceField.h"
 #include "SoundTrigger.h"
 #include "WinTrigger.h"
+#include "GodSummoner.h"
 
 std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 {
@@ -39,11 +40,13 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 	{ "chest",  [](auto args, auto idToTarget, auto groupName) {return new ChestTarget(args, idToTarget, groupName); } },
 	{ "key_",  [](auto args, auto idToTarget, auto groupName) {return new KeyTarget(args, idToTarget, groupName); } },
 	{ "fixedkey_",  [](auto args, auto idToTarget, auto groupName) {return new FixedKeyTarget(args, idToTarget, groupName); } },
+	{ "map_",  [](auto args, auto idToTarget, auto groupName) {return new GodSummoner(args, idToTarget, groupName); } },
 };
 
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 {
 	{ "plate_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName, false); } },
+	{ "fplate_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName, false, true); } },
 	{ "plateElectro_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName, true); } },
 	{ "pressbutton_" ,  [](auto args, auto idToTarget, auto groupName) {return new PressButton(args, idToTarget, groupName); } },
 	{ "keyhole_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyHoleActivator(args, idToTarget, groupName); } },
