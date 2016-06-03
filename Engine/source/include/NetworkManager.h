@@ -42,8 +42,8 @@ private:
 	static std::vector<char> lastBytesSent;
 
 	// Client Side UI rendering, only
-	static Texture *loadingScreen, *waitingScreen, *deadScreen;
-	static bool gameStarted, waiting, myClientIsDead;
+	static Texture *loadingScreen, *waitingScreen, *deadScreen, *creditsScreen;
+	static bool gameStarted, waiting, myClientIsDead, gameEnded;
 
 public:
 	NetworkManager();

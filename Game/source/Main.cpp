@@ -45,6 +45,7 @@ int main(int argc, char** argv)
 	{
 		// load the player scene
 		GameObject *player = loadScene(file.getString("GameSettings", "player"));
+		player->setName("Player_" + std::to_string(client));
 
 		Sensitivity sens(file.getFloat("GameSettings", "mouseSensitivity"), file.getFloat("GameSettings", "joystickSensitivity"));
 		

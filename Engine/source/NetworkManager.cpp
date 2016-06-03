@@ -39,11 +39,13 @@ std::vector<char> NetworkManager::lastBytesSent;
 // --- STATIC VAR DECLS FOR CLIENT UI RENDERING --
 
 bool NetworkManager::gameStarted = false;
+bool NetworkManager::gameEnded = false;
 bool NetworkManager::waiting = false;
 bool NetworkManager::myClientIsDead = false;
 Texture* NetworkManager::loadingScreen = nullptr;
 Texture* NetworkManager::waitingScreen = nullptr;
 Texture* NetworkManager::deadScreen = nullptr;
+Texture* NetworkManager::creditsScreen = nullptr;
 
 // --- GENERAL FUNC -- //
 
@@ -367,12 +369,18 @@ void NetworkManager::ReceiveClientMessages()
 			break;
 		case PLAYER_HAS_DIED_EVENT:
 			myClientIsDead = true;
+			Renderer::crosshair->hide();
 			std::cerr << "Received PLAYER_HAS_DIED_EVENT" << std::endl;
 			break;
 		case PLAYER_HAS_RESPAWNED_EVENT:
 			std::cerr << "Received PLAYER_HAS_RESPAWNED_EVENT" << std::endl;
+			Renderer::crosshair->show();
 			myClientIsDead = false;
 			break;
+		case GAME_END_EVENT:
+			std::cerr << "Yay, you win!" << std::endl;
+			Renderer::crosshair->hide();
+			gameEnded = true;
 		case CREATE_OBJECT_NETWORK_DATA:
 		case DESTROY_OBJECT_NETWORK_DATA:
 			//std::cerr << numClientMessages++ << "RECV OBJ DATA" << std::endl;
@@ -410,24 +418,28 @@ void NetworkManager::drawUI()
 			//NetworkManager::waitingScreen = new Texture("assets/waiting.png", true);
 			NetworkManager::loadingScreen = new Texture("assets/konnekting.png", true);
 			NetworkManager::deadScreen = new Texture("assets/getgood.png", true);
+			NetworkManager::creditsScreen = new Texture("assets/credits.png", true);
 		}
-		if (myClientIsDead && gameStarted) {
+		if (myClientIsDead && gameStarted && deadScreen != nullptr) {
 			Renderer::drawSplash(NetworkManager::deadScreen, true);
 		}
-		else if (waiting) {
-			//Renderer::drawSplash(NetworkManager::waitingScreen, true); // this doesn't actually work
-		}
-		else if (connected && !gameStarted) {
+		else if (connected && !gameStarted && loadingScreen != nullptr) {
 			// Draw "connecting" screen
 			Renderer::drawSplash(NetworkManager::loadingScreen, true);
 		}
-		if (gameStarted && NetworkManager::loadingScreen != nullptr) {
+		else if (connected && gameEnded && creditsScreen != nullptr) {
+			Renderer::drawSplash(NetworkManager::creditsScreen, true);
+		}
+
+		if (gameEnded && NetworkManager::loadingScreen != nullptr) {
 			delete NetworkManager::loadingScreen;
 			NetworkManager::loadingScreen = nullptr;
 			//delete NetworkManager::waitingScreen;
 			//NetworkManager::waitingScreen = nullptr;
 			delete NetworkManager::deadScreen;
 			NetworkManager::deadScreen = nullptr;
+			delete NetworkManager::creditsScreen;
+			NetworkManager::creditsScreen = nullptr;
 		}
 	}
 }

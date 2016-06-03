@@ -24,7 +24,8 @@ enum MessageType {
 	// No struct event types
 	GAME_START_EVENT,
 	PLAYER_HAS_DIED_EVENT,
-	PLAYER_HAS_RESPAWNED_EVENT
+	PLAYER_HAS_RESPAWNED_EVENT,
+	GAME_END_EVENT
 };
 
 enum SoundState {

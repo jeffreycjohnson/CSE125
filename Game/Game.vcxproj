@@ -41,6 +41,7 @@
     <ClCompile Include="source\FPSMovement.cpp" />
     <ClCompile Include="source\SoundTrigger.cpp" />
     <ClCompile Include="source\Target.cpp" />
+    <ClCompile Include="source\WinTrigger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\CSE167.vcxproj">
@@ -69,6 +70,7 @@
     <ClInclude Include="source\GodSummoner.h" />
     <ClInclude Include="source\SoundTrigger.h" />
     <ClInclude Include="source\Target.h" />
+    <ClInclude Include="source\WinTrigger.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1A66FBD-7F91-412A-B6ED-FB645555F316}</ProjectGuid>

@@ -22,6 +22,7 @@
 #include "ChestTarget.h"
 #include "ForceField.h"
 #include "SoundTrigger.h"
+#include "WinTrigger.h"
 
 std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 {
@@ -51,6 +52,7 @@ std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 	{ "fixedchest_" ,  [](auto args, auto idToTarget, auto groupName) {return new ChestActivator(args, idToTarget, groupName); } },
 	{ "chest_" ,  [](auto args, auto idToTarget, auto groupName) {return new ChestActivator(args, idToTarget, groupName); } },
 	{ "sndtrig_" ,  [](auto args, auto idToTarget, auto groupName) {return new SoundTrigger(args); } },
+	{ "wintrig_", [](auto args, auto idToTarget, auto groupName) {return new WinTrigger(args, idToTarget, groupName); } },
 };
 
 std::vector<std::string> split(const std::string &s, char delim) 
