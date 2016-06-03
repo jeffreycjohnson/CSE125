@@ -12,6 +12,7 @@ public:
     explicit FileWatcher(const std::string& file, unsigned int delay = 0);
 
     bool changed();
+    bool exists = true;
 
     const std::string file;
 

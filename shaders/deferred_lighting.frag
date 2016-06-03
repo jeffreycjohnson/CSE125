@@ -7,9 +7,11 @@ in vec4 vPosition;
 out vec4 frag_color;
 
 uniform sampler2D colorTex; //color texture - rgb: color | a: metalness
-uniform sampler2D normalTex; //normal texture - rgb: normal | a: IOR
+uniform sampler2D normalTex; //normal texture - rgb: normal | a: height
 uniform sampler2D posTex; //position texture - rgb: position | a: roughness
 uniform sampler2DShadow shadowTex;
+uniform sampler2D lightGradientTex;
+uniform samplerCubeShadow pointShadowTex;
 
 //world space camera position, to get view vector
 uniform vec3 cameraPos;
@@ -28,7 +30,10 @@ void main () {
   if(albedo.xyz == vec3(0)) discard;
   vec4 pos = texture(posTex, gl_FragCoord.xy / uScreenSize);
   vec4 normal = texture(normalTex, gl_FragCoord.xy / uScreenSize);
-  vec3 mat = vec3(albedo.a, pos.w, normal.w);
+  float metalness = albedo.a;
+  float height = normal.w;
+  float roughness = pos.w;
+
   pos = uIV_Matrix * vec4(pos.xyz, 1);
   pos /= pos.w;
   normal.xyz = normal.xyz * 2 - 1;
@@ -36,13 +41,13 @@ void main () {
   vec3 view = normalize(cameraPos - pos.xyz);
 
 
-  mat.y += 0.0001; //there seem to be issues with roughness = 0 due to visibility
-  float a = sqrt(mat.y);// squaring it makes everything shiny, sqrting it looks like linear roughness
+  roughness += 0.0001; //there seem to be issues with roughness = 0 due to visibility
+  float a = roughness;// squaring it makes everything shiny, sqrting it looks like linear roughness
 
-  vec3 F0 = IorToF0(mat.z, mat.x, albedo.rgb);
+  vec3 F0 = MetalToF0(metalness, albedo.rgb);
 
   if(uLightType == 3) {
-	  frag_color = vec4(envMap(F0, normal.xyz, albedo.rgb, view, a, mat.x), 1.0);
+	  frag_color = vec4(envMap(F0, normal.xyz, albedo.rgb, view, a, metalness), 1.0);
   }
   else {
 	  vec3 lightDir;
@@ -51,6 +56,9 @@ void main () {
 	  if(uLightType == 0) {
 		  lightDir = uLightPosition - pos.xyz;
 		  lightDist = length(lightDir);
+
+		  shadow = texture(lightGradientTex, vec2(acos(dot(normalize(lightDir), normalize(uLightDirection))) / (3.14159), 0)).r;
+		  shadow *= texture(pointShadowTex, vec4(-normalize(lightDir), lightDist/25.0));
 
 		  //Spherical light algorithm from http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 		  float sphereRadius = uLightSize;
@@ -73,7 +81,7 @@ void main () {
 	  float a2 = a*a;
 	  vec3 specColor = GGX_D(dotNH, a2*a2) * SpecularBRDF(uLightColor, normal.xyz, view, lightDir, a, F0, 1);
 
-	  vec3 diffuseColor = ((1.0-mat.r) * albedo.rgb) * diffuseLight;
+	  vec3 diffuseColor = ((1.0-metalness) * albedo.rgb) * diffuseLight;
 	  vec3 color = falloff(diffuseColor + specColor, lightDist, uLightFalloff);
 
 	  frag_color = vec4(color * shadow, 1.0);

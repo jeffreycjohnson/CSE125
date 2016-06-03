@@ -13,6 +13,7 @@ public:
 	GLuint *colorTex;
 	size_t numColorTex;
 	GLuint depthTex;
+    const bool cubeMap;
 
 	bool hdrEnabled=false;
 	std::vector<GLenum> colorFormats;
@@ -23,8 +24,8 @@ public:
 	static bool loaded;
 
 
-	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth, bool hdrEnabled);
-	Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, bool accessibleDepth);
+	Framebuffer(int w, int h, int numColorTexture, bool accessibleDepth, bool hdrEnabled, bool cube = false);
+	Framebuffer(int w, int h, const std::vector<GLenum>& colorFormats, bool accessibleDepth, bool cube = false);
 	~Framebuffer();
 
 	void deleteTextures();

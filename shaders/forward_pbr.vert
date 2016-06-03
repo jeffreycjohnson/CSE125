@@ -10,16 +10,19 @@ uniform mat4 uV_Matrix;
 uniform mat4 uP_Matrix;
 		
 out vec4 vPosition;
+out vec4 vWorldPosition;
 out vec3 vNormal;
 out vec2 vTexCoord;
 out vec3 vTangent;
 out vec3 vBitangent;
 
 void main () {
-	vNormal = mat3(uM_Matrix) * aNormal;
-	vTangent = mat3(uM_Matrix) * aTangent;
-	vBitangent = mat3(uM_Matrix) * aBitangent;
+	mat3 normalMat = transpose(inverse(mat3(uM_Matrix)));
+	vNormal = normalize(normalMat * aNormal.xyz);
+	vTangent = normalize(normalMat * aTangent.xyz);
+	vBitangent = normalize(normalMat * aBitangent.xyz);
     vTexCoord = aTexCoord;
-    vPosition = uV_Matrix * uM_Matrix * aPosition;
+	vWorldPosition = uM_Matrix * aPosition;
+    vPosition = uV_Matrix * vWorldPosition;
 	gl_Position = uP_Matrix * vPosition;
 }

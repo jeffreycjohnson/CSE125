@@ -42,13 +42,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -116,7 +116,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_EXCEPTIONAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL2;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
@@ -173,7 +173,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_EXCEPTIONAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\;$(SolutionDir)Dependencies\fmod;$(SolutionDir)Dependencies\SOIL2;$(SolutionDir)Dependencies\glfw\include\GLFW;$(SolutionDir)Dependencies\glew\include\GL;$(SolutionDir)Dependencies\glm\glm;$(ProjectDir)source\scripts\include;$(ProjectDir)source\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -194,6 +194,18 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Crosshair.cpp" />
+    <ClCompile Include="source\LoadingScreen.cpp" />
+    <ClCompile Include="source\NetworkStats.cpp" />
+    <ClCompile Include="source\Ray.cpp" />
+    <ClCompile Include="source\NetworkManager.cpp" />
+    <ClCompile Include="source\include\Collision.cpp" />
+    <ClCompile Include="source\NetworkStruct.cpp" />
+    <ClCompile Include="source\ServerInput.cpp" />
+    <ClCompile Include="source\ClientNetwork.cpp" />
+    <ClCompile Include="source\CapsuleCollider.cpp" />
+    <ClCompile Include="source\CollisionInfo.cpp" />
+    <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\Animation.cpp" />
     <ClCompile Include="source\BloomPass.cpp" />
     <ClCompile Include="source\BoxCollider.cpp" />
@@ -201,6 +213,10 @@
     <ClCompile Include="source\Component.cpp" />
     <ClCompile Include="source\DeferredPass.cpp" />
     <ClCompile Include="source\FileWatcher.cpp" />
+    <ClCompile Include="source\NetworkUtility.cpp" />
+    <ClCompile Include="source\Octree.cpp" />
+    <ClCompile Include="source\OctreeManager.cpp" />
+    <ClCompile Include="source\OctreeNode.cpp" />
     <ClCompile Include="source\ParticleTrail.cpp" />
     <ClCompile Include="source\ForwardPass.cpp" />
     <ClCompile Include="source\Framebuffer.cpp" />
@@ -212,21 +228,45 @@
     <ClCompile Include="source\Material.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\ObjectLoader.cpp" />
+    <ClCompile Include="source\Plane.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
+    <ClCompile Include="source\ServerNetwork.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Sound.cpp" />
+    <ClCompile Include="source\SSAO.cpp" />
+    <ClCompile Include="source\SphereCollider.cpp" />
     <ClCompile Include="source\Texture.cpp" />
     <ClCompile Include="source\ThreadPool.cpp" />
     <ClCompile Include="source\Timer.cpp" />
     <ClCompile Include="source\Transform.cpp" />
+    <ClCompile Include="source\UIButton.cpp" />
+    <ClCompile Include="source\UIComponent.cpp" />
+    <ClCompile Include="source\UIList.cpp" />
+    <ClCompile Include="source\UIMenu.cpp" />
     <ClCompile Include="source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\include\Crosshair.h" />
+    <ClInclude Include="source\include\LoadingScreen.h" />
+    <ClInclude Include="source\include\NetworkStats.h" />
+    <ClInclude Include="source\include\NetworkManager.h" />
+    <ClInclude Include="source\include\NetworkStruct.h" />
+    <ClInclude Include="source\include\OctreeManager.h" />
+    <ClInclude Include="source\include\ServerInput.h" />
+    <ClInclude Include="source\include\ClientNetwork.h" />
+    <ClInclude Include="source\include\CapsuleCollider.h" />
+    <ClInclude Include="source\include\Collider.h" />
+    <ClInclude Include="source\include\Collision.h" />
+    <ClInclude Include="source\include\Config.h" />
     <ClInclude Include="source\include\Animation.h" />
     <ClInclude Include="source\include\BoxCollider.h" />
     <ClInclude Include="source\include\Camera.h" />
     <ClInclude Include="source\include\Component.h" />
+    <ClInclude Include="source\include\NetworkUtility.h" />
+    <ClInclude Include="source\include\ServerNetwork.h" />
+    <ClInclude Include="source\include\Plane.h" />
+    <ClInclude Include="source\include\SphereCollider.h" />
     <ClInclude Include="source\include\ThreadPool.h" />
     <ClInclude Include="source\include\FileWatcher.h" />
     <ClInclude Include="source\include\ParticleTrail.h" />
@@ -247,8 +287,20 @@
     <ClInclude Include="source\include\Texture.h" />
     <ClInclude Include="source\include\Timer.h" />
     <ClInclude Include="source\include\Transform.h" />
+    <ClInclude Include="source\include\UI.h" />
+    <ClInclude Include="source\include\UIButton.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\assets\particles\Default.particle.ini" />
+    <None Include="..\config\buttons.ini">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\config\sounds.ini">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\shaders\cube_map.vert" />
+    <None Include="..\shaders\cube_map.geom" />
     <None Include="..\shaders\deferred_gbuffer.frag" />
     <None Include="..\shaders\deferred_lighting.frag" />
     <None Include="..\shaders\deferred_lighting.vert" />
@@ -261,10 +313,12 @@
     <None Include="..\shaders\forward_pbr.vert" />
     <None Include="..\shaders\forward_pbr_skeletal.vert" />
     <None Include="..\shaders\forward_unlit.frag" />
+    <None Include="..\shaders\geom_pass.glsl" />
     <None Include="..\shaders\gpu_particle.frag" />
     <None Include="..\shaders\gpu_particle.vert" />
     <None Include="..\shaders\gpu_particle_burst.vert" />
     <None Include="..\shaders\lighting.glsl" />
+    <None Include="..\shaders\linear_depth.frag" />
     <None Include="..\shaders\particle_trail.frag" />
     <None Include="..\shaders\particle_trail.vert" />
     <None Include="..\shaders\shadow.frag" />
@@ -272,6 +326,18 @@
     <None Include="..\shaders\simple.vert" />
     <None Include="..\shaders\skybox.frag" />
     <None Include="..\shaders\skybox.vert" />
+    <None Include="..\shaders\ssao.frag" />
+    <None Include="..\shaders\ssao_blur.frag" />
+    <None Include="..\shaders\ui.frag" />
+    <None Include="..\shaders\ui.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\config\options.ini">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,25 +3,48 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_dsp.h"
 #include "fmod/fmod_errors.h"
-#include <iostream>
 #include "Input.h"
+#include "Config.h"
+#include "Renderer.h"
+#include "Camera.h"
+#include "Timer.h"
+
+#include <iostream>
 
 FMOD::System* Sound::system;
 std::unordered_map<std::string, FMOD::Sound*> Sound::soundMap;
+std::queue<Sound*> Sound::broadcastQueue = std::queue<Sound*>();
 FMOD_RESULT Sound::result;
+FMOD::ChannelGroup* Sound::masterChannelGroup = nullptr;
+FMOD::ChannelGroup* Sound::cgBroadcast = nullptr;
+FMOD::ChannelGroup* Sound::cgGame = nullptr;
+FMOD::ChannelGroup* Sound::cgEffects = nullptr;
+FMOD::ChannelGroup* Sound::cgMusic = nullptr;
+Sound* Sound::currentMusic = nullptr;
+bool Sound::broadcasting = false;
 
-Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D)
+Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume, bool is3D, int type)
 {
+	isConstructed = true;
+
 	name = soundName;
 	this->volume = volume;
 	this->looping = looping;
 	this->is3D = is3D;
+	ASSERT(type == SOUND_EFFECT || type == MUSIC || type == BROADCAST || type == NO_DAMPEN_CHANNEL, "Sound channel type is invalid.");
+	this->channelType = type;
 	playing = active = playOnAwake;
+	this->postConstructor();
+}
 
+void Sound::postConstructor() {
 	result = system->playSound(soundMap[name], 0, true, &channel);
 	channel->setVolume(volume);
-	if (!is3D)
+
+	if (!is3D) {
 		channel->setPriority(0);
+	}
+
 	if (looping)
 	{
 		channel->setMode(FMOD_LOOP_NORMAL);
@@ -31,6 +54,18 @@ Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume
 	{
 		channel->setMode(FMOD_LOOP_OFF);
 	}
+
+	switch (channelType) {
+	case SOUND_EFFECT:
+		channel->setChannelGroup(Sound::cgEffects); break;
+	case MUSIC:
+		channel->setChannelGroup(Sound::cgMusic); break;
+	case BROADCAST:
+		channel->setChannelGroup(Sound::cgBroadcast); break;
+	default:
+		channel->setChannelGroup(Sound::masterChannelGroup); break;
+	}
+
 }
 
 Sound::~Sound()
@@ -40,25 +75,65 @@ Sound::~Sound()
 
 void Sound::update(float)
 {
-    if (playing) {
-        position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
-        velocity = position - prevPosition;
-        FMOD_VECTOR pos = { position.x, position.y, position.z };
-        FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
-        channel->set3DAttributes(&pos, &vel, 0);
+	if (playing) {
+		position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
+		velocity = (position - prevPosition) * Timer::fixedTimestep;
 
-        prevPosition = gameObject->transform.getWorldPosition();
-    }
+		FMOD_VECTOR pos = { position.x, position.y, position.z };
+		FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
 
-	channel->setPaused(!playing); // Used at the end of update to prevent inconsistent initial volume
+		if (is3D) {
+			channel->set3DAttributes(&pos, &vel, 0);
+		}
+		prevPosition = gameObject->transform.getWorldPosition();
+	}
+	
+	switch (channelType) {
+	case SOUND_EFFECT:
+		channel->setChannelGroup(Sound::cgEffects); break;
+	case MUSIC:
+		channel->setChannelGroup(Sound::cgMusic); break;
+	case BROADCAST:
+		channel->setChannelGroup(Sound::cgBroadcast); break;
+	default:
+		channel->setChannelGroup(Sound::masterChannelGroup); break;
+	}
+
+	// All BROADCAST sounds are handled in updateFMOD to prevent race conditions
+	if (channelType != BROADCAST) {
+		// Used at the end of update to prevent inconsistent initial volume
+		channel->setPaused(!playing);
+	}
 }
 
 void Sound::play()
 {
-	if (playing)
+	if (channelType == MUSIC) {
+		Sound::currentMusic = this;
+	}
+	else if (channelType == BROADCAST) {
+		// enqueue the broadcast message
+		Sound::broadcastQueue.push(this);
+		postToNetwork(SoundNetworkData::soundState::PLAY, false, -1, 0.0f);
+		return;
+	}
+
+	// If we've played the sound once AND this instance of it is not being played again, play it
+	if (playing && !isPlaying())
 	{
 		// Possible leak, does FMOD handle deleting sound instances for playSound?
-		result = system->playSound(soundMap[name], 0, false, &channel);
+		result = system->playSound(soundMap[name], 0, true, &channel);
+
+		position = gameObject->transform.getWorldPosition(); // Needs to be in world position for audio
+		velocity = (position - prevPosition) * Timer::fixedTimestep;
+		FMOD_VECTOR pos = { position.x, position.y, position.z };
+		FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+		
+		if (is3D) {
+			channel->set3DAttributes(&pos, &vel, 0);
+		}
+		prevPosition = gameObject->transform.getWorldPosition();
+
 		channel->setVolume(volume);
 		if (looping)
 		{
@@ -70,25 +145,50 @@ void Sound::play()
 			channel->setMode(FMOD_LOOP_OFF);
 		}
 
-		if (!is3D)
+		if (!is3D) {
 			channel->setPriority(0);
+		}
+
+		switch (channelType) {
+		case SOUND_EFFECT:
+			channel->setChannelGroup(Sound::cgEffects); break;
+		case MUSIC:
+			channel->setChannelGroup(Sound::cgMusic); break;
+		case BROADCAST:
+			channel->setChannelGroup(Sound::cgBroadcast); break;
+		default:
+			channel->setChannelGroup(Sound::masterChannelGroup); break;
+		}
+
+		if (channelType != BROADCAST) {
+			// play the sound, unless it's a broadcast message
+			channel->setPaused(!playing);
+		}
+
 	}
-	else // Paused
+	else
 	{
+		// Paused
 		playing = true;
 	}
+
 	active = true;
+	postToNetwork(SoundNetworkData::soundState::PLAY, false, -1, 0.0f);
 }
 
 void Sound::pause()
 {
 	playing = false;
+	channel->setPaused(true);
+	std::cout << "Sound is being paused" << std::endl;
+	postToNetwork(SoundNetworkData::soundState::PAUSE, false, -1, 0.0f);
 }
 
 void Sound::stop()
 {
 	channel->stop();
 	active = false;
+	postToNetwork(SoundNetworkData::soundState::STOP, false, -1, 0.0f);
 }
 
 void Sound::toggle()
@@ -97,6 +197,7 @@ void Sound::toggle()
 		stop();
 	else
 		play();
+	postToNetwork(SoundNetworkData::soundState::TOGGLE, false, -1, 0.0f);
 }
 
 void Sound::setLooping(bool looping, int count = -1)
@@ -107,60 +208,265 @@ void Sound::setLooping(bool looping, int count = -1)
 		channel->setMode(FMOD_LOOP_OFF);
 
 	channel->setLoopCount(count);
+	postToNetwork(SoundNetworkData::soundState::SET_LOOPING, looping, count, 0.0f);
 }
 
 void Sound::setVolume(float volume)
 {
-	channel->setVolume(volume);
+	if (channel != nullptr) {
+		FMODErrorCheck(channel->setVolume(volume), "FMOD set volume failed.");
+	}
+	postToNetwork(SoundNetworkData::soundState::SET_VOLUME, false, -1, volume);
 }
 
 void Sound::init()
 {
-	result = FMOD::System_Create(&system);
-	if (result != FMOD_OK)
-	{
-		std::cout << "FMOD Error " << result << std::endl;
-		throw;
-	}
+	FMODErrorCheck(FMOD::System_Create(&system), "FMOD::System_Create failed");
 
 	int driverCount = 0;
 	result = system->getNumDrivers(&driverCount);
 
 	if (driverCount == 0 || result != FMOD_OK)
 	{
-		std::cout << "FMOD Error " << result << std::endl;
-		throw;
+		FATAL("FMOD failed to find sound drivers (or worse.)");
 	}
 
 	// Initialize our Instance with 128 channels
-	system->init(256, FMOD_INIT_NORMAL, NULL);
+	FMODErrorCheck(system->init(256, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, NULL), "FMOD system->init() failed.");
+	FMODErrorCheck(system->set3DNumListeners(1), "Failed to set # of 3D listeners");
 
 	// Generate sound map
-	SoundClass cabin;
-	system->createSound("assets/sounds/ambience/cabin.wav", FMOD_2D, NULL, &cabin);
-	soundMap.insert({ "cabin", cabin });
-	SoundClass gun;
-	system->createSound("assets/sounds/gun.wav", FMOD_2D, NULL, &gun);
-	soundMap.insert({ "gun", gun });
-	SoundClass boost;
-	system->createSound("assets/sounds/boost.wav", FMOD_2D, NULL, &boost);
-	soundMap.insert({ "boost", boost });
-	SoundClass fighterEngine;
-	system->createSound("assets/sounds/engine.wav", FMOD_3D, NULL, &fighterEngine);
-	soundMap.insert({ "fighterEngine", fighterEngine });
-	SoundClass explosion;
-	system->createSound("assets/sounds/explosion.mp3", FMOD_3D, NULL, &explosion);
-	soundMap.insert({ "explosion", explosion });
-	SoundClass capital;
-	system->createSound("assets/sounds/capital.wav", FMOD_2D, NULL, &capital);
-	soundMap.insert({ "capital", capital });
-	SoundClass music;
-	system->createSound("assets/sounds/music/soundtrack.mp3", FMOD_2D, NULL, &music);
-	soundMap.insert({ "music", music });
-	// Add more sounds as we need
+	initFromConfig();
+
+	// Create channel group hierarchy. This allows us to quiet the game sound & music to play
+	// a broadcast message sound (e.g. an announcer.) The root is the master channel group, of course.
+
+	FMODErrorCheck(system->getMasterChannelGroup(&Sound::masterChannelGroup), "Failed to create channel group.");
+	FMODErrorCheck(system->createChannelGroup("broadcast", &Sound::cgBroadcast), "Failed to create channel group.");
+	FMODErrorCheck(system->createChannelGroup("effects", &Sound::cgEffects), "Failed to create channel group.");
+	FMODErrorCheck(system->createChannelGroup("music", &Sound::cgMusic), "Failed to create channel group.");
+	FMODErrorCheck(system->createChannelGroup("game", &Sound::cgGame), "Failed to create channel group.");
+
+	FMODErrorCheck(cgGame->addGroup(cgEffects), "cgEffects add failure");
+	FMODErrorCheck(cgGame->addGroup(cgMusic), "cdMusic add failure");
+	FMODErrorCheck(masterChannelGroup->addGroup(cgBroadcast), "cgBroadcast add failure");
+	FMODErrorCheck(masterChannelGroup->addGroup(cgGame), "cdGame add filure");
+
+	/*FMOD::ChannelGroup* parent; // insanity checking
+	cgGame->getParentGroup(&parent);
+	ASSERT((parent == masterChannelGroup), "");
+	cgBroadcast->getParentGroup(&parent);
+	ASSERT((parent == masterChannelGroup), "");
+	cgEffects->getParentGroup(&parent);
+	ASSERT((parent == cgGame), "");
+	cgMusic->getParentGroup(&parent);
+	ASSERT((parent == cgGame), "");*/
 }
 
 void Sound::updateFMOD()
 {
-	system->update();
+	// Before updating FMOD, if we are currently broadcasting a sound (e.g. diminishing the game audio
+	// and prioritizing something special) then we should set the gain here, rather than making individual
+	// other sounds even more stateful than they already are.
+
+	if (!Sound::broadcastQueue.empty() && !broadcasting) {
+		auto snd = broadcastQueue.front();
+		Sound::broadcasting = true;
+		FMODErrorCheck(system->playSound(soundMap[snd->name], cgBroadcast, false, &snd->channel), "Broadcast sound couldn't be played.");
+		//FMODErrorCheck(cgGame->setVolume(0.15f), "Failure lowering other channel group volume");
+		FMODErrorCheck(cgEffects->setVolume(0.15f), "Failure lowering other channel group volume");
+		FMODErrorCheck(cgMusic->setVolume(0.75f), "Failure lowering other channel group volume");
+	}
+	else if (!broadcastQueue.empty() && broadcasting) {
+		auto snd = broadcastQueue.front();
+		if (!snd->isPlaying()) {
+			broadcastQueue.pop();
+			broadcasting = false;
+			snd->channel->stop();
+		}
+	}
+	else if (broadcastQueue.empty()) {
+		//FMODErrorCheck(cgGame->setVolume(1.0f), "Failure resetting game audio volume.");
+		FMODErrorCheck(cgMusic->setVolume(1.0f), "Failure resetting game audio volume.");
+		FMODErrorCheck(cgEffects->setVolume(1.0f), "Failure resetting game audio volume.");
+	}
+
+	// Listener information is now updated in here as opposed in Camera
+	// Apparently this is more consistent. Hopefully.
+
+	glm::vec3 position = Renderer::mainCamera->gameObject->transform.getWorldPosition();
+	
+	// Velocity is 0 for now. If doppler effect desired, please calculate in terms of meters per second
+	glm::vec3 velocity = { 0.0, 0.0, 0.0 };
+	glm::vec3 forward  = glm::normalize(glm::vec3(Renderer::mainCamera->gameObject->transform.getTransformMatrix() * glm::vec4(0, 0, -1, 0)));
+	glm::vec3 up = glm::normalize(glm::cross({-1, 0, 0}, forward));
+
+	FMOD_VECTOR pos = { position.x, position.y, position.z };
+	FMOD_VECTOR vel = { velocity.x, velocity.y, velocity.z };
+	FMOD_VECTOR fwd = { forward.x, forward.y, forward.z };
+	FMOD_VECTOR upv = { up.x, up.y, up.z };
+
+	FMODErrorCheck(system->set3DListenerAttributes(0, &pos, &vel, &fwd, &upv), "FMOD Error while updating 3D listener attrs.");
+
+	FMODErrorCheck(system->update(), "FMOD failure in system->update()");
+}
+
+void Sound::FMODErrorCheck(FMOD_RESULT result, const std::string& msg)
+{
+	if (result != FMOD_OK) {
+		FATAL(msg.c_str());
+	}
+}
+
+void Sound::Dispatch(const std::vector<char> &bytes, int messageType, int messageId) {
+	GameObject *go = GameObject::FindByID(messageId);
+	if (go == nullptr)
+	{
+		throw std::runtime_error("From Sound.cpp/Dispatch: Nonexistant gameobject");
+	}
+	Sound * s;
+	s = go->getComponent<Sound>();
+	if (s != nullptr) {
+		s->deserializeAndApply(bytes);
+	}
+	else {
+		s = new Sound();
+		go->addComponent(s);
+		s->deserializeAndApply(bytes);
+	}
+}
+
+void Sound::deserializeAndApply(std::vector<char> bytes){
+	SoundNetworkData sind = structFromBytes<SoundNetworkData>(bytes);
+
+	switch (sind.ss){
+	case SoundNetworkData::soundState::PLAY:
+		this->play();
+		break;
+	case SoundNetworkData::soundState::TOGGLE:
+		this->toggle();
+		break;
+	case SoundNetworkData::soundState::STOP:
+		this->stop();
+		break;
+	case SoundNetworkData::soundState::PAUSE:
+		this->pause();
+		break;
+	case SoundNetworkData::soundState::SET_LOOPING:
+		this->setLooping(sind.loopingParam, sind.count);
+		break;
+	case SoundNetworkData::soundState::SET_VOLUME:
+		this->setVolume(sind.volumeParam);
+		break;
+	case SoundNetworkData::soundState::MUTATE:
+		FATAL("I technically don't need a mutate state.");
+		break;
+	case SoundNetworkData::soundState::CONSTRUCT:
+	default:
+		//assert(isConstructed == false);
+		name = std::string(sind.soundName);
+		this->volume = sind.volume;
+		this->looping = sind.looping;
+		this->is3D = sind.is3D;
+		this->playing = sind.playing;
+		this->channelType = sind.channelType;
+
+		//This basically initializes things based off the 
+		//old constructor
+		this->postConstructor();
+		this->isConstructed = true;
+		break;
+	}
+}
+
+std::vector<char> Sound::serialize(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam)
+{
+	SoundNetworkData snd = SoundNetworkData(
+		gameObject->getID(),
+		this->name,
+		this->playing,
+		this->active,
+		this->looping,
+		this->volume,
+		this->is3D,
+		ss,
+		loopingParam,
+		count,
+		volumeParam,
+		channelType
+	);
+	return structToBytes(snd);
+}
+
+void Sound::postToNetwork(SoundNetworkData::soundState ss, bool loopingParam, int count, float volumeParam)
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		std::cerr << "Sound ain't got no attached game object modified??" << std::endl;
+		return;
+	}
+	NetworkManager::PostMessage(serialize(ss, loopingParam, count, volumeParam), SOUND_NETWORK_DATA, my->getID());
+}
+
+void Sound::setGameObject(GameObject* object) {
+	Component::setGameObject(object);
+	postToNetwork(SoundNetworkData::soundState::CONSTRUCT, false, -1, 0.0f);
+};
+
+Sound* Sound::affixSoundToDummy(GameObject* parent, Sound * sound)
+{
+	auto dummy = new GameObject;
+	ASSERT(parent != nullptr, "Failed to affix dummy sound game object. Parent gameObject is null.");
+	dummy->setName(sound->name);
+	dummy->addComponent(sound);
+	parent->addChild(dummy);
+	return sound;
+}
+
+bool Sound::isPlaying()
+{
+	// Detect if the sound is still playing
+	FMOD::Sound* ptr;
+	if (channel != nullptr) {
+		channel->getCurrentSound(&ptr);
+		if (ptr == soundMap[name]) {
+			bool isPlaying;
+			channel->isPlaying(&isPlaying);
+			return isPlaying;
+		}
+		else {
+			return false;
+		}
+	}
+	else
+		return false;
+}
+
+void Sound::initFromConfig()
+{
+	ConfigFile file("config/sounds.ini");
+	std::vector<std::string> sounds = file.allSections();
+
+	for (auto i = sounds.begin(); i != sounds.end(); ++i) {
+		SoundClass soundToAdd;
+		std::string fileName = file.getString(*i, "file");
+		std::string fmodMode = file.getString(*i, "fmodMode");
+
+		int is2DElse3D = fmodMode == std::string("2D") ? FMOD_2D : FMOD_3D;
+		//int exinfo = file.getInt(*i, "exinfo");
+		//TODO: Don't know what exinfo is
+		//TODO: TEST THIS!!! DON'T KNOW IF YOUR REFERENCES WILL DISAPPEAR
+		FMODErrorCheck( system->createSound(fileName.c_str(), is2DElse3D, NULL, &soundToAdd), fileName );
+		soundMap.insert({ *i, soundToAdd });
+	}
+	//Sanity check
+	std::cout << "Sound's initFromConfig Sanity Check" << std::endl;
+	for (auto i : soundMap) {
+		std::cout << i.first << std::endl;
+		std::cout << i.second << std::endl;
+	}
+	std::cout << std::endl << std::endl;
 }

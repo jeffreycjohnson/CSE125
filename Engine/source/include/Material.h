@@ -27,8 +27,10 @@ private:
             u = value;
         };
     };
-    std::map<std::string, UniformType*> uniforms;
-    std::map<std::string, const Texture*> textures;
+    std::map<std::string, std::unique_ptr<UniformType>> uniforms;
+    std::map<std::string, std::unique_ptr<Texture>> textures;
+    std::unique_ptr<FileWatcher> watcher;
+    bool hasAnimations = false;
 
     class UniformSetter
     {
@@ -39,24 +41,26 @@ private:
         UniformSetter(Material*, const std::string&);
         template<typename T>
         void operator=(T value) {
-            if (mat->uniforms.count(name)) delete mat->uniforms[name];
-            mat->uniforms[name] = new UniformTypeInner<T>(value);
+            mat->uniforms[name] = std::make_unique<UniformTypeInner<T>>(value);
         }
     };
+
+    void loadFromFile(const std::string& file);
 
 public:
     Shader * shader;
     bool transparent;
 
-    Material(Shader *, bool transparent = true);
-    ~Material();
+    explicit Material(Shader *, bool transparent = true);
+    explicit Material(std::string file, bool hasAnimations=false);
     UniformSetter operator[](const std::string& name);
     void bind();
+    const bool autoReload = false;
+	std::string getWatcherFileName() const;
+
 };
 
 template<>
-void Material::UniformSetter::operator=<Texture*>(Texture* value);
-template<>
-void Material::UniformSetter::operator=<const Texture*>(const Texture* value);
+void Material::UniformSetter::operator=<std::unique_ptr<Texture>>(std::unique_ptr<Texture> value);
 
 #endif

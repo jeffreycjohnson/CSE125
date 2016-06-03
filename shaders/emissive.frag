@@ -5,10 +5,11 @@ in vec2 vTexCoord;
 
 layout(location = 0) out vec4 frag_color;
 
-uniform sampler2D colorTex; //color texture - rgb: color | a: transparency
+uniform sampler2D colorTex; //color texture - rgb: color
+uniform float emissionStrength;
 
 void main() {
     vec4 albedo = texture(colorTex, vTexCoord);
 
-    frag_color = vec4(albedo.rgb * 20, albedo.a);
+    frag_color = vec4(albedo.rgb * emissionStrength, 1);
 }

@@ -8,12 +8,6 @@
 #include <gtc/matrix_inverse.hpp>
 #include "Camera.h"
 
-const static glm::mat4 bias(
-    0.5, 0.0, 0.0, 0.0,
-    0.0, 0.5, 0.0, 0.0,
-    0.0, 0.0, 0.5, 0.0,
-    0.5, 0.5, 0.5, 1.0);
-
 void GBufferPass::render(Camera* camera)
 {
     glEnable(GL_DEPTH_TEST);
@@ -27,7 +21,7 @@ void GBufferPass::render(Camera* camera)
     camera->fbo->bind(3, buffers);
     for (auto mesh : Renderer::renderBuffer.deferred)
     {
-        mesh->material->bind();
+        mesh->getMaterial()->bind();
         mesh->draw();
     }
     CHECK_ERROR();
@@ -59,24 +53,15 @@ void LightingPass::render(Camera* camera)
     shader["normalTex"] = 1;
     shader["posTex"] = 2;
     shader["shadowTex"] = 3;
+    shader["pointShadowTex"] = 4;
+    shader["lightGradientTex"] = 5;
     shader["uIV_Matrix"] = Renderer::currentCamera->gameObject->transform.getTransformMatrix();
     CHECK_ERROR();
 
     for(auto light : Renderer::renderBuffer.light) {
         auto d = dynamic_cast<DirectionalLight*>(light);
-        if (!d)
-        {
-            glCullFace(GL_FRONT);
-        }
-        else
-        {
-            glCullFace(GL_BACK);
-            if(d->shadowCaster && d->shadowMap->fbo)
-            {
-                d->shadowMap->fbo->bindDepthTexture(3);
-                shader["uShadow_Matrix"] = bias * DirectionalLight::shadowMatrix * glm::affineInverse(d->gameObject->transform.getTransformMatrix());
-            }
-        }
+        if (!d) glCullFace(GL_FRONT);
+        else glCullFace(GL_BACK);
 
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_BLEND);
@@ -85,6 +70,7 @@ void LightingPass::render(Camera* camera)
         glEnable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDrawBuffer(GL_COLOR_ATTACHMENT3);
+        CHECK_ERROR();
 
         light->deferredPass();
     }
@@ -93,7 +79,7 @@ void LightingPass::render(Camera* camera)
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    auto& currentEntry = Mesh::meshMap["Plane"];
+    auto& currentEntry = Mesh::meshMap["assets/Primatives.obj/Plane"];
 
     if (Renderer::gpuData.vaoHandle != currentEntry.vaoHandle) {
         glBindVertexArray(currentEntry.vaoHandle);
@@ -110,7 +96,6 @@ void LightingPass::render(Camera* camera)
     shader["uP_Matrix"] = Renderer::perspective;
     CHECK_ERROR();
 
-    // TODO : Render Ambient
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glDepthMask(GL_TRUE);

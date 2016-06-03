@@ -28,7 +28,8 @@ private:
 public:
     friend class Material;
 
-    Shader(const std::string& vertex, const std::string& fragment, bool autoReload = true);
+    Shader(const std::string& vertex, const std::string& fragment);
+    Shader(const std::string& vertex, const std::string& geom, const std::string& fragment);
     ~Shader();
 
     Uniform operator[](const std::string& name);
@@ -36,10 +37,12 @@ public:
     void reload();
 
     GLint id = -1;
-    bool autoReload;
+    bool autoReload = true;
 
 private:
-    FileWatcher * vertWatcher, * fragWatcher;
+    std::unique_ptr<FileWatcher> vertWatcher, fragWatcher, geomWatcher;
+
+    Shader(Shader&) = delete;
 };
 
 #endif

@@ -2,12 +2,17 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "NetworkManager.h"
+#include "NetworkUtility.h"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>		// Post processing flags
 
+#include <iostream>	
+
 #include "Animation.h"
+#include "Material.h"
 
 #define POSITION_COUNT 3
 #define NORMAL_COUNT 3
@@ -27,15 +32,47 @@
 std::unordered_map<std::string, MeshData> Mesh::meshMap;
 std::unordered_map<std::string, BoneData>  Mesh::boneIdMap;
 
+Mesh* Mesh::fromCachedMeshData(std::string name)
+{
+	auto iter = Mesh::meshMap.find(name);
+	if (iter == Mesh::meshMap.end())
+	{
+		FATAL("Can only create mesh from cached data if data in cache");
+	}
+
+	Mesh *created = new Mesh;
+	created->name = name;
+
+	return created;
+}
+
+void Mesh::Dispatch(const std::vector<char> &bytes, int messageType, int messageId)
+{
+	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
+
+	GameObject *go = GameObject::FindByID(messageId);
+	if (go == nullptr)
+	{
+		FATAL("Cannot set mesh of nonexistant gameobject");
+	}
+
+	Mesh * cachedMesh = Mesh::fromCachedMeshData(std::string(mnd.meshName));
+	cachedMesh->setMaterial(new Material(mnd.materialName, mnd.hasAnimations));
+	std::cout << mnd.materialName << std::endl;
+	go->addComponent(cachedMesh);
+}
+
+Mesh::Mesh() {}
 
 Mesh::Mesh(std::string name) : name(name) {
-    if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) throw;
+	if (Mesh::meshMap.find(name) == Mesh::meshMap.end()) {
+		FATAL(name.c_str());
+	}
 }
 
 Mesh::~Mesh() {
 
 }
-
 
 void Mesh::draw() {
 	MeshData& currentEntry = meshMap.at(name);
@@ -75,10 +112,68 @@ void Mesh::draw() {
     }
 }
 
-void Mesh::setMaterial(Material *mat) {
-	material = mat;
+void Mesh::setGameObject(GameObject* object)
+{
+	Component::setGameObject(object);
+	postToNetwork();
 }
 
+std::vector<char> Mesh::serialize()
+{
+	std::string materialName = "assets/DefaultMaterial.mat.ini";
+	if (material != nullptr)
+	{
+		materialName = material->getWatcherFileName();
+	}
+
+	MeshNetworkData mnd = MeshNetworkData(gameObject->getID(), name, materialName, false);
+	return structToBytes(mnd);
+}
+
+void Mesh::deserializeAndApply(std::vector<char> bytes)
+{
+	MeshNetworkData mnd = structFromBytes<MeshNetworkData>(bytes);
+	auto iter = Mesh::meshMap.find(mnd.meshName);
+	if (iter == Mesh::meshMap.end())
+	{
+		FATAL("Can only create mesh from cached data if data in cache");
+	}
+
+	this->name = std::string(mnd.meshName);
+}
+
+void Mesh::toggleMaterial()
+{
+	Material * tmpMat = this->getMaterial();
+	this->setMaterial(alternateMaterial);
+	this->alternateMaterial = tmpMat;
+}
+
+void Mesh::postToNetwork()
+{
+	if (NetworkManager::getState() != SERVER_MODE) return;
+
+	GameObject *my = gameObject;
+	if (my == nullptr)
+	{
+		//std::cerr << "Mesh with no attached game object modified??" << std::endl;
+		return;
+	}
+
+	std::cout << "sent " << this->name << std::endl;
+	NetworkManager::PostMessage(serialize(), MESH_NETWORK_DATA, my->getID());
+}
+
+void Mesh::setMaterial(Material *mat) 
+{
+	material = mat;
+	postToNetwork();
+}
+
+Material * Mesh::getMaterial()
+{
+	return material;
+}
 
 bool boneWeightSort(std::pair<int, float> bone1, std::pair<int, float> bone2) {
 	return bone1.second > bone2.second;
@@ -89,6 +184,12 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	std::vector<float> megaArray;
 	std::vector<int> idArray;
 	std::vector<int> indexArray;
+
+	// Calculate min/max points (these get sent to the Octree when a scene is loaded)
+	float xmin, ymin, zmin;
+	float xmax, ymax, zmax;
+	xmax = ymax = zmax = -FLT_MAX;
+	xmin = ymin = zmin = FLT_MAX;
 
 	bool enabledTexCoord[8];
 	for (int t = 0; t < 8; ++t) {
@@ -140,7 +241,14 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		for (int p = 0; p < POSITION_COUNT; ++p) {
-			megaArray.push_back(mesh->mVertices[i][p]);
+			auto vertex = mesh->mVertices[i];
+			xmin = std::fminf(vertex.x, xmin);
+			ymin = std::fminf(vertex.y, ymin);
+			zmin = std::fminf(vertex.z, zmin);
+			xmax = std::fmaxf(vertex.x, xmax);
+			ymax = std::fmaxf(vertex.y, ymax);
+			zmax = std::fmaxf(vertex.z, zmax);
+			megaArray.push_back(vertex[p]);
 		}
         if (hasNormals) {
             for (int p = 0; p < NORMAL_COUNT; ++p) {
@@ -234,6 +342,10 @@ void Mesh::loadMesh(std::string name, const aiMesh* mesh) {
 	meshData.vaoHandle = vao;
 	meshData.indexSize = static_cast<GLsizei>(indexArray.size());
     meshData.wireframe = mesh->mPrimitiveTypes == aiPrimitiveType_LINE;
+	meshData.min = glm::vec3(xmin, ymin, zmin);
+	meshData.max = glm::vec3(xmax, ymax, zmax);
+	meshData.radius = glm::length(glm::vec3(fmaxf(fabsf(xmin), fabsf(xmax)), fmaxf(fabsf(ymin), fabsf(ymax)), fmaxf(fabsf(zmin), fabsf(zmax))));
 
 	Mesh::meshMap[name] = meshData;
+
 }

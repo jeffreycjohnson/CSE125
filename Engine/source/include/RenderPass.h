@@ -44,16 +44,49 @@ public:
 	Skybox* skybox;
 };
 
-class ShadowPass : public RenderPass
+class DirectionalShadowPass : public RenderPass
 {
 public:
     void render(Camera* camera) override;
 };
 
-class DebugPass : public RenderPass
+class PointShadowPass : public RenderPass
 {
 public:
     void render(Camera* camera) override;
+private:
+    int frames = 0;
+};
+
+class DebugPass : public RenderPass
+{
+public:
+	static bool drawLights;
+	static bool drawColliders;
+	static bool drawDynamicOctree;
+	static bool drawStaticOctree;
+
+	static glm::vec3 colliderColor;  // Draw colliders with this color by default
+	static glm::vec3 collidingColor; // Draw colliders that are colliding in this color
+	static glm::vec3 octreeColor;    // Draw octree nodes in this color
+
+    void render(Camera* camera) override;
+};
+
+// Samples controls quality, radius the SSAO coverage
+class SSAOPass : public RenderPass
+{
+public:
+	explicit SSAOPass(unsigned int samples = 16, float radius = 0.5f);
+	void render(Camera* camera) override;
+    glm::vec3 ambientColor = glm::vec3(0.1f);
+
+private:
+	unsigned int samples;
+	float radius;
+	std::unique_ptr<Texture> noise;
+	std::unique_ptr<Framebuffer> aoBuffer;
+	std::vector<glm::vec3> sampleBuf;
 };
 
 class BloomPass : public RenderPass
@@ -66,6 +99,17 @@ public:
 private:
     Framebuffer * brightPass;
     Framebuffer * blurBuffers[5];
+};
+
+class UIPass : public RenderPass
+{
+public:
+	UIPass();
+	~UIPass() override;
+	void render(Camera* camera) override;
+
+private:
+	std::unique_ptr<Texture> tex;
 };
 
 #endif

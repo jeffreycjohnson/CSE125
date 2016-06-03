@@ -19,17 +19,64 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\KeyTarget.cpp" />
+    <ClCompile Include="source\ChestTarget.cpp" />
+    <ClCompile Include="source\ForceField.cpp" />
+    <ClCompile Include="source\FixedKeyTarget.cpp" />
+    <ClCompile Include="source\ChestActivator.cpp" />
+    <ClCompile Include="source\FixedChestTarget.cpp" />
+    <ClCompile Include="source\KeyActivator.cpp" />
+    <ClCompile Include="source\KeyHoleActivator.cpp" />
+    <ClCompile Include="source\KeyHoleTarget.cpp" />
+    <ClCompile Include="source\Inventory.cpp" />
+    <ClCompile Include="source\PressButton.cpp" />
+    <ClCompile Include="source\Door.cpp" />
+    <ClCompile Include="source\Laser.cpp" />
+    <ClCompile Include="source\Rotating.cpp" />
+    <ClCompile Include="source\Plate.cpp" />
+    <ClCompile Include="source\Activator.cpp" />
+    <ClCompile Include="source\ActivatorRegistrator.cpp" />
+    <ClCompile Include="source\GodSummoner.cpp" />
     <ClCompile Include="source\Main.cpp" />
+    <ClCompile Include="source\FPSMovement.cpp" />
+    <ClCompile Include="source\SoundTrigger.cpp" />
+    <ClCompile Include="source\Target.cpp" />
+    <ClCompile Include="source\WinTrigger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\CSE167.vcxproj">
       <Project>{1ae1de3f-01ed-4b82-99c7-5d586a83010f}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\KeyTarget.h" />
+    <ClInclude Include="source\ChestTarget.h" />
+    <ClInclude Include="source\ForceField.h" />
+    <ClInclude Include="source\FixedKeyTarget.h" />
+    <ClInclude Include="source\ChestActivator.h" />
+    <ClInclude Include="source\FixedChestTarget.h" />
+    <ClInclude Include="source\KeyActivator.h" />
+    <ClInclude Include="source\KeyHoleActivator.h" />
+    <ClInclude Include="source\KeyHoleTarget.h" />
+    <ClInclude Include="source\Inventory.h" />
+    <ClInclude Include="source\PressButton.h" />
+    <ClInclude Include="source\Door.h" />
+    <ClInclude Include="source\Laser.h" />
+    <ClInclude Include="source\Rotating.h" />
+    <ClInclude Include="source\Plate.h" />
+    <ClInclude Include="source\Activator.h" />
+    <ClInclude Include="source\ActivatorRegistrator.h" />
+    <ClInclude Include="source\FPSMovement.h" />
+    <ClInclude Include="source\GodSummoner.h" />
+    <ClInclude Include="source\SoundTrigger.h" />
+    <ClInclude Include="source\Target.h" />
+    <ClInclude Include="source\WinTrigger.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1A66FBD-7F91-412A-B6ED-FB645555F316}</ProjectGuid>
     <RootNamespace>Game</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>Server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -48,13 +95,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>

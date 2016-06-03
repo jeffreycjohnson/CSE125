@@ -77,13 +77,8 @@ vec3 SpecularEnvMap(vec3 normal, vec3 view, float a, vec3 F0) {
     return color;
 }
 
-vec3 IorToF0(float IOR, float metalness, vec3 color) {
-    IOR *= 4;
-    //F0 is essentially specular color, as well as Fresnel term
-    vec3 F0 = vec3(1, 1, 1) * pow((1.0 - IOR) / (1.0 + IOR), 2);
-    F0 = mix(F0, color, metalness); //interpolate Fresnel with the color as metalness increases (with metalness=1, color => reflection color)
-    F0 = mix(vec3(1, 1, 1) * dot(vec3(.33, .33, .33), F0), F0, metalness); //my own improvement - could be wrong : desaturates Fresnel as metalness decreases
-    return F0;
+vec3 MetalToF0(float metalness, vec3 color) {
+    return mix(vec3(0.03), color, metalness);
 }
 
 vec3 envMap(vec3 F0, vec3 normal, vec3 albedo, vec3 view, float a, float metalness) {
