@@ -42,7 +42,8 @@ std::map<std::string, targFun> ActivatorRegistrator::prefixToTarget =
 
 std::map<std::string, actvFun> ActivatorRegistrator::prefixToActivator =
 {
-	{ "plate_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName); } },
+	{ "plate_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName, false); } },
+	{ "plateElectro_" ,  [](auto args, auto idToTarget, auto groupName) {return new Plate(args, idToTarget, groupName, true); } },
 	{ "pressbutton_" ,  [](auto args, auto idToTarget, auto groupName) {return new PressButton(args, idToTarget, groupName); } },
 	{ "keyhole_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyHoleActivator(args, idToTarget, groupName); } },
 	{ "key_" ,  [](auto args, auto idToTarget, auto groupName) {return new KeyActivator(args, idToTarget, groupName); } },

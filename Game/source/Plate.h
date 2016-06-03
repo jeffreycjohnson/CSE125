@@ -11,9 +11,10 @@ private:
 	// this is just necessary because no collisionExit
 	bool isColliding;
 	bool isNotColliding;
-	Sound *stepOn, *stepOff;
+	bool isElectro;
+	Sound *stepOn, *stepOff, *plateElectric;
 public:
-	Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName);
+	Plate(std::vector<std::string> tokens, const std::map<std::string, Target*>& idToTargets, std::string groupName, bool electro);
 
 	~Plate();
 

@@ -40,7 +40,9 @@ glm::vec3 Door::moveDirectionVec()
 void Door::create()
 {
 	// Seems like doors in master.blend have positions that work well enough
-	unlockSound = Sound::affixSoundToDummy(gameObject, new Sound("doorunlock", false, false, 1.0f, true));
+	ConfigFile file("config/sounds.ini");
+	float vol = file.getFloat("doorunlock", "volume");
+	unlockSound = Sound::affixSoundToDummy(gameObject, new Sound("doorunlock", false, false, vol, true));
 	initPosit = gameObject->transform.getPosition();
 }
 
