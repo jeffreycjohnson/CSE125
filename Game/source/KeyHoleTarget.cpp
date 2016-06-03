@@ -58,5 +58,5 @@ void KeyHoleTarget::fixedUpdate()
 
 void KeyHoleTarget::create() {
 	ConfigFile file("config/sounds.ini");
-	keyinsert = Sound::affixSoundToDummy(gameObject, new Sound("keychirp", true, false, file.getFloat("keychirp", "volume"), true));
+	keyinsert = Sound::affixSoundToDummy(gameObject, new Sound("keychirp", true, false, file.getFloat("keychirp", "volume"), true, Sound::NO_DAMPEN_CHANNEL));
 }

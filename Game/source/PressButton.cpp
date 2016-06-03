@@ -61,8 +61,8 @@ void PressButton::create()
 		go = gameObject;
 	}
 	ConfigFile file("config/sounds.ini");
-	snd_activate = Sound::affixSoundToDummy(go, new Sound("button_activate", false, false, file.getFloat("button_activate", "volume"), true));
-	snd_tick = Sound::affixSoundToDummy(go, new Sound("button_tick", false, false, file.getFloat("button_tick", "volume"), true));
+	snd_activate = Sound::affixSoundToDummy(go, new Sound("button_activate", false, false, file.getFloat("button_activate", "volume"), true, Sound::NO_DAMPEN_CHANNEL));
+	snd_tick = Sound::affixSoundToDummy(go, new Sound("button_tick", false, false, file.getFloat("button_tick", "volume"), true, Sound::NO_DAMPEN_CHANNEL));
 }
 
 void PressButton::trigger()

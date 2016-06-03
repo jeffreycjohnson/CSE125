@@ -33,9 +33,9 @@ void Plate::create()
 	ConfigFile file("config/sounds.ini");
 	auto colNode = gameObject->findChildByNameContains("Colliders");
 	auto boxCollider = colNode != nullptr ? colNode->findChildByNameContains("BoxCollider") : nullptr;
-	stepOn = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOn", true, false, file.getFloat("plate_stepOn", "volume"), true));
-	stepOff = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOff", true, false, file.getFloat("plate_stepOn", "volume"), true));
-	plateElectric = Sound::affixSoundToDummy(boxCollider, new Sound("plate_electric", true, false, file.getFloat("plate_electric", "volume"), true));
+	stepOn = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOn", true, false, file.getFloat("plate_stepOn", "volume"), true, Sound::NO_DAMPEN_CHANNEL));
+	stepOff = Sound::affixSoundToDummy(boxCollider, new Sound("plate_stepOff", true, false, file.getFloat("plate_stepOn", "volume"), true, Sound::NO_DAMPEN_CHANNEL));
+	plateElectric = Sound::affixSoundToDummy(boxCollider, new Sound("plate_electric", true, false, file.getFloat("plate_electric", "volume"), true, Sound::NO_DAMPEN_CHANNEL));
 }
 
 void Plate::fixedUpdate()

@@ -31,7 +31,7 @@ Sound::Sound(std::string soundName, bool playOnAwake, bool looping, float volume
 	this->volume = volume;
 	this->looping = looping;
 	this->is3D = is3D;
-	ASSERT(type == SOUND_EFFECT || type == MUSIC || type == BROADCAST, "Sound channel type is invalid.");
+	ASSERT(type == SOUND_EFFECT || type == MUSIC || type == BROADCAST || type == NO_DAMPEN_CHANNEL, "Sound channel type is invalid.");
 	this->channelType = type;
 	playing = active = playOnAwake;
 	this->postConstructor();
@@ -63,7 +63,7 @@ void Sound::postConstructor() {
 	case BROADCAST:
 		channel->setChannelGroup(Sound::cgBroadcast); break;
 	default:
-		channel->setChannelGroup(Sound::cgEffects); break;
+		channel->setChannelGroup(Sound::masterChannelGroup); break;
 	}
 
 }
@@ -96,7 +96,7 @@ void Sound::update(float)
 	case BROADCAST:
 		channel->setChannelGroup(Sound::cgBroadcast); break;
 	default:
-		channel->setChannelGroup(Sound::cgEffects); break;
+		channel->setChannelGroup(Sound::masterChannelGroup); break;
 	}
 
 	// All BROADCAST sounds are handled in updateFMOD to prevent race conditions
@@ -157,7 +157,7 @@ void Sound::play()
 		case BROADCAST:
 			channel->setChannelGroup(Sound::cgBroadcast); break;
 		default:
-			channel->setChannelGroup(Sound::cgEffects); break;
+			channel->setChannelGroup(Sound::masterChannelGroup); break;
 		}
 
 		if (channelType != BROADCAST) {

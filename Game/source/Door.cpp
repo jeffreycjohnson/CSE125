@@ -42,7 +42,7 @@ void Door::create()
 	// Seems like doors in master.blend have positions that work well enough
 	ConfigFile file("config/sounds.ini");
 	float vol = file.getFloat("doorunlock", "volume");
-	unlockSound = Sound::affixSoundToDummy(gameObject, new Sound("doorunlock", false, false, vol, true));
+	unlockSound = Sound::affixSoundToDummy(gameObject, new Sound("doorunlock", false, false, vol, true, Sound::NO_DAMPEN_CHANNEL));
 	initPosit = gameObject->transform.getPosition();
 }
 

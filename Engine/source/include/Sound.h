@@ -43,6 +43,8 @@ public:
 	// Special channel group that lowers master gain (except for on itself) of everything else
 	static const int BROADCAST = 2;
 
+	static const int NO_DAMPEN_CHANNEL = 3; // Not affected by broadcast
+
 	static FMOD::ChannelGroup *cgEffects, *cgMusic, *cgBroadcast, *cgGame, *masterChannelGroup;
 	static Sound* currentMusic;
 
