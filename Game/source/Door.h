@@ -3,6 +3,7 @@
 
 #include "Target.h"
 #include "Sound.h"
+#include "Config.h"
 
 #include <map>
 #include <vector>

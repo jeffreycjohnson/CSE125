@@ -101,10 +101,12 @@ void FPSMovement::create()
 	float jumpVol = soundConfig.getFloat("jumpsound", "volume");
 	float deathVol = soundConfig.getFloat("deathsound", "volume");
 	float landVol = soundConfig.getFloat("landsound", "volume");
+	//float emoteVol = soundConfig.getFloat("robotemote", "volume");
 
 	jumpSound = Sound::affixSoundToDummy(gameObject, new Sound("jumpsound", false, false, jumpVol, true, Sound::SOUND_EFFECT));
 	deathRattle = Sound::affixSoundToDummy(gameObject, new Sound("deathsound", false, false, deathVol, true, Sound::SOUND_EFFECT));
 	landSound = Sound::affixSoundToDummy(gameObject, new Sound("landsound", false, false, landVol, true));
+	//emoteSound = Sound::affixSoundToDummy(gameObject, new Sound("emotesound", false, false, landVol, true));
 
 	//Input::hideCursor();
 	recalculate();
@@ -173,8 +175,16 @@ void FPSMovement::fixedUpdate()
 	getPlayerRadii();
 	raycastMouse();
 
+	// Robot chirp
+	//robotEmote();
+
 	if(Input::getAxis("respawn", clientID) > 0.0f)
 		respawn();
+}
+
+void FPSMovement::robotEmote() {
+	float emoteButton = Input::getAxis("emote", clientID);
+	if (emoteButton) emoteSound->play();
 }
 
 void FPSMovement::getPlayerRadii() {

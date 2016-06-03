@@ -48,6 +48,7 @@ private:
 	Sound* landSound;
 	Sound* testBroadcastSound;
 	Sound* deathRattle;
+	Sound* emoteSound;
 
 	float mouseSensitivity, joystickSensitivity;
 
@@ -67,7 +68,8 @@ private:
 	glm::vec3 lastRayPoint;
 	glm::vec3 lastRayPointPlusN;
 	bool raycastHit;
-
+	
+	void robotEmote();
 	void handleHorizontalMovement(float dt);
 	void handleVerticalMovement(float dt);
 	void checkOnSurface(glm::vec3 position, glm::vec3 direction);

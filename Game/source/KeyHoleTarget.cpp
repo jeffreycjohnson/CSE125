@@ -28,5 +28,11 @@ void KeyHoleTarget::fixedUpdate()
 		// call KeyHoleActivator->activate() to open door/chest
 		this->gameObject->getComponent<KeyHoleActivator>()->trigger();
 		keyUsed = true;
+		keyinsert->play();
 	}
+}
+
+void KeyHoleTarget::create() {
+	ConfigFile file("config/sounds.ini");
+	keyinsert = Sound::affixSoundToDummy(gameObject, new Sound("keychirp", true, false, file.getFloat("keychirp", "volume"), true));
 }
